@@ -54,7 +54,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'LeaveMangement'
+          app-name: 'leavemangement-c6gkhdb9d7aff6cu'
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CD4CB78FC6D7430B9EA835AB7144FAFB }}
