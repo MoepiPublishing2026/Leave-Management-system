@@ -1,5 +1,6 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
+# Azure context: sub 65a13282-523c-450a-b9d4-07404ac05702 | RG LeaveManagement | plan ASP-LeaveManagement-93a4 (B1 Linux, southafricanorth)
 
 name: Build and deploy PHP app to Azure Web App - LeaveMangement
 
@@ -52,12 +53,10 @@ jobs:
         with:
           name: php-app
 
-      # Publish profile auth cross-checks userName in the XML against app-name; a mismatched
-      # secret (e.g. profile from another Web App) always fails. Service principal auth avoids that.
       - name: Azure Login
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
