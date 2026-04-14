@@ -43,18 +43,25 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    
+    permissions:
+      contents: read
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: php-app
-      
-      # Omit slot-name for the default site; only set it for non-production deployment slots.
+
+      # Publish profile auth cross-checks userName in the XML against app-name; a mismatched
+      # secret (e.g. profile from another Web App) always fails. Service principal auth avoids that.
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'leavemangement-c6gkhdb9d7aff6cu'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CD4CB78FC6D7430B9EA835AB7144FAFB }}
