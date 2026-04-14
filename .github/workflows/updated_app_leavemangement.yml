@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy PHP app to Azure Web App - LeaveManagement01
+name: Build and deploy PHP app to Azure Web App - LeaveMangement
 
 on:
   push:
@@ -55,6 +55,6 @@ jobs:
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'leavemanagement01-bydugzbzdyb0grc0'
+          app-name: 'leavemangement-c6gkhdb9d7aff6cu'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_83BD390D2ECC47DFA4EA56B5F30A2873 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CD4CB78FC6D7430B9EA835AB7144FAFB }}
