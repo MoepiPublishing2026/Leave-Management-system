@@ -63,5 +63,6 @@ jobs:
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'leavemangement-c6gkhdb9d7aff6cu'
+          app-name: 'LeaveMangement'
+          resource-group-name: 'LeaveManagement'
           package: .
