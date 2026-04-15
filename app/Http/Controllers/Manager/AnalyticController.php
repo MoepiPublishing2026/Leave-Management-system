@@ -1,0 +1,137 @@
+<?php
+
+namespace App\Http\Controllers\Manager;
+
+use App\Http\Controllers\Controller;
+use App\Models\LeaveRequest;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+class AnalyticController extends Controller
+{
+    public function index(Request $request)
+    {
+          $monthFilter = $request->query('month', 'this_year');
+          $staff = $request->query('staff', 'all');
+
+    
+
+        $leaveQuery = LeaveRequest::query()
+            ->whereRaw('LOWER(status) != ?', ['withdrawn']);  // Exclude withdrawn
+
+        if (ctype_digit((string) $staff)) {
+            $leaveQuery->where('user_id', (int) $staff);
+        }
+
+        if ($monthFilter) {
+            $now = Carbon::now();
+
+            if (ctype_digit((string) $monthFilter)) {
+                $leaveQuery->whereYear('start_date', (int) $monthFilter);
+            } elseif ($monthFilter === 'this_month') {
+                $leaveQuery->whereYear('start_date', $now->year)
+                           ->whereMonth('start_date', $now->month);
+            } elseif ($monthFilter === 'this_quarter') {
+                $quarter = ceil($now->month / 3);
+                $startMonth = ($quarter - 1) * 3 + 1;
+                $endMonth = $startMonth + 2;
+
+                $leaveQuery->whereYear('start_date', $now->year)
+                           ->whereBetween(DB::raw('MONTH(start_date)'), [$startMonth, $endMonth]);
+            } elseif ($monthFilter === 'this_year') {
+                $leaveQuery->whereYear('start_date', $now->year);
+            } else {
+                // Specific month YYYY-MM
+                $leaveQuery->whereYear('start_date', substr($monthFilter, 0, 4))
+                           ->whereMonth('start_date', substr($monthFilter, 5, 2));
+            }
+        }
+
+        $totalLeaves = $leaveQuery->count();
+        $pendingTotal = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['pending'])->count();
+        $overduePending = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['pending'])
+            ->whereDate('start_date', '<', Carbon::today())
+            ->count();
+        $pendingRequests = max(0, $pendingTotal - $overduePending);
+
+        $activeEmployees = User::where('is_active', 1)->count();
+        $totalEmployees = User::count();
+
+        $approvedCount = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['approved'])->count();
+        $approvalRate = $totalLeaves > 0 ? round(($approvedCount / $totalLeaves) * 100, 1) : 0;
+
+        $leavesByType = (clone $leaveQuery)
+            ->select('leave_type', DB::raw('count(*) as total'))
+            ->groupBy('leave_type')
+            ->get();
+
+        $leavesByDesignation = (clone $leaveQuery)
+            ->join('users', 'leave_requests.user_id', '=', 'users.id')
+            ->select('users.designation', DB::raw('count(leave_requests.id) as total'))
+            ->groupBy('users.designation')
+            ->get();
+
+        $designationLabels = $leavesByDesignation->pluck('designation')->toArray();
+        $designationData = $leavesByDesignation->pluck('total')->toArray();
+
+        $topLeaveTakers = (clone $leaveQuery)
+            ->select('user_id', DB::raw('count(*) as total'))
+            ->groupBy('user_id')
+            ->with('user')
+            ->orderByDesc('total')
+            ->take(5)
+            ->get();
+
+        $totalForTop = $topLeaveTakers->sum('total');
+        if ($totalForTop > 0 && $topLeaveTakers->count() > 0) {
+            $rounded = [];
+            foreach ($topLeaveTakers as $taker) {
+                $rounded[] = round(($taker->total / $totalForTop) * 100, 1);
+            }
+            $sumRounded = array_sum($rounded);
+            $diff = round(100.0 - $sumRounded, 1);
+            $lastIndex = count($rounded) - 1;
+            $rounded[$lastIndex] = max(0.0, $rounded[$lastIndex] + $diff);
+            foreach ($topLeaveTakers as $i => $taker) {
+                $taker->percentage = $rounded[$i] ?? 0.0;
+            }
+        } else {
+            foreach ($topLeaveTakers as $taker) {
+                $taker->percentage = 0.0;
+            }
+        }
+
+        $months = LeaveRequest::selectRaw("DATE_FORMAT(start_date, '%Y-%m') as month")
+            ->distinct()
+            ->orderBy('month', 'desc')
+            ->pluck('month');
+
+        $nowYear = (int) Carbon::now()->year;
+        $years = collect(range($nowYear - 1, $nowYear - 5));
+
+        $staffOptions = User::orderBy('first_name')
+            ->orderBy('last_name')
+            ->get(['id', 'first_name', 'last_name', 'email']);
+
+        return view('manager.analytics.index', compact(
+            'totalLeaves',
+            'pendingRequests',
+            'activeEmployees',
+            'totalEmployees',
+            'approvedCount',
+            'approvalRate',
+            'leavesByType',
+            'topLeaveTakers',
+            'totalForTop',
+            'designationLabels',
+            'designationData',
+            'months',
+            'years',
+            'monthFilter',
+            'staffOptions',
+            'staff'
+        ));
+    }
+}
