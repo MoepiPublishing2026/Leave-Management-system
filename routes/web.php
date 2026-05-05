@@ -97,6 +97,7 @@ Route::post('/apply-for-leave', [LeaveController::class, 'submit'])
 
 Route::get('/leave/my-requests', [LeaveController::class, 'myRequests'])->name('leave.myRequests');
 Route::patch('/leave/withdraw/{id}', [LeaveController::class, 'withdraw'])->name('leave.withdraw');
+Route::get('/leave/balance', [LeaveController::class, 'leaveBalance'])->name('leave.balance')->middleware('auth');
 
 Route::get('/settings', [AuthController::class, 'edit'])->name('settings.edit')->middleware('auth');
 Route::post('/settings', [AuthController::class, 'update'])->name('settings.update')->middleware('auth');
@@ -173,4 +174,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifications/{notification}/open', [NotificationsController::class, 'open'])->name('notifications.open');
     // optionally add route to mark notifications as read
     Route::post('/notifications/mark-read', [NotificationsController::class, 'markAsRead'])->name('notifications.mark.read');
+
+    Route::get('/users/{user}/profile-picture', [AuthController::class, 'profilePicture'])->name('users.profile_picture');
+    Route::get('/leave-requests/{leaveRequest}/attachments/{attachment}', [LeaveController::class, 'downloadAttachment'])
+        ->name('leave.attachments.show');
 });

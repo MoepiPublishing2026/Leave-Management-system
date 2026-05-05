@@ -39,7 +39,26 @@ class RequestsController extends Controller
         $status = strtolower((string) $request->query('status', 'all'));
         $search = trim((string) $request->query('search', ''));
         $searchKey = strtolower($search);
+        $monthFilter = $request->query('month');
         $query = LeaveRequest::with('user');
+
+        if (is_string($monthFilter) && $monthFilter !== '') {
+            $now = Carbon::now();
+            if (ctype_digit((string) $monthFilter)) {
+                $query->whereYear('start_date', (int) $monthFilter);
+            } elseif ($monthFilter === 'this_month') {
+                $query->whereYear('start_date', $now->year)
+                    ->whereMonth('start_date', $now->month);
+            } elseif ($monthFilter === 'this_quarter') {
+                $quarter = (int) ceil($now->month / 3);
+                $startMonth = ($quarter - 1) * 3 + 1;
+                $endMonth = $startMonth + 2;
+                $query->whereYear('start_date', $now->year)
+                    ->whereBetween(\DB::raw('MONTH(start_date)'), [$startMonth, $endMonth]);
+            } elseif ($monthFilter === 'this_year') {
+                $query->whereYear('start_date', $now->year);
+            }
+        }
 
         if ($status === 'overdue') {
             $query->whereRaw('LOWER(status) = ?', ['pending'])
@@ -86,7 +105,7 @@ class RequestsController extends Controller
         }
 
         $requests = $query->orderByDesc('created_at')->paginate(10)->withQueryString();
-        return view('manager.requests.index', compact('requests', 'status', 'search'));
+        return view('manager.requests.index', compact('requests', 'status', 'search', 'monthFilter'));
     }
 
   
@@ -124,10 +143,18 @@ public function approve($id)
 
     // Notify user in-app (database)
     $manager = Auth::user();
-    $leave->user->notify(new LeaveStatusNotification($leave, $manager));
+    try {
+        $leave->user->notify(new LeaveStatusNotification($leave, $manager));
+    } catch (\Throwable $e) {
+        report($e);
+    }
 
-    // Send email as before
-    Mail::to($leave->user->email)->send(new LeaveResponseMail($leave));
+    // Send email, but don't fail the approval if mail is misconfigured
+    try {
+        Mail::to($leave->user->email)->send(new LeaveResponseMail($leave));
+    } catch (\Throwable $e) {
+        report($e);
+    }
 
     return redirect()->back()->with('success', 'Request approved and employee notified.');
 }
@@ -167,10 +194,18 @@ public function reject(Request $r, $id)
 
     // Notify user in-app (database)
     $manager = Auth::user();
-    $leave->user->notify(new LeaveStatusNotification($leave, $manager));
+    try {
+        $leave->user->notify(new LeaveStatusNotification($leave, $manager));
+    } catch (\Throwable $e) {
+        report($e);
+    }
 
-    // Send email as before
-    Mail::to($leave->user->email)->send(new LeaveResponseMail($leave));
+    // Send email, but don't fail the rejection if mail is misconfigured
+    try {
+        Mail::to($leave->user->email)->send(new LeaveResponseMail($leave));
+    } catch (\Throwable $e) {
+        report($e);
+    }
 
     return redirect()->back()->with('success', 'Request rejected and employee notified.');
 }

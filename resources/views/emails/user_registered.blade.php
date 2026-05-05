@@ -75,7 +75,7 @@
     
     <p>If you did not request this account, please ignore this email.</p>
     
-    <p class="footer-text">Thank you for joining us!<br/>The Asset Team</p>
+    <p class="footer-text">Thank you for joining us!<br/>Leave Management</p>
   </div>
 </body>
 </html>

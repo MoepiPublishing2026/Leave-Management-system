@@ -14,12 +14,14 @@ use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TwoFactorCodeMail;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
     // Show login page
     public function showLoginForm()
     {
+        request()->session()->regenerateToken();
         return view('auth.login');
     }
 
@@ -249,6 +251,26 @@ class AuthController extends Controller
     $user->save();
 
     return redirect()->route('settings.edit')->with('success', 'Profile updated successfully.');
+}
+
+public function profilePicture(User $user)
+{
+    if (empty($user->profile_picture)) {
+        abort(404);
+    }
+
+    $disk = Storage::disk('public');
+    $path = (string) $user->profile_picture;
+
+    if (!$disk->exists($path)) {
+        abort(404);
+    }
+
+    $fullPath = $disk->path($path);
+
+    return response()->file($fullPath, [
+        'Cache-Control' => 'private, max-age=3600',
+    ]);
 }
 
     // Logout

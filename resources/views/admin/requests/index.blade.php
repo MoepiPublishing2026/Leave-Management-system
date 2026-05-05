@@ -50,18 +50,21 @@
     <h1>Leave Requests - {{ ucfirst($status) }}</h1>
     <form method="GET" action="{{ route('admin.requests') }}" class="search-row">
         <input type="hidden" name="status" value="{{ $status }}" />
+        @if(!empty($monthFilter))
+            <input type="hidden" name="month" value="{{ $monthFilter }}" />
+        @endif
         <input type="text" name="search" placeholder="Search (name, type, status, dates, comment...)" value="{{ $search ?? '' }}" />
         <button type="submit">Search</button>
-        <a href="{{ route('admin.requests', ['status' => $status]) }}">Clear</a>
+        <a href="{{ route('admin.requests', ['status' => $status, 'month' => $monthFilter]) }}">Clear</a>
     </form>
 
     <div class="filter-links">
-        <a href="{{ route('admin.requests', ['status' => 'all']) }}" class="{{ $status === 'all' ? 'active' : '' }}">All</a>
-        <a href="{{ route('admin.requests', ['status' => 'pending']) }}" class="{{ $status === 'pending' ? 'active' : '' }}">Pending</a>
-        <a href="{{ route('admin.requests', ['status' => 'approved']) }}" class="{{ $status === 'approved' ? 'active' : '' }}">Approved</a>
-        <a href="{{ route('admin.requests', ['status' => 'rejected']) }}" class="{{ $status === 'rejected' ? 'active' : '' }}">Rejected</a>
-        <a href="{{ route('admin.requests', ['status' => 'withdrawn']) }}" class="{{ $status === 'withdrawn' ? 'active' : '' }}">Withdrawn</a>
-        <a href="{{ route('admin.requests', ['status' => 'overdue']) }}" class="{{ $status === 'overdue' ? 'active' : '' }}">Overdue</a>
+        <a href="{{ route('admin.requests', ['status' => 'all', 'month' => $monthFilter]) }}" class="{{ $status === 'all' ? 'active' : '' }}">All</a>
+        <a href="{{ route('admin.requests', ['status' => 'pending', 'month' => $monthFilter]) }}" class="{{ $status === 'pending' ? 'active' : '' }}">Pending</a>
+        <a href="{{ route('admin.requests', ['status' => 'approved', 'month' => $monthFilter]) }}" class="{{ $status === 'approved' ? 'active' : '' }}">Approved</a>
+        <a href="{{ route('admin.requests', ['status' => 'rejected', 'month' => $monthFilter]) }}" class="{{ $status === 'rejected' ? 'active' : '' }}">Rejected</a>
+        <a href="{{ route('admin.requests', ['status' => 'withdrawn', 'month' => $monthFilter]) }}" class="{{ $status === 'withdrawn' ? 'active' : '' }}">Withdrawn</a>
+        <a href="{{ route('admin.requests', ['status' => 'overdue', 'month' => $monthFilter]) }}" class="{{ $status === 'overdue' ? 'active' : '' }}">Overdue</a>
     </div>
 
     <table>
@@ -100,7 +103,7 @@
                 foreach ($files as $i => $file) {
                     $fileLinks[] = [
                         'label' => 'File ' . ($i + 1),
-                        'url' => asset('storage/' . ltrim((string) $file, '/')),
+                        'url' => route('leave.attachments.show', ['leaveRequest' => $req->id, 'attachment' => $i + 1]),
                     ];
                 }
 

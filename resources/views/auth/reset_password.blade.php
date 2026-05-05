@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Reset Password - Leave Management</title>
     <link rel="icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" sizes="32x32" />
-    <link rel="icon" href="{{ asset('images/favicon-16.png') }}" type="image/png" sizes="16x16" />
-    <link rel="icon" href="{{ asset('images/favicon-192.png') }}" type="image/png" sizes="192x192" />
-    <link rel="icon" href="{{ asset('images/favicon-512.png') }}" type="image/png" sizes="512x512" />
-    <link rel="shortcut icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" />
-    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}" sizes="180x180" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -23,7 +18,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 700px;
+            max-width: 600px;
             width: 100%;
             background: white;
             padding: 40px;
@@ -41,23 +36,11 @@
             height: 5px;
             background: linear-gradient(90deg, #b2cd16 0%, #9ef755 100%);
         }
-        .login-logo {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .login-logo img {
-            height: 170px;
-            width: auto;
-            max-width: 100%;
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 18px;
-            font-size: 28px;
-            color: #2d3748;
-            font-weight: 600;
-        }
-        .form-group { margin-bottom: 18px; }
+        .login-logo { text-align: center; margin-bottom: 20px; }
+        .login-logo img { height: 170px; width: auto; max-width: 100%; }
+        h2 { text-align: center; margin-bottom: 25px; font-size: 28px; color: #2d3748; }
+        
+        .form-group { margin-bottom: 20px; width: 100%; }
         label {
             display: block;
             margin-bottom: 8px;
@@ -65,12 +48,16 @@
             font-size: 13px;
             color: #4a5568;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
+        
+        /* Fixed input styling */
+        .input-wrapper { position: relative; width: 100%; }
         input[type="email"],
-        input[type="password"] {
+        input[type="password"],
+        input[type="text"] {
             width: 100%;
-            padding: 14px 16px;
+            display: block;
+            padding: 14px 45px 14px 16px;
             font-size: 16px;
             border-radius: 10px;
             border: 2px solid #e2e8f0;
@@ -84,11 +71,30 @@
             background: white;
             box-shadow: 0 0 0 3px rgba(178, 205, 22, 0.1);
         }
-        .error {
-            color: #e53e3e;
-            font-size: 13px;
-            margin-top: 6px;
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 14px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #a0aec0;
+            width: 22px;
+            height: 22px;
+            transition: color 0.3s ease;
         }
+        .toggle-password:hover svg {
+            stroke: #b2cd16;
+        }
+        .toggle-password svg {
+            width: 22px;
+            height: 22px;
+            stroke: #b2cd16;
+            transition: stroke 0.3s ease;
+        }
+        
+        .error { color: #e53e3e; font-size: 13px; margin-top: 6px; }
+        
         button {
             width: 100%;
             padding: 16px;
@@ -99,22 +105,10 @@
             border: none;
             background: linear-gradient(135deg, #b2cd16 0%, #9ef755 100%);
             color: white;
-            margin-top: 6px;
+            margin-top: 10px;
         }
-        .links {
-            margin-top: 18px;
-            text-align: center;
-        }
-        .links a {
-            color: #b2cd16;
-            font-weight: 600;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        @media (max-width: 480px) {
-            .container { padding: 30px 22px; }
-            h2 { font-size: 24px; }
-        }
+        .links { margin-top: 18px; text-align: center; }
+        .links a { color: #b2cd16; font-weight: 600; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -131,47 +125,50 @@
             <div class="form-group">
                 <label for="email">Email Address</label>
                 <input type="email" name="email" id="email" value="{{ old('email', $email) }}" required autofocus />
-                @error('email')
-                    <div class="error">{{ $message }}</div>
-                @enderror
             </div>
 
             <div class="form-group">
                 <label for="password">New Password</label>
-                <input type="password" name="password" id="password" required />
-                @error('password')
-                    <div class="error">{{ $message }}</div>
-                @enderror
+                <div class="input-wrapper">
+                    <input type="password" name="password" id="password" required />
+                    <span class="toggle-password" id="togglePassword1">
+                        <svg id="eyeOpen1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <svg id="eyeClosed1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    </span>
+                </div>
             </div>
 
             <div class="form-group">
                 <label for="password_confirmation">Confirm Password</label>
-                <input type="password" name="password_confirmation" id="password_confirmation" required />
+                <div class="input-wrapper">
+                    <input type="password" name="password_confirmation" id="password_confirmation" required />
+                    <span class="toggle-password" id="togglePassword2">
+                        <svg id="eyeOpen2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <svg id="eyeClosed2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    </span>
+                </div>
             </div>
 
             <button type="submit">Reset Password</button>
         </form>
 
-        <div class="links">
-            <a href="{{ route('login') }}">Back to Login</a>
-        </div>
-        
-        <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #a0aec0;">
-            &copy; {{ date('Y') }} Moepi Publishing. All rights reserved.
-        </div>
+        <div class="links"><a href="{{ route('login') }}">Back to Login</a></div>
     </div>
 
-    @if ($errors->any())
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Please fix the following errors:',
-                html: '<ul style="text-align:left;">' + @json($errors->all()).map(e => '<li>' + e + '</li>').join('') + '</ul>',
-                confirmButtonText: 'OK',
-                width: '40em',
-                confirmButtonColor: '#b2cd16'
+    <script>
+        function setupToggle(inputId, toggleId, openId, closedId) {
+            document.querySelector(`#${toggleId}`).addEventListener('click', () => {
+                const input = document.querySelector(`#${inputId}`);
+                const open = document.querySelector(`#${openId}`);
+                const closed = document.querySelector(`#${closedId}`);
+                const isPass = input.type === 'password';
+                input.type = isPass ? 'text' : 'password';
+                open.style.display = isPass ? 'none' : 'block';
+                closed.style.display = isPass ? 'block' : 'none';
             });
-        </script>
-    @endif
+        }
+        setupToggle('password', 'togglePassword1', 'eyeOpen1', 'eyeClosed1');
+        setupToggle('password_confirmation', 'togglePassword2', 'eyeOpen2', 'eyeClosed2');
+    </script>
 </body>
 </html>

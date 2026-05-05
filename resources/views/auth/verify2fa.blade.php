@@ -125,7 +125,7 @@
         <div class="login-logo">
             <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
         </div>
-        <h2>Two-Factor Auth</h2>
+        <h2>Two-Factor Authentication</h2>
         <p>A verification code has been sent to your email. Please enter it below to continue.</p>
 
         <form method="POST" action="{{ route('login.verify.post') }}">

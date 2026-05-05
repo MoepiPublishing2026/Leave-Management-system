@@ -35,7 +35,7 @@
     .card {
         background: white;
         border-radius: 16px;
-        padding: 14px 14px 12px;
+        padding: 11px 12px 10px;
         box-shadow: 0 6px 16px rgba(8, 8, 8, 0.15);
         border: 1px solid #e5e7eb;
         cursor: pointer;
@@ -47,11 +47,13 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        min-height: 120px;
-        min-width: 220px;
+        width: 210px;
+        height: 96px;
+        min-height: 96px;
+        min-width: 210px;
         color: black;
-        flex: 1 1 220px;
-        max-width: 280px;
+        flex: 0 0 210px;
+        max-width: 210px;
         box-sizing: border-box;
     }
     .card:hover {
@@ -78,9 +80,9 @@
         color: #0a1347;
     }
     .card-title {
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 600;
-        margin: 4px 0 8px 0;
+        margin: 3px 0 6px 0;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -88,7 +90,7 @@
     }
     .card-value {
         font-weight: bold;
-        font-size: 1.8rem;
+        font-size: 1.6rem;
         margin-top: 0;
     }
     .charts-container {
@@ -100,14 +102,14 @@
     }
     .chart-card {
         background: white;
-        padding: 12px 12px;
+        padding: 10px 10px;
         border-radius: 24px;
         box-shadow: 0 6px 22px rgba(67, 83, 255, 0.12);
         border: 1px solid #dbe3f0;
         color: #222;
         display: flex;
         flex-direction: column;
-        min-height: 280px;
+        min-height: 240px;
     }
     .chart-card h3 {
         margin: 0 0 10px 0;
@@ -117,11 +119,11 @@
     }
     canvas {
         width: 100% !important;
-        max-height: 240px;
+        max-height: 210px;
         height: auto !important;
     }
     @media (max-width: 768px) {
-        canvas { max-height: 220px; }
+        canvas { max-height: 190px; }
     }
     @media (max-width: 992px) {
         .charts-container {
@@ -139,7 +141,7 @@
         flex-shrink: 0;
     }
     @media (max-width: 992px) {
-        .card { min-width: 200px; flex-basis: 200px; }
+        .card { min-width: 210px; flex-basis: 210px; }
     }
     @media (max-width: 600px) {
         .cards { gap: 12px; }
@@ -149,10 +151,25 @@
   <h1>Manager Dashboard</h1>
 
 <div class="manager-container">
+    <div style="display:flex; justify-content:flex-end; margin-bottom: 10px;">
+        <form method="GET" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <label style="font-weight:800; color:#334155;">Filter</label>
+            <select name="month" onchange="this.form.submit()" style="padding:8px 10px; border-radius:10px; border:2px solid #a5d817; font-weight:800;">
+                <option value="this_year" {{ ($monthFilter ?? 'this_year') === 'this_year' ? 'selected' : '' }}>This Year</option>
+                <option value="this_quarter" {{ ($monthFilter ?? '') === 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
+                <option value="this_month" {{ ($monthFilter ?? '') === 'this_month' ? 'selected' : '' }}>This Month</option>
+                @php $nowY = (int) \Illuminate\Support\Carbon::now()->year; @endphp
+                @foreach(range($nowY, $nowY - 5) as $y)
+                    <option value="{{ $y }}" {{ (string) ($monthFilter ?? '') === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
+                @endforeach
+            </select>
+            <noscript><button type="submit">Apply</button></noscript>
+        </form>
+    </div>
   
     
     <div class="cards">
-    <a href="{{ route('manager.requests.index', ['status' => 'all']) }}" class="card card-all">
+    <a href="{{ route('manager.requests.index', ['status' => 'all', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-all">
         <div class="card-title">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18" />
@@ -162,7 +179,7 @@
         <div class="card-value">{{ $allRequestsCount }}</div>
     </a>
 
-    <a href="{{ route('manager.requests.index', ['status' => 'pending']) }}" class="card card-pending">
+    <a href="{{ route('manager.requests.index', ['status' => 'pending', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-pending">
         <div class="card-title">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -172,7 +189,7 @@
         <div class="card-value">{{ $pendingRequestsCount }}</div>
     </a>
 
-    <a href="{{ route('manager.requests.index', ['status' => 'overdue']) }}" class="card card-overdue">
+    <a href="{{ route('manager.requests.index', ['status' => 'overdue', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-overdue">
         <div class="card-title">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -182,7 +199,7 @@
         <div class="card-value">{{ $overduePendingCount ?? 0 }}</div>
     </a>
 
-    <a href="{{ route('manager.requests.index', ['status' => 'approved']) }}" class="card card-approved">
+    <a href="{{ route('manager.requests.index', ['status' => 'approved', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-approved">
         <div class="card-title">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -192,7 +209,7 @@
         <div class="card-value">{{ $approvedRequestsCount }}</div>
     </a>
 
-    <a href="{{ route('manager.requests.index', ['status' => 'rejected']) }}" class="card card-rejected">
+    <a href="{{ route('manager.requests.index', ['status' => 'rejected', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-rejected">
         <div class="card-title">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -218,15 +235,19 @@
         </div>
         <div class="chart-card">
             <h3>Requests by Department</h3>
-            <canvas id="departmentPolar"></canvas>
+            @if(empty($departmentLabels))
+                <p style="margin:0; color:#64748b; font-size:14px;">No leave requests by department for this period.</p>
+            @else
+                <canvas id="departmentPolar"></canvas>
+            @endif
         </div>
         <div class="chart-card">
-            <h3>Top Leave Types</h3>
-            <canvas id="topTypesBar"></canvas>
+            <h3>Average Leave Days by Type</h3>
+            <canvas id="avgLeaveDaysBar"></canvas>
         </div>
         <div class="chart-card">
-            <h3>Status Radar</h3>
-            <canvas id="statusRadar"></canvas>
+            <h3>Submission Pattern by Weekday</h3>
+            <canvas id="weekdayLine"></canvas>
         </div>
     </div>
 </div>
@@ -257,15 +278,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return v.endsWith(' leave') ? v.slice(0, -5).trim() : v;
     };
     const chartPalette = {
-        blue: '#3b82f6',
-        purple: '#8b5cf6',
-        teal: '#06b6d4',
-        orange: '#f59e0b',
-        coral: '#F08080',
-        pink: '#ec4899',
-        magenta: '#d946ef',
-        slate: '#64748b',
-        green: '#2ecc71'
+        blue: '#d4c53d',
+      purple: '#8b5cf6',
+      teal: '#93eb07',
+      orange: '#f59e0b',
+      coral: '#F08080',
+      pink: '#ec4899',
+      magenta: '#d946ef',
+      slate: '#64748b',
+      green: '#2ecc71'
     };
     const fallbackColors = [
         chartPalette.blue,
@@ -312,6 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const leaveTypeLabels = @json($leaveTypeCounts->keys()->toArray());
     const leaveTypeData = @json($leaveTypeCounts->values()->toArray());
+    const leaveTypePct = @json($leaveTypePercentages ?? []);
     const leaveTypeColors = leaveTypeLabels.map((t) => getColorForType(t));
 
     new Chart(document.getElementById('leaveDoughnut'), {
@@ -330,12 +352,33 @@ document.addEventListener('DOMContentLoaded', () => {
             plugins: {
                 legend: {
                     position: 'bottom',
-                    labels: { font: { size: 14, weight: '600' }, color: '#2c3e50' }
+                    labels: {
+                        font: { size: 14, weight: '600' },
+                        color: '#2c3e50',
+                        generateLabels: (chart) => {
+                            const base = Chart.overrides.doughnut.plugins.legend.labels.generateLabels(chart);
+                            return base.map((item) => {
+                                const pct = (leaveTypePct[item.text] ?? 0).toFixed(1);
+                                return { ...item, text: `${item.text} (${pct}%)` };
+                            });
+                        }
+                    }
                 },
-                tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
+                tooltip: {
+                    bodyFont: { size: 14 },
+                    titleFont: { weight: '700' },
+                    callbacks: {
+                        label: (ctx) => {
+                            const pct = (leaveTypePct[ctx.label] ?? 0).toFixed(1);
+                            return `${ctx.label}: ${ctx.parsed} (${pct}%)`;
+                        }
+                    }
+                }
             }
         }
     });
+
+    const statusPct = @json($statusPercentages ?? []);
 
     new Chart(document.getElementById('statusPie'), {
         type: 'pie',
@@ -357,9 +400,28 @@ document.addEventListener('DOMContentLoaded', () => {
             plugins: {
                 legend: {
                     position: 'bottom',
-                    labels: { font: { size: 14, weight: '600' }, color: '#2c3e50' }
+                    labels: {
+                        font: { size: 14, weight: '600' },
+                        color: '#2c3e50',
+                        generateLabels: (chart) => {
+                            const base = Chart.overrides.pie.plugins.legend.labels.generateLabels(chart);
+                            return base.map((item) => {
+                                const pct = (statusPct[item.text] ?? 0).toFixed(1);
+                                return { ...item, text: `${item.text} (${pct}%)` };
+                            });
+                        }
+                    }
                 },
-                tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
+                tooltip: {
+                    bodyFont: { size: 14 },
+                    titleFont: { weight: '700' },
+                    callbacks: {
+                        label: (ctx) => {
+                            const pct = (statusPct[ctx.label] ?? 0).toFixed(1);
+                            return `${ctx.label}: ${ctx.parsed} (${pct}%)`;
+                        }
+                    }
+                }
             }
         }
     });
@@ -390,75 +452,94 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    new Chart(document.getElementById('departmentPolar'), {
-        type: 'polarArea',
-        data: {
-            labels: @json($departmentLabels),
-            datasets: [{
-                data: @json($departmentData),
-                backgroundColor: @json($departmentLabels).map((d) => hexToRgba(getColorForLabel(d), 0.65)),
-                borderColor: '#fff',
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { font: { size: 14, weight: '600' }, color: '#2c3e50' }
-                },
-                tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
+    const deptPolarCanvas = document.getElementById('departmentPolar');
+    if (deptPolarCanvas) {
+        const deptLabels = @json($departmentLabels);
+        const deptData = @json($departmentData);
+        const deptPct = @json($departmentPercentages ?? []);
+        const polarLegendGen = Chart.overrides?.polarArea?.plugins?.legend?.labels?.generateLabels
+            || Chart.overrides?.doughnut?.plugins?.legend?.labels?.generateLabels;
+        new Chart(deptPolarCanvas, {
+            type: 'polarArea',
+            data: {
+                labels: deptLabels,
+                datasets: [{
+                    data: deptData,
+                    backgroundColor: deptLabels.map((d) => hexToRgba(getColorForLabel(d), 0.65)),
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 14, weight: '600' },
+                            color: '#2c3e50',
+                            generateLabels: (chart) => {
+                                const base = polarLegendGen ? polarLegendGen(chart) : [];
+                                return base.map((item) => {
+                                    const pct = (deptPct[item.text] ?? 0).toFixed(1);
+                                    return { ...item, text: `${item.text} (${pct}%)` };
+                                });
+                            }
+                        }
+                    },
+                    tooltip: {
+                        bodyFont: { size: 14 },
+                        titleFont: { weight: '700' },
+                        callbacks: {
+                            label: (ctx) => {
+                                const pct = (deptPct[ctx.label] ?? 0).toFixed(1);
+                                return `${ctx.label}: ${ctx.formattedValue} (${pct}%)`;
+                            }
+                        }
+                    }
+                }
             }
-        }
-    });
+        });
+    }
 
-    const topBarColor = chartPalette.purple;
-    new Chart(document.getElementById('topTypesBar'), {
+    new Chart(document.getElementById('avgLeaveDaysBar'), {
         type: 'bar',
         data: {
-            labels: leaveTypeLabels,
+            labels: @json($avgLeaveTypeLabels),
             datasets: [{
-                label: 'Requests',
-                data: leaveTypeData,
-                backgroundColor: topBarColor,
-                borderColor: topBarColor,
+                label: 'Average Days',
+                data: @json($avgLeaveTypeData),
+                backgroundColor: chartPalette.orange,
+                borderColor: chartPalette.orange,
                 borderWidth: 2,
                 borderRadius: 8
             }]
         },
         options: {
-            indexAxis: 'y',
             responsive: true,
             plugins: {
                 legend: { display: false },
                 tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
             },
             scales: {
-                x: { beginAtZero: true, ticks: { stepSize: 1 } }
+                y: { beginAtZero: true }
             }
         }
     });
 
-    const statusRadarColor = chartPalette.blue;
-    new Chart(document.getElementById('statusRadar'), {
-        type: 'radar',
+    new Chart(document.getElementById('weekdayLine'), {
+        type: 'line',
         data: {
-            labels: ['Pending', 'Rejected', 'Approved'],
+            labels: @json($weekdayLabels),
             datasets: [{
-                label: 'Requests',
-                data: [
-                    {{ $statusCounts['Pending'] ?? 0 }},
-                    {{ $statusCounts['Rejected'] ?? 0 }},
-                    {{ $statusCounts['Approved'] ?? 0 }}
-                ],
-                borderColor: statusRadarColor,
-                backgroundColor: hexToRgba(statusRadarColor, 0.25),
-                pointBackgroundColor: statusRadarColor,
-                pointBorderColor: '#fff',
-                pointHoverBorderColor: '#fff',
-                pointHoverBackgroundColor: statusRadarColor,
-                borderWidth: 3
+                label: 'Requests Submitted',
+                data: @json($weekdayData),
+                backgroundColor: hexToRgba(chartPalette.blue, 0.2),
+                borderColor: chartPalette.blue,
+                fill: true,
+                tension: 0.35,
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
         options: {
@@ -468,13 +549,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
             },
             scales: {
-                r: {
-                    beginAtZero: true,
-                    ticks: { display: false }
-                }
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
             }
         }
     });
+
 });
 </script>
 @endsection

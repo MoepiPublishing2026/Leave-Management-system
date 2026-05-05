@@ -285,7 +285,7 @@
             @php $user = auth()->user(); @endphp
             <div class="navbar-profile" id="profileMenu" tabindex="0" aria-haspopup="true" aria-expanded="false" aria-label="User menu">
                 @if($user->profile_picture)
-                    <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="Profile Picture" class="profile-image" />
+                    <img src="{{ route('users.profile_picture', ['user' => $user->id]) }}?v={{ optional($user->updated_at)->timestamp }}" alt="Profile Picture" class="profile-image" />
                 @else
                     <div class="profile-circle" title="{{ $user->first_name }} {{ $user->last_name }}">
                         {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? 'S', 0, 1)) }}

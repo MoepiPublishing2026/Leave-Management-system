@@ -39,8 +39,7 @@
     padding-left: 15px;
     letter-spacing: 0.04em;
   }
-  
-  /* Leave Balance Card */
+
   .leave-balance-card {
     background: white;
     border-radius: 16px;
@@ -52,13 +51,15 @@
     max-width: 1200px;
     margin-bottom: 24px;
     transition: box-shadow 0.3s ease;
-    border-left: 5px solid #94068d;  /* Left border is thicker */
+    border-left: 5px solid #94068d;
     border-top: 1px solid #94068d;
     border-right: 1px solid #94068d;
     border-bottom: 1px solid #94068d;
   }
   .leave-balance-card:hover {
     box-shadow: 0 10px 40px rgba(32, 80, 110, 0.2);
+    position: relative;
+    z-index: 1;
   }
   .leave-balance-title {
     font-size: 1.6rem;
@@ -82,10 +83,11 @@
   .leave-balance-list.open {
     max-height: 800px;
     margin-top: 12px;
+    overflow: visible;
+    padding-top: 4px;
   }
   .leave-balance-item {
     background-color: rgb(252, 213, 234);
-    
     border-radius: 16px;
     padding: 18px 26px;
     display: flex;
@@ -102,13 +104,13 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     white-space: nowrap;
     text-overflow: ellipsis;
-    overflow: hidden; border-left: 5px solid #f00e65;  /* Left border is thicker */
+    overflow: hidden;
+    border-left: 5px solid #f00e65;
     border-top: 1px solid #f00e65;
     border-right: 1px solid #f00e65;
     border-bottom: 1px solid #f00e65;
   }
   .leave-balance-item:hover {
-    transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(13, 59, 53, 0.25);
   }
   .leave-balance-item.disabled {
@@ -132,14 +134,14 @@
     padding-left: 12px;
   }
 
-  /* Status Cards */
   .cards {
     display: flex;
     flex-wrap: nowrap;
     gap: 16px;
     margin-bottom: 40px;
     overflow-x: auto;
-    padding-bottom: 8px;
+    overflow-y: visible;
+    padding: 4px 2px 8px;
   }
   .card {
     background: white;
@@ -163,27 +165,13 @@
   }
   .card:hover {
     box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    z-index: 2;
   }
-  .card-pending {
-    border-color: #dab00cff;
-    color: #44380aff;
-  }
-  .card-approved {
-    border-color: #53e21aff;
-    color: #1c7737ff;
-  }
-  .card-rejected {
-    border-color: #eb0e8fff;
-    color: #881f54ff;
-  }
-  .card-overdue {
-    border-color: #d946ef;
-    color: #7a135d;
-  }
-  .card-withdrawn {
-    border-color: #2fcfc5ff;
-    color: #0a1347;
-  }
+  .card-pending { border-color: #dab00cff; color: #44380aff; }
+  .card-approved { border-color: #53e21aff; color: #1c7737ff; }
+  .card-rejected { border-color: #eb0e8fff; color: #881f54ff; }
+  .card-overdue { border-color: #d946ef; color: #7a135d; }
+  .card-withdrawn { border-color: #2fcfc5ff; color: #0a1347; }
   .card-title {
     font-size: 1.08rem;
     font-weight: 600;
@@ -198,7 +186,6 @@
     margin-top: 0;
   }
 
-  /* Charts */
   .dash-charts-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -258,7 +245,6 @@
   .pyramid-row {
     height: 16px;
     border-radius: 10px;
-    background: linear-gradient(135deg, #b2cd16 0%, #0a1347 100%);
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     display: flex;
     align-items: center;
@@ -317,9 +303,9 @@
     flex-shrink: 0;
   }
 </style>
+
 <h1>Employee Dashboard</h1>
 <div class="dashboard-container">
-  
 
   <div id="leaveBalanceCard" class="leave-balance-card" role="button" tabindex="0" aria-expanded="false" aria-controls="leaveBalanceList">
     <div class="leave-balance-title">
@@ -336,7 +322,10 @@
         @php
           $isDisabled = $annualBalance <= 0 && !in_array($type, $notDisabledWhenAnnualExhausted, true);
         @endphp
-        <li class="leave-balance-item {{ $isDisabled ? 'disabled' : '' }}" title="{{ $type }} Leave" onclick="{{ $isDisabled ? '' : 'event.stopPropagation(); window.location=\'' . route('apply', ['leave_type' => $type]) . '\'' }}" style="{{ $isDisabled ? '' : 'cursor: pointer;' }}">
+        <li class="leave-balance-item {{ $isDisabled ? 'disabled' : '' }}"
+            title="{{ $type }} Leave"
+            onclick="{{ $isDisabled ? '' : 'event.stopPropagation(); window.location=\'' . route('leave.balance', ['type' => $type]) . '\'' }}"
+            style="{{ $isDisabled ? '' : 'cursor: pointer;' }}">
           <span class="leave-type">{{ $type }} Leave</span>
           <span class="leave-days">
             {{ $daysLeft }} days left{{ $isDisabled ? ' (Disabled)' : '' }}
@@ -409,9 +398,9 @@
       </div>
     </div>
     <div class="chart-card">
-      <h3>Monthly Leave Requests</h3>
+      <h3>Monthly Leave Requests ({{ $year }})</h3>
       <div class="chart-body">
-        <canvas id="monthlyBar"></canvas>
+        <canvas id="monthlyLine"></canvas>
       </div>
     </div>
     <div class="chart-card">
@@ -421,15 +410,9 @@
       </div>
     </div>
     <div class="chart-card">
-      <h3>Top Leave Types</h3>
+      <h3>Leave Utilization by Type</h3>
       <div class="chart-body">
-        <canvas id="topTypesBar"></canvas>
-      </div>
-    </div>
-    <div class="chart-card">
-      <h3>Leave Types Polar</h3>
-      <div class="chart-body">
-        <canvas id="leaveTypePolar"></canvas>
+        <canvas id="utilizationBar"></canvas>
       </div>
     </div>
     <div class="chart-card">
@@ -439,22 +422,18 @@
         <div id="leaveBalancePyramidLegend" class="pyramid-legend" aria-label="Leave balances legend"></div>
       </div>
     </div>
+    <!-- <div class="chart-card">
+      <h3>Leave Balance Share</h3>
+      <div class="chart-body">
+        <canvas id="balanceSharePie"></canvas>
+      </div>
+    </div> -->
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const hslToHex = (h, s, l) => {
-      s /= 100;
-      l /= 100;
-      const k = n => (n + h / 30) % 12;
-      const a = s * Math.min(l, 1 - l);
-      const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-      const toHex = x => Math.round(255 * x).toString(16).padStart(2, '0');
-      return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
-    };
-
     const hexToRgba = (hex, alpha) => {
       const raw = String(hex || '').replace('#', '');
       const r = parseInt(raw.slice(0, 2), 16);
@@ -468,10 +447,11 @@
       if (!v) return '';
       return v.endsWith(' leave') ? v.slice(0, -5).trim() : v;
     };
+
     const chartPalette = {
-      blue: '#3b82f6',
+      blue: '#d4c53d',
       purple: '#8b5cf6',
-      teal: '#06b6d4',
+      teal: '#93eb07',
       orange: '#f59e0b',
       coral: '#F08080',
       pink: '#ec4899',
@@ -479,6 +459,7 @@
       slate: '#64748b',
       green: '#2ecc71'
     };
+
     const fallbackColors = [
       chartPalette.blue,
       chartPalette.purple,
@@ -486,8 +467,10 @@
       chartPalette.orange,
       chartPalette.magenta,
       chartPalette.coral,
-      chartPalette.slate
+      chartPalette.slate,
+      chartPalette.green
     ];
+
     const fixedTypeColors = {
       annual: chartPalette.teal,
       sick: chartPalette.magenta,
@@ -499,6 +482,7 @@
       study: '#0ea5e9',
       urgent: '#fb923c'
     };
+
     const hashString = (str) => {
       let h = 0;
       for (let i = 0; i < str.length; i += 1) {
@@ -507,10 +491,12 @@
       }
       return Math.abs(h);
     };
+
     const hashToColor = (key) => {
       if (!key) return chartPalette.slate;
       return fallbackColors[hashString(key) % fallbackColors.length];
     };
+
     const getColorForType = (type) => {
       const key = normalizeKey(type);
       return fixedTypeColors[key] || hashToColor(key);
@@ -546,41 +532,67 @@
     });
 
     const leaveTypes = @json(array_keys($leaveTypeCounts));
+    const leaveTypeData = @json(array_values($leaveTypeCounts));
+    const leaveTypePct = @json($leaveTypePercentages ?? []);
     const leaveTypeColors = leaveTypes.map(t => getColorForType(t));
+
+    const monthlyLabels = @json($barLabels);
+    const monthlyTotals = @json($barData);
 
     new Chart(document.getElementById('leaveDoughnut'), {
       type: 'doughnut',
       data: {
         labels: leaveTypes,
         datasets: [{
-          data: @json(array_values($leaveTypeCounts)),
+          data: leaveTypeData,
           backgroundColor: leaveTypeColors,
           borderColor: '#fff',
-          borderWidth: 2,
+          borderWidth: 2
         }]
       },
       options: {
         responsive: true,
         plugins: {
-          legend: { position: 'bottom', labels: { font: { size: 14, weight: '600' }, color: '#2c3e50' } },
-          tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
+          legend: {
+            position: 'bottom',
+            labels: {
+              font: { size: 14, weight: '600' },
+              color: '#2c3e50',
+              generateLabels: (chart) => {
+                const base = Chart.overrides.doughnut.plugins.legend.labels.generateLabels(chart);
+                return base.map((item) => {
+                  const pct = (leaveTypePct[item.text] ?? 0).toFixed(1);
+                  return { ...item, text: `${item.text} (${pct}%)` };
+                });
+              }
+            }
+          },
+          tooltip: {
+            bodyFont: { size: 14 },
+            titleFont: { weight: '700' },
+            callbacks: {
+              label: (ctx) => {
+                const perc = (leaveTypePct[ctx.label] ?? 0).toFixed(1);
+                return `${ctx.label}: ${ctx.parsed} (${perc}%)`;
+              }
+            }
+          }
         }
       }
     });
 
-    const monthlyLabels = @json($barLabels);
-    const monthlyTotals = @json($barData);
     const monthlyColor = chartPalette.pink;
-    const monthlyScatter = monthlyLabels.map((label, i) => ({ x: label, y: monthlyTotals[i] }));
-
-    new Chart(document.getElementById('monthlyBar'), {
-      type: 'scatter',
+    new Chart(document.getElementById('monthlyLine'), {
+      type: 'line',
       data: {
+        labels: monthlyLabels,
         datasets: [{
           label: 'Total Requests',
-          data: monthlyScatter,
-          backgroundColor: monthlyColor,
+          data: monthlyTotals,
+          backgroundColor: hexToRgba(monthlyColor, 0.2),
           borderColor: monthlyColor,
+          tension: 0.3,
+          fill: true,
           pointRadius: 5,
           pointHoverRadius: 7
         }]
@@ -592,7 +604,7 @@
           tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
         },
         scales: {
-          x: { type: 'category', ticks: { maxRotation: 0, minRotation: 0 } },
+          x: { ticks: { maxRotation: 0, minRotation: 0 } },
           y: { beginAtZero: true, ticks: { stepSize: 1 } }
         }
       }
@@ -632,65 +644,55 @@
       }
     });
 
-    const leaveTypeLabels = @json(array_keys($leaveTypeCounts));
-    const leaveTypeData = @json(array_values($leaveTypeCounts));
-    const topBarColor = chartPalette.purple;
-    new Chart(document.getElementById('topTypesBar'), {
+    const leaveBalances = @json($leaveBalances);
+    const balanceEntries = Object.entries(leaveBalances).map(([type, days]) => ({
+      type,
+      days: Number(days) || 0
+    }));
+
+    const maxDays = balanceEntries.reduce((m, it) => Math.max(m, it.days), 0) || 1;
+
+    const utilizationLabels = balanceEntries.map(x => x.type);
+    const utilizationUsed = balanceEntries.map(x => Math.max(0, 20 - x.days));
+    const utilizationRemaining = balanceEntries.map(x => x.days);
+    const utilColors = utilizationLabels.map(t => getColorForType(t));
+
+    new Chart(document.getElementById('utilizationBar'), {
       type: 'bar',
       data: {
-        labels: leaveTypeLabels,
-        datasets: [{
-          label: 'Requests',
-          data: leaveTypeData,
-          backgroundColor: topBarColor,
-          borderColor: topBarColor,
-          borderWidth: 2,
-          borderRadius: 8
-        }]
+        labels: utilizationLabels,
+        datasets: [
+          {
+            label: 'Used',
+            data: utilizationUsed,
+            backgroundColor: utilColors.map(c => hexToRgba(c, 0.75)),
+            borderWidth: 1
+          },
+          {
+            label: 'Remaining',
+            data: utilizationRemaining,
+            backgroundColor: utilColors.map(c => hexToRgba(c, 0.35)),
+            borderWidth: 1
+          }
+        ]
       },
       options: {
-        indexAxis: 'y',
         responsive: true,
         plugins: {
-          legend: { display: false },
+          legend: { position: 'bottom' },
           tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
         },
         scales: {
-          x: { beginAtZero: true, ticks: { stepSize: 1 } }
+          x: { stacked: true },
+          y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
         }
       }
     });
-
-    new Chart(document.getElementById('leaveTypePolar'), {
-      type: 'polarArea',
-      data: {
-        labels: leaveTypes,
-        datasets: [{
-          data: @json(array_values($leaveTypeCounts)),
-          backgroundColor: leaveTypeColors.map(c => hexToRgba(c, 0.7)),
-          borderColor: leaveTypeColors,
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'bottom', labels: { font: { size: 14, weight: '600' }, color: '#2c3e50' } },
-          tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
-        }
-      }
-    });
-
-    const leaveBalances = @json($leaveBalances);
-    const pyramidItems = Object.entries(leaveBalances)
-      .map(([type, days]) => ({ type, days: Number(days) || 0 }))
-      .sort((a, b) => b.days - a.days);
 
     const pyramidRoot = document.getElementById('leaveBalancePyramid');
     const pyramidLegendRoot = document.getElementById('leaveBalancePyramidLegend');
-    const maxDays = pyramidItems.reduce((m, it) => Math.max(m, it.days), 0) || 1;
 
-    pyramidItems.forEach((it) => {
+    balanceEntries.sort((a, b) => b.days - a.days).forEach((it) => {
       const widthPct = Math.max(12, Math.round((it.days / maxDays) * 100));
       const color = getColorForType(it.type);
 
@@ -725,6 +727,29 @@
 
       item.appendChild(text);
       pyramidLegendRoot.appendChild(item);
+    });
+
+    const balanceShareLabels = balanceEntries.map(x => x.type);
+    const balanceShareData = balanceEntries.map(x => x.days);
+
+    new Chart(document.getElementById('balanceSharePie'), {
+      type: 'pie',
+      data: {
+        labels: balanceShareLabels,
+        datasets: [{
+          data: balanceShareData,
+          backgroundColor: balanceShareLabels.map(t => hexToRgba(getColorForType(t), 0.85)),
+          borderColor: '#ffffff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
+        }
+      }
     });
 
     const leaveBalanceCard = document.getElementById('leaveBalanceCard');

@@ -14,9 +14,28 @@ class LeaveRequestController extends Controller
         $status = strtolower((string) $request->query('status', 'all'));
         $search = trim((string) $request->query('search', ''));
         $searchKey = strtolower($search);
+        $monthFilter = $request->query('month');
 
         $query = LeaveRequest::with(['user', 'overdueEscalatedBy', 'handledBy'])
             ->orderByDesc('created_at');
+
+        if (is_string($monthFilter) && $monthFilter !== '') {
+            $now = Carbon::now();
+            if (ctype_digit((string) $monthFilter)) {
+                $query->whereYear('start_date', (int) $monthFilter);
+            } elseif ($monthFilter === 'this_month') {
+                $query->whereYear('start_date', $now->year)
+                    ->whereMonth('start_date', $now->month);
+            } elseif ($monthFilter === 'this_quarter') {
+                $quarter = (int) ceil($now->month / 3);
+                $startMonth = ($quarter - 1) * 3 + 1;
+                $endMonth = $startMonth + 2;
+                $query->whereYear('start_date', $now->year)
+                    ->whereBetween(\DB::raw('MONTH(start_date)'), [$startMonth, $endMonth]);
+            } elseif ($monthFilter === 'this_year') {
+                $query->whereYear('start_date', $now->year);
+            }
+        }
 
         if ($status === 'overdue') {
             $query->whereRaw('LOWER(status) = ?', ['pending'])
@@ -64,7 +83,7 @@ class LeaveRequestController extends Controller
 
         $requests = $query->paginate(10)->withQueryString();
 
-        return view('admin.requests.index', compact('requests', 'status', 'search'));
+        return view('admin.requests.index', compact('requests', 'status', 'search', 'monthFilter'));
     }
 
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Manager;
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use App\Models\User;
+use App\Support\PercentageDistribution;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -65,11 +66,13 @@ class AnalyticController extends Controller
         $leavesByType = (clone $leaveQuery)
             ->select('leave_type', DB::raw('count(*) as total'))
             ->groupBy('leave_type')
+            ->orderByDesc('total')
             ->get();
 
+        // Count distinct employees (not requests) per designation for this filter window
         $leavesByDesignation = (clone $leaveQuery)
             ->join('users', 'leave_requests.user_id', '=', 'users.id')
-            ->select('users.designation', DB::raw('count(leave_requests.id) as total'))
+            ->select(DB::raw("COALESCE(users.designation, 'Unknown') as designation"), DB::raw('COUNT(DISTINCT leave_requests.user_id) as total'))
             ->groupBy('users.designation')
             ->get();
 
@@ -86,16 +89,10 @@ class AnalyticController extends Controller
 
         $totalForTop = $topLeaveTakers->sum('total');
         if ($totalForTop > 0 && $topLeaveTakers->count() > 0) {
-            $rounded = [];
+            $topCounts = $topLeaveTakers->mapWithKeys(fn ($t) => [(int) $t->user_id => (int) $t->total])->toArray();
+            $topPct = PercentageDistribution::oneDecimalPercents($topCounts);
             foreach ($topLeaveTakers as $taker) {
-                $rounded[] = round(($taker->total / $totalForTop) * 100, 1);
-            }
-            $sumRounded = array_sum($rounded);
-            $diff = round(100.0 - $sumRounded, 1);
-            $lastIndex = count($rounded) - 1;
-            $rounded[$lastIndex] = max(0.0, $rounded[$lastIndex] + $diff);
-            foreach ($topLeaveTakers as $i => $taker) {
-                $taker->percentage = $rounded[$i] ?? 0.0;
+                $taker->percentage = $topPct[(int) $taker->user_id] ?? 0.0;
             }
         } else {
             foreach ($topLeaveTakers as $taker) {
@@ -115,6 +112,27 @@ class AnalyticController extends Controller
             ->orderBy('last_name')
             ->get(['id', 'first_name', 'last_name', 'email']);
 
+        if ($staffOptions->isNotEmpty()) {
+            $staffOptions = $staffOptions->unique(function ($u) {
+                return strtolower(trim((string) ($u->email ?? ''))) ?: (string) $u->id;
+            })->values();
+        }
+
+        $typePercentages = [];
+        if ($totalLeaves > 0 && $leavesByType->isNotEmpty()) {
+            $typeCounts = $leavesByType->pluck('total', 'leave_type')->map(fn ($v) => (int) $v)->toArray();
+            $typePercentages = PercentageDistribution::oneDecimalPercents($typeCounts);
+        }
+
+        $designationPercentages = [];
+        if (!empty($designationLabels) && !empty($designationData)) {
+            $designationCounts = [];
+            foreach ($designationLabels as $i => $label) {
+                $designationCounts[(string) $label] = (int) ($designationData[$i] ?? 0);
+            }
+            $designationPercentages = PercentageDistribution::oneDecimalPercents($designationCounts);
+        }
+
         return view('manager.analytics.index', compact(
             'totalLeaves',
             'pendingRequests',
@@ -123,10 +141,12 @@ class AnalyticController extends Controller
             'approvedCount',
             'approvalRate',
             'leavesByType',
+            'typePercentages',
             'topLeaveTakers',
             'totalForTop',
             'designationLabels',
             'designationData',
+            'designationPercentages',
             'months',
             'years',
             'monthFilter',

@@ -111,10 +111,15 @@ class ReportController extends Controller
 
         $callback = function() use ($leaves, $csvHeaders) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, $csvHeaders);
+            // Help Excel reliably split columns
+            // - UTF-8 BOM so names render correctly
+            // - "sep=," line tells Excel the delimiter
+            fwrite($file, "\xEF\xBB\xBF");
+            fwrite($file, "sep=,\r\n");
+            fputcsv($file, $csvHeaders, ',');
 
             if($leaves->isEmpty()) {
-                fputcsv($file, ['No leave records found for the selected date range']);
+                fputcsv($file, ['No leave records found for the selected date range'], ',');
             } else {
                 foreach ($leaves as $leave) {
                     $days = Carbon::parse($leave->end_date)->diffInDays(Carbon::parse($leave->start_date)) + 1;
@@ -123,15 +128,20 @@ class ReportController extends Controller
                     if ($statusLower === 'pending' && $leave->start_date && Carbon::parse($leave->start_date)->lt(Carbon::today())) {
                         $status = 'Overdue';
                     }
+                    $employeeName = trim(($leave->user->first_name ?? '') . ' ' . ($leave->user->last_name ?? ''));
+                    if ($employeeName === '') {
+                        $employeeName = $leave->user->email ?? 'Unknown';
+                    }
+
                     fputcsv($file, [
-                        $leave->user->first_name ?? 'Unknown',
+                        $employeeName,
                         $leave->leave_type,
                         $leave->start_date,
                         $leave->end_date,
                         $days,
                         $status,
                         $leave->created_at
-                    ]);
+                    ], ',');
                 }
             }
             fclose($file);
@@ -140,7 +150,7 @@ class ReportController extends Controller
         $filename = 'leave_requests_' . ($startDate ?? 'all') . '_to_' . ($endDate ?? 'all') . '.csv';
 
         return response()->streamDownload($callback, $filename, [
-            'Content-Type' => 'text/csv',
+            'Content-Type' => 'text/csv; charset=UTF-8',
             'Cache-Control' => 'no-store, no-cache',
         ]);
     }

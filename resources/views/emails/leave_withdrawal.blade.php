@@ -22,7 +22,7 @@
 
                             <p>Leave period: <strong>{{ \Carbon\Carbon::parse($leaveRequest->start_date)->format('d M Y') }}</strong> to <strong>{{ \Carbon\Carbon::parse($leaveRequest->end_date)->format('d M Y') }}</strong>.</p>
 
-                            <p>Regards,<br/>Leave Management System Team</p>
+                            <p>Regards,<br/>Leave Management</p>
                         </td>
                     </tr>
                     <tr>

@@ -346,7 +346,7 @@
                     @endphp
                     @foreach ($leavesByType as $type)
                         @php
-                        $percentage = $totalLeaves > 0 ? round(($type->total / $totalLeaves) * 100, 1) : 0;
+                        $percentage = $typePercentages[$type->leave_type] ?? 0;
                         $color = $colorForType($type->leave_type);
                         @endphp
                         <div class="leave-type-entry">
@@ -460,6 +460,7 @@
             return '#64748b';
         });
     };
+    const designationPct = @json($designationPercentages ?? []);
 
     const chart = new Chart(ctx, {
         type: 'pie',
@@ -475,7 +476,18 @@
         options: {
             responsive: true,
             plugins: {
-                legend: { position: 'bottom' }
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        generateLabels: (chart) => {
+                            const base = Chart.overrides.pie.plugins.legend.labels.generateLabels(chart);
+                            return base.map((item) => {
+                                const pct = (designationPct[item.text] ?? 0).toFixed(1);
+                                return { ...item, text: `${item.text} (${pct}%)` };
+                            });
+                        }
+                    }
+                }
             }
         }
     });

@@ -13,6 +13,6 @@
     <p>This code will expire in 10 minutes.</p>
     <p>If you did not request this, please ignore this email.</p>
     <br>
-    <p>Regards,<br>Moepi Publishing</p>
+    <p>Regards,<br>Leave Management</p>
 </body>
 </html>

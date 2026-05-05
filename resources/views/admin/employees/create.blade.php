@@ -242,7 +242,7 @@
     </form>
 
     <div class="branding">
-        Copyright 2022 Moepi Publishing. All Rights Reserved.
+        Copyright {{ date('Y') }} Moepi Publishing. All Rights Reserved.
     </div>
 </div>
 

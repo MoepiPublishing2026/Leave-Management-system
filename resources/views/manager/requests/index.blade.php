@@ -43,16 +43,19 @@ a.view-reason:hover {color: #c53030;}
     <h1>Leave Requests - {{ ucfirst($status) }}</h1>
     <form method="GET" action="{{ route('manager.requests.index') }}" class="search-row">
         <input type="hidden" name="status" value="{{ $status }}" />
+        @if(!empty($monthFilter))
+            <input type="hidden" name="month" value="{{ $monthFilter }}" />
+        @endif
         <input type="text" name="search" placeholder="Search (name, type, status, dates, comment...)" value="{{ $search ?? '' }}" />
         <button type="submit">Search</button>
-        <a href="{{ route('manager.requests.index', ['status' => $status]) }}">Clear</a>
+        <a href="{{ route('manager.requests.index', ['status' => $status, 'month' => $monthFilter]) }}">Clear</a>
     </form>
     <div class="filter-links">
-        <a href="{{ route('manager.requests.index', ['status' => 'all']) }}" class="{{ $status === 'all' ? 'active' : '' }}">All</a>
-        <a href="{{ route('manager.requests.index', ['status' => 'pending']) }}" class="{{ $status === 'pending' ? 'active' : '' }}">Pending</a>
-        <a href="{{ route('manager.requests.index', ['status' => 'approved']) }}" class="{{ $status === 'approved' ? 'active' : '' }}">Approved</a>
-        <a href="{{ route('manager.requests.index', ['status' => 'rejected']) }}" class="{{ $status === 'rejected' ? 'active' : '' }}">Rejected</a>
-        <a href="{{ route('manager.requests.index', ['status' => 'overdue']) }}" class="{{ $status === 'overdue' ? 'active' : '' }}">Overdue</a>
+        <a href="{{ route('manager.requests.index', ['status' => 'all', 'month' => $monthFilter]) }}" class="{{ $status === 'all' ? 'active' : '' }}">All</a>
+        <a href="{{ route('manager.requests.index', ['status' => 'pending', 'month' => $monthFilter]) }}" class="{{ $status === 'pending' ? 'active' : '' }}">Pending</a>
+        <a href="{{ route('manager.requests.index', ['status' => 'approved', 'month' => $monthFilter]) }}" class="{{ $status === 'approved' ? 'active' : '' }}">Approved</a>
+        <a href="{{ route('manager.requests.index', ['status' => 'rejected', 'month' => $monthFilter]) }}" class="{{ $status === 'rejected' ? 'active' : '' }}">Rejected</a>
+        <a href="{{ route('manager.requests.index', ['status' => 'overdue', 'month' => $monthFilter]) }}" class="{{ $status === 'overdue' ? 'active' : '' }}">Overdue</a>
     </div>
     <table>
         <thead>
@@ -90,7 +93,7 @@ a.view-reason:hover {color: #c53030;}
                 foreach ($files as $i => $file) {
                     $fileLinks[] = [
                         'label' => 'File ' . ($i + 1),
-                        'url' => asset('storage/' . ltrim((string) $file, '/')),
+                        'url' => route('leave.attachments.show', ['leaveRequest' => $req->id, 'attachment' => $i + 1]),
                     ];
                 }
 

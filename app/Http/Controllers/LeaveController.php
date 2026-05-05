@@ -13,6 +13,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewLeaveRequestNotification;
  use Yasumi\Yasumi;
+use Illuminate\Support\Facades\Storage;
+use App\Support\PercentageDistribution;
 
 
 class LeaveController extends Controller
@@ -90,12 +92,16 @@ public function dashboard()
             ->groupBy('leave_type')
             ->pluck('total', 'leave_type')
             ->toArray();
+        arsort($leaveTypeCounts, SORT_NUMERIC);
+        $leaveTypePercentages = PercentageDistribution::oneDecimalPercents($leaveTypeCounts);
 
-        // Monthly bars
+        // Monthly chart: submissions in the current calendar year only (month-only filter would stack every October, etc.)
+        $dashboardYear = (int) Carbon::now()->year;
         $barLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         $barData = [];
         foreach ($barLabels as $month) {
             $barData[] = LeaveRequest::where('user_id', $userId)
+                ->whereYear('created_at', $dashboardYear)
                 ->whereMonth('created_at', date('m', strtotime($month . ' 1')))
                 ->count();
         }
@@ -103,7 +109,7 @@ public function dashboard()
         // Policies keyed by leave_type
         $policies = LeavePolicy::all()->keyBy('leave_type');
 
-        $year = Carbon::now()->year;
+        $year = $dashboardYear;
         [$startOfYear, $endOfYear] = $this->yearWindow($year);
 
         // Fetch approved leaves intersecting the selected year
@@ -153,11 +159,93 @@ public function dashboard()
             'withdrawnCount',
             'overduePendingCount',
             'leaveTypeCounts',
+            'leaveTypePercentages',
+            'year',
             'barLabels',
             'barData',
             'leaveBalances'
         ));
     }
+
+public function leaveBalance(Request $request)
+{
+    $userId = auth()->id();
+
+    $year = (int) $request->query('year', Carbon::now()->year);
+    [$startOfYear, $endOfYear] = $this->yearWindow($year);
+
+    $policies = LeavePolicy::all()->keyBy('leave_type');
+
+    $leavesTakenRaw = LeaveRequest::where('user_id', $userId)
+        ->whereRaw('LOWER(status) = ?', ['approved'])
+        ->whereDate('end_date', '>=', $startOfYear->toDateString())
+        ->whereDate('start_date', '<=', $endOfYear->toDateString())
+        ->orderByDesc('start_date')
+        ->get();
+
+    $publicHolidays = $this->generateHolidaysRange($year, $year);
+
+    $leaveDaysCounted = [];
+    foreach ($leavesTakenRaw as $leave) {
+        $start = Carbon::parse($leave->start_date);
+        $end = Carbon::parse($leave->end_date);
+        $daysCount = $this->countWorkingDaysInYear($start, $end, $publicHolidays, $year);
+        if (!empty($leave->is_half_day) && $daysCount > 0) {
+            $daysCount = 0.5;
+        }
+        $leaveDaysCounted[$leave->leave_type] = ($leaveDaysCounted[$leave->leave_type] ?? 0) + $daysCount;
+        $leave->days = $daysCount;
+    }
+
+    $leaveBalances = [];
+    foreach ($policies as $type => $policy) {
+        $taken = $leaveDaysCounted[$type] ?? 0;
+        $leaveBalances[$type] = [
+            'default_days' => (float) ($policy->default_days ?? 0),
+            'taken_days' => (float) $taken,
+            'remaining_days' => (float) max(0, ($policy->default_days ?? 0) - $taken),
+            'requires_proof' => (bool) ($policy->requires_proof ?? false),
+            'allow_half_days' => (bool) ($policy->allow_half_days ?? false),
+        ];
+    }
+
+    $annualKey = $policies->has('Annual') ? 'Annual' : ($policies->has('Annual Leave') ? 'Annual Leave' : 'Annual');
+    if ($policies->has($annualKey)) {
+        $annualDefault = (float) ($policies[$annualKey]->default_days ?? 30);
+        $nonMaternityTaken = 0.0;
+        foreach ($leaveDaysCounted as $type => $takenDays) {
+            if (strtolower((string) $type) === 'maternity') {
+                continue;
+            }
+            $nonMaternityTaken += (float) $takenDays;
+        }
+        $leaveBalances[$annualKey]['default_days'] = $annualDefault;
+        $leaveBalances[$annualKey]['taken_days'] = $nonMaternityTaken;
+        $leaveBalances[$annualKey]['remaining_days'] = (float) max(0, $annualDefault - $nonMaternityTaken);
+    }
+
+    $selectedType = $request->query('type');
+    if (is_string($selectedType)) {
+        $selectedType = trim($selectedType);
+    }
+
+    if (!empty($selectedType)) {
+        $matchedKey = null;
+        foreach (array_keys($leaveBalances) as $key) {
+            if (strtolower((string) $key) === strtolower((string) $selectedType)) {
+                $matchedKey = $key;
+                break;
+            }
+        }
+
+        if ($matchedKey !== null) {
+            $leaveBalances = [$matchedKey => $leaveBalances[$matchedKey]];
+            $selectedType = $matchedKey;
+        }
+    }
+
+    return view('leave.balance', compact('year', 'leaveBalances', 'leavesTakenRaw', 'selectedType'));
+}
 
 
    
@@ -556,5 +644,41 @@ public function leavesByDate($date)
     return view('admin.leaves.bydate', compact('leaves', 'date'));
 }
 
+public function downloadAttachment(LeaveRequest $leaveRequest, int $attachment)
+{
+    $user = auth()->user();
+    $role = strtolower(trim((string) ($user->role ?? '')));
+
+    if (!in_array($role, ['manager', 'admin'], true) && (int) ($user->id ?? 0) !== (int) $leaveRequest->user_id) {
+        abort(403);
+    }
+
+    $files = [];
+    if (!empty($leaveRequest->file_uploads)) {
+        $decoded = json_decode($leaveRequest->file_uploads, true);
+        if (is_array($decoded)) {
+            $files = $decoded;
+        } else {
+            $files = [$leaveRequest->file_uploads];
+        }
+    }
+
+    $idx = max(1, (int) $attachment) - 1;
+    $path = $files[$idx] ?? null;
+    if (!is_string($path) || trim($path) === '') {
+        abort(404);
+    }
+
+    $disk = Storage::disk('public');
+    $path = ltrim($path, '/');
+    if (!$disk->exists($path)) {
+        abort(404);
+    }
+
+    $fullPath = $disk->path($path);
+    $downloadName = basename($path) ?: ('attachment_' . ($idx + 1));
+
+    return response()->download($fullPath, $downloadName);
+}
 
 }

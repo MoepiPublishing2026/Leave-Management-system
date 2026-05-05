@@ -141,7 +141,7 @@
                         @endphp
                         @if(count($files) > 0)
                             @foreach($files as $i => $file)
-                                <a href="{{ asset('storage/' . ltrim((string) $file, '/')) }}" target="_blank">File {{ $i + 1 }}</a>@if($i < count($files) - 1) | @endif
+                                <a href="{{ route('leave.attachments.show', ['leaveRequest' => $request->id, 'attachment' => $i + 1]) }}" target="_blank">File {{ $i + 1 }}</a>@if($i < count($files) - 1) | @endif
                             @endforeach
                         @else
                             &mdash;
