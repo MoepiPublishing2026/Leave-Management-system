@@ -212,10 +212,36 @@
             border-right: none;
             border-bottom: 1px solid #e5e7eb;
         }
+
+        /* WhatsApp-like behavior: list -> thread */
+        .messages-wrap.is-mobile-thread .messages-sidebar {
+            display: none;
+        }
+        .messages-wrap:not(.is-mobile-thread) .messages-main {
+            display: none;
+        }
+        .mobile-back {
+            display: inline-flex !important;
+        }
+    }
+
+    .mobile-back {
+        display: none;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        color: #0a1347;
+        font-weight: 900;
+        padding: 8px 10px;
+        border-radius: 12px;
+        text-decoration: none;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        flex-shrink: 0;
     }
 </style>
 
-<div class="messages-wrap">
+<div class="messages-wrap {{ $activeConversation ? 'is-mobile-thread' : '' }}">
     <div class="messages-sidebar">
         <h2>Messages</h2>
         <div class="thread-list">
@@ -238,7 +264,6 @@
                             @if(($c->unread_count ?? 0) > 0)
                                 <span class="thread-unread">{{ $c->unread_count }}</span>
                             @endif
-                            <span>{{ $c->leaveRequest?->leave_type ?? '' }}</span>
                         </span>
                     </div>
                     <div class="thread-sub">
@@ -267,13 +292,12 @@
                     : (trim(($activeConversation->admin?->first_name ?? '') . ' ' . ($activeConversation->admin?->last_name ?? '')) ?: 'Admin');
             @endphp
             <div class="messages-header">
+                <a class="mobile-back" href="{{ route('messages.index') }}" aria-label="Back to chats">←</a>
                 <div>
-                    <h3>Leave #{{ $activeConversation->leave_request_id }} — {{ $employeeName }}</h3>
-                    <div class="meta">{{ $activeConversation->leaveRequest?->leave_type ?? '' }} • {{ $activeConversation->leaveRequest?->status ?? '' }}</div>
+                    <h3>{{ $otherName }}</h3>
+                    <div class="meta">Leave #{{ $activeConversation->leave_request_id }} — {{ $employeeName }} • {{ $activeConversation->leaveRequest?->leave_type ?? '' }} • {{ $activeConversation->leaveRequest?->status ?? '' }}</div>
                 </div>
-                <div class="meta">
-                    {{ $otherName }}
-                </div>
+                <div class="meta">{{ optional($activeConversation->updated_at)->diffForHumans() }}</div>
             </div>
 
             <div class="messages-body" id="messagesBody">

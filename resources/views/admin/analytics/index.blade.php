@@ -2,12 +2,11 @@
 
 @section('content')
 <style>
-    body {
+    /* Scope page styles so navbar/layout stays consistent */
+    .admin-analytics-page {
         font-family: "Century Gothic", sans-serif;
         background-color: white;
         color: #333;
-        margin: 0;
-        padding: 0;
     }
     .page-header {
         display: flex;
@@ -210,8 +209,78 @@
     table.table tbody tr td {
         border: none !important;
     }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .page-header {
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .page-header h2 {
+            font-size: 1.6rem;
+        }
+        .filter-form {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .filter-form select,
+        .filter-form a {
+            width: 100%;
+        }
+
+        .metrics-row {
+            gap: 12px;
+        }
+        .metrics-col {
+            flex: 1 1 100%;
+            min-width: 0;
+        }
+
+        .stats-row {
+            gap: 12px;
+        }
+        .chart-card {
+            flex: 1 1 100%;
+            min-width: 0;
+        }
+        .leave-type-list {
+            max-height: 360px;
+        }
+        #designationPieChart {
+            width: 100% !important;
+            max-height: 320px !important;
+        }
+
+        .table-scroll-x {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 6px;
+            padding-left: 16px;
+            padding-right: 16px;
+            margin-left: -16px;
+            margin-right: -16px;
+            scrollbar-width: thin;
+            scroll-snap-type: x proximity;
+            overscroll-behavior-x: contain;
+        }
+        .table-scroll-x table {
+            min-width: 520px;
+        }
+        .table-scroll-x th,
+        .table-scroll-x td {
+            white-space: nowrap;
+            padding: 8px 10px;
+            font-size: 0.85rem;
+            scroll-snap-align: start;
+        }
+    }
 </style>
 
+<div class="admin-analytics-page">
 <div class="container-fluid">
     <div class="page-header">
         <h2>Analytics & Insights</h2>
@@ -244,7 +313,6 @@
                     <div class="card-icon bg-blue-100 text-blue-600"><i class="fas fa-calendar-alt"></i></div>
                 </div>
                 <h3>{{ $totalLeaves }}</h3>
-                <small class="text-success">{{ $approvalRate }}% approved</small>
             </div>
         </div>
         <div class="metrics-col">
@@ -273,8 +341,8 @@
                     <h5>Approval Rate</h5>
                     <div class="card-icon bg-pink-100 text-pink-600"><i class="fas fa-chart-line"></i></div>
                 </div>
-                <h3>{{ $approvalRate }}%</h3>
-                <small class="text-primary">{{ $approvedCount }} approved</small>
+                <h3>{{ $approvedCount }}</h3>
+                <small class="text-primary">{{ $approvalRate }}% approved</small>
             </div>
         </div>
     </div>
@@ -295,34 +363,8 @@
                             return $v;
                         };
 
-                        $palette = [
-                            '#1d4ed8',
-                            '#3b82f6',
-                            '#0ea5e9',
-                            '#06b6d4',
-                            '#14b8a6',
-                            '#6366f1',
-                            '#8b5cf6',
-                            '#a855f7',
-                            '#d946ef',
-                            '#ec4899',
-                            '#F08080',
-                            '#2ecc71',
-                            '#64748b',
-                            '#94a3b8',
-                        ];
-
-                        $fixedTypeColors = [
-                            'annual' => '#06b6d4',
-                            'sick' => '#d946ef',
-                            'maternity' => '#F08080',
-                            'paternity' => '#6366f1',
-                            'bereavement' => '#8b5cf6',
-                            'unpaid' => '#64748b',
-                            'compassionate' => '#3b82f6',
-                            'study' => '#0ea5e9',
-                            'urgent' => '#ec4899',
-                        ];
+                        $palette = config('leave_type_colors.fallback_palette', []);
+                        $fixedTypeColors = config('leave_type_colors.colors', []);
 
                         $hashString = function ($str) {
                             $s = (string) $str;
@@ -340,7 +382,7 @@
                             if ($key !== '' && array_key_exists($key, $fixedTypeColors)) {
                                 return $fixedTypeColors[$key];
                             }
-                            $idx = $key === '' ? 0 : ($hashString($key) % count($palette));
+                            $idx = ($key === '' ? 0 : ($hashString($key) % max(count($palette), 1)));
                             return $palette[$idx];
                         };
                     @endphp
@@ -379,6 +421,7 @@
             <div class="card">
                 <h5><i class="fas fa-trophy me-2 text-warning"></i>Top Leave Takers</h5>
                 <hr>
+                <div class="table-scroll-x" role="region" aria-label="Top leave takers table">
                 <table class="table table-borderless align-middle mb-0">
                     <thead>
                         <tr>
@@ -411,9 +454,11 @@
                         @endif
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -445,21 +490,13 @@
         }
         return Math.abs(h);
     };
-    const colorsForLabels = (labels) => {
-        const used = new Set();
-        return labels.map((label) => {
-            const base = hashString(label) % chartPalette.length;
-            for (let offset = 0; offset < chartPalette.length; offset += 1) {
-                const idx = (base + offset) % chartPalette.length;
-                const c = chartPalette[idx];
-                if (!used.has(c)) {
-                    used.add(c);
-                    return c;
-                }
-            }
-            return '#64748b';
-        });
+    const designationPalette = @json(config('designation_colors.palette'));
+    const normalizeDesignation = (value) => String(value || '').trim().toLowerCase();
+    const colorForDesignation = (label) => {
+        const key = normalizeDesignation(label) || 'unknown';
+        return designationPalette[hashString(key) % designationPalette.length];
     };
+    const colorsForLabels = (labels) => labels.map((label) => colorForDesignation(label));
     const designationPct = @json($designationPercentages ?? []);
 
     const chart = new Chart(ctx, {

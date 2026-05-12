@@ -45,6 +45,10 @@
             display: flex;
             align-items: center;
         }
+        .navbar-logo:hover,
+        .navbar-logo:focus {
+            background: transparent !important;
+        }
 
         .navbar-logo img {
             height: 80px;
@@ -125,15 +129,19 @@
         }
 
         .badge-notification {
-            position: absolute;
-            top: 4px;
-            right: 8px;
-            font-size: 13px;
-            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 6px;
+            border-radius: 999px;
             background: #4c8615ff;
             color: white;
-            border-radius: 15px;
-            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 800;
+            margin-left: 6px;
+            line-height: 1;
         }
         .mobile-menu-btn {
             display: none;
@@ -201,6 +209,11 @@
         .mobile-sidebar a.active,
         .mobile-sidebar a:hover {
             background: #eff106;
+        }
+        /* Don't apply link hover background to the sidebar logo */
+        .mobile-sidebar a.mobile-sidebar-brand:hover,
+        .mobile-sidebar a.mobile-sidebar-brand:focus {
+            background: transparent !important;
         }
 
         /* Profile Icon */
@@ -287,11 +300,17 @@
                 flex-wrap: wrap;
                 gap: 10px;
             }
-            .navbar-logo img {
-                height: 70px;
+            /* Mobile navbar: hamburger left, small logo right (profile hidden) */
+            .navbar-logo {
+                display: flex;
+                margin-left: auto;
+                cursor: pointer;
             }
+            .navbar-logo img { height: 44px; }
+            .navbar-profile { display: none; }
             nav.menu { display: none; }
             .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
+            .mobile-menu-btn { margin-right: auto; }
             main {
                 padding: 18px;
             }
@@ -299,7 +318,44 @@
                 min-width: min(92vw, 420px);
             }
         }
+
+        /* Mobile sidebar header: logo left, close right */
+        .mobile-sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .mobile-sidebar-brand {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        .mobile-sidebar-brand img {
+            height: 46px;
+            width: auto;
+            max-width: 100%;
+        }
+
+        .mobile-sidebar-profile-btn {
+            border: none;
+            background: transparent;
+            padding: 0;
+            border-radius: 999px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mobile-sidebar-profile-btn:focus { outline: 2px solid rgba(178, 205, 22, 0.35); outline-offset: 3px; }
+        .mobile-sidebar-profile-btn .profile-circle,
+        .mobile-sidebar-profile-btn .profile-image {
+            width: 38px;
+            height: 38px;
+        }
     </style>
+
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -337,6 +393,8 @@
 </head>
 <body>
     <nav class="navbar" role="navigation" aria-label="Main Navigation">
+        <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
+
         <div class="navbar-logo" onclick="window.location.href='{{ url('/') }}'">
             <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
         </div>
@@ -353,8 +411,6 @@
             $notificationCount = 0;
         @endphp
         @endauth
-
-        <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
 
         <nav class="menu" aria-label="Primary Navigation">
             <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
@@ -393,6 +449,7 @@
                     <li><a href="{{ route('notifications.index') }}" class="dropdown-item text-center">View All</a></li>
                 </ul>
             </div>
+
             @endauth
         </nav>
 
@@ -423,8 +480,21 @@
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
     <aside id="mobileSidebar" class="mobile-sidebar" aria-label="Mobile Navigation">
         <div class="mobile-sidebar-header">
-            <div class="mobile-sidebar-title">Menu</div>
-            <button class="mobile-menu-btn" type="button" aria-label="Close menu" onclick="toggleMobileSidebar(false)">&times;</button>
+            <a class="mobile-sidebar-brand" href="{{ url('/') }}" aria-label="Moepi Publishing home">
+                <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
+            </a>
+            @auth
+                @php $user = auth()->user(); @endphp
+                <button class="mobile-sidebar-profile-btn" type="button" aria-label="Close menu" onclick="toggleMobileSidebar(false)">
+                    @if($user && $user->profile_picture)
+                        <img src="{{ route('users.profile_picture', ['user' => $user->id]) }}?v={{ optional($user->updated_at)->timestamp }}" alt="Profile Picture" class="profile-image" />
+                    @else
+                        <div class="profile-circle" title="{{ $user->first_name }} {{ $user->last_name }}">
+                            {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? 'S', 0, 1)) }}
+                        </div>
+                    @endif
+                </button>
+            @endauth
         </div>
         <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
         <a href="{{ route('apply') }}" class="{{ request()->routeIs('apply') ? 'active' : '' }}">Apply</a>
@@ -462,6 +532,7 @@
                 backdrop.style.display = 'none';
                 document.body.style.overflow = '';
             }
+
         }
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') toggleMobileSidebar(false);

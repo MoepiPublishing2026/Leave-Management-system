@@ -448,39 +448,24 @@
       return v.endsWith(' leave') ? v.slice(0, -5).trim() : v;
     };
 
+    const fixedTypeColors = @json(config('leave_type_colors.colors'));
+    const fallbackColors = @json(config('leave_type_colors.fallback_palette'));
+
+    // Local palette for non-leave-type charts (status/monthly/etc.)
+    // Keep these bright and distinct (not tied to leave-type colors).
     const chartPalette = {
-      blue: '#d4c53d',
-      purple: '#8b5cf6',
-      teal: '#93eb07',
-      orange: '#f59e0b',
-      coral: '#F08080',
+      blue: '#2563eb',
+      teal: '#06b6d4',
+      green: '#22c55e',
+      amber: '#f59e0b',
+      red: '#ef4444',
       pink: '#ec4899',
-      magenta: '#d946ef',
+      purple: '#a855f7',
+      indigo: '#6366f1',
       slate: '#64748b',
-      green: '#2ecc71'
-    };
-
-    const fallbackColors = [
-      chartPalette.blue,
-      chartPalette.purple,
-      chartPalette.teal,
-      chartPalette.orange,
-      chartPalette.magenta,
-      chartPalette.coral,
-      chartPalette.slate,
-      chartPalette.green
-    ];
-
-    const fixedTypeColors = {
-      annual: chartPalette.teal,
-      sick: chartPalette.magenta,
-      maternity: chartPalette.coral,
-      paternity: chartPalette.orange,
-      bereavement: chartPalette.purple,
-      unpaid: chartPalette.slate,
-      compassionate: chartPalette.blue,
-      study: '#0ea5e9',
-      urgent: '#fb923c'
+      coral: '#fb7185',
+      orange: '#f97316',
+      magenta: '#d946ef',
     };
 
     const hashString = (str) => {
@@ -492,10 +477,7 @@
       return Math.abs(h);
     };
 
-    const hashToColor = (key) => {
-      if (!key) return chartPalette.slate;
-      return fallbackColors[hashString(key) % fallbackColors.length];
-    };
+    const hashToColor = (key) => fallbackColors[hashString(key || 'default') % fallbackColors.length];
 
     const getColorForType = (type) => {
       const key = normalizeKey(type);
@@ -644,17 +626,12 @@
       }
     });
 
-    const leaveBalances = @json($leaveBalances);
-    const balanceEntries = Object.entries(leaveBalances).map(([type, days]) => ({
-      type,
-      days: Number(days) || 0
-    }));
+    const leaveUtilization = @json($leaveUtilization ?? []);
+    const utilEntries = Array.isArray(leaveUtilization) ? leaveUtilization : [];
 
-    const maxDays = balanceEntries.reduce((m, it) => Math.max(m, it.days), 0) || 1;
-
-    const utilizationLabels = balanceEntries.map(x => x.type);
-    const utilizationUsed = balanceEntries.map(x => Math.max(0, 20 - x.days));
-    const utilizationRemaining = balanceEntries.map(x => x.days);
+    const utilizationLabels = utilEntries.map(x => x.type);
+    const utilizationUsed = utilEntries.map(x => Number(x.used) || 0);
+    const utilizationRemaining = utilEntries.map(x => Number(x.remaining) || 0);
     const utilColors = utilizationLabels.map(t => getColorForType(t));
 
     new Chart(document.getElementById('utilizationBar'), {
@@ -688,6 +665,13 @@
         }
       }
     });
+
+    const leaveBalances = @json($leaveBalances);
+    const balanceEntries = Object.entries(leaveBalances).map(([type, days]) => ({
+      type,
+      days: Number(days) || 0
+    }));
+    const maxDays = balanceEntries.reduce((m, it) => Math.max(m, it.days), 0) || 1;
 
     const pyramidRoot = document.getElementById('leaveBalancePyramid');
     const pyramidLegendRoot = document.getElementById('leaveBalancePyramidLegend');

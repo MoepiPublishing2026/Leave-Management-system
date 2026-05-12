@@ -110,6 +110,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
    Route::get('/reports', [ReportsController::class, 'index'])->name('reports');
+   Route::get('/reports/export-pdf', [ReportsController::class, 'exportPdf'])->name('reports.export_pdf');
 
     Route::get('/requests', [LeaveRequestController::class, 'index'])->name('requests');
    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
@@ -151,6 +152,7 @@ Route::get('requests', [RequestsController::class, 'index'])->name('requests.ind
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports');
     Route::get('/reports/export-csv', [ReportController::class, 'exportCsv'])->name('reports.export_csv');
+    Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.export_pdf');
     Route::get('/analytics', [AnalyticController::class, 'index'])->name('analytics');
     Route::get('/calendar', [CalendarsController::class, 'index'])->name('calendar');
     Route::get('/request', function () {

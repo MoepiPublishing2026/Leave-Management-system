@@ -21,20 +21,20 @@
             overflow-x: hidden;
         }
 
-        /* Top navigation bar */
+        /* Top navigation bar (match App/Manager) */
         header.navbar {
             position: fixed;
             top: 0; left: 0; right: 0;
             height: 90px;
             background-color: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            padding: 0 24px;
+            justify-content: space-between;
+            padding: 0 30px;
             z-index: 9999;
             border-bottom: 3px solid #a5d817;
-            gap: 18px;
+            box-shadow: 0 0 10px #bdb6b6ff;
+            user-select: none;
 }
         
 
@@ -42,12 +42,17 @@
             height: 80px;
             width: auto;
         }
+        header.navbar .logo a:hover,
+        header.navbar .logo a:focus,
+        header.navbar .logo:hover,
+        header.navbar .logo:focus {
+            background: transparent !important;
+        }
 
         nav.menu {
             display: flex;
-            gap: 24px;
+            gap: 18px;
             align-items: center;
-            justify-content: flex-start;
             margin-left: auto;
         }
 
@@ -56,15 +61,22 @@
             font-weight: 700;
             font-size: 15px;
             text-decoration: none;
-            padding: 8px 12px;
+            padding: 10px 15px;
             border-radius: 8px;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            align-items: center;
         }
 
         nav.menu a:hover,
         nav.menu a.active {
             background-color: #eff106;
             color: #0a1347;
+        }
+        /* Ensure hover wins if other CSS overrides it */
+        nav.menu a:hover {
+            background-color: #eff106 !important;
+            color: #0a1347 !important;
         }
         .badge-notification {
             display: inline-flex;
@@ -145,7 +157,12 @@
         }
         .mobile-sidebar a.active,
         .mobile-sidebar a:hover {
-            background: #eff106;
+            background: #eff106 !important;
+        }
+        /* Don't apply link hover background to the sidebar logo */
+        .mobile-sidebar a.mobile-sidebar-brand:hover,
+        .mobile-sidebar a.mobile-sidebar-brand:focus {
+            background: transparent !important;
         }
 
         .navbar-profile {
@@ -231,27 +248,72 @@
             header.navbar .logo img {
                 height: 70px;
             }
+            /* Mobile navbar: hamburger left, small logo right (profile hidden) */
+            header.navbar .logo {
+                display: flex;
+                margin-left: auto;
+            }
+            header.navbar .logo img { height: 44px; }
+            .navbar-profile { display: none; }
             nav.menu { display: none; }
             .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
+            .mobile-menu-btn { margin-right: auto; }
             main.content {
                 padding: 18px;
                 max-width: 100%;
             }
         }
+
+        /* Mobile sidebar header: logo left, close right */
+        .mobile-sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .mobile-sidebar-brand {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        .mobile-sidebar-brand img {
+            height: 46px;
+            width: auto;
+            max-width: 100%;
+        }
+
+        .mobile-sidebar-profile-btn {
+            border: none;
+            background: transparent;
+            padding: 0;
+            border-radius: 999px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mobile-sidebar-profile-btn:focus { outline: 2px solid rgba(178, 205, 22, 0.35); outline-offset: 3px; }
+        .mobile-sidebar-profile-btn .profile-circle,
+        .mobile-sidebar-profile-btn .profile-image {
+            width: 38px;
+            height: 38px;
+        }
     </style>
+
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
 
     @stack('styles')
     @yield('head')
 </head>
 <body>
     <header class="navbar" role="banner">
+        <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
+
         <div class="logo">
             <a href="{{ route('admin.dashboard') }}">
                 <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo">
             </a>
         </div>
-
-        <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
 
         @php
             $unreadMessageCount = 0;
@@ -291,21 +353,32 @@
                         {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? 'S', 0, 1)) }}
                     </div>
                 @endif
-                <div class="profile-dropdown" id="profileDropdown" role="menu" aria-hidden="true">
-                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
-                </div>
             </div>
-            <form id="logout-form" method="POST" action="{{ route('logout') }}">
-                @csrf
-            </form>
         @endauth
+
+        <form id="logout-form" method="POST" action="{{ route('logout') }}">
+            @csrf
+        </form>
     </header>
 
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
     <aside id="mobileSidebar" class="mobile-sidebar" aria-label="Mobile Navigation">
         <div class="mobile-sidebar-header">
-            <div class="mobile-sidebar-title">Menu</div>
-            <button class="mobile-menu-btn" type="button" aria-label="Close menu" onclick="toggleMobileSidebar(false)">&times;</button>
+            <a class="mobile-sidebar-brand" href="{{ route('admin.dashboard') }}" aria-label="Moepi Publishing admin dashboard">
+                <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
+            </a>
+            @auth
+                @php $user = auth()->user(); @endphp
+                <button class="mobile-sidebar-profile-btn" type="button" aria-label="Close menu" onclick="toggleMobileSidebar(false)">
+                    @if($user && $user->profile_picture)
+                        <img src="{{ route('users.profile_picture', ['user' => $user->id]) }}?v={{ optional($user->updated_at)->timestamp }}" alt="Profile Picture" class="profile-image" />
+                    @else
+                        <div class="profile-circle" title="{{ $user->first_name }} {{ $user->last_name }}">
+                            {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? 'S', 0, 1)) }}
+                        </div>
+                    @endif
+                </button>
+            @endauth
         </div>
         <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
         <a href="{{ route('admin.employees.index') }}" class="{{ request()->routeIs('admin.employees.*') ? 'active' : '' }}">Employees</a>
@@ -330,22 +403,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @stack('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const profile = document.getElementById('profileMenu');
-            const dropdown = document.getElementById('profileDropdown');
-
-            if (profile && dropdown) {
-                profile.addEventListener('click', () => {
-                    dropdown.classList.toggle('show');
-                });
-
-                window.addEventListener('click', (e) => {
-                    if (!profile.contains(e.target)) {
-                        dropdown.classList.remove('show');
-                    }
-                });
-            }
-        });
+        // (intentionally left minimal; admin uses direct Logout link + mobile sidebar)
     </script>
 
     @if (session('success'))
@@ -420,6 +478,7 @@
                 backdrop.style.display = 'none';
                 document.body.style.overflow = '';
             }
+
         }
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') toggleMobileSidebar(false);

@@ -67,7 +67,7 @@
 
 <p>Please check your leave status in your <a href="{{ url('/login') }}" class="button">Account Dashboard</a>.</p>
 
-<p>Thank you for using our leave management system!</p>
+<p>Thank you for using Moepi Publishing!</p>
 
 <p style="margin-top: 30px; font-size: 12px; color: #6b7280;">&copy; {{ date('Y') }} Moepi Publishing. All rights reserved.</p>
 

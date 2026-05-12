@@ -4,12 +4,13 @@
 
 @section('content')
 <style>
-    body {
-        font-family: "Century Gothic", sans-serif;
+    /* Keep layout navbar styling consistent; scope page styles */
+    .manager-calendar-page {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         background-color: white;
         color: #333;
     }
-    h1 {
+    .manager-calendar-page h1 {
         font-weight: 700;
         font-size: 40px;
         color: #2c3e50;
@@ -19,7 +20,7 @@
         letter-spacing: 0.04em;
         text-align: left;
     }
-    h5 {
+    .manager-calendar-page h5 {
         font-weight: 700;
         font-size: 20px;
         color: #5c0646ff;
@@ -28,10 +29,10 @@
         letter-spacing: 0.04em;
         text-align: center;
     }
-    .page-header {
+    .manager-calendar-page .page-header {
         margin-bottom: 20px;
     }
-    .calendar-nav {
+    .manager-calendar-page .calendar-nav {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -39,7 +40,7 @@
         margin-top: 10px;
         margin-bottom: 10px;
     }
-    .calendar-nav a {
+    .manager-calendar-page .calendar-nav a {
         background: #f8f9fa;
         color: black;
         padding: 5px 10px;
@@ -49,10 +50,10 @@
         font-size: 15px;
         user-select: none;
     }
-    .calendar-nav a:hover {
+    .manager-calendar-page .calendar-nav a:hover {
         background-color: #e1f5edff;
     }
-    .calendar {
+    .manager-calendar-page .calendar {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         gap: 5px;
@@ -61,7 +62,7 @@
         margin-left: auto;
         margin-right: auto;
     }
-    .day {
+    .manager-calendar-page .day {
         border: 1px solid #dee2e6;
         border-radius: 6px;
         padding: 10px;
@@ -73,7 +74,7 @@
         position: relative;
         font-size: 0.87rem;
     }
-    .day.day-disabled {
+    .manager-calendar-page .day.day-disabled {
         background: #ffffff;
         color: #9aa0a6;
         cursor: not-allowed;
@@ -112,6 +113,7 @@
         border: 2px solid #94ee1fff;
     }
 </style>
+<div class="manager-calendar-page">
 <h1>Team Leave Calendar</h1>
 <div class="container mt-4">
     <div class="calendar-nav">
@@ -203,4 +205,5 @@ function showDetails(date) {
     modal.show();
 }
 </script>
+</div>
 @endsection

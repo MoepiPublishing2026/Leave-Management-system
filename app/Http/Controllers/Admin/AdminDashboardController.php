@@ -72,20 +72,52 @@ class AdminDashboardController extends Controller
 
         $activeEmployeesCount = User::where('is_active', 1)->count();
 
-        // Monthly leave requests by start_date (same scope as manager: all non-withdrawn)
-        $monthlyData = (clone $baseQuery)->select(
-            DB::raw('YEAR(start_date) as year'),
-            DB::raw('MONTH(start_date) as month'),
+        // Monthly leave requests grouped by application month (created_at), not leave month.
+        // This matches the employee dashboard behavior (apply in May for September counts in May).
+        $monthlyQuery = LeaveRequest::query()->whereRaw('LOWER(status) != ?', ['withdrawn']);
+        if ($monthFilter) {
+            $now = Carbon::now();
+            if (ctype_digit((string) $monthFilter)) {
+                $monthlyQuery->whereYear('created_at', (int) $monthFilter);
+            } elseif ($monthFilter === 'this_month') {
+                $monthlyQuery->whereYear('created_at', $now->year)
+                    ->whereMonth('created_at', $now->month);
+            } elseif ($monthFilter === 'this_quarter') {
+                $quarter = (int) ceil($now->month / 3);
+                $startMonth = ($quarter - 1) * 3 + 1;
+                $endMonth = $startMonth + 2;
+                $monthlyQuery->whereYear('created_at', $now->year)
+                    ->whereBetween(DB::raw('MONTH(created_at)'), [$startMonth, $endMonth]);
+            } elseif ($monthFilter === 'this_year') {
+                $monthlyQuery->whereYear('created_at', $now->year);
+            }
+        }
+
+        $monthlyData = $monthlyQuery->select(
+            DB::raw('YEAR(created_at) as year'),
+            DB::raw('MONTH(created_at) as month'),
             DB::raw('COUNT(*) as total')
-        )->groupBy('year', 'month')
+        )
+            ->groupBy('year', 'month')
             ->orderBy('year')
             ->orderBy('month')
             ->get();
+
+        // Always return Jan..Dec (no skipped months). Months with no data are 0.
+        $selectedYear = ctype_digit((string) $monthFilter) ? (int) $monthFilter : (int) Carbon::now()->year;
         $barLabels = [];
-        $barData = [];
-        foreach ($monthlyData as $data) {
-            $barLabels[] = date('M Y', mktime(0, 0, 0, $data->month, 1, $data->year));
-            $barData[] = $data->total;
+        $barData = array_fill(0, 12, 0);
+        for ($m = 1; $m <= 12; $m++) {
+            $barLabels[] = date('M Y', mktime(0, 0, 0, $m, 1, $selectedYear));
+        }
+        foreach ($monthlyData as $row) {
+            if ((int) $row->year !== $selectedYear) {
+                continue;
+            }
+            $idx = ((int) $row->month) - 1;
+            if ($idx >= 0 && $idx < 12) {
+                $barData[$idx] = (int) $row->total;
+            }
         }
 
         $rawStatusCounts = (clone $baseQuery)->select('status', DB::raw('count(*) as total'))
@@ -124,14 +156,16 @@ class AdminDashboardController extends Controller
             );
         }
 
-        $avgLeaveDaysByType = (clone $baseQuery)
-            ->whereRaw('LOWER(status) = ?', ['approved'])
-            ->select('leave_type', DB::raw('AVG(DATEDIFF(end_date, start_date) + 1) as avg_days'))
-            ->groupBy('leave_type')
-            ->orderByDesc('avg_days')
-            ->get();
-        $avgLeaveTypeLabels = $avgLeaveDaysByType->pluck('leave_type')->toArray();
-        $avgLeaveTypeData = $avgLeaveDaysByType->pluck('avg_days')->map(fn ($v) => round((float) $v, 1))->toArray();
+        // Requests by designation (for dashboard chart)
+        $designationCounts = (clone $baseQuery)
+            ->join('users', 'leave_requests.user_id', '=', 'users.id')
+            ->select(DB::raw("COALESCE(users.designation, 'Unknown') as designation"), DB::raw('COUNT(*) as total'))
+            ->groupBy('designation')
+            ->pluck('total', 'designation')
+            ->toArray();
+        arsort($designationCounts, SORT_NUMERIC);
+        $designationLabels = array_keys($designationCounts);
+        $designationData = array_values($designationCounts);
 
         $weekdayRows = (clone $baseQuery)
             ->select(DB::raw('DAYOFWEEK(created_at) as day_num'), DB::raw('COUNT(*) as total'))
@@ -162,8 +196,8 @@ class AdminDashboardController extends Controller
             'departmentData' => $departmentData,
             'departmentPercentages' => $departmentPercentages,
             'monthFilter' => $monthFilter,
-            'avgLeaveTypeLabels' => $avgLeaveTypeLabels,
-            'avgLeaveTypeData' => $avgLeaveTypeData,
+            'designationLabels' => $designationLabels,
+            'designationData' => $designationData,
             'weekdayLabels' => $weekdayLabels,
             'weekdayData' => $weekdayData,
         ]);

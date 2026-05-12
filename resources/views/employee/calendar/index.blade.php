@@ -4,12 +4,13 @@
 
 @section('content')
 <style>
-    body {
-        font-family: "Century Gothic", sans-serif;
+    /* Keep layout navbar styling consistent; scope page styles */
+    .employee-calendar-page {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         background-color: white;
         color: #333;
     }
-    h1 {
+    .employee-calendar-page h1 {
         font-weight: 700;
         font-size: 40px;
         color: #2c3e50;
@@ -19,7 +20,7 @@
         text-align: left;
         border-left: 6px solid #138056ff;
     }
-    h5 {
+    .employee-calendar-page h5 {
         font-weight: 700;
         font-size: 20px;
         color: #5c0646ff;
@@ -28,10 +29,10 @@
         letter-spacing: 0.04em;
         text-align: center;
     }
-    .page-header {
+    .employee-calendar-page .page-header {
         margin-bottom: 20px;
     }
-    .calendar-nav {
+    .employee-calendar-page .calendar-nav {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -39,7 +40,7 @@
         margin-top: 10px;
         margin-bottom: 10px;
     }
-    .calendar-nav a {
+    .employee-calendar-page .calendar-nav a {
         background: #f8f9fa;
         color: black;
         padding: 5px 10px;
@@ -49,10 +50,10 @@
         font-size: 15px;
         user-select: none;
     }
-    .calendar-nav a:hover {
+    .employee-calendar-page .calendar-nav a:hover {
         background-color: #e1f5edff;
     }
-    .calendar {
+    .employee-calendar-page .calendar {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         gap: 5px;
@@ -61,7 +62,7 @@
         margin-left: auto;
         margin-right: auto;
     }
-    .day-header {
+    .employee-calendar-page .day-header {
         font-weight: bold;
         text-align: center;
         background-color: white;
@@ -69,7 +70,7 @@
         border-radius: 4px;
         user-select: none;
     }
-    .day {
+    .employee-calendar-page .day {
         border: 1px solid #dee2e6;
         border-radius: 6px;
         padding: 10px;
@@ -119,6 +120,7 @@
         padding-left: 20px;
     }
 </style>
+<div class="employee-calendar-page">
  <h1>My Leave Calendar</h1>
 
 
@@ -211,4 +213,5 @@
         modal.show();
     }
 </script>
+</div>
 @endsection

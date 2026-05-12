@@ -57,6 +57,13 @@
         border-top: 1px solid #dddddd;
         padding-top: 20px;
       }
+
+      .copyright {
+        margin-top: 18px;
+        font-size: 12px;
+        color: #6b7280;
+        text-align: center;
+      }
     </style>
 </head>
 <body>
@@ -75,7 +82,9 @@
     
     <p>If you did not request this account, please ignore this email.</p>
     
-    <p class="footer-text">Thank you for joining us!<br/>Leave Management</p>
+    <p class="footer-text">Thank you for joining us!<br/>Moepi Publishing</p>
+
+    <p class="copyright">&copy; {{ date('Y') }} Moepi Publishing. All rights reserved.</p>
   </div>
 </body>
 </html>

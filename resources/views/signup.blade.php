@@ -93,31 +93,49 @@
             border-radius: 12px;
             cursor: pointer;
             border: none;
-            background-color: #b2cd16;
+            background: linear-gradient(135deg, #b2cd16 0%, #9ef755 100%);
             color: white;
             text-decoration: none;
             text-align: center;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
         }
+        button::before, .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.5s ease;
+        }
+        button:hover::before, .btn-login:hover::before { left: 100%; }
         button:hover, .btn-login:hover {
-            background-color: #0f140acc;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(178, 205, 22, 0.3);
         }
+        button:active, .btn-login:active { transform: translateY(0); }
         .btn-login {
             display: inline-flex;
             align-items: center;
             justify-content: center;
         }
         .branding {
-            margin-top: 35px;
-            font-size: 13px;
-            color: #a2a6b1;
-            user-select: none;
-            letter-spacing: 0.5px;
+            text-align: center;
+            margin-top: 18px;
+            font-size: 12px;
+            color: #a0aec0;
         }
     </style>
+
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
 </head>
 <body>
     <div class="signup-container">

@@ -20,13 +20,13 @@ class LeaveRequestSubmittedMail extends Mailable
     public function __construct(LeaveRequest $leaveRequest)
     {
         $this->leaveRequest = $leaveRequest;
-        $this->workingDays = $this->calculateWorkingDays($leaveRequest->start_date, $leaveRequest->end_date);
+        $this->workingDays = $this->calculateWorkingDays($leaveRequest);
     }
 
-    private function calculateWorkingDays($startDate, $endDate)
+    private function calculateWorkingDays(LeaveRequest $leaveRequest)
     {
-        $start = Carbon::parse($startDate);
-        $end = Carbon::parse($endDate);
+        $start = Carbon::parse($leaveRequest->start_date);
+        $end = Carbon::parse($leaveRequest->end_date);
 
         $publicHolidays = [];
         for ($year = $start->year; $year <= $end->year; $year++) {
@@ -34,6 +34,14 @@ class LeaveRequestSubmittedMail extends Mailable
             foreach ($holidays as $holiday) {
                 $publicHolidays[] = $holiday->format('Y-m-d');
             }
+        }
+
+        // Half-day requests should count as 0.5 (if the day is a working day).
+        if (!empty($leaveRequest->is_half_day)) {
+            if (!$start->isWeekend() && !in_array($start->toDateString(), $publicHolidays)) {
+                return 0.5;
+            }
+            return 0;
         }
 
         $workingDays = 0;

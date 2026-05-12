@@ -1,0 +1,268 @@
+/* Shared UI consistency layer (fonts, links, footers, buttons).
+   Keep selectors low-specificity to avoid breaking page-specific designs. */
+
+:root {
+  --ui-font-sans: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --ui-brand-1: #b2cd16;
+  --ui-brand-2: #9ef755;
+  --ui-muted: #a0aec0;
+  --ui-divider: #e2e8f0;
+  --ui-shadow-brand: 0 10px 25px rgba(178, 205, 22, 0.3);
+}
+
+html, body {
+  font-family: var(--ui-font-sans);
+}
+
+/* Mobile responsiveness helpers (dashboards, cards, headings)
+   Uses common container/card classnames already in views. */
+@media (max-width: 768px) {
+  /* Global mobile typography (content only) */
+  main :where(h1) { font-size: 26px !important; }
+  main :where(h2) { font-size: 20px !important; }
+  main :where(h3) { font-size: 16px !important; }
+  main :where(p, li, td, th, label, input, select, button, a) { font-size: 14px; }
+
+  /* Tables: horizontal scroll on mobile (all sides/pages) */
+  main :where(table) {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-collapse: collapse;
+  }
+
+  /* Buttons: shrink on mobile so they fit */
+  main :where(button, input[type="submit"], input[type="button"], .btn, a.btn) {
+    font-size: 14px !important;
+    padding: 8px 12px !important;
+    border-radius: 10px !important;
+    line-height: 1.15 !important;
+  }
+  /* Big "Add" links/buttons in admin pages */
+  main :where(.add-employee-button) {
+    font-size: 14px !important;
+    padding: 8px 12px !important;
+    float: none !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0 0 0 !important;
+  }
+  /* Search/filter rows: allow wrapping instead of overflow */
+  main :where(.search-row, .filter-export-container, .filter-export-container form) {
+    flex-wrap: wrap !important;
+  }
+  main :where(.search-row input, .filter-export-container input) {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  main :where(.search-row button, .search-row a) {
+    flex: 1 1 auto !important;
+    justify-content: center;
+    text-align: center;
+  }
+  main :where(table) :where(th, td) {
+    white-space: nowrap;
+  }
+  /* Make sure inner table doesn't squish columns too much */
+  main :where(table) {
+    min-width: 100%;
+  }
+
+  /* If a table is wrapped in an explicit scroll container, force overflow */
+  main :where(.table-scroll-x) {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    touch-action: pan-x;
+  }
+  main :where(.table-scroll-x > table) {
+    display: table !important;
+    width: max-content !important;
+    min-width: 640px !important;
+    border-collapse: separate;
+  }
+
+  :where(.dashboard-container, .manager-container, .admin-container) {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    border-radius: 16px !important;
+  }
+
+  :where(.dashboard-container, .manager-container, .admin-container) h1 {
+    font-size: 26px !important;
+    margin-bottom: 16px !important;
+    padding-left: 10px !important;
+  }
+
+  :where(.dashboard-container, .manager-container, .admin-container) h2 {
+    font-size: 20px !important;
+  }
+
+  :where(.dashboard-container, .manager-container, .admin-container) h3 {
+    font-size: 16px !important;
+  }
+
+  /* Summary cards ("Pending", "Approved", etc.) */
+  :where(.dashboard-container, .manager-container, .admin-container) .cards {
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    gap: 12px !important;
+  }
+
+  :where(.dashboard-container, .manager-container, .admin-container) .cards .card {
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    flex: 1 1 calc(50% - 12px) !important;
+    height: auto !important;
+    min-height: 84px !important;
+    padding: 10px 10px !important;
+  }
+
+  :where(.dashboard-container, .manager-container, .admin-container) .card-title {
+    font-size: 0.95rem !important;
+    margin: 2px 0 6px 0 !important;
+  }
+
+  :where(.dashboard-container, .manager-container, .admin-container) .card-value {
+    font-size: 1.35rem !important;
+  }
+
+  /* Request pages: make wide tables usable on mobile */
+  :where(.leave-container, .page-container) {
+    padding: 16px 12px !important;
+    margin: 12px auto !important;
+  }
+  :where(.leave-title) { font-size: 26px !important; margin-bottom: 14px !important; }
+  :where(.leave-header-flex) { flex-wrap: wrap !important; gap: 10px !important; }
+  :where(.leave-table) { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  :where(.leave-table th, .leave-table td) { padding: 10px 12px !important; white-space: nowrap; }
+
+  /* Calendar pages: shrink day boxes on mobile */
+  :where(.admin-calendar-page, .manager-calendar-page, .employee-calendar-page) .day {
+    height: 80px !important;
+    padding: 8px !important;
+    font-size: 0.8rem !important;
+  }
+  :where(.admin-calendar-page, .manager-calendar-page, .employee-calendar-page) .day-header {
+    padding: 6px !important;
+    font-size: 0.8rem !important;
+  }
+  /* Calendar leave badge: keep it neat on mobile */
+  :where(.admin-calendar-page, .manager-calendar-page, .employee-calendar-page) .leave-count {
+    font-size: 0.72rem !important;
+    padding: 2px 6px !important;
+    border-radius: 999px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    max-width: calc(100% - 12px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 420px) {
+  :where(.dashboard-container, .manager-container, .admin-container) .cards .card {
+    flex-basis: 100% !important;
+  }
+}
+
+/* Consistent auth form headings */
+.auth-title {
+  text-align: center;
+  margin: 0 0 18px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #2d3748;
+  letter-spacing: -0.2px;
+}
+
+/* Footer / "All rights reserved" */
+.branding {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+
+/* Subtle divider used above footer link blocks */
+.links,
+.extra-links {
+  border-top: 1px solid var(--ui-divider);
+}
+
+/* Consistent underline-on-hover for “text under buttons” links */
+.links a,
+.extra-links a {
+  color: var(--ui-brand-1);
+  font-weight: 600;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.links a::after,
+.extra-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 2px;
+  width: 0;
+  background: var(--ui-brand-1);
+  transition: width 0.3s ease;
+}
+
+.links a:hover::after,
+.extra-links a:hover::after {
+  width: 100%;
+}
+
+.links a:hover,
+.extra-links a:hover {
+  color: var(--ui-brand-2);
+}
+
+/* Button consistency without overriding Bootstrap coloring */
+:where(button, input[type="submit"], input[type="button"], .btn, .btn-login) {
+  font-family: inherit;
+  border-radius: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+:where(button, input[type="submit"], input[type="button"]):hover {
+  transform: translateY(-1px);
+}
+
+/* Gradient hover “polish” for pages that already use the brand gradient */
+:where(button, .btn-login, input[type="submit"])[style*="linear-gradient"],
+:where(button, .btn-login, input[type="submit"])[class*="gradient"] {
+  position: relative;
+  overflow: hidden;
+}
+
+:where(button, .btn-login, input[type="submit"])[style*="linear-gradient"]::before,
+:where(button, .btn-login, input[type="submit"])[class*="gradient"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: left 0.5s ease;
+}
+
+:where(button, .btn-login, input[type="submit"])[style*="linear-gradient"]:hover::before,
+:where(button, .btn-login, input[type="submit"])[class*="gradient"]:hover::before {
+  left: 100%;
+}
+
+/* If a button already uses the brand gradient, give it the brand shadow on hover */
+:where(button, .btn-login, input[type="submit"])[style*="#b2cd16"]:hover,
+:where(button, .btn-login, input[type="submit"])[style*="#9ef755"]:hover {
+  box-shadow: var(--ui-shadow-brand);
+}
+

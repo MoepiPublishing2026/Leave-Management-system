@@ -63,5 +63,7 @@
     <a href="{{ url('/login') }}" class="login-button">Log In</a>
 
     <p>Thank you!</p>
+
+    <p style="margin-top: 30px; font-size: 12px; color: #6b7280;">&copy; {{ date('Y') }} Moepi Publishing. All rights reserved.</p>
 </body>
 </html>

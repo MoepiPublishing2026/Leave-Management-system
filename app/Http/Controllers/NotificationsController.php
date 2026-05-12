@@ -11,7 +11,14 @@ class NotificationsController extends Controller
         $user = auth()->user();
         $notifications = $user->notifications()->latest()->paginate(20);
 
-        return view('notifications.index', compact('notifications'));
+        // Render the correct layout per role (prevents Manager/Admin from seeing Employee layout)
+        $view = match ($user->role ?? 'employee') {
+            'admin' => 'admin.notifications.index',
+            'manager' => 'manager.notifications.index',
+            default => 'notifications.index',
+        };
+
+        return view($view, compact('notifications'));
     }
 
     public function open(Request $request, string $notification)

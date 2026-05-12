@@ -65,9 +65,10 @@
 
 </style>
 
-<h1>Employees List
+<div class="employees-header" style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom: 20px;">
+    <h1 style="margin-bottom: 0;">Employees List</h1>
     <a href="{{ route('admin.employees.create') }}" class="add-employee-button">+ Add Employee</a>
-</h1>
+</div>
 
 <table>
     <thead>

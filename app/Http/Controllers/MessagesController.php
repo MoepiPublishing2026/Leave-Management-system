@@ -106,9 +106,6 @@ class MessagesController extends Controller
         if ($conversationId) {
             $activeConversation = LeaveRequestConversation::with(['leaveRequest.user', 'manager', 'admin', 'messages.sender'])
                 ->find($conversationId);
-        } elseif ($conversations->isNotEmpty()) {
-            $activeConversation = LeaveRequestConversation::with(['leaveRequest.user', 'manager', 'admin', 'messages.sender'])
-                ->find($conversations->first()->id);
         }
 
         if ($activeConversation) {

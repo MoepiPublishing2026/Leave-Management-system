@@ -51,11 +51,19 @@
     border-collapse: collapse;
     background: #fff;
     border-radius: 10px;
-    overflow: hidden;
+    overflow: visible;
     box-shadow: 0 3px 15px rgba(0,0,0,0.05);
     border: 1px solid #ddd;
     font-size: 1rem;
   }
+  .table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+  }
+  .table-scroll::-webkit-scrollbar { height: 8px; }
+  .table-scroll::-webkit-scrollbar-thumb { background: rgba(17, 24, 39, 0.25); border-radius: 999px; }
   .leave-table th, .leave-table td {
     padding: 15px 20px;
     text-align: center;
@@ -160,6 +168,7 @@
   </div>
 
   @if ($leaveRequests->isNotEmpty())
+  <div class="table-scroll" role="region" aria-label="Scrollable table">
   <table class="leave-table" role="table" aria-label="My Leave Requests">
     <thead>
       <tr>
@@ -207,6 +216,7 @@
       @endforeach
     </tbody>
   </table>
+  </div>
   @else
   <div class="no-requests" role="alert">You have no leave requests yet.</div>
   @endif

@@ -148,6 +148,18 @@
         .signup-container { padding: 24px; }
         input[type="text"], input[type="email"], input[type="password"], select { font-size: 16px; padding: 11px 14px; }
         .toggle-password { right: 8px; }
+        .button-group {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+        .button-group button,
+        .button-group .btn-login {
+            width: 100%;
+            padding: 11px 14px;
+            font-size: 15px;
+            border-radius: 12px;
+        }
     }
 </style>
 
@@ -242,7 +254,7 @@
     </form>
 
     <div class="branding">
-        Copyright {{ date('Y') }} Moepi Publishing. All Rights Reserved.
+        &copy; {{ date('Y') }} Moepi Publishing. All rights reserved.
     </div>
 </div>
 

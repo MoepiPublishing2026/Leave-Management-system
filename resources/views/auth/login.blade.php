@@ -248,6 +248,8 @@
             }
         }
     </style>
+
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
 </head>
 
 <body>
@@ -256,7 +258,7 @@
             <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
         </div>
 
-        <h2>Login</h2>
+        <h2 class="auth-title">Login</h2>
 
         <form method="POST" action="{{ route('login.post') }}">
             @csrf

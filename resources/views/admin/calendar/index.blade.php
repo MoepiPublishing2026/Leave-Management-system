@@ -3,12 +3,13 @@
 @section('content')
 
 <style>
-    body {
-        font-family: "Century Gothic", sans-serif;
+    /* Keep layout navbar styling consistent; scope page styles */
+    .admin-calendar-page {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         background-color: white;
         color: #333;
     }
-    h1 {
+    .admin-calendar-page h1 {
         font-weight: 700;
         font-size: 40px;
         color: #2c3e50;
@@ -18,7 +19,7 @@
         letter-spacing: 0.04em;
         text-align: left;
     }
-    h5 {
+    .admin-calendar-page h5 {
         font-weight: 700;
         font-size: 20px;
         color: #5c0646ff;
@@ -27,10 +28,10 @@
         letter-spacing: 0.04em;
         text-align: center;
     }
-    .page-header {
+    .admin-calendar-page .page-header {
         margin-bottom: 20px;
     }
-    .calendar-nav {
+    .admin-calendar-page .calendar-nav {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -38,7 +39,7 @@
         margin-top: 10px;
         margin-bottom: 10px;
     }
-    .calendar-nav a {
+    .admin-calendar-page .calendar-nav a {
         background: #f8f9fa;
         color: black;
         padding: 5px 10px;
@@ -48,10 +49,10 @@
         font-size: 15px;
         user-select: none;
     }
-    .calendar-nav a:hover {
+    .admin-calendar-page .calendar-nav a:hover {
         background-color: #e1f5edff;
     }
-    .calendar {
+    .admin-calendar-page .calendar {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         gap: 5px;
@@ -60,7 +61,7 @@
         margin-left: auto;
         margin-right: auto;
     }
-    .day {
+    .admin-calendar-page .day {
         border: 1px solid #dee2e6;
         border-radius: 6px;
         padding: 10px;
@@ -72,11 +73,11 @@
         position: relative;
         font-size: 0.87rem;
     }
-    .day.has-leave {
+    .admin-calendar-page .day.has-leave {
         background: white !important;
         border: 2px solid #94ee1fff;
     }
-    .leave-count {
+    .admin-calendar-page .leave-count {
         position: absolute;
         bottom: 5px;
         right: 8px;
@@ -88,22 +89,22 @@
         padding: 2px 8px;
         user-select: none;
     }
-    .day.day-disabled {
+    .admin-calendar-page .day.day-disabled {
         background: #ffffff;
         color: #9aa0a6;
         cursor: not-allowed;
         opacity: 0.8;
     }
-    .day.day-disabled:hover,
-    .day.day-disabled:focus {
+    .admin-calendar-page .day.day-disabled:hover,
+    .admin-calendar-page .day.day-disabled:focus {
         background: #ffffff;
     }
-    .day:hover,
-    .day:focus {
+    .admin-calendar-page .day:hover,
+    .admin-calendar-page .day:focus {
         background-color: #f1f3f5;
         outline: none;
     }
-    .day-header {
+    .admin-calendar-page .day-header {
         font-weight: bold;
         text-align: center;
         background-color: white;
@@ -111,10 +112,11 @@
         border-radius: 4px;
         user-select: none;
     }
-    ul.leave-details-list {
+    .admin-calendar-page ul.leave-details-list {
         padding-left: 20px;
     }
 </style>
+<div class="admin-calendar-page">
 <h1>Team Leave Calendar</h1>
 <div class="container mt-4">
     <div class="calendar-nav">
@@ -197,4 +199,5 @@
     }
 </script>
 
+</div>
 @endsection

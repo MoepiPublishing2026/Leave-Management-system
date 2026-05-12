@@ -142,16 +142,25 @@
 
     <div class="filter-export-container">
         <form id="filterForm" method="GET" action="{{ route('admin.reports') }}">
+            <select name="month" onchange="this.form.submit()" style="padding:6px 12px; border-radius:5px; border:2px solid #3994a8ff; font-size:16px; color:#334155; font-weight:700;">
+                <option value="this_year" {{ ($monthFilter ?? 'this_year') === 'this_year' ? 'selected' : '' }}>This Year</option>
+                <option value="this_quarter" {{ ($monthFilter ?? '') === 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
+                <option value="this_month" {{ ($monthFilter ?? '') === 'this_month' ? 'selected' : '' }}>This Month</option>
+                @foreach(($years ?? []) as $y)
+                    <option value="{{ $y }}" {{ (string) ($monthFilter ?? '') === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
+                @endforeach
+            </select>
             <input type="date" name="start_date" value="{{ request('start_date') }}">
             <input type="date" name="end_date" value="{{ request('end_date') }}">
             <button type="submit">Filter</button>
             <a href="{{ route('admin.reports') }}" style="display:inline-flex; align-items:center; justify-content:center; background:#f8f9fa; color:#0f172a; padding:7px 20px; font-weight:600; border-radius:6px; border: 1px solid #ccc; text-decoration:none;">Clear</a>
         </form>
 
-        <form method="GET" action="{{ route('admin.reports.export_csv') }}">
+        <form method="GET" action="{{ route('admin.reports.export_pdf') }}">
+            <input type="hidden" name="month" value="{{ $monthFilter ?? request('month', 'this_year') }}">
             <input type="hidden" name="start_date" value="{{ request('start_date') }}">
             <input type="hidden" name="end_date" value="{{ request('end_date') }}">
-            <button type="submit">Export CSV</button>
+            <button type="submit">Export PDF</button>
         </form>
     </div>
 

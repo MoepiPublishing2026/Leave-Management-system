@@ -14,5 +14,7 @@
     <p>If you did not request this, please ignore this email.</p>
     <br>
     <p>Regards,<br>Leave Management</p>
+
+    <p style="margin-top: 30px; font-size: 12px; color: #6b7280;">&copy; {{ date('Y') }} Moepi Publishing. All rights reserved.</p>
 </body>
 </html>

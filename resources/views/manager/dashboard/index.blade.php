@@ -242,8 +242,8 @@
             @endif
         </div>
         <div class="chart-card">
-            <h3>Average Leave Days by Type</h3>
-            <canvas id="avgLeaveDaysBar"></canvas>
+            <h3>Requests by Designation</h3>
+            <canvas id="designationBar"></canvas>
         </div>
         <div class="chart-card">
             <h3>Submission Pattern by Weekday</h3>
@@ -277,36 +277,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!v) return '';
         return v.endsWith(' leave') ? v.slice(0, -5).trim() : v;
     };
+    const fixedTypeColors = @json(config('leave_type_colors.colors'));
+    const fallbackColors = @json(config('leave_type_colors.fallback_palette'));
+
+    // Local palette for non-leave-type charts (status/monthly/etc.)
+    // Keep these bright and distinct (not tied to leave-type colors).
     const chartPalette = {
-        blue: '#d4c53d',
-      purple: '#8b5cf6',
-      teal: '#93eb07',
-      orange: '#f59e0b',
-      coral: '#F08080',
-      pink: '#ec4899',
-      magenta: '#d946ef',
-      slate: '#64748b',
-      green: '#2ecc71'
-    };
-    const fallbackColors = [
-        chartPalette.blue,
-        chartPalette.purple,
-        chartPalette.teal,
-        chartPalette.orange,
-        chartPalette.magenta,
-        chartPalette.coral,
-        chartPalette.slate
-    ];
-    const fixedTypeColors = {
-        annual: chartPalette.teal,
-        sick: chartPalette.magenta,
-        maternity: chartPalette.coral,
-        paternity: chartPalette.orange,
-        bereavement: chartPalette.purple,
-        unpaid: chartPalette.slate,
-        compassionate: chartPalette.blue,
-        study: '#0ea5e9',
-        urgent: '#fb923c'
+        blue: '#2563eb',
+        teal: '#06b6d4',
+        green: '#22c55e',
+        amber: '#f59e0b',
+        red: '#ef4444',
+        pink: '#ec4899',
+        purple: '#a855f7',
+        indigo: '#6366f1',
+        slate: '#64748b',
+        coral: '#fb7185',
+        orange: '#f97316',
+        magenta: '#d946ef',
     };
     const hashString = (str) => {
         let h = 0;
@@ -316,10 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return Math.abs(h);
     };
-    const hashToColor = (key) => {
-        if (!key) return chartPalette.slate;
-        return fallbackColors[hashString(key) % fallbackColors.length];
-    };
+    const hashToColor = (key) => fallbackColors[hashString(key || 'default') % fallbackColors.length];
     const getColorForType = (type) => {
         const key = normalizeKey(type);
         return fixedTypeColors[key] || hashToColor(key);
@@ -502,15 +487,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    new Chart(document.getElementById('avgLeaveDaysBar'), {
+    const designationLabels = @json($designationLabels ?? []);
+    const designationData = @json($designationData ?? []);
+    const designationPalette = @json(config('designation_colors.palette'));
+    const normalizeDesignation = (value) => String(value || '').trim().toLowerCase();
+    const colorForDesignation = (label) => {
+        const key = normalizeDesignation(label) || 'unknown';
+        return designationPalette[hashString(key) % designationPalette.length];
+    };
+
+    new Chart(document.getElementById('designationBar'), {
         type: 'bar',
         data: {
-            labels: @json($avgLeaveTypeLabels),
+            labels: designationLabels,
             datasets: [{
-                label: 'Average Days',
-                data: @json($avgLeaveTypeData),
-                backgroundColor: chartPalette.orange,
-                borderColor: chartPalette.orange,
+                label: 'Requests',
+                data: designationData,
+                backgroundColor: designationLabels.map((l) => hexToRgba(colorForDesignation(l), 0.8)),
+                borderColor: designationLabels.map((l) => colorForDesignation(l)),
                 borderWidth: 2,
                 borderRadius: 8
             }]
@@ -522,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
             },
             scales: {
-                y: { beginAtZero: true }
+                y: { beginAtZero: true, ticks: { precision: 0 } }
             }
         }
     });

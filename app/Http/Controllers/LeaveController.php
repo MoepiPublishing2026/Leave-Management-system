@@ -152,6 +152,41 @@ public function dashboard()
             $leaveBalances[$annualKey] = max(0, $annualDefault - $nonMaternityTaken);
         }
 
+        // Build utilization dataset (no hardcoded totals)
+        $leaveUtilization = [];
+        foreach ($policies as $type => $policy) {
+            $defaultDays = (float) ($policy->default_days ?? 0);
+            $takenDays = (float) ($leaveDaysCounted[$type] ?? 0);
+            $remainingDays = (float) max(0, $defaultDays - $takenDays);
+
+            $leaveUtilization[] = [
+                'type' => $type,
+                'total' => $defaultDays,
+                'used' => $takenDays,
+                'remaining' => $remainingDays,
+            ];
+        }
+        // Mirror Annual override in utilization too (annual = annualDefault - nonMaternityTaken)
+        if ($policies->has($annualKey ?? 'Annual')) {
+            $annualKeyResolved = $annualKey ?? 'Annual';
+            $annualDefault = (float) ($policies[$annualKeyResolved]->default_days ?? 30);
+            $nonMaternityTaken = 0.0;
+            foreach ($leaveDaysCounted as $type => $takenDays) {
+                if (strtolower((string) $type) === 'maternity') {
+                    continue;
+                }
+                $nonMaternityTaken += (float) $takenDays;
+            }
+            // replace/insert annual record
+            $leaveUtilization = array_values(array_filter($leaveUtilization, fn ($it) => $it['type'] !== $annualKeyResolved));
+            $leaveUtilization[] = [
+                'type' => $annualKeyResolved,
+                'total' => $annualDefault,
+                'used' => $nonMaternityTaken,
+                'remaining' => (float) max(0, $annualDefault - $nonMaternityTaken),
+            ];
+        }
+
         return view('dashboard', compact(
             'pendingCount',
             'approvedCount',
@@ -163,7 +198,8 @@ public function dashboard()
             'year',
             'barLabels',
             'barData',
-            'leaveBalances'
+            'leaveBalances',
+            'leaveUtilization'
         ));
     }
 

@@ -94,38 +94,84 @@
         }
         button {
             width: 100%;
-            padding: 16px;
+            padding: 14px;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 15px;
             border-radius: 10px;
             cursor: pointer;
             border: none;
             background: linear-gradient(135deg, #b2cd16 0%, #9ef755 100%);
             color: white;
-            margin-top: 6px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
         }
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.5s ease;
+        }
+        button:hover::before { left: 100%; }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(178, 205, 22, 0.3);
+        }
+        button:active { transform: translateY(0); }
         .links {
             margin-top: 18px;
             text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
         }
         .links a {
             color: #b2cd16;
             font-weight: 600;
             text-decoration: none;
             font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #b2cd16;
+            transition: width 0.3s ease;
+        }
+        .links a:hover::after { width: 100%; }
+        .links a:hover { color: #9ef755; }
+
+        .branding {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 12px;
+            color: #a0aec0;
         }
         @media (max-width: 480px) {
             .container { padding: 30px 22px; }
             h2 { font-size: 24px; }
         }
     </style>
+
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
 </head>
 <body>
     <div class="container">
         <div class="login-logo">
             <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
         </div>
-        <h2>Two-Factor Authentication</h2>
+        <h2 class="auth-title">Two-Factor Authentication</h2>
         <p>A verification code has been sent to your email. Please enter it below to continue.</p>
 
         <form method="POST" action="{{ route('login.verify.post') }}">
@@ -142,7 +188,7 @@
             <a href="{{ route('login') }}">Back to Login</a>
         </div>
         
-        <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #a0aec0;">
+        <div class="branding">
             &copy; {{ date('Y') }} Moepi Publishing. All rights reserved.
         </div>
     </div>
