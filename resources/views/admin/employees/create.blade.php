@@ -54,52 +54,42 @@
         box-sizing: border-box;
         transition: border-color 0.3s ease;
     }
-    .has-toggle {
+    /* Match auth/login password toggle (eye icons + placement) */
+    .input-wrapper {
         position: relative;
+        width: 100%;
     }
-    .has-toggle input[type="password"],
-    .has-toggle input[type="text"] {
+    .input-wrapper input[type="password"],
+    .input-wrapper input[type="text"] {
         padding-right: 48px;
     }
     .toggle-password {
         position: absolute;
         top: 50%;
-        right: 12px;
+        right: 14px;
         transform: translateY(-50%);
-        width: 32px;
-        height: 32px;
-        display: flex;
+        cursor: pointer;
+        color: #a0aec0;
+        transition: color 0.3s ease;
+        width: 22px;
+        height: 22px;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
-        user-select: none;
-        background: white;
-        border-radius: 8px;
-        border: none;
-        outline: none;
-        padding: 0;
+    }
+    .toggle-password:hover svg {
+        stroke: #b2cd16;
     }
     .toggle-password svg {
-        width: 20px;
-        height: 20px;
+        width: 22px;
+        height: 22px;
         stroke: #b2cd16;
-        background: transparent;
-        pointer-events: none;
+        transition: stroke 0.3s ease;
     }
     .toggle-password:focus {
-        outline: 2px solid #4a4a4a;
-    }
-    .toggle-password .icon-closed {
-        display: none;
-    }
-    .toggle-password[aria-pressed="true"] .icon-open {
-        display: none;
-    }
-    .toggle-password[aria-pressed="true"] .icon-closed {
-        display: block;
-    }
-    .form-row {
-        position: relative;
+        outline: 2px solid rgba(178, 205, 22, 0.45);
+        outline-offset: 2px;
+        border-radius: 4px;
     }
     .error {
         color: #ff1e5a;
@@ -113,10 +103,13 @@
         gap: 15px;
         margin-top: 30px;
     }
-    button, .btn-login {
+    .button-group .btn-form-action {
+        box-sizing: border-box;
+        min-height: 52px;
         padding: 15px 40px;
         font-weight: 600;
         font-size: 18px;
+        line-height: 1.25;
         border-radius: 12px;
         cursor: pointer;
         border: none;
@@ -129,13 +122,11 @@
         justify-content: center;
         transition: background-color 0.3s ease;
     }
-    button:hover, .btn-login:hover {
-        background-color: #0f140acc;
+    .button-group button.btn-form-action {
+        font-family: inherit;
     }
-    .btn-login {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+    .button-group .btn-form-action:hover {
+        background-color: #0f140acc;
     }
     .branding {
         margin-top: 35px;
@@ -147,16 +138,18 @@
     @media (max-width: 576px) {
         .signup-container { padding: 24px; }
         input[type="text"], input[type="email"], input[type="password"], select { font-size: 16px; padding: 11px 14px; }
-        .toggle-password { right: 8px; }
+        .input-wrapper input[type="password"],
+        .input-wrapper input[type="text"] { padding-right: 44px; }
+        .toggle-password { right: 12px; }
         .button-group {
             flex-direction: column;
             align-items: stretch;
             gap: 10px;
         }
-        .button-group button,
-        .button-group .btn-login {
+        .button-group .btn-form-action {
             width: 100%;
-            padding: 11px 14px;
+            min-height: 48px;
+            padding: 12px 16px;
             font-size: 15px;
             border-radius: 12px;
         }
@@ -198,43 +191,41 @@
             <div class="error">{{ $message }}</div>
         @enderror
 
-        <!-- Password with toggle -->
+        <!-- Password with toggle (same icons as login) -->
         <label for="password">Password</label>
-        <div class="form-row has-toggle">
+        <div class="input-wrapper">
             <input type="password" name="password" id="password" required />
-            <button type="button" class="toggle-password" aria-label="Show or hide password"
-                aria-pressed="false" data-target="password">
-                <svg class="icon-open" data-state="open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+            <span class="toggle-password" id="togglePasswordAdd" role="button" tabindex="0" aria-label="Show or hide password">
+                <svg id="eyeOpenAdd" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M2.4 12S6.9 4.5 12 4.5 21.6 12 21.6 12 17.1 19.5 12 19.5 2.4 12 2.4 12z"/>
-                    <circle cx="12" cy="12" r="3"/>
+                        d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" />
+                    <circle cx="12" cy="12" r="3" stroke-width="2" />
                 </svg>
-                <svg class="icon-closed" data-state="closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+                <svg id="eyeClosedAdd" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" style="display:none;">
                     <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5"/>
+                        d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5a10.6 10.6 0 00-4.9 1.2" />
                 </svg>
-            </button>
+            </span>
         </div>
         @error('password')
             <div class="error">{{ $message }}</div>
         @enderror
 
-        <!-- Confirm password with toggle -->
+        <!-- Confirm password with toggle (same icons as login) -->
         <label for="password_confirmation">Confirm Password</label>
-        <div class="form-row has-toggle">
+        <div class="input-wrapper">
             <input type="password" name="password_confirmation" id="password_confirmation" required />
-            <button type="button" class="toggle-password" aria-label="Show or hide confirm password"
-                aria-pressed="false" data-target="password_confirmation">
-                <svg class="icon-open" data-state="open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+            <span class="toggle-password" id="togglePasswordAddConfirm" role="button" tabindex="0" aria-label="Show or hide confirm password">
+                <svg id="eyeOpenAddConfirm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M2.4 12S6.9 4.5 12 4.5 21.6 12 21.6 12 17.1 19.5 12 19.5 2.4 12 2.4 12z"/>
-                    <circle cx="12" cy="12" r="3"/>
+                        d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" />
+                    <circle cx="12" cy="12" r="3" stroke-width="2" />
                 </svg>
-                <svg class="icon-closed" data-state="closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+                <svg id="eyeClosedAddConfirm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" style="display:none;">
                     <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5"/>
+                        d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5a10.6 10.6 0 00-4.9 1.2" />
                 </svg>
-            </button>
+            </span>
         </div>
 
         <label for="role">Role</label>
@@ -248,8 +239,8 @@
         @enderror
 
         <div class="button-group">
-            <button type="submit">Add Employee</button>
-            <a href="{{ route('admin.employees.index') }}" class="btn-login">Back to List</a>
+            <button type="submit" class="btn-form-action">Add Employee</button>
+            <a href="{{ route('admin.employees.index') }}" class="btn-form-action">Back to List</a>
         </div>
     </form>
 
@@ -260,21 +251,33 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Toggle password function
-        function togglePasswordFor(button) {
-            const targetId = button.getAttribute('data-target');
-            const input = document.getElementById(targetId);
-            if (!input) return;
-            const isHidden = input.type === 'password';
-            input.type = isHidden ? 'text' : 'password';
-            button.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
-        }
-        document.querySelectorAll('.toggle-password').forEach(btn => {
-            btn.addEventListener('click', function (e) {
+        function setupPasswordToggle(toggleEl, inputId, openId, closedId) {
+            const input = document.getElementById(inputId);
+            const eyeOpen = document.getElementById(openId);
+            const eyeClosed = document.getElementById(closedId);
+            if (!toggleEl || !input || !eyeOpen || !eyeClosed) return;
+
+            function flip() {
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                eyeOpen.style.display = isPassword ? 'none' : 'block';
+                eyeClosed.style.display = isPassword ? 'block' : 'none';
+            }
+
+            toggleEl.addEventListener('click', function (e) {
                 e.preventDefault();
-                togglePasswordFor(btn);
+                flip();
             });
-        });
+            toggleEl.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    flip();
+                }
+            });
+        }
+
+        setupPasswordToggle(document.getElementById('togglePasswordAdd'), 'password', 'eyeOpenAdd', 'eyeClosedAdd');
+        setupPasswordToggle(document.getElementById('togglePasswordAddConfirm'), 'password_confirmation', 'eyeOpenAddConfirm', 'eyeClosedAddConfirm');
     });
 </script>
 @endsection

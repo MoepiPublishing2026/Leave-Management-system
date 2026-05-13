@@ -75,13 +75,18 @@ html, body {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
     max-width: 100%;
-    touch-action: pan-x;
+    min-width: 0 !important;
+    /* Let horizontal scroll reach the last column (avoid pan-x fighting touch on iOS) */
+    touch-action: auto;
+    overscroll-behavior-x: contain;
   }
   main :where(.table-scroll-x > table) {
     display: table !important;
     width: max-content !important;
-    min-width: 640px !important;
+    min-width: 720px !important;
     border-collapse: separate;
+    overflow: visible !important;
+    overflow-x: visible !important;
   }
 
   :where(.dashboard-container, .manager-container, .admin-container) {

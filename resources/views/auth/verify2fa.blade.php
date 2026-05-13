@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Two-Factor Authentication - Leave Management</title>
     <link rel="icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" sizes="32x32" />
-    <link rel="icon" href="{{ asset('images/favicon-16.png') }}" type="image/png" sizes="16x16" />
-    <link rel="icon" href="{{ asset('images/favicon-192.png') }}" type="image/png" sizes="192x192" />
-    <link rel="icon" href="{{ asset('images/favicon-512.png') }}" type="image/png" sizes="512x512" />
     <link rel="shortcut icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" />
     <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}" sizes="180x180" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -235,32 +235,36 @@
 
         .metrics-row { gap: 12px; }
         .metrics-col { flex: 1 1 100%; min-width: 0; }
-        .stats-row { gap: 12px; }
+        .stats-row { gap: 12px; min-width: 0; }
+        .table-card { min-width: 0; flex: 1 1 100%; }
         .chart-card { flex: 1 1 100%; min-width: 0; }
         #designationPieChart { width: 100% !important; max-height: 320px !important; }
 
+        .table-card > .card {
+            min-width: 0;
+        }
         .table-scroll-x {
             width: 100%;
+            min-width: 0;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            padding-bottom: 6px;
+            padding-bottom: 8px;
             padding-left: 16px;
             padding-right: 16px;
             margin-left: -16px;
             margin-right: -16px;
             scrollbar-width: thin;
-            scroll-snap-type: x proximity;
             overscroll-behavior-x: contain;
-        }
-        .table-scroll-x table {
-            min-width: 520px;
         }
         .table-scroll-x th,
         .table-scroll-x td {
             white-space: nowrap;
             padding: 8px 10px;
             font-size: 0.85rem;
-            scroll-snap-align: start;
+        }
+        .table-scroll-x th:last-child,
+        .table-scroll-x td:last-child {
+            min-width: 8.5rem;
         }
     }
 </style>

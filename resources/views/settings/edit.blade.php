@@ -80,9 +80,9 @@
         padding-right: 45px;
         margin-bottom: 0;
     }
-    .password-toggle .toggle-icon {
+    .password-toggle .toggle-password {
         position: absolute;
-        right: 10px;
+        right: 14px;
         top: 50%;
         transform: translateY(-50%);
         cursor: pointer;
@@ -91,11 +91,14 @@
         transition: color 0.3s ease;
         width: 22px;
         height: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
-    .password-toggle .toggle-icon:hover svg {
+    .password-toggle .toggle-password:hover svg {
         stroke: #b2cd16;
     }
-    .password-toggle .toggle-icon svg {
+    .password-toggle .toggle-password svg {
         width: 22px;
         height: 22px;
         stroke: #b2cd16;
@@ -124,7 +127,7 @@
         <label for="current_password">Current Password</label>
         <div class="password-toggle">
             <input id="current_password" name="current_password" type="password" placeholder="Required to change password" />
-            <span class="toggle-icon" id="toggleCurrentPassword">
+            <span class="toggle-password" id="toggleCurrentPassword" role="button" tabindex="0" aria-label="Show or hide current password">
                 <svg id="eyeOpenCurrent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" />
                     <circle cx="12" cy="12" r="3" stroke-width="2" />
@@ -141,7 +144,7 @@
         <label for="password">New Password</label>
         <div class="password-toggle">
             <input id="password" name="password" type="password" placeholder="Leave blank to keep current" />
-            <span class="toggle-icon" id="togglePassword">
+            <span class="toggle-password" id="togglePassword" role="button" tabindex="0" aria-label="Show or hide new password">
                 <svg id="eyeOpenPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" />
                     <circle cx="12" cy="12" r="3" stroke-width="2" />
@@ -158,7 +161,7 @@
         <label for="password_confirmation">Confirm Password</label>
         <div class="password-toggle">
             <input id="password_confirmation" name="password_confirmation" type="password" />
-            <span class="toggle-icon" id="togglePasswordConfirmation">
+            <span class="toggle-password" id="togglePasswordConfirmation" role="button" tabindex="0" aria-label="Show or hide confirm password">
                 <svg id="eyeOpenPasswordConfirmation" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" />
                     <circle cx="12" cy="12" r="3" stroke-width="2" />
@@ -187,11 +190,21 @@
         const eyeClosed = document.getElementById(closedId);
         if (!toggle || !input || !eyeOpen || !eyeClosed) return;
 
-        toggle.addEventListener('click', () => {
+        function flip() {
             const isPassword = input.type === 'password';
             input.type = isPassword ? 'text' : 'password';
             eyeOpen.style.display = isPassword ? 'none' : 'block';
             eyeClosed.style.display = isPassword ? 'block' : 'none';
+        }
+        toggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            flip();
+        });
+        toggle.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                flip();
+            }
         });
     }
 

@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@yield('title', 'Admin Panel')</title>
     <link rel="icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" sizes="32x32" />
-    <link rel="icon" href="{{ asset('images/favicon-16.png') }}" type="image/png" sizes="16x16" />
-    <link rel="icon" href="{{ asset('images/favicon-192.png') }}" type="image/png" sizes="192x192" />
-    <link rel="icon" href="{{ asset('images/favicon-512.png') }}" type="image/png" sizes="512x512" />
     <link rel="shortcut icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" />
     <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}" sizes="180x180" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -302,6 +299,30 @@
 
     <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const profile = document.getElementById('profileMenu');
+            const dropdown = document.getElementById('profileDropdown');
+
+            if (profile && dropdown) {
+                profile.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('show');
+                    profile.setAttribute('aria-expanded', dropdown.classList.contains('show') ? 'true' : 'false');
+                    dropdown.setAttribute('aria-hidden', dropdown.classList.contains('show') ? 'false' : 'true');
+                });
+
+                window.addEventListener('click', function(e) {
+                    if (!profile.contains(e.target)) {
+                        dropdown.classList.remove('show');
+                        profile.setAttribute('aria-expanded', 'false');
+                        dropdown.setAttribute('aria-hidden', 'true');
+                    }
+                });
+            }
+        });
+    </script>
+
     @stack('styles')
     @yield('head')
 </head>
@@ -353,12 +374,17 @@
                         {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? 'S', 0, 1)) }}
                     </div>
                 @endif
+                <div class="profile-dropdown" id="profileDropdown" role="menu" aria-hidden="true">
+                    <a href="{{ route('logout') }}" role="menuitem"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        Logout
+                    </a>
+                    <form id="logout-form" method="POST" action="{{ route('logout') }}">
+                        @csrf
+                    </form>
+                </div>
             </div>
         @endauth
-
-        <form id="logout-form" method="POST" action="{{ route('logout') }}">
-            @csrf
-        </form>
     </header>
 
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
@@ -402,9 +428,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @stack('scripts')
-    <script>
-        // (intentionally left minimal; admin uses direct Logout link + mobile sidebar)
-    </script>
 
     @if (session('success'))
         <script>
