@@ -66,6 +66,7 @@ class EmployeeController extends Controller
         return redirect()->route('admin.employees.index')->with('success', 'Employee added successfully.');
     } catch (\Exception $e) {
         // Log or handle error
+        \Log::error($e->getMessage());
         return redirect()->back()->withErrors(['error' => 'Failed to add employee. Please try again.'])->withInput();
     }
 }
