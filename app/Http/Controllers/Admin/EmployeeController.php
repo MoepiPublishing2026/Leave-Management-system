@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use App\Models\LeaveRequest;
+use Illuminate\Support\Facades\Log; 
 use App\Models\LeaveRequestConversation;
 use App\Models\LeaveRequestMessage;
 

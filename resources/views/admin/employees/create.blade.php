@@ -230,7 +230,7 @@
 
         <label for="role">Role</label>
         <select name="role" required>
-            <option value="employee" {{ old('role') == 'employee' ? 'selected' : '' }}>Employee12</option>
+            <option value="employee" {{ old('role') == 'employee' ? 'selected' : '' }}>Employee123</option>
             <option value="manager" {{ old('role') == 'manager' ? 'selected' : '' }}>Manager</option>
             <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
         </select>
