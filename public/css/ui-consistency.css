@@ -174,6 +174,14 @@ html, body {
   }
 }
 
+/* Hide browser-native password reveal when a custom toggle is present (Edge/IE) */
+.input-wrapper input[type="password"]::-ms-reveal,
+.input-wrapper input[type="password"]::-ms-clear,
+.password-toggle input[type="password"]::-ms-reveal,
+.password-toggle input[type="password"]::-ms-clear {
+  display: none;
+}
+
 /* Consistent auth form headings */
 .auth-title {
   text-align: center;
