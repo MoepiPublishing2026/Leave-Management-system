@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use App\Models\LeaveRequest;
+use Illuminate\Support\Facades\Log; 
 use App\Models\LeaveRequestConversation;
 use App\Models\LeaveRequestMessage;
 
@@ -64,11 +65,16 @@ class EmployeeController extends Controller
         Mail::to($user->email)->send(new WelcomeUserMail($user, $rawPassword));
 
         return redirect()->route('admin.employees.index')->with('success', 'Employee added successfully.');
-    } catch (\Exception $e) {
-        // Log or handle error
-        \Log::error($e->getMessage());
-        return redirect()->back()->withErrors(['error' => 'Failed to add employee. Please try again.'])->withInput();
-    }
+    }catch (\Exception $e) {
+    // Log the error for debugging
+    Log::error($e->getMessage());
+
+            // Pass the message into withErrors so you can see it in the view
+            return redirect()->back()
+                ->withErrors(['error' => 'An error occurred while creating the employee: ' ])
+                ->withInput();
+        }
+
 }
 
     public function destroy($id)
