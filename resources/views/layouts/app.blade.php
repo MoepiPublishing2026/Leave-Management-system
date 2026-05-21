@@ -415,7 +415,7 @@
             <a href="{{ route('leave.myRequests') }}" class="{{ request()->routeIs('leave.myRequests') ? 'active' : '' }}">Requests</a>
             <a href="{{ route('employee.calendar') }}" class="{{ request()->routeIs('employee.calendar') ? 'active' : '' }}">Calendar</a>
             <a href="{{ route('policies') }}" class="{{ request()->routeIs('policies') ? 'active' : '' }}">Policies</a>
-            <a href="{{ route('settings.edit') }}" class="{{ request()->routeIs('settings.edit') ? 'active' : '' }}">Settings</a>
+            <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs(['profile.edit', 'settings.edit']) ? 'active' : '' }}">Profile</a>
 
             @auth
             <div class="nav-item dropdown">
@@ -498,7 +498,7 @@
         <a href="{{ route('leave.myRequests') }}" class="{{ request()->routeIs('leave.myRequests') ? 'active' : '' }}">Requests</a>
         <a href="{{ route('employee.calendar') }}" class="{{ request()->routeIs('employee.calendar') ? 'active' : '' }}">Calendar</a>
         <a href="{{ route('policies') }}" class="{{ request()->routeIs('policies') ? 'active' : '' }}">Policies</a>
-        <a href="{{ route('settings.edit') }}" class="{{ request()->routeIs('settings.edit') ? 'active' : '' }}">Settings</a>
+        <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs(['profile.edit', 'settings.edit']) ? 'active' : '' }}">Profile</a>
         <a href="{{ route('notifications.index') }}" class="{{ request()->routeIs('notifications.*') ? 'active' : '' }}">
             <span>Notifications</span>
             @if($notificationCount > 0)

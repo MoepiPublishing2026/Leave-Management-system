@@ -20,6 +20,7 @@ class AnalyticController extends Controller
     
 
         $leaveQuery = LeaveRequest::query()
+            ->byEmployeeApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn']);  // Exclude withdrawn
 
         if (ctype_digit((string) $staff)) {
@@ -57,8 +58,8 @@ class AnalyticController extends Controller
             ->count();
         $pendingRequests = max(0, $pendingTotal - $overduePending);
 
-        $activeEmployees = User::where('is_active', 1)->count();
-        $totalEmployees = User::count();
+        $activeEmployees = User::employees()->where('is_active', 1)->count();
+        $totalEmployees = User::employees()->count();
 
         $approvedCount = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['approved'])->count();
         $approvalRate = $totalLeaves > 0 ? round(($approvedCount / $totalLeaves) * 100, 1) : 0;
@@ -72,6 +73,7 @@ class AnalyticController extends Controller
         // Count distinct employees (not requests) per designation for this filter window
         $leavesByDesignation = (clone $leaveQuery)
             ->join('users', 'leave_requests.user_id', '=', 'users.id')
+            ->where('users.role', 'employee')
             ->select(DB::raw("COALESCE(users.designation, 'Unknown') as designation"), DB::raw('COUNT(DISTINCT leave_requests.user_id) as total'))
             ->groupBy('users.designation')
             ->get();
@@ -108,7 +110,8 @@ class AnalyticController extends Controller
         $nowYear = (int) Carbon::now()->year;
         $years = collect(range($nowYear - 1, $nowYear - 5));
 
-        $staffOptions = User::orderBy('first_name')
+        $staffOptions = User::employees()
+            ->orderBy('first_name')
             ->orderBy('last_name')
             ->get(['id', 'first_name', 'last_name', 'email']);
 

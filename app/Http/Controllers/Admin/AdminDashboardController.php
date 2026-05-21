@@ -16,7 +16,7 @@ class AdminDashboardController extends Controller
     {
         $monthFilter = $request->query('month', 'this_year');
 
-        $baseQuery = LeaveRequest::query()->whereRaw('LOWER(status) != ?', ['withdrawn']);
+        $baseQuery = LeaveRequest::query()->byEmployeeApplicants()->whereRaw('LOWER(status) != ?', ['withdrawn']);
         if ($monthFilter) {
             $now = Carbon::now();
             if (ctype_digit((string) $monthFilter)) {
@@ -70,11 +70,11 @@ class AdminDashboardController extends Controller
                 ->count('user_id');
         }
 
-        $activeEmployeesCount = User::where('is_active', 1)->count();
+        $activeEmployeesCount = User::employees()->where('is_active', 1)->count();
 
         // Monthly leave requests grouped by application month (created_at), not leave month.
         // This matches the employee dashboard behavior (apply in May for September counts in May).
-        $monthlyQuery = LeaveRequest::query()->whereRaw('LOWER(status) != ?', ['withdrawn']);
+        $monthlyQuery = LeaveRequest::query()->byEmployeeApplicants()->whereRaw('LOWER(status) != ?', ['withdrawn']);
         if ($monthFilter) {
             $now = Carbon::now();
             if (ctype_digit((string) $monthFilter)) {
@@ -136,6 +136,7 @@ class AdminDashboardController extends Controller
         ]);
 
         $departmentCountsRaw = (clone $baseQuery)->join('users', 'leave_requests.user_id', '=', 'users.id')
+            ->where('users.role', 'employee')
             ->select(DB::raw("COALESCE(users.department, 'Unknown') as department"), DB::raw('count(*) as total'))
             ->groupBy('department')
             ->pluck('total', 'department')
@@ -159,6 +160,7 @@ class AdminDashboardController extends Controller
         // Requests by designation (for dashboard chart)
         $designationCounts = (clone $baseQuery)
             ->join('users', 'leave_requests.user_id', '=', 'users.id')
+            ->where('users.role', 'employee')
             ->select(DB::raw("COALESCE(users.designation, 'Unknown') as designation"), DB::raw('COUNT(*) as total'))
             ->groupBy('designation')
             ->pluck('total', 'designation')

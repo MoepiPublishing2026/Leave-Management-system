@@ -30,7 +30,9 @@ class CalendarsController extends Controller
             }
         }
 
-        $leaves = LeaveRequest::with('user')
+        $leaves = LeaveRequest::query()
+            ->byEmployeeApplicants()
+            ->with('user')
             ->whereRaw('LOWER(status) = ?', ['approved'])
             ->where(function ($query) use ($startOfMonth, $endOfMonth) {
                 $query->whereBetween('start_date', [$startOfMonth, $endOfMonth])

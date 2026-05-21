@@ -263,24 +263,146 @@ public function leaveBalance(Request $request)
     $selectedType = $request->query('type');
     if (is_string($selectedType)) {
         $selectedType = trim($selectedType);
-    }
-
-    if (!empty($selectedType)) {
-        $matchedKey = null;
-        foreach (array_keys($leaveBalances) as $key) {
-            if (strtolower((string) $key) === strtolower((string) $selectedType)) {
-                $matchedKey = $key;
-                break;
+        if ($selectedType === '') {
+            $selectedType = null;
+        } else {
+            $matchedKey = null;
+            foreach (array_keys($leaveBalances) as $key) {
+                if (strtolower((string) $key) === strtolower((string) $selectedType)) {
+                    $matchedKey = $key;
+                    break;
+                }
             }
-        }
-
-        if ($matchedKey !== null) {
-            $leaveBalances = [$matchedKey => $leaveBalances[$matchedKey]];
             $selectedType = $matchedKey;
         }
     }
 
-    return view('leave.balance', compact('year', 'leaveBalances', 'leavesTakenRaw', 'selectedType'));
+    $approvedLeaves = $leavesTakenRaw;
+    if (!empty($selectedType)) {
+        $approvedLeaves = $approvedLeaves
+            ->filter(fn ($leave) => strtolower((string) $leave->leave_type) === strtolower((string) $selectedType))
+            ->values();
+    }
+
+    $pendingLeaves = LeaveRequest::where('user_id', $userId)
+        ->whereRaw('LOWER(status) = ?', ['pending'])
+        ->whereDate('end_date', '>=', $startOfYear->toDateString())
+        ->whereDate('start_date', '<=', $endOfYear->toDateString())
+        ->orderBy('start_date')
+        ->get();
+
+    foreach ($pendingLeaves as $leave) {
+        $start = Carbon::parse($leave->start_date);
+        $end = Carbon::parse($leave->end_date);
+        $daysCount = $this->countWorkingDaysInYear($start, $end, $publicHolidays, $year);
+        if (!empty($leave->is_half_day) && $daysCount > 0) {
+            $daysCount = 0.5;
+        }
+        $leave->days = $daysCount;
+    }
+
+    $requestCounts = [
+        'pending' => 0,
+        'approved' => 0,
+        'rejected' => 0,
+        'withdrawn' => 0,
+        'overdue' => 0,
+    ];
+
+    $yearRequests = LeaveRequest::where('user_id', $userId)
+        ->whereDate('end_date', '>=', $startOfYear->toDateString())
+        ->whereDate('start_date', '<=', $endOfYear->toDateString())
+        ->get();
+
+    foreach ($yearRequests as $req) {
+        if (!empty($selectedType) && strtolower((string) $req->leave_type) !== strtolower((string) $selectedType)) {
+            continue;
+        }
+
+        $statusKey = strtolower(trim((string) $req->status));
+        if ($statusKey === 'pending' && Carbon::parse($req->start_date)->lt(Carbon::today())) {
+            $requestCounts['overdue']++;
+        } elseif (array_key_exists($statusKey, $requestCounts)) {
+            $requestCounts[$statusKey]++;
+        }
+    }
+
+    $annualInfo = $leaveBalances[$annualKey] ?? ['default_days' => 0, 'taken_days' => 0, 'remaining_days' => 0];
+    $annualAllocated = (float) ($annualInfo['default_days'] ?? 0);
+    $annualTaken = (float) ($annualInfo['taken_days'] ?? 0);
+    $annualRemaining = (float) ($annualInfo['remaining_days'] ?? 0);
+    $annualUsagePercent = $annualAllocated > 0
+        ? min(100, round(($annualTaken / $annualAllocated) * 100))
+        : 0;
+
+    $notDisabledWhenAnnualExhausted = ['Annual', 'Annual Leave', 'Sick', 'Bereavement', 'Maternity'];
+
+    $pendingLeavesDisplay = $pendingLeaves;
+    if (!empty($selectedType)) {
+        $pendingLeavesDisplay = $pendingLeaves
+            ->filter(fn ($leave) => strtolower((string) $leave->leave_type) === strtolower((string) $selectedType))
+            ->values();
+    }
+
+    $pendingDaysTotal = (float) $pendingLeavesDisplay->sum('days');
+
+    $upcomingLeaves = $leavesTakenRaw
+        ->filter(fn ($leave) => Carbon::parse($leave->start_date)->gte(Carbon::today()));
+
+    if (!empty($selectedType)) {
+        $upcomingLeaves = $upcomingLeaves
+            ->filter(fn ($leave) => strtolower((string) $leave->leave_type) === strtolower((string) $selectedType));
+    }
+
+    $upcomingLeaves = $upcomingLeaves->sortBy('start_date')->take(5)->values();
+
+    $focusedBalance = null;
+    $isTypeDisabled = false;
+    $typeUsagePercent = 0;
+    $countsAgainstAnnual = false;
+
+    if (!empty($selectedType) && isset($leaveBalances[$selectedType])) {
+        $info = $leaveBalances[$selectedType];
+        $allocated = (float) ($info['default_days'] ?? 0);
+        $taken = (float) ($info['taken_days'] ?? 0);
+        $typeUsagePercent = $allocated > 0 ? min(100, (int) round(($taken / $allocated) * 100)) : 0;
+        $isTypeDisabled = $annualRemaining <= 0 && !in_array($selectedType, $notDisabledWhenAnnualExhausted, true);
+        $countsAgainstAnnual = strtolower((string) $selectedType) !== strtolower((string) $annualKey)
+            && strtolower((string) $selectedType) !== 'maternity';
+
+        $focusedBalance = array_merge($info, [
+            'type' => $selectedType,
+            'usage_percent' => $typeUsagePercent,
+        ]);
+    }
+
+    $leaveTypeOptions = [];
+    foreach ($leaveBalances as $type => $info) {
+        $leaveTypeOptions[] = [
+            'type' => $type,
+            'remaining' => (float) ($info['remaining_days'] ?? 0),
+            'disabled' => $annualRemaining <= 0 && !in_array($type, $notDisabledWhenAnnualExhausted, true),
+        ];
+    }
+
+    return view('leave.balance', compact(
+        'year',
+        'leaveBalances',
+        'leaveTypeOptions',
+        'approvedLeaves',
+        'selectedType',
+        'pendingLeavesDisplay',
+        'pendingDaysTotal',
+        'requestCounts',
+        'annualKey',
+        'annualRemaining',
+        'upcomingLeaves',
+        'focusedBalance',
+        'isTypeDisabled',
+        'typeUsagePercent',
+        'countsAgainstAnnual',
+        'notDisabledWhenAnnualExhausted'
+    ));
 }
 
 
@@ -580,51 +702,124 @@ public function applyForm()
 }
 
 
-public function myRequests()
+private function calculateWorkingDaysForLeave(LeaveRequest $leave): float
 {
-    $userId = Auth::id();
-
+    $startYear = (int) Carbon::parse($leave->start_date)->year;
+    $endYear = (int) Carbon::parse($leave->end_date)->year;
     $publicHolidays = [];
-    // Fetch all leaves of this user
-    $leaveRequests = LeaveRequest::where('user_id', $userId)
-        ->orderBy('start_date', 'desc')
-        ->get();
 
-    // Extract unique years from all leaves
-    $years = $leaveRequests->flatMap(function ($leave) {
-        return [Carbon::parse($leave->start_date)->year, Carbon::parse($leave->end_date)->year];
-    })->unique()->values()->all();
-
-    // Get all public holidays for years implicated
-    foreach ($years as $year) {
+    for ($year = $startYear; $year <= $endYear; $year++) {
         $holidays = Yasumi::create('SouthAfrica', $year);
         foreach ($holidays as $holiday) {
             $publicHolidays[] = $holiday->format('Y-m-d');
         }
     }
 
-    // Calculate working days excluding weekend and public holidays per leave
-    $leaveRequests->transform(function($leave) use ($publicHolidays) {
-        $start = Carbon::parse($leave->start_date);
-        $end = Carbon::parse($leave->end_date);
-        $current = $start->copy();
-        $daysCount = 0;
-        while ($current->lte($end)) {
-            if (!$current->isWeekend() && !in_array($current->toDateString(), $publicHolidays)) {
-                $daysCount++;
+    $start = Carbon::parse($leave->start_date);
+    $end = Carbon::parse($leave->end_date);
+    $current = $start->copy();
+    $daysCount = 0;
+
+    while ($current->lte($end)) {
+        if (!$current->isWeekend() && !in_array($current->toDateString(), $publicHolidays, true)) {
+            $daysCount++;
+        }
+        $current->addDay();
+    }
+
+    if (!empty($leave->is_half_day) && $daysCount > 0) {
+        return 0.5;
+    }
+
+    return (float) $daysCount;
+}
+
+public function myRequests(Request $request)
+{
+    $userId = Auth::id();
+    $status = strtolower((string) $request->query('status', 'all'));
+    $search = trim((string) $request->query('search', ''));
+    $searchKey = strtolower($search);
+
+    $query = LeaveRequest::query()
+        ->with(['overdueEscalatedBy', 'handledBy'])
+        ->where('user_id', $userId)
+        ->orderByDesc('created_at');
+
+    if ($status === 'overdue') {
+        $query->whereRaw('LOWER(status) = ?', ['pending'])
+            ->whereDate('start_date', '<', Carbon::today());
+    } elseif ($status === 'pending') {
+        $query->whereRaw('LOWER(status) = ?', ['pending'])
+            ->whereDate('start_date', '>=', Carbon::today());
+    } elseif ($status !== 'all') {
+        $query->whereRaw('LOWER(status) = ?', [$status]);
+    }
+
+    $effectiveSearch = $search;
+    if ($status === 'all' && $searchKey === 'overdue') {
+        $query->whereRaw('LOWER(status) = ?', ['pending'])
+            ->whereDate('start_date', '<', Carbon::today());
+        $effectiveSearch = '';
+    } elseif ($status === 'all' && $searchKey === 'pending') {
+        $query->whereRaw('LOWER(status) = ?', ['pending'])
+            ->whereDate('start_date', '>=', Carbon::today());
+        $effectiveSearch = '';
+    }
+
+    if ($effectiveSearch !== '') {
+        $query->where(function ($q) use ($effectiveSearch) {
+            $q->where('leave_type', 'like', '%' . $effectiveSearch . '%')
+                ->orWhereRaw('LOWER(status) like ?', ['%' . strtolower($effectiveSearch) . '%'])
+                ->orWhere('start_date', 'like', '%' . $effectiveSearch . '%')
+                ->orWhere('end_date', 'like', '%' . $effectiveSearch . '%')
+                ->orWhere('important_comment', 'like', '%' . $effectiveSearch . '%');
+
+            if (ctype_digit($effectiveSearch)) {
+                $q->orWhere('id', (int) $effectiveSearch);
             }
-            $current->addDay();
-        }
-        if (!empty($leave->is_half_day) && $daysCount > 0) {
-            $daysCount = 0.5;
-        }
-        $leave->days = $daysCount;
+        });
+    }
+
+    $leaveRequests = $query->paginate(10)->withQueryString();
+
+    $leaveRequests->getCollection()->transform(function (LeaveRequest $leave) {
+        $leave->days = $this->calculateWorkingDaysForLeave($leave);
+
         return $leave;
     });
 
-    return view('leave.my_requests', compact('leaveRequests'));
+    return view('leave.my_requests', compact('leaveRequests', 'status', 'search'));
 }
 
+
+public function destroy($id)
+{
+    $leaveRequest = LeaveRequest::where('id', $id)
+        ->where('user_id', Auth::id())
+        ->firstOrFail();
+
+    $status = strtolower(trim((string) $leaveRequest->status));
+    if (!in_array($status, ['pending', 'withdrawn'], true)) {
+        return redirect()
+            ->route('leave.myRequests')
+            ->with('error', 'Only pending or withdrawn requests can be deleted.');
+    }
+
+    try {
+        app(\App\Services\UserDeletionService::class)->deleteLeaveRequestRecord($leaveRequest);
+
+        return redirect()
+            ->route('leave.myRequests')
+            ->with('success', 'Leave request deleted permanently.');
+    } catch (\Throwable $e) {
+        report($e);
+
+        return redirect()
+            ->route('leave.myRequests')
+            ->with('error', 'Unable to delete this leave request. Please try again.');
+    }
+}
 
 public function withdraw($id)
 {
@@ -651,23 +846,7 @@ public function withdraw($id)
 
 public function statusLeaves($status)
 {
-    $userId = auth()->id();
-    $statusKey = strtolower(trim((string) $status));
-    $query = LeaveRequest::where('user_id', $userId);
-
-    if ($statusKey === 'overdue') {
-        $query->whereRaw('LOWER(status) = ?', ['pending'])
-            ->whereDate('start_date', '<', Carbon::today());
-    } elseif ($statusKey === 'pending') {
-        $query->whereRaw('LOWER(status) = ?', ['pending'])
-            ->whereDate('start_date', '>=', Carbon::today());
-    } else {
-        $query->whereRaw('LOWER(status) = ?', [$statusKey]);
-    }
-
-    $leaves = $query->get();
-
-    return view('leave.leaves_by_status', compact('leaves', 'status'));
+    return redirect()->route('leave.myRequests', ['status' => strtolower(trim((string) $status))]);
 }
 public function leavesByDate($date)
 {

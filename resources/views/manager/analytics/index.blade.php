@@ -284,7 +284,7 @@
                 @endforeach
             </select>
             <select name="staff" onchange="document.getElementById('monthFilterForm').submit()">
-                <option value="all" {{ (string) ($staff ?? 'all') === 'all' ? 'selected' : '' }}>All Staff</option>
+                <option value="all" {{ (string) ($staff ?? 'all') === 'all' ? 'selected' : '' }}>All Employees</option>
                 @foreach(($staffOptions ?? []) as $u)
                     <option value="{{ $u->id }}" {{ (string) ($staff ?? 'all') === (string) $u->id ? 'selected' : '' }}>
                         {{ trim(($u->first_name ?? '') . ' ' . ($u->last_name ?? '')) ?: ('User #' . $u->id) }}
@@ -332,15 +332,15 @@
             </div>
         </div>
 
-        <!-- Approval Rate -->
+        <!-- Approved -->
         <div class="metrics-col">
             <div class="card">
                 <div class="card-header">
-                    <h5>Approval Rate</h5>
+                    <h5>Approved</h5>
                     <div class="card-icon bg-pink-100 text-pink-600"><i class="fas fa-chart-line"></i></div>
                 </div>
                 <h3>{{ $approvedCount }}</h3>
-                <small class="text-primary">{{ $approvalRate }}% approved</small>
+                <small class="text-primary">{{ $approvalRate }}% approval rate</small>
             </div>
         </div>
     </div>

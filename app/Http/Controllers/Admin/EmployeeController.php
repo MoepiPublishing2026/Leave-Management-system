@@ -10,11 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use App\Models\LeaveRequest;
-use Illuminate\Support\Facades\Log; 
-use App\Models\LeaveRequestConversation;
-use App\Models\LeaveRequestMessage;
+use Illuminate\Support\Facades\Log;
+use App\Services\UserDeletionService;
 
 class EmployeeController extends Controller
 {
@@ -87,49 +84,9 @@ class EmployeeController extends Controller
 
         DB::beginTransaction();
         try {
-            // Null out foreign-key references where user acted as handler/escalator
-            if (Schema::hasColumn('leave_requests', 'handled_by')) {
-                LeaveRequest::where('handled_by', $employee->id)->update(['handled_by' => null]);
-            }
-            if (Schema::hasColumn('leave_requests', 'overdue_escalated_by')) {
-                LeaveRequest::where('overdue_escalated_by', $employee->id)->update(['overdue_escalated_by' => null]);
-            }
-
-            // Remove conversations/messages where this user participated as manager/admin/sender
-            if (Schema::hasTable('leave_request_conversations')) {
-                $conversationQuery = LeaveRequestConversation::query();
-                if (Schema::hasColumn('leave_request_conversations', 'manager_id')) {
-                    $conversationQuery->orWhere('manager_id', $employee->id);
-                }
-                if (Schema::hasColumn('leave_request_conversations', 'admin_id')) {
-                    $conversationQuery->orWhere('admin_id', $employee->id);
-                }
-                $conversationIdsForUserRole = $conversationQuery->pluck('id')->all();
-                if (!empty($conversationIdsForUserRole)) {
-                    LeaveRequestMessage::whereIn('conversation_id', $conversationIdsForUserRole)->delete();
-                    LeaveRequestConversation::whereIn('id', $conversationIdsForUserRole)->delete();
-                }
-            }
-
-            $leaveIds = LeaveRequest::where('user_id', $employee->id)->pluck('id')->all();
-            if (!empty($leaveIds)) {
-                $conversationIds = LeaveRequestConversation::whereIn('leave_request_id', $leaveIds)->pluck('id')->all();
-                if (!empty($conversationIds)) {
-                    LeaveRequestMessage::whereIn('conversation_id', $conversationIds)->delete();
-                    LeaveRequestConversation::whereIn('id', $conversationIds)->delete();
-                }
-                LeaveRequest::whereIn('id', $leaveIds)->delete();
-            }
-
-            // Remove notifications linked to this user (if table exists)
-            if (\Illuminate\Support\Facades\Schema::hasTable('notifications')) {
-                DB::table('notifications')
-                    ->where('notifiable_type', User::class)
-                    ->where('notifiable_id', $employee->id)
-                    ->delete();
-            }
-
-            $employee->delete();
+            $deletion = app(UserDeletionService::class);
+            $deletion->deleteUser($employee);
+            $deletion->purgeOrphanedLeaveRequests();
             DB::commit();
 
             return redirect()->route('admin.employees.index')->with('success', 'Employee deleted successfully.');

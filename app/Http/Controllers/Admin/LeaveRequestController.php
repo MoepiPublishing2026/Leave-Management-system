@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
+use App\Services\UserDeletionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -16,7 +17,9 @@ class LeaveRequestController extends Controller
         $searchKey = strtolower($search);
         $monthFilter = $request->query('month');
 
-        $query = LeaveRequest::with(['user', 'overdueEscalatedBy', 'handledBy'])
+        $query = LeaveRequest::query()
+            ->byEmployeeApplicants()
+            ->with(['user', 'overdueEscalatedBy', 'handledBy'])
             ->orderByDesc('created_at');
 
         if (is_string($monthFilter) && $monthFilter !== '') {
@@ -86,4 +89,25 @@ class LeaveRequestController extends Controller
         return view('admin.requests.index', compact('requests', 'status', 'search', 'monthFilter'));
     }
 
+    public function destroy(LeaveRequest $leaveRequest)
+    {
+        if (strtolower((string) (auth()->user()->role ?? '')) !== 'admin') {
+            abort(403);
+        }
+
+        try {
+            $requestId = $leaveRequest->id;
+            app(UserDeletionService::class)->deleteLeaveRequestRecord($leaveRequest);
+
+            return redirect()
+                ->back()
+                ->with('success', 'Leave request #' . $requestId . ' deleted permanently.');
+        } catch (\Throwable $e) {
+            report($e);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Unable to delete this leave request. Please try again.');
+        }
+    }
 }

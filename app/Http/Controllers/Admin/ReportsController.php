@@ -19,6 +19,7 @@ class ReportsController extends Controller
         $years = range((int) Carbon::now()->year, (int) Carbon::now()->year - 5);
 
         $leaveQuery = LeaveRequest::query()
+            ->byEmployeeApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn']);
         if ($startDate && $endDate) {
             $leaveQuery->whereDate('created_at', '>=', $startDate)
@@ -125,6 +126,7 @@ class ReportsController extends Controller
         $monthFilter = $request->query('month', 'this_year');
 
         $query = LeaveRequest::query()
+            ->byEmployeeApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn']);
 
         if ($startDate && $endDate) {
@@ -200,6 +202,7 @@ class ReportsController extends Controller
         $monthFilter = $request->query('month', 'this_year');
 
         $query = LeaveRequest::query()
+            ->byEmployeeApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn'])
             ->with('user')
             ->orderByDesc('created_at');

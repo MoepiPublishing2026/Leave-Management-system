@@ -214,7 +214,7 @@ class AuthController extends Controller
     public function edit()
     {
         $user = auth()->user();
-        return view('settings.edit', compact('user'));
+        return view('profile.edit', compact('user'));
     }
 
     // Update profile and password
@@ -250,7 +250,7 @@ class AuthController extends Controller
 
     $user->save();
 
-    return redirect()->route('settings.edit')->with('success', 'Profile updated successfully.');
+    return redirect()->route('profile.edit')->with('success', 'Profile updated successfully.');
 }
 
 public function profilePicture(User $user)

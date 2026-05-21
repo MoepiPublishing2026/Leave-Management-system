@@ -38,6 +38,15 @@ class LeaveRequest extends Model
         return $this->belongsTo(User::class, 'handled_by');
     }
 
+    /** Leave requests submitted by employees only (managers/admins do not apply). */
+    public function scopeByEmployeeApplicants($query)
+    {
+        return $query->whereIn(
+            'user_id',
+            User::query()->employees()->select('id')
+        );
+    }
+
     public function isOverdue(): bool
     {
         $status = strtolower(trim((string) ($this->status ?? '')));

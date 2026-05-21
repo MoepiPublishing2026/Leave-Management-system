@@ -44,6 +44,9 @@
     .pagination { margin-bottom: 0; }
     .pagination .page-link { padding: 6px 10px; font-weight: 700; font-size: 0.9rem; }
     .request-details-popup { border: 2px solid #138056ff !important; border-radius: 16px !important; }
+    .btn-delete { padding: 6px 14px; font-weight: 800; font-size: 0.85rem; border: none; border-radius: 8px; cursor: pointer; background: #7f1d1d; color: #fff; margin-top: 8px; }
+    .btn-delete:hover { background: #991b1b; }
+    .actions-stack { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 </style>
 
 <div class="admin-container">
@@ -146,8 +149,13 @@
                         <span class="badge badge-{{ $rowStatus === 'withdrawn' ? 'withdrawn' : $rowStatus }}">{{ ucfirst($rowStatus) }}</span>
                     @endif
                 </td>
-                <td>
+                <td class="actions-stack" onclick="event.stopPropagation();">
                     <a href="{{ route('messages.leave', $req) }}" style="font-weight:800; color:#0a1347; text-decoration:underline;">Messages</a>
+                    <form class="delete-request-form" method="POST" action="{{ route('admin.requests.destroy', $req) }}" style="margin:0;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button" class="btn-delete delete-request-btn" data-request-id="{{ $req->id }}">Delete</button>
+                    </form>
                 </td>
             </tr>
         @empty
@@ -243,6 +251,27 @@ function openDetails(details) {
         confirmButtonText: 'Close'
     });
 }
+
+document.querySelectorAll('.delete-request-btn').forEach((btn) => {
+    btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const form = btn.closest('form');
+        if (!form) return;
+        const requestId = btn.getAttribute('data-request-id') || '';
+        Swal.fire({
+            title: 'Delete leave request?',
+            html: `Request <strong>#${escapeHtml(requestId)}</strong> will be permanently removed, including messages and attachments.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#7f1d1d',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, delete it',
+        }).then((result) => {
+            if (result.isConfirmed) form.submit();
+        });
+    });
+});
 
 document.addEventListener('click', (e) => {
     const interactive = e.target.closest('a,button,form,input,textarea,select,label');

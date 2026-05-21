@@ -31,7 +31,7 @@ class DashboardsController extends Controller
     {
         $monthFilter = $request->query('month', 'this_year');
 
-        $baseQuery = LeaveRequest::query()->whereRaw('LOWER(status) != ?', ['withdrawn']);
+        $baseQuery = LeaveRequest::query()->byEmployeeApplicants()->whereRaw('LOWER(status) != ?', ['withdrawn']);
         if ($monthFilter) {
             $now = Carbon::now();
             if (ctype_digit((string) $monthFilter)) {
@@ -80,7 +80,7 @@ class DashboardsController extends Controller
 
         // Monthly leave requests grouped by application month (created_at), not leave month.
         // This matches the employee dashboard behavior (apply in May for September counts in May).
-        $monthlyQuery = LeaveRequest::query()->whereRaw('LOWER(status) != ?', ['withdrawn']);
+        $monthlyQuery = LeaveRequest::query()->byEmployeeApplicants()->whereRaw('LOWER(status) != ?', ['withdrawn']);
         if ($monthFilter) {
             $now = Carbon::now();
             if (ctype_digit((string) $monthFilter)) {
@@ -128,6 +128,7 @@ class DashboardsController extends Controller
 
         $departmentCountsRaw = (clone $baseQuery)
             ->join('users', 'leave_requests.user_id', '=', 'users.id')
+            ->where('users.role', 'employee')
             ->select(DB::raw("COALESCE(users.department, 'Unknown') as department"), DB::raw('count(leave_requests.id) as total'))
             ->groupBy('department')
             ->pluck('total', 'department');
@@ -150,6 +151,7 @@ class DashboardsController extends Controller
         // Requests by designation (for dashboard chart)
         $designationCounts = (clone $baseQuery)
             ->join('users', 'leave_requests.user_id', '=', 'users.id')
+            ->where('users.role', 'employee')
             ->select(DB::raw("COALESCE(users.designation, 'Unknown') as designation"), DB::raw('COUNT(leave_requests.id) as total'))
             ->groupBy('designation')
             ->pluck('total', 'designation')

@@ -24,4 +24,10 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    /** Users who can submit leave requests. */
+    public function scopeEmployees($query)
+    {
+        return $query->where('role', 'employee');
+    }
 }

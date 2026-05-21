@@ -97,10 +97,15 @@ Route::post('/apply-for-leave', [LeaveController::class, 'submit'])
 
 Route::get('/leave/my-requests', [LeaveController::class, 'myRequests'])->name('leave.myRequests');
 Route::patch('/leave/withdraw/{id}', [LeaveController::class, 'withdraw'])->name('leave.withdraw');
+Route::delete('/leave/requests/{id}', [LeaveController::class, 'destroy'])->name('leave.destroy')->middleware('auth');
 Route::get('/leave/balance', [LeaveController::class, 'leaveBalance'])->name('leave.balance')->middleware('auth');
 
-Route::get('/settings', [AuthController::class, 'edit'])->name('settings.edit')->middleware('auth');
-Route::post('/settings', [AuthController::class, 'update'])->name('settings.update')->middleware('auth');
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [AuthController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile', [AuthController::class, 'update'])->name('profile.update');
+    Route::get('/settings', fn () => redirect()->route('profile.edit'))->name('settings.edit');
+    Route::post('/settings', [AuthController::class, 'update'])->name('settings.update');
+});
 
 Route::get('/leave/status/{status}', [LeaveController::class, 'statusLeaves'])->name('leave.status');
 
@@ -113,6 +118,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
    Route::get('/reports/export-pdf', [ReportsController::class, 'exportPdf'])->name('reports.export_pdf');
 
     Route::get('/requests', [LeaveRequestController::class, 'index'])->name('requests');
+    Route::delete('/requests/{leaveRequest}', [LeaveRequestController::class, 'destroy'])->name('requests.destroy');
    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
    Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
     Route::get('/settings', [\App\Http\Controllers\Admin\LeaveSettingsController::class, 'index'])->name('settings');
@@ -149,6 +155,7 @@ Route::get('requests', [RequestsController::class, 'index'])->name('requests.ind
     Route::patch('requests/{id}/reject', [RequestsController::class, 'reject'])->name('requests.reject');
     Route::post('requests/{id}/escalate', [RequestsController::class, 'escalate'])->name('requests.escalate');
     Route::get('requests/{id}/show-reason', [RequestsController::class, 'showRejectionReason'])->name('requests.show_reason');
+    Route::delete('requests/{leaveRequest}', [RequestsController::class, 'destroy'])->name('requests.destroy');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports');
     Route::get('/reports/export-csv', [ReportController::class, 'exportCsv'])->name('reports.export_csv');
