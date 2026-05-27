@@ -12,8 +12,8 @@
         .meta { margin-top: 6px; color: #64748b; font-size: 11px; }
         .cards { margin: 14px 0 12px; width: 100%; border-collapse: collapse; }
         .cards td { padding: 8px 10px; border: 1px solid #e2e8f0; }
-        .k { color: #64748b; font-size: 11px; }
-        .v { font-weight: 700; font-size: 16px; }
+        .k { color: #64748b; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }
+        .v { font-weight: 800; font-size: 18px; line-height: 1.05; color: #111827; }
         table.data { width: 100%; border-collapse: collapse; }
         table.data th { background: #f1f5f9; text-align: left; padding: 8px; border: 1px solid #e2e8f0; }
         table.data td { padding: 7px 8px; border: 1px solid #e2e8f0; vertical-align: top; }
@@ -24,7 +24,7 @@
     <div class="header">
         <p class="title">{{ $title ?? 'Leave Requests Report' }}</p>
         <p class="subtitle">{{ $subtitle ?? '' }}</p>
-        <p class="meta">Generated: {{ optional($generatedAt)->format('Y-m-d H:i') }}</p>
+        <p class="meta">Generated: {{ optional($generatedAt)->timezone(config('app.timezone'))->format('Y-m-d H:i') }}</p>
     </div>
 
     <table class="cards">
@@ -57,8 +57,8 @@
                 <td>{{ $leave->start_date }}</td>
                 <td>{{ $leave->end_date }}</td>
                 <td>{{ !empty($leave->is_half_day) ? 'Half day' : ($leave->days ?? '') }}</td>
-                <td>{{ $leave->status }}</td>
-                <td class="muted">{{ $leave->created_at }}</td>
+                <td>{{ \Illuminate\Support\Str::ucfirst(strtolower(trim((string) $leave->status))) }}</td>
+                <td class="muted">{{ optional($leave->created_at)->timezone(config('app.timezone'))->format('Y-m-d H:i') }}</td>
             </tr>
         @empty
             <tr><td colspan="7" class="muted">No records for this filter.</td></tr>

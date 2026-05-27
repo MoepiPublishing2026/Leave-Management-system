@@ -68,7 +68,7 @@ class EmployeeController extends Controller
 
             // Pass the message into withErrors so you can see it in the view
             return redirect()->back()
-                ->withErrors(['error' => 'An error occurred while creating the employee: ' ])
+                ->withErrors(['error' => 'An error occurred while creating the employee. Please try again.'])
                 ->withInput();
         }
 

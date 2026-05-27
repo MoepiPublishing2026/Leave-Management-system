@@ -1,70 +1,54 @@
-<?php
-
-namespace App\Http\Controllers\Manager;
-
-use App\Http\Controllers\Controller;
-use App\Models\LeaveRequest;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Yasumi\Yasumi;
-
-class CalendarsController extends Controller
-{
-    public function index(Request $request)
-    {
-        $month = (int) $request->query('month', Carbon::now()->month);
-        $year = (int) $request->query('year', Carbon::now()->year);
-
-        $firstDay = Carbon::create($year, $month, 1);
-        $startDay = $firstDay->dayOfWeek; // 0=Sun, 6=Sat
-        $daysInMonth = $firstDay->daysInMonth;
-        $startOfMonth = $firstDay->copy()->startOfMonth();
-        $endOfMonth = $firstDay->copy()->endOfMonth();
-
-        // Generate SA public holidays for all years spanned by month view
-        $publicHolidays = [];
-        for ($y = $startOfMonth->year; $y <= $endOfMonth->year; $y++) {
-            $holidays = Yasumi::create('SouthAfrica', $y);
-            foreach ($holidays as $holiday) {
-                $publicHolidays[] = $holiday->format('Y-m-d');
-            }
-        }
-
-        $leaves = LeaveRequest::query()
-            ->byEmployeeApplicants()
-            ->with('user')
-            ->whereRaw('LOWER(status) = ?', ['approved'])
-            ->where(function ($query) use ($startOfMonth, $endOfMonth) {
-                $query->whereBetween('start_date', [$startOfMonth, $endOfMonth])
-                    ->orWhereBetween('end_date', [$startOfMonth, $endOfMonth])
-                    ->orWhere(function ($sub) use ($startOfMonth, $endOfMonth) {
-                        $sub->where('start_date', '<=', $startOfMonth)
-                            ->where('end_date', '>=', $endOfMonth);
-                    });
-            })
-            ->orderBy('start_date')
-            ->get();
-
-        $events = [];
-
-        foreach ($leaves as $leave) {
-            $period = Carbon::parse($leave->start_date)->daysUntil(Carbon::parse($leave->end_date)->addDay());
-            foreach ($period as $day) {
-                // Exclude weekends and public holidays
-                if (
-                    $day->between($startOfMonth, $endOfMonth) &&
-                    !$day->isWeekend() &&
-                    !in_array($day->toDateString(), $publicHolidays)
-                ) {
-                    $dateKey = $day->format('Y-m-d');
-                    $events[$dateKey][] = [
-                        'user' => $leave->user ? ($leave->user->first_name . ' ' . $leave->user->last_name) : 'Unknown',
-                        'type' => ucfirst($leave->leave_type),
-                    ];
-                }
-            }
-        }
-
-        return view('manager.calendar.index', compact('month', 'year', 'startDay', 'daysInMonth', 'events', 'publicHolidays'));
-    }
-}
+<?php
+
+namespace App\Http\Controllers\Manager;
+
+use App\Http\Controllers\Controller;
+use App\Models\LeaveRequest;
+use App\Services\CalendarService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+
+class CalendarsController extends Controller
+{
+    public function index(Request $request)
+    {
+        $context = CalendarService::monthContext(
+            (int) $request->query('month', Carbon::now()->month),
+            (int) $request->query('year', Carbon::now()->year)
+        );
+
+        $leaves = LeaveRequest::query()
+            ->byEmployeeApplicants()
+            ->with('user')
+            ->whereRaw('LOWER(status) = ?', ['approved'])
+            ->where(function ($query) use ($context) {
+                $query->whereBetween('start_date', [$context['startOfMonth'], $context['endOfMonth']])
+                    ->orWhereBetween('end_date', [$context['startOfMonth'], $context['endOfMonth']])
+                    ->orWhere(function ($sub) use ($context) {
+                        $sub->where('start_date', '<=', $context['startOfMonth'])
+                            ->where('end_date', '>=', $context['endOfMonth']);
+                    });
+            })
+            ->orderBy('start_date')
+            ->get();
+
+        $events = CalendarService::buildEvents(
+            $leaves,
+            $context['startOfMonth'],
+            $context['endOfMonth'],
+            $context['publicHolidays'],
+            true
+        );
+
+        $summary = CalendarService::monthSummary($events);
+
+        return view('manager.calendar.index', array_merge($context, [
+            'events' => $events,
+            'summary' => $summary,
+            'calendarTitle' => 'Team Leave Calendar',
+            'calendarRoute' => 'manager.calendar',
+            'showUserInModal' => true,
+            'interactive' => true,
+        ]));
+    }
+}

@@ -23,7 +23,7 @@
             position: fixed;
             top: 0; left: 0; right: 0;
             height: 90px;
-            background-color: white;
+            background-color: #ffffff !important;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -60,6 +60,7 @@
             text-decoration: none;
             padding: 10px 15px;
             border-radius: 8px;
+            background-color: transparent;
             transition: background-color 0.3s ease, color 0.3s ease;
             display: flex;
             align-items: center;
@@ -233,6 +234,8 @@
             max-width: 1500px;
             margin-left: auto;
             margin-right: auto;
+            background-color: #ffffff;
+            min-height: calc(100vh - 90px);
         }
 
         @media (max-width: 992px) {

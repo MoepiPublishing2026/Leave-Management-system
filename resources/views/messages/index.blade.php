@@ -189,6 +189,10 @@
         font-size: 14px;
         outline: none;
     }
+    .compose-form textarea:focus {
+        border-color: #138056ff;
+        box-shadow: 0 0 0 3px rgba(19, 128, 86, 0.12);
+    }
     .compose-form button {
         padding: 10px 18px;
         border-radius: 12px;
@@ -197,6 +201,15 @@
         background: #138056ff;
         color: white;
         cursor: pointer;
+    }
+    .compose-form button:hover {
+        background: #0f6b47;
+    }
+    .compose-error {
+        margin-top: 8px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #b91c1c;
     }
     .empty {
         padding: 40px 18px;
@@ -332,9 +345,12 @@
             <div class="messages-compose">
                 <form class="compose-form" method="POST" action="{{ route('messages.send', ['conversation' => $activeConversation->id]) }}">
                     @csrf
-                    <textarea name="body" required placeholder="Type a message..."></textarea>
+                    <textarea name="body" required placeholder="Type a message...">{{ old('body') }}</textarea>
                     <button type="submit">Send</button>
                 </form>
+                @error('body')
+                    <div class="compose-error">{{ $message }}</div>
+                @enderror
             </div>
         @endif
     </div>

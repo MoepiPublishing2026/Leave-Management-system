@@ -65,7 +65,8 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    // South Africa does not use daylight saving time; keep timestamps consistent.
+    'timezone' => env('APP_TIMEZONE', 'Africa/Johannesburg'),
 
     /*
     |--------------------------------------------------------------------------

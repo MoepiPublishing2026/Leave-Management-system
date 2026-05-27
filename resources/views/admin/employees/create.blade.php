@@ -7,15 +7,17 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
-    body {
+    .employee-create-page {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: white;
-        padding: 40px 20px;
+        /* Align heading/start with dashboard pages (no centered narrow column) */
+        max-width: none;
         margin: 0;
+        padding: 0 0 32px;
+        color: #1e293b;
     }
     .signup-container {
-        max-width: 800px;
-        margin: 5px auto 0;
+        max-width: 980px;
+        margin: 0 auto;
         background-color: #ffffff;
         border-radius: 15px;
         padding: 35px 30px;
@@ -47,12 +49,19 @@
         width: 100%;
         margin-top: 7px;
         padding: 13px 17px;
-        font-size: 18px;
+        font-size: 16px;
         border-radius: 8px;
         border: 1px solid #9ef755ff;
-        color: #787c8d;
+        color: #0f172a;
+        background: #ffffff;
         box-sizing: border-box;
         transition: border-color 0.3s ease;
+    }
+    input:focus,
+    select:focus {
+        outline: none;
+        border-color: #138056;
+        box-shadow: 0 0 0 3px rgba(19, 128, 86, 0.12);
     }
     /* Match auth/login password toggle (eye icons + placement) */
     .input-wrapper {
@@ -156,8 +165,11 @@
     }
 </style>
 
-<div class="signup-container">
-    <h2>Add Employee</h2>
+<div class="employee-create-page">
+    <h1 style="font-weight:700; font-size:40px; color:#2c3e50; margin:0 0 8px; padding-left:15px; border-left:6px solid #138056; letter-spacing:0.04em;">Add Employee</h1>
+    <p style="margin:0 0 18px; color:#64748b; font-size:0.92rem;">Create a new user account and send their login details by email.</p>
+
+    <div class="signup-container">
     <form method="POST" action="{{ route('admin.employees.store') }}">
         @csrf
 
@@ -246,6 +258,7 @@
 
     <div class="branding">
         &copy; {{ date('Y') }} Moepi Publishing. All rights reserved.
+    </div>
     </div>
 </div>
 

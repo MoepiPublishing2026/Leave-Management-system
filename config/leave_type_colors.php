@@ -23,6 +23,8 @@ return [
         'unpaid' => '#F08080',        // light coral
         'compassionate' => '#22c55e', // green
         'study' => '#14b8a6',         // teal
+        'family responsibility' => '#0ea5e9', // sky
+        'family' => '#0ea5e9',
         'urgent' => '#ec4899',        // pink
     ],
 

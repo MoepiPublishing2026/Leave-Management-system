@@ -95,8 +95,8 @@ Route::get('/apply', [LeaveController::class, 'applyForm'])
 Route::post('/apply-for-leave', [LeaveController::class, 'submit'])
     ->middleware('auth')->name('leave.submit');
 
-Route::get('/leave/my-requests', [LeaveController::class, 'myRequests'])->name('leave.myRequests');
-Route::patch('/leave/withdraw/{id}', [LeaveController::class, 'withdraw'])->name('leave.withdraw');
+Route::get('/leave/my-requests', [LeaveController::class, 'myRequests'])->middleware('auth')->name('leave.myRequests');
+Route::patch('/leave/withdraw/{id}', [LeaveController::class, 'withdraw'])->middleware('auth')->name('leave.withdraw');
 Route::delete('/leave/requests/{id}', [LeaveController::class, 'destroy'])->name('leave.destroy')->middleware('auth');
 Route::get('/leave/balance', [LeaveController::class, 'leaveBalance'])->name('leave.balance')->middleware('auth');
 
@@ -107,7 +107,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings', [AuthController::class, 'update'])->name('settings.update');
 });
 
-Route::get('/leave/status/{status}', [LeaveController::class, 'statusLeaves'])->name('leave.status');
+Route::get('/leave/status/{status}', [LeaveController::class, 'statusLeaves'])->middleware('auth')->name('leave.status');
 
 Route::get('/reports/export', [ReportsController::class, 'exportCsv'])->name('admin.reports.export_csv');
 
@@ -129,9 +129,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::delete('employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
    
      Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
-     
-   
-    Route::get('calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
 
  // route in web.php
 
@@ -165,14 +162,7 @@ Route::get('requests', [RequestsController::class, 'index'])->name('requests.ind
     Route::get('/request', function () {
         return redirect()->route('manager.requests.index', ['status' => 'all']);
     })->name('request');
-  
-
-    Route::get('calendar/events', [CalendarsController::class, 'events'])->name('calendar.events');
-
-    
 });
-
-
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/messages', [MessagesController::class, 'index'])->name('messages.index');

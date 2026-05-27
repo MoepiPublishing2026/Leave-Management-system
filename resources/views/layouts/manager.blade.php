@@ -22,7 +22,7 @@
             position: fixed;
             top: 0; left: 0; right: 0;
             height: 90px;
-            background-color: #fff;
+            background-color: #ffffff !important;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -65,6 +65,7 @@
             text-decoration: none;
             padding: 10px 15px;
             border-radius: 8px;
+            background-color: transparent;
             transition: background-color 0.3s ease, color 0.3s ease;
             font-size: 15px;
             display: flex;
@@ -92,6 +93,7 @@
             text-decoration: none;
             padding: 10px 15px;
             border-radius: 8px;
+            background-color: transparent;
             transition: background-color 0.3s ease, color 0.3s ease;
             font-size: 15px;
             display: flex;
@@ -204,6 +206,7 @@
             text-align: center;
             padding: 12px;
             border-bottom: 1px solid #eee;
+            background: #ffffff;
         }
         .dropdown-menu.notifications-dropdown .dropdown-item {
             white-space: normal;
@@ -269,12 +272,13 @@
 
         /* Main Content */
         main {
-            margin-top: 100px;
+            margin-top: 90px;
             padding: 40px;
             max-width: 1800px;
             margin-left: auto;
             margin-right: auto;
-            min-height: calc(100vh - 100px);
+            min-height: calc(100vh - 90px);
+            background-color: #ffffff;
         }
 
         @media (max-width: 992px) {
@@ -300,7 +304,7 @@
             .mobile-menu-btn { margin-right: auto; }
             main {
                 padding: 18px;
-                margin-top: 100px;
+                margin-top: 90px;
             }
             .dropdown-menu.notifications-dropdown {
                 min-width: min(92vw, 440px);
@@ -374,9 +378,9 @@
     <nav class="navbar" role="navigation" aria-label="Main Navigation">
         <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
 
-        <div class="navbar-logo" onclick="window.location.href='{{ url('/') }}'">
+        <a class="navbar-logo" href="{{ route('manager.dashboard') }}" aria-label="Go to dashboard">
             <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
-        </div>
+        </a>
 
         @php
             $unreadMessageCount = 0;
@@ -476,7 +480,7 @@
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
     <aside id="mobileSidebar" class="mobile-sidebar" aria-label="Mobile Navigation">
         <div class="mobile-sidebar-header">
-            <a class="mobile-sidebar-brand" href="{{ url('/') }}" aria-label="Moepi Publishing home">
+            <a class="mobile-sidebar-brand" href="{{ route('manager.dashboard') }}" aria-label="Go to dashboard">
                 <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
             </a>
             @auth

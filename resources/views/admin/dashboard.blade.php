@@ -18,7 +18,6 @@
         border-radius: 20px;
         box-shadow: 0 6px 20px rgba(163, 71, 71, 0.08);
         margin: 0 auto;
-        user-select: none;
     }
     h1 {
         font-weight: 700;
@@ -45,7 +44,6 @@
     color: black;
     cursor: pointer;
     transition: box-shadow 0.3s ease;
-    user-select: none;
     text-align: center;
     border-left: 5px solid; /* keep left border */
     border: 1px solid transparent; /* default transparent border */
@@ -79,11 +77,11 @@
 }
 
 .card-rejected {
-    border-left: 5px solid #eb0e8fff;
-    border-top: 1px solid #eb0e8fff;
-    border-right: 1px solid #eb0e8fff;
-    border-bottom: 1px solid #eb0e8fff;
-    color: #881f54ff;
+    border-left: 5px solid #2fcfc5ff;
+    border-top: 1px solid #2fcfc5ff;
+    border-right: 1px solid #2fcfc5ff;
+    border-bottom: 1px solid #2fcfc5ff;
+    color: #0a1347;
 }
 
 .card-active {
@@ -149,14 +147,10 @@
         font-size: 1rem;
         color: #2c3e50;
     }
-    canvas {
-        width: 100% !important;
-        max-height: 210px;
-    }
-    @media (max-width: 768px) {
-        canvas {
-            max-height: 190px;
-        }
+    .chart-body {
+        position: relative;
+        width: 100%;
+        overflow: visible;
     }
     @media (max-width: 992px) {
         .dash-charts-grid {
@@ -180,7 +174,7 @@
                 <option value="this_quarter" {{ ($monthFilter ?? '') === 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
                 <option value="this_month" {{ ($monthFilter ?? '') === 'this_month' ? 'selected' : '' }}>This Month</option>
                 @php $nowY = (int) \Illuminate\Support\Carbon::now()->year; @endphp
-                @foreach(range($nowY, $nowY - 5) as $y)
+                @foreach(range($nowY - 1, $nowY - 5) as $y)
                     <option value="{{ $y }}" {{ (string) ($monthFilter ?? '') === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
                 @endforeach
             </select>
@@ -189,7 +183,7 @@
     </div>
     <div class="cards" id="cardsContainer" role="list">
 
-        <a href="{{ route('admin.requests', ['status' => 'all', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="All leave requests" class="card card-all" draggable="true">
+        <a href="{{ route('admin.requests', ['status' => 'all', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="All leave requests" class="card card-all">
             <div class="card-title">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
@@ -199,7 +193,7 @@
             <div class="card-value">{{ $allRequestsCount ?? 0 }}</div>
         </a>
 
-        <a href="{{ route('admin.requests', ['status' => 'pending', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="Pending leave requests" class="card card-pending" draggable="true">
+        <a href="{{ route('admin.requests', ['status' => 'pending', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="Pending leave requests" class="card card-pending">
             <div class="card-title">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="24" height="24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3" />
@@ -210,7 +204,7 @@
             <div class="card-value">{{ $pendingRequestsCount }}</div>
         </a>
 
-        <a href="{{ route('admin.requests', ['status' => 'overdue', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="Overdue leave requests" class="card card-overdue" draggable="true">
+        <a href="{{ route('admin.requests', ['status' => 'overdue', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="Overdue leave requests" class="card card-overdue">
             <div class="card-title">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -220,7 +214,7 @@
             <div class="card-value">{{ $overduePendingCount ?? 0 }}</div>
         </a>
 
-        <a href="{{ route('admin.calendar') }}" role="listitem" aria-label="Employees on leave today" class="card card-approved" draggable="true">
+        <a href="{{ route('admin.calendar') }}" role="listitem" aria-label="Employees on leave today" class="card card-approved">
             <div class="card-title">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -233,7 +227,7 @@
             <div class="card-value">{{ $onLeaveTodayCount }}</div>
         </a>
 
-        <a href="{{ route('admin.employees.index') }}" role="listitem" aria-label="Active employees count" class="card card-active" draggable="true">
+        <a href="{{ route('admin.employees.index') }}" role="listitem" aria-label="Active employees count" class="card card-active">
             <div class="card-title">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
                     <circle cx="12" cy="7" r="4" />
@@ -249,36 +243,53 @@
     <div class="dash-charts-grid">
         <div class="chart-card">
             <h3>Leave Requests by Type</h3>
-            <canvas id="leaveDoughnut"></canvas>
+            <div class="chart-body chart-body--ring">
+                <canvas id="leaveDoughnut"></canvas>
+            </div>
+            <ul class="chart-html-legend" id="leaveDoughnutLegend" aria-label="Leave types legend"></ul>
         </div>
         <div class="chart-card">
-            <h3>Monthly Leave Requests</h3>
-            <canvas id="monthlyBar"></canvas>
+            <h3>Monthly Applications Submitted ({{ $chartYear }})</h3>
+            <div class="chart-body chart-body--plot">
+                <canvas id="monthlyLine"></canvas>
+            </div>
         </div>
         <div class="chart-card">
             <h3>Leave Requests by Status</h3>
-            <canvas id="statusPie"></canvas>
+            <div class="chart-body chart-body--ring">
+                <canvas id="statusPie"></canvas>
+            </div>
+            <ul class="chart-html-legend" id="statusPieLegend" aria-label="Leave status legend"></ul>
+        </div>
+        <div class="chart-card">
+            <h3>Monthly Requests by Status ({{ $chartYear }})</h3>
+            <div class="chart-body chart-body--plot">
+                <canvas id="monthlyStatusStackedBar"></canvas>
+            </div>
         </div>
         <div class="chart-card">
             <h3>Requests by Department</h3>
             @if(empty($departmentLabels))
                 <p style="margin:0; color:#64748b; font-size:14px;">No leave requests by department for this period.</p>
             @else
-                <canvas id="departmentPolar"></canvas>
+                <div class="chart-body chart-body--ring">
+                    <canvas id="departmentPolar"></canvas>
+                </div>
+                <ul class="chart-html-legend" id="departmentPolarLegend" aria-label="Departments legend"></ul>
             @endif
         </div>
         <div class="chart-card">
             <h3>Requests by Designation</h3>
-            <canvas id="designationBar"></canvas>
-        </div>
-        <div class="chart-card">
-            <h3>Submission Pattern by Weekday</h3>
-            <canvas id="weekdayLine"></canvas>
+            <div class="chart-body chart-body--plot">
+                <canvas id="designationBar"></canvas>
+            </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@include('partials.dashboard-charts-styles')
+@include('partials.dashboard-chart-vars')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const hslToHex = (h, s, l) => {
@@ -388,20 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
         options: {
             responsive: true,
             plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        font: { size: 14, weight: '600' },
-                        color: '#2c3e50',
-                        generateLabels: (chart) => {
-                            const base = Chart.overrides.doughnut.plugins.legend.labels.generateLabels(chart);
-                            return base.map((item) => {
-                                const pct = (leaveTypePct[item.text] ?? 0).toFixed(1);
-                                return { ...item, text: `${item.text} (${pct}%)` };
-                            });
-                        }
-                    }
-                },
+                legend: { display: false },
                 tooltip: {
                     bodyFont: { size: 14 },
                     titleFont: { weight: '700' },
@@ -415,21 +413,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+    renderChartHtmlLegend('leaveDoughnutLegend', leaveTypeLabels, leaveTypeColors, leaveTypePct);
 
     const statusPct = @json($statusPercentages ?? []);
+    const statusPieLabels = window.leaveStatusPieLabels;
+    const statusPieColors = window.statusColorsForLabels(statusPieLabels);
 
     // Leave Requests by Status pie chart
     new Chart(document.getElementById('statusPie'), {
         type: 'pie',
         data: {
-            labels: ['Pending', 'Rejected', 'Approved'],
+            labels: statusPieLabels,
             datasets: [{
                 data: [
                     {{ $statusCounts['pending'] ?? $statusCounts['Pending'] ?? 0 }},
                     {{ $statusCounts['rejected'] ?? $statusCounts['Rejected'] ?? 0 }},
                     {{ $statusCounts['approved'] ?? $statusCounts['Approved'] ?? 0 }}
                 ],
-                backgroundColor: [chartPalette.teal, chartPalette.coral, chartPalette.green],
+                backgroundColor: statusPieColors,
                 borderColor: '#fff',
                 borderWidth: 2
             }]
@@ -437,20 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
         options: {
             responsive: true,
             plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        font: { size: 14, weight: '600' },
-                        color: '#2c3e50',
-                        generateLabels: (chart) => {
-                            const base = Chart.overrides.pie.plugins.legend.labels.generateLabels(chart);
-                            return base.map((item) => {
-                                const pct = (statusPct[item.text] ?? 0).toFixed(1);
-                                return { ...item, text: `${item.text} (${pct}%)` };
-                            });
-                        }
-                    }
-                },
+                legend: { display: false },
                 tooltip: {
                     bodyFont: { size: 14 },
                     titleFont: { weight: '700' },
@@ -464,20 +452,35 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+    renderChartHtmlLegend('statusPieLegend', statusPieLabels, statusPieColors, statusPct);
 
-    const monthlyLabels = @json($barLabels);
-    const monthlyTotals = @json($barData);
-    const monthlyColor = chartPalette.pink;
-    const monthlyScatter = monthlyLabels.map((label, i) => ({ x: label, y: monthlyTotals[i] }));
+    const allMonthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const padMonthlySeries = (values) => {
+        const series = Array.isArray(values) ? [...values] : [];
+        while (series.length < 12) {
+            series.push(0);
+        }
+        return series.slice(0, 12);
+    };
+    const monthlyLabels = allMonthLabels;
+    const monthlyTotals = padMonthlySeries(@json($barData));
+    const monthlyApproved = padMonthlySeries(@json($monthlyApprovedData));
+    const monthlyPending = padMonthlySeries(@json($monthlyPendingData));
+    const monthlyRejected = padMonthlySeries(@json($monthlyRejectedData));
+    const monthAxisTicks = { autoSkip: false, maxRotation: 0, minRotation: 0 };
+    const monthlyColor = window.leaveMonthlyApplicationsColor;
 
-    new Chart(document.getElementById('monthlyBar'), {
-        type: 'scatter',
+    new Chart(document.getElementById('monthlyLine'), {
+        type: 'line',
         data: {
+            labels: monthlyLabels,
             datasets: [{
                 label: 'Total Requests',
-                data: monthlyScatter,
-                backgroundColor: monthlyColor,
+                data: monthlyTotals,
+                backgroundColor: hexToRgba(monthlyColor, 0.2),
                 borderColor: monthlyColor,
+                tension: 0.3,
+                fill: true,
                 pointRadius: 5,
                 pointHoverRadius: 7
             }]
@@ -489,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
             },
             scales: {
-                x: { type: 'category', ticks: { maxRotation: 0, minRotation: 0 } },
+                x: { ticks: monthAxisTicks },
                 y: { beginAtZero: true, ticks: { stepSize: 1 } }
             }
         }
@@ -502,6 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const deptPct = @json($departmentPercentages ?? []);
         const polarLegendGen = Chart.overrides?.polarArea?.plugins?.legend?.labels?.generateLabels
             || Chart.overrides?.doughnut?.plugins?.legend?.labels?.generateLabels;
+        const deptColors = deptLabels.map((d) => colorForKey(String(d || '').trim().toLowerCase()));
         new Chart(deptPolarCanvas, {
             type: 'polarArea',
             data: {
@@ -516,20 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            font: { size: 14, weight: '600' },
-                            color: '#2c3e50',
-                            generateLabels: (chart) => {
-                                const base = polarLegendGen ? polarLegendGen(chart) : [];
-                                return base.map((item) => {
-                                    const pct = (deptPct[item.text] ?? 0).toFixed(1);
-                                    return { ...item, text: `${item.text} (${pct}%)` };
-                                });
-                            }
-                        }
-                    },
+                    legend: { display: false },
                     tooltip: {
                         bodyFont: { size: 14 },
                         titleFont: { weight: '700' },
@@ -543,6 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+        renderChartHtmlLegend('departmentPolarLegend', deptLabels, deptColors, deptPct);
     }
 
     const designationLabels = @json($designationLabels ?? []);
@@ -579,29 +571,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    new Chart(document.getElementById('weekdayLine'), {
-        type: 'line',
+    new Chart(document.getElementById('monthlyStatusStackedBar'), {
+        type: 'bar',
         data: {
-            labels: @json($weekdayLabels),
-            datasets: [{
-                label: 'Requests Submitted',
-                data: @json($weekdayData),
-                backgroundColor: hexToRgba(chartPalette.blue, 0.2),
-                borderColor: chartPalette.blue,
-                fill: true,
-                tension: 0.35,
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
+            labels: monthlyLabels,
+            datasets: [
+                {
+                    label: 'Approved',
+                    data: monthlyApproved,
+                    backgroundColor: colorForStatus('Approved'),
+                    borderColor: colorForStatus('Approved'),
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    stack: 'status'
+                },
+                {
+                    label: 'Pending',
+                    data: monthlyPending,
+                    backgroundColor: colorForStatus('Pending'),
+                    borderColor: colorForStatus('Pending'),
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    stack: 'status'
+                },
+                {
+                    label: 'Rejected',
+                    data: monthlyRejected,
+                    backgroundColor: colorForStatus('Rejected'),
+                    borderColor: colorForStatus('Rejected'),
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    stack: 'status'
+                }
+            ]
         },
         options: {
             responsive: true,
             plugins: {
-                legend: { display: false },
+                legend: {
+                    position: 'bottom',
+                    labels: { font: { size: 13, weight: '600' }, color: '#2c3e50' }
+                },
                 tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
             },
             scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                x: {
+                    type: 'category',
+                    stacked: true,
+                    offset: true,
+                    ticks: monthAxisTicks
+                },
+                y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
             }
         }
     });

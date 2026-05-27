@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use App\Models\User;
+use App\Services\ProfilePictureService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TwoFactorCodeMail;
@@ -225,7 +226,7 @@ class AuthController extends Controller
     $rules = [
         'current_password' => ['nullable', 'string'],
         'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-        'profile_picture' => ['nullable', 'image', 'max:2048'],
+        'profile_picture' => ['nullable', 'image', 'max:10240'],
     ];
     if ($request->filled('password')) {
         $rules['current_password'] = ['required', 'current_password'];
@@ -241,11 +242,10 @@ class AuthController extends Controller
     }
 
     if ($request->hasFile('profile_picture')) {
-        if ($user->profile_picture) {
-            Storage::disk('public')->delete($user->profile_picture);
-        }
-        $path = $request->file('profile_picture')->store('profile_pictures', 'public');
-        $user->profile_picture = $path;
+        $user->profile_picture = app(ProfilePictureService::class)->store(
+            $request->file('profile_picture'),
+            $user->profile_picture
+        );
     }
 
     $user->save();

@@ -10,10 +10,13 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html,
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: white;
+            background: #ffffff;
             min-height: 100vh;
+        }
+        body {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -80,7 +83,7 @@
             border-radius: 10px;
             border: 2px solid #e2e8f0;
             color: #2d3748;
-            background: #f7fafc;
+            background: #ffffff;
             transition: all 0.3s ease;
         }
         input:focus {

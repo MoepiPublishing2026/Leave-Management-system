@@ -18,7 +18,6 @@
     border-radius: 20px;
     box-shadow: 0 6px 20px rgba(163, 71, 71, 0.08);
     margin: 0 auto;
-    user-select: none;
   }
   @media (max-width: 768px) {
     .dashboard-container {
@@ -28,7 +27,11 @@
       grid-template-columns: 1fr;
     }
     .chart-card {
-      min-height: 320px;
+      min-height: auto;
+      overflow: visible;
+    }
+    .cards {
+      padding-bottom: 12px;
     }
   }
   h1 {
@@ -47,7 +50,6 @@
     box-shadow: 0 6px 20px rgba(32, 50, 93, 0.1);
     color: #680523;
     cursor: pointer;
-    user-select: none;
     max-width: 1200px;
     margin-bottom: 24px;
     transition: box-shadow 0.3s ease;
@@ -100,7 +102,6 @@
     font-weight: 600;
     color: #050505ff;
     box-shadow: 0 3px 7px rgba(13, 59, 53, 0.12);
-    user-select: none;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -157,7 +158,6 @@
     min-width: 190px;
     flex: 1 1 190px;
     cursor: move;
-    user-select: none;
     position: relative;
     transition: box-shadow 0.3s ease;
     border-left: 5px solid;
@@ -169,9 +169,9 @@
   }
   .card-pending { border-color: #dab00cff; color: #44380aff; }
   .card-approved { border-color: #53e21aff; color: #1c7737ff; }
-  .card-rejected { border-color: #eb0e8fff; color: #881f54ff; }
+  .card-rejected { border-color: #2fcfc5ff; color: #0a1347; }
   .card-overdue { border-color: #d946ef; color: #7a135d; }
-  .card-withdrawn { border-color: #2fcfc5ff; color: #0a1347; }
+  .card-withdrawn { border-color: #6e4111; color: #3f2a0a; }
   .card-title {
     font-size: 1.08rem;
     font-weight: 600;
@@ -222,7 +222,8 @@
   }
   .chart-body {
     position: relative;
-    height: 220px;
+    width: 100%;
+    overflow: visible;
   }
   .chart-body.pyramid-body {
     height: auto;
@@ -336,7 +337,7 @@
   </div>
 
   <div class="cards" id="cardsContainer" role="list">
-    <a href="{{ route('leave.status', ['status' => 'pending']) }}" role="listitem" aria-label="Pending Leaves count" class="card card-pending" draggable="true" style="color:#a16207;">
+    <a href="{{ route('leave.status', ['status' => 'pending']) }}" role="listitem" aria-label="Pending Leaves count" class="card card-pending" style="color:#a16207;">
       <div class="card-title">
         <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="#facc15" viewBox="0 0 24 24" stroke-width="2" stroke="#facc15" stroke-linejoin="round" stroke-linecap="round">
           <circle cx="12" cy="12" r="10" />
@@ -347,7 +348,7 @@
       <div class="card-value">{{ $pendingCount }}</div>
     </a>
 
-    <a href="{{ route('leave.status', ['status' => 'overdue']) }}" role="listitem" aria-label="Overdue Leaves count" class="card card-overdue" draggable="true">
+    <a href="{{ route('leave.status', ['status' => 'overdue']) }}" role="listitem" aria-label="Overdue Leaves count" class="card card-overdue">
       <div class="card-title">
         <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="#d946ef" viewBox="0 0 24 24" stroke-width="2" stroke="#d946ef" stroke-linejoin="round" stroke-linecap="round">
           <circle cx="12" cy="12" r="10" />
@@ -359,7 +360,7 @@
       <div class="card-value">{{ $overduePendingCount ?? 0 }}</div>
     </a>
 
-    <a href="{{ route('leave.status', ['status' => 'approved']) }}" role="listitem" aria-label="Approved Leaves count" class="card card-approved" draggable="true" style="color:#064e3b;">
+    <a href="{{ route('leave.status', ['status' => 'approved']) }}" role="listitem" aria-label="Approved Leaves count" class="card card-approved" style="color:#064e3b;">
       <div class="card-title">
         <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="#10b981" viewBox="0 0 24 24" stroke-width="2" stroke="#10b981" stroke-linejoin="round" stroke-linecap="round">
           <path d="M5 13l4 4L19 7" />
@@ -369,9 +370,9 @@
       <div class="card-value">{{ $approvedCount }}</div>
     </a>
 
-    <a href="{{ route('leave.status', ['status' => 'rejected']) }}" role="listitem" aria-label="Rejected Leaves count" class="card card-rejected" draggable="true" style="color:#7f1d1d;">
+    <a href="{{ route('leave.status', ['status' => 'rejected']) }}" role="listitem" aria-label="Rejected Leaves count" class="card card-rejected">
       <div class="card-title">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="#ef4444" viewBox="0 0 24 24" stroke-width="2" stroke="#ef4444" stroke-linejoin="round" stroke-linecap="round">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="#2fcfc5" viewBox="0 0 24 24" stroke-width="2" stroke="#2fcfc5" stroke-linejoin="round" stroke-linecap="round">
           <path d="M6 18L18 6M6 6l12 12" />
         </svg>
         Rejected Leaves
@@ -379,9 +380,9 @@
       <div class="card-value">{{ $rejectedCount }}</div>
     </a>
 
-    <a href="{{ route('leave.status', ['status' => 'withdrawn']) }}" role="listitem" aria-label="Withdrawn Leaves count" class="card card-withdrawn" draggable="true">
+    <a href="{{ route('leave.status', ['status' => 'withdrawn']) }}" role="listitem" aria-label="Withdrawn Leaves count" class="card card-withdrawn">
       <div class="card-title">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="#2fcfc5ff" viewBox="0 0 24 24" stroke-width="2" stroke="#2fcfc5ff" stroke-linejoin="round" stroke-linecap="round">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="#6e4111" viewBox="0 0 24 24" stroke-width="2" stroke="#6e4111" stroke-linejoin="round" stroke-linecap="round">
           <path d="M6 18L18 6M6 6l12 12" />
         </svg>
         Withdrawn Leaves
@@ -393,25 +394,33 @@
   <div class="dash-charts-grid">
     <div class="chart-card">
       <h3>Leave Requests by Type</h3>
-      <div class="chart-body">
+      <div class="chart-body chart-body--ring">
         <canvas id="leaveDoughnut"></canvas>
       </div>
+      <ul class="chart-html-legend" id="leaveDoughnutLegend" aria-label="Leave types legend"></ul>
     </div>
     <div class="chart-card">
-      <h3>Monthly Leave Requests ({{ $year }})</h3>
-      <div class="chart-body">
+      <h3>Monthly Applications Submitted ({{ $year }})</h3>
+      <div class="chart-body chart-body--plot">
         <canvas id="monthlyLine"></canvas>
       </div>
     </div>
     <div class="chart-card">
-      <h3>Leave Requests by Status</h3>
-      <div class="chart-body">
-        <canvas id="statusRadar"></canvas>
+      <h3>Monthly Requests by Status ({{ $year }})</h3>
+      <div class="chart-body chart-body--plot">
+        <canvas id="monthlyStatusStackedBar"></canvas>
       </div>
     </div>
     <div class="chart-card">
+      <h3>Leave Requests by Status</h3>
+      <div class="chart-body chart-body--ring">
+        <canvas id="statusPie"></canvas>
+      </div>
+      <ul class="chart-html-legend" id="statusPieLegend" aria-label="Leave status legend"></ul>
+    </div>
+    <div class="chart-card">
       <h3>Leave Utilization by Type</h3>
-      <div class="chart-body">
+      <div class="chart-body chart-body--plot">
         <canvas id="utilizationBar"></canvas>
       </div>
     </div>
@@ -432,6 +441,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@include('partials.dashboard-charts-styles')
+@include('partials.dashboard-chart-vars')
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const hexToRgba = (hex, alpha) => {
@@ -489,37 +500,26 @@
     Chart.defaults.color = '#2c3e50';
     Chart.defaults.maintainAspectRatio = false;
 
-    const container = document.getElementById('cardsContainer');
-    let dragged;
-
-    container.addEventListener('dragstart', (e) => {
-      dragged = e.target;
-      e.target.style.opacity = 0.5;
-      e.dataTransfer.effectAllowed = "move";
-    });
-
-    container.addEventListener('dragend', (e) => {
-      e.target.style.opacity = "";
-    });
-
-    container.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-      const target = e.target.closest('.card');
-      if(target && target !== dragged) {
-        const rect = target.getBoundingClientRect();
-        const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
-        container.insertBefore(dragged, next && target.nextSibling || target);
-      }
-    });
-
     const leaveTypes = @json(array_keys($leaveTypeCounts));
     const leaveTypeData = @json(array_values($leaveTypeCounts));
     const leaveTypePct = @json($leaveTypePercentages ?? []);
     const leaveTypeColors = leaveTypes.map(t => getColorForType(t));
 
-    const monthlyLabels = @json($barLabels);
-    const monthlyTotals = @json($barData);
+    const allMonthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const padMonthlySeries = (values) => {
+      const series = Array.isArray(values) ? [...values] : [];
+      while (series.length < 12) {
+        series.push(0);
+      }
+      return series.slice(0, 12);
+    };
+    const monthlyLabels = allMonthLabels;
+    const monthlyTotals = padMonthlySeries(@json($barData));
+    const monthlyApproved = padMonthlySeries(@json($monthlyApprovedData));
+    const monthlyPending = padMonthlySeries(@json($monthlyPendingData));
+    const monthlyRejected = padMonthlySeries(@json($monthlyRejectedData));
+    const monthlyWithdrawn = padMonthlySeries(@json($monthlyWithdrawnData));
+    const monthAxisTicks = { autoSkip: false, maxRotation: 0, minRotation: 0 };
 
     new Chart(document.getElementById('leaveDoughnut'), {
       type: 'doughnut',
@@ -535,20 +535,7 @@
       options: {
         responsive: true,
         plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              font: { size: 14, weight: '600' },
-              color: '#2c3e50',
-              generateLabels: (chart) => {
-                const base = Chart.overrides.doughnut.plugins.legend.labels.generateLabels(chart);
-                return base.map((item) => {
-                  const pct = (leaveTypePct[item.text] ?? 0).toFixed(1);
-                  return { ...item, text: `${item.text} (${pct}%)` };
-                });
-              }
-            }
-          },
+          legend: { display: false },
           tooltip: {
             bodyFont: { size: 14 },
             titleFont: { weight: '700' },
@@ -562,8 +549,12 @@
         }
       }
     });
+    renderChartHtmlLegend('leaveDoughnutLegend', leaveTypes, leaveTypeColors, leaveTypePct);
 
-    const monthlyColor = chartPalette.pink;
+    const monthlyColor = window.leaveMonthlyApplicationsColor;
+    const statusPieLabels = window.leaveStatusPieLabels;
+    const statusPieColors = window.statusColorsForLabels(statusPieLabels);
+    const statusPct = @json($statusPercentages ?? []);
     new Chart(document.getElementById('monthlyLine'), {
       type: 'line',
       data: {
@@ -586,45 +577,109 @@
           tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
         },
         scales: {
-          x: { ticks: { maxRotation: 0, minRotation: 0 } },
+          x: { ticks: monthAxisTicks },
           y: { beginAtZero: true, ticks: { stepSize: 1 } }
         }
       }
     });
 
-    const statusRadarColor = chartPalette.blue;
-    new Chart(document.getElementById('statusRadar'), {
-      type: 'radar',
+    new Chart(document.getElementById('monthlyStatusStackedBar'), {
+      type: 'bar',
       data: {
-        labels: ['Pending', 'Approved', 'Rejected', 'Withdrawn'],
+        labels: monthlyLabels,
+        datasets: [
+          {
+            label: 'Approved',
+            data: monthlyApproved,
+            backgroundColor: colorForStatus('Approved'),
+            borderColor: colorForStatus('Approved'),
+            borderWidth: 1,
+            borderRadius: 4,
+            stack: 'status'
+          },
+          {
+            label: 'Pending',
+            data: monthlyPending,
+            backgroundColor: colorForStatus('Pending'),
+            borderColor: colorForStatus('Pending'),
+            borderWidth: 1,
+            borderRadius: 4,
+            stack: 'status'
+          },
+          {
+            label: 'Rejected',
+            data: monthlyRejected,
+            backgroundColor: colorForStatus('Rejected'),
+            borderColor: colorForStatus('Rejected'),
+            borderWidth: 1,
+            borderRadius: 4,
+            stack: 'status'
+          },
+          {
+            label: 'Withdrawn',
+            data: monthlyWithdrawn,
+            backgroundColor: colorForStatus('Withdrawn'),
+            borderColor: colorForStatus('Withdrawn'),
+            borderWidth: 1,
+            borderRadius: 4,
+            stack: 'status'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { font: { size: 13, weight: '600' }, color: '#2c3e50' }
+          },
+          tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
+        },
+        scales: {
+          x: {
+            type: 'category',
+            stacked: true,
+            offset: true,
+            ticks: monthAxisTicks
+          },
+          y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('statusPie'), {
+      type: 'pie',
+      data: {
+        labels: statusPieLabels,
         datasets: [{
-          label: 'Requests',
           data: [
             {{ $pendingCount }},
-            {{ $approvedCount }},
             {{ $rejectedCount }},
-            {{ $withdrawnCount ?? 0 }}
+            {{ $approvedCount }}
           ],
-          borderColor: statusRadarColor,
-          backgroundColor: hexToRgba(statusRadarColor, 0.25),
-          pointBackgroundColor: statusRadarColor,
-          pointBorderColor: '#fff',
-          pointHoverBorderColor: '#fff',
-          pointHoverBackgroundColor: statusRadarColor,
-          borderWidth: 3
+          backgroundColor: statusPieColors,
+          borderColor: '#fff',
+          borderWidth: 2
         }]
       },
       options: {
         responsive: true,
         plugins: {
           legend: { display: false },
-          tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
-        },
-        scales: {
-          r: { beginAtZero: true, ticks: { display: false } }
+          tooltip: {
+            bodyFont: { size: 14 },
+            titleFont: { weight: '700' },
+            callbacks: {
+              label: (ctx) => {
+                const pct = (statusPct[ctx.label] ?? 0).toFixed(1);
+                return `${ctx.label}: ${ctx.parsed} (${pct}%)`;
+              }
+            }
+          }
         }
       }
     });
+    renderChartHtmlLegend('statusPieLegend', statusPieLabels, statusPieColors, statusPct);
 
     const leaveUtilization = @json($leaveUtilization ?? []);
     const utilEntries = Array.isArray(leaveUtilization) ? leaveUtilization : [];

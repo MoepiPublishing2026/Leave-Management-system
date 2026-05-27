@@ -106,6 +106,36 @@ public function dashboard()
                 ->count();
         }
 
+        $monthlyStatusRows = LeaveRequest::where('user_id', $userId)
+            ->whereYear('created_at', $dashboardYear)
+            ->select(
+                \DB::raw('MONTH(created_at) as month'),
+                \DB::raw('LOWER(TRIM(status)) as status'),
+                \DB::raw('COUNT(*) as total')
+            )
+            ->groupBy('month', 'status')
+            ->orderBy('month')
+            ->get();
+
+        $monthlyApprovedData = array_fill(0, 12, 0);
+        $monthlyPendingData = array_fill(0, 12, 0);
+        $monthlyRejectedData = array_fill(0, 12, 0);
+        $monthlyWithdrawnData = array_fill(0, 12, 0);
+        foreach ($monthlyStatusRows as $row) {
+            $idx = ((int) $row->month) - 1;
+            if ($idx < 0 || $idx > 11) {
+                continue;
+            }
+            $count = (int) $row->total;
+            match ($row->status) {
+                'approved' => $monthlyApprovedData[$idx] = $count,
+                'pending' => $monthlyPendingData[$idx] = $count,
+                'rejected' => $monthlyRejectedData[$idx] = $count,
+                'withdrawn' => $monthlyWithdrawnData[$idx] = $count,
+                default => null,
+            };
+        }
+
         // Policies keyed by leave_type
         $policies = LeavePolicy::all()->keyBy('leave_type');
 
@@ -187,17 +217,28 @@ public function dashboard()
             ];
         }
 
+        $statusPercentages = PercentageDistribution::oneDecimalPercents([
+            'Pending' => (int) $pendingCount,
+            'Rejected' => (int) $rejectedCount,
+            'Approved' => (int) $approvedCount,
+        ]);
+
         return view('dashboard', compact(
             'pendingCount',
             'approvedCount',
             'rejectedCount',
             'withdrawnCount',
             'overduePendingCount',
+            'statusPercentages',
             'leaveTypeCounts',
             'leaveTypePercentages',
             'year',
             'barLabels',
             'barData',
+            'monthlyApprovedData',
+            'monthlyPendingData',
+            'monthlyRejectedData',
+            'monthlyWithdrawnData',
             'leaveBalances',
             'leaveUtilization'
         ));
@@ -207,7 +248,10 @@ public function leaveBalance(Request $request)
 {
     $userId = auth()->id();
 
-    $year = (int) $request->query('year', Carbon::now()->year);
+    $currentYear = (int) Carbon::now()->year;
+    $year = (int) $request->query('year', $currentYear);
+    $year = max(2000, min(2100, $year));
+    $yearOptions = range($currentYear - 4, $currentYear + 1);
     [$startOfYear, $endOfYear] = $this->yearWindow($year);
 
     $policies = LeavePolicy::all()->keyBy('leave_type');
@@ -387,6 +431,8 @@ public function leaveBalance(Request $request)
 
     return view('leave.balance', compact(
         'year',
+        'currentYear',
+        'yearOptions',
         'leaveBalances',
         'leaveTypeOptions',
         'approvedLeaves',
@@ -396,6 +442,7 @@ public function leaveBalance(Request $request)
         'requestCounts',
         'annualKey',
         'annualRemaining',
+        'annualUsagePercent',
         'upcomingLeaves',
         'focusedBalance',
         'isTypeDisabled',
@@ -528,20 +575,29 @@ public function applyForm()
     }
 
     if ($policy && $policy->requires_proof) {
-        $rules['file_uploads'] = 'required|array';
-        $rules['file_uploads.*'] = 'file|max:2048';
+        $rules['file_uploads'] = 'required|array|min:1';
+        $rules['file_uploads.*'] = 'file|max:10240';
     } else {
         $rules['file_uploads'] = 'nullable|array';
-        $rules['file_uploads.*'] = 'file|max:2048';
+        $rules['file_uploads.*'] = 'file|max:10240';
     }
 
     $messages = [
         'leave_type.required' => 'Please select a type of leave.',
         'important_comment.required' => 'A valid reason (comment) is required for unpaid leave.',
         'file_uploads.required' => 'Proof (attachment) is required for this type of leave.',
+        'file_uploads.min' => 'Please attach at least one supporting document.',
+        'file_uploads.*.max' => 'Each attachment must be 10 MB or smaller.',
+        'file_uploads.*.file' => 'Each attachment must be a valid file.',
     ];
 
     $validated = $request->validate($rules, $messages);
+
+    if ($policy && $policy->requires_proof && !$request->hasFile('file_uploads')) {
+        return redirect()->back()
+            ->withErrors(['file_uploads' => 'Proof (attachment) is required for this type of leave.'])
+            ->withInput();
+    }
 
     if ($halfDay && (!$policy || empty($policy->allow_half_days))) {
         return redirect()->back()
@@ -800,10 +856,13 @@ public function destroy($id)
         ->firstOrFail();
 
     $status = strtolower(trim((string) $leaveRequest->status));
-    if (!in_array($status, ['pending', 'withdrawn'], true)) {
+    $currentYear = (int) Carbon::now()->year;
+    $requestYear = $leaveRequest->start_date ? (int) Carbon::parse($leaveRequest->start_date)->year : $currentYear;
+    $isPreviousYear = $requestYear === ($currentYear - 1);
+    if (!($status === 'withdrawn' || $isPreviousYear)) {
         return redirect()
             ->route('leave.myRequests')
-            ->with('error', 'Only pending or withdrawn requests can be deleted.');
+            ->with('error', 'Only withdrawn requests or requests from the previous year can be deleted.');
     }
 
     try {

@@ -3,22 +3,65 @@
 @section('title', 'Notifications')
 
 @section('content')
-<div class="container my-4">
-    <h1>All Notifications</h1>
+@include('partials.notifications-page-styles')
+
+@php
+    $unreadCount = (int) ($notifications->whereNull('read_at')->count());
+@endphp
+
+<div class="notifications-page">
+    <h1>Notifications</h1>
+    <p class="notifications-lead">
+        @if($notifications->total() > 0)
+            Showing {{ $notifications->total() }} {{ \Illuminate\Support\Str::plural('notification', $notifications->total()) }}
+            @if($unreadCount > 0) · <strong>{{ $unreadCount }}</strong> unread @endif
+        @else
+            All your notifications in one place.
+        @endif
+    </p>
 
     @if ($notifications->isEmpty())
-        <p>You have no notifications.</p>
+        <div class="notifications-toolbar">
+            <a href="{{ route('admin.dashboard') }}" class="notifications-btn notifications-btn--secondary">Dashboard</a>
+        </div>
+        <div class="notifications-list">
+            <div class="notifications-empty">You have no notifications.</div>
+        </div>
     @else
-        <ul class="list-group">
+        <div class="notifications-toolbar">
+            <a href="{{ route('admin.dashboard') }}" class="notifications-btn notifications-btn--secondary">Dashboard</a>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                @if($unreadCount > 0)
+                    <form method="POST" action="{{ route('notifications.mark.read') }}" style="margin:0;">
+                        @csrf
+                        <button type="submit" class="notifications-btn notifications-btn--primary">
+                            Mark all as read
+                        </button>
+                    </form>
+                @endif
+            </div>
+        </div>
+
+        <ul class="notifications-list">
             @foreach ($notifications as $notification)
-                <li class="list-group-item @if(is_null($notification->read_at)) list-group-item-warning @endif">
-                    <a href="{{ route('notifications.open', ['notification' => $notification->id, 'redirect' => route('notifications.index')]) }}" style="text-decoration:none; color:inherit;">
-                        {{ $notification->data['message'] ?? 'No message' }} - <small>{{ $notification->created_at->diffForHumans() }}</small>
+                @php
+                    $isUnread = is_null($notification->read_at);
+                    $msg = (string) ($notification->data['message'] ?? 'Notification');
+                @endphp
+                <li class="notification-item {{ $isUnread ? 'is-unread' : '' }}">
+                    <a class="notification-link"
+                       href="{{ route('notifications.open', ['notification' => $notification->id, 'redirect' => route('notifications.index')]) }}">
+                        <span class="notification-dot" aria-hidden="true"></span>
+                        <div class="notification-body">
+                            <div class="notification-message">{{ $msg }}</div>
+                            <div class="notification-meta">{{ $notification->created_at->diffForHumans() }}</div>
+                        </div>
                     </a>
                 </li>
             @endforeach
         </ul>
-        <div class="mt-3">
+
+        <div class="notifications-pagination">
             {{ $notifications->links() }}
         </div>
     @endif

@@ -278,6 +278,16 @@ public function escalate(Request $r, $id)
             abort(403);
         }
 
+        $status = strtolower(trim((string) ($leaveRequest->status ?? '')));
+        $currentYear = (int) \Carbon\Carbon::now()->year;
+        $requestYear = $leaveRequest->start_date ? (int) \Carbon\Carbon::parse($leaveRequest->start_date)->year : $currentYear;
+        $isPreviousYear = $requestYear === ($currentYear - 1);
+        if (!($status === 'withdrawn' || $isPreviousYear)) {
+            return redirect()
+                ->back()
+                ->with('error', 'Only withdrawn requests or requests from the previous year can be deleted.');
+        }
+
         try {
             $requestId = $leaveRequest->id;
             app(UserDeletionService::class)->deleteLeaveRequestRecord($leaveRequest);

@@ -9,9 +9,13 @@
     <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}" sizes="180x180" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        html,
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background-color: white;
+            background-color: #ffffff;
+            min-height: 100vh;
+        }
+        body {
             padding: 40px 20px;
             margin: 0;
         }

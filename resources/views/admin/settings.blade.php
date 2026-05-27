@@ -1,200 +1,118 @@
 @extends('layouts.admin')
 
-@section('title','Leave Policies Settings')
+@section('title', 'Leave Policies Settings')
 
 @section('content')
+@include('partials.content-page-styles')
 <style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        background: white;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    .settings-policy-header {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #138056;
+        margin: 0 0 14px;
     }
-    h1 {
-        font-weight: 700;
-        font-size: 2.5rem;
-        margin-bottom: 1.5rem;
-        color: #1f2937;
-        border-left: 6px solid #138056ff;
-        padding-left: 10px;
-    }
-    form {
-        max-width: 1200px;
-        margin: 0 auto 4rem auto;
-        background: white;
-        border-radius: 1rem;
-          box-shadow: 0 0 10px #a7bd8dff;
-        padding: 2rem 3rem;
-    }
-    .policy-section {
-        padding: 1.6rem 0;
-        border-bottom: 1px solid #e5e7eb;
-    }
-    .policy-section:last-child {
-        border: none;
-    }
-    .policy-header {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #111827;
-        margin-bottom: 1rem;
-    }
-    .inputs-row {
+    .settings-checkbox-row {
         display: flex;
-        gap: 2rem;
-        margin-bottom: 1rem;
         flex-wrap: wrap;
+        gap: 16px 28px;
+        margin-bottom: 14px;
     }
-    .input-group {
-        flex: 1;
-        min-width: 280px;
-    }
-    label {
-        display: block;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 0.35rem;
-    }
-    input[type="number"] {
-        width: 100%;
-        padding: 0.6rem 0.8rem;
-        font-size: 1rem;
-        border: 1px solid #d1d5db;
-        border-radius: 0.5rem;
-        box-sizing: border-box;
-        outline-offset: 2px;
-        transition: outline-color 0.3s ease;
-    }
-    input[type="number"]:focus {
-        outline: 2px solid #3b82f6;
-    }
-    .checkbox-row {
-        display: flex;
-        gap: 3rem;
-        margin-bottom: 1.5rem;
-    }
-    .checkbox-label {
-        display: flex;
+    .settings-checkbox-label {
+        display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 8px;
         font-weight: 600;
-        color: #374151;
+        color: #334155;
         cursor: pointer;
-        user-select: none;
+        font-size: 0.92rem;
     }
-    input[type="checkbox"] {
-        width: 1.1rem;
-        height: 1.1rem;
-        cursor: pointer;
+    .settings-checkbox-label input {
+        width: 16px;
+        height: 16px;
+        accent-color: #138056;
     }
-    .policy-summary {
-        background: #dff8e0ff;
-        padding: 1rem 1.5rem;
-        border-radius: 0.75rem;
-        color: #08330aff;
-        font-size: 0.935rem;
-        line-height: 1.5;
+    .settings-summary {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 10px;
+        padding: 14px 16px;
+        color: #166534;
+        font-size: 0.88rem;
+        line-height: 1.55;
     }
-    .policy-summary ul {
-        padding-left: 1.15em;
-        margin: 0;
+    .settings-summary ul {
+        margin: 8px 0 0;
+        padding-left: 18px;
     }
-    .policy-summary ul li {
-        margin-bottom: 0.5rem;
+    .settings-summary li { margin-bottom: 4px; }
+    .settings-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 8px;
     }
-    button[type="submit"] {
-        background: #88b117ff;
-        color: white;
-        border: none;
-        padding: 0.8rem 2rem;
-        border-radius: 0.6rem;
-        font-weight: 700;
-        font-size: 1rem;
-        cursor: pointer;
-        float: right;
-        transition: background-color 0.3s ease;
-    }
-    button[type="submit"]:hover {
-        background: #090d16ff;
-    }
-    .notification {
-        max-width: 900px;
-        margin: 1rem auto 2rem auto;
-        text-align: center;
-        font-weight: 600;
-        color: #16a34a;
-    }
-    .important-notes {
-        background: #bbf7a3ff;
-        color: #0b3816ff;
-        padding: 1.5rem 2rem;
-        border-radius: 1rem;
-        max-width: 1200px;
-        margin: 2rem auto;
-        font-weight: 600;
-        box-shadow: 0 0 5px rgba(66, 133, 244, 0.35);
-    }
-    .important-notes ul {
-        padding-left: 1em;
-        margin-top: 0.5rem;
-    }
-    .important-notes ul li {
-        margin-bottom: 0.4em;
-        font-weight: 600;
-    }
-
 </style>
 
-<h1>Leave Policies Settings</h1>
+<div class="app-page">
+    <h1>Leave Policies</h1>
+    <p class="app-page-lead">Configure default days, carry-over limits, and rules for each leave type. Changes apply to new requests immediately.</p>
 
-<form action="{{ route('admin.settings.save') }}" method="POST" novalidate>
-    @csrf
-    @foreach($leaveTypes as $type)
-        <input type="hidden" name="leave_type[]" value="{{ $type }}">
-        <section class="policy-section" aria-labelledby="policy-{{ $type }}-label">
-            <h2 id="policy-{{ $type }}-label" class="policy-header">{{ $type }} Leave</h2>
-            <div class="inputs-row">
-                <div class="input-group">
-                    <label for="default_days_{{ $type }}">Default Days per Year</label>
-                    <input id="default_days_{{ $type }}" type="number" min="0" name="default_days[{{ $type }}]" value="{{ $policies[$type]->default_days ?? 0 }}">
+    <form action="{{ route('admin.settings.save') }}" method="POST" novalidate>
+        @csrf
+
+        @foreach($leaveTypes as $type)
+            <input type="hidden" name="leave_type[]" value="{{ $type }}">
+            <section class="app-page-panel" aria-labelledby="policy-{{ $type }}-label">
+                <h2 id="policy-{{ $type }}-label" class="settings-policy-header">{{ $type }} Leave</h2>
+
+                <div class="app-form-grid">
+                    <div class="app-form-group">
+                        <label for="default_days_{{ $type }}">Default days per year</label>
+                        <input id="default_days_{{ $type }}" type="number" min="0" name="default_days[{{ $type }}]" value="{{ $policies[$type]->default_days ?? 0 }}">
+                    </div>
+                    <div class="app-form-group">
+                        <label for="max_carry_over_{{ $type }}">Maximum carry over days</label>
+                        <input id="max_carry_over_{{ $type }}" type="number" min="0" name="max_carry_over[{{ $type }}]" value="{{ $policies[$type]->max_carry_over ?? 0 }}">
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label for="max_carry_over_{{ $type }}">Maximum Carry Over Days</label>
-                    <input id="max_carry_over_{{ $type }}" type="number" min="0" name="max_carry_over[{{ $type }}]" value="{{ $policies[$type]->max_carry_over ?? 0 }}">
+
+                <div class="settings-checkbox-row">
+                    <label for="allow_half_days_{{ $type }}" class="settings-checkbox-label">
+                        <input id="allow_half_days_{{ $type }}" type="checkbox" name="allow_half_days[{{ $type }}]" value="1" {{ !empty($policies[$type]) && $policies[$type]->allow_half_days ? 'checked' : '' }}>
+                        Allow half days
+                    </label>
+                    <label for="requires_proof_{{ $type }}" class="settings-checkbox-label">
+                        <input id="requires_proof_{{ $type }}" type="checkbox" name="requires_proof[{{ $type }}]" value="1" {{ !empty($policies[$type]) && $policies[$type]->requires_proof ? 'checked' : '' }}>
+                        Requires proof (medical certificate or documentation)
+                    </label>
                 </div>
-            </div>
-            <div class="checkbox-row">
-                <label for="allow_half_days_{{ $type }}" class="checkbox-label">
-                    <input id="allow_half_days_{{ $type }}" type="checkbox" name="allow_half_days[{{ $type }}]" value="1" {{ !empty($policies[$type]) && $policies[$type]->allow_half_days ? 'checked' : '' }}>
-                    Allow Half Days (Employees can request 0.5 day increments)
-                </label>
-                <label for="requires_proof_{{ $type }}" class="checkbox-label">
-                    <input id="requires_proof_{{ $type }}" type="checkbox" name="requires_proof[{{ $type }}]" value="1" {{ !empty($policies[$type]) && $policies[$type]->requires_proof ? 'checked' : '' }}>
-                    Requires Proof (Medical certificate or documentation required)
-                </label>
-            </div>
-            <div class="policy-summary" aria-live="polite">
-                <p><strong>Policy Summary</strong></p>
-                <ul>
-                    <li>Employees receive {{ $policies[$type]->default_days ?? 0 }} days of {{ strtolower($type) }} leave annually</li>
-                    <li>Up to {{ $policies[$type]->max_carry_over ?? 0 }} unused days can be carried over to the next year</li>
-                    <li>{{ !empty($policies[$type]->allow_half_days) ? 'Half-day requests are allowed' : 'Half-day requests are NOT allowed' }}</li>
-                    <li>{{ !empty($policies[$type]->requires_proof) ? 'Supporting documentation is required' : 'Supporting documentation is not required' }}</li>
-                </ul>
-            </div>
-        </section>
-    @endforeach
-    <button type="submit" aria-label="Save Leave Policies">Save</button>
-</form>
 
-<section class="important-notes" aria-label="Important notes about leave policies">
-    <p><strong>Important Notes</strong></p>
-    <ul>
-        <li>Policy changes apply immediately to new leave requests</li>
-        <li>Existing leave balances are not automatically adjusted</li>
-        <li>To update balances, use the User Management section</li>
-        <li>All changes logged in the audit trail</li>
-    </ul>
-</section>
+                <div class="settings-summary" aria-live="polite">
+                    <strong>Summary</strong>
+                    <ul>
+                        <li>{{ (int) ($policies[$type]->default_days ?? 0) }} days of {{ strtolower($type) }} leave annually</li>
+                        <li>Up to {{ (int) ($policies[$type]->max_carry_over ?? 0) }} unused days can be carried over</li>
+                        <li>{{ !empty($policies[$type]->allow_half_days) ? 'Half-day requests are allowed' : 'Half-day requests are not allowed' }}</li>
+                        <li>{{ !empty($policies[$type]->requires_proof) ? 'Supporting documentation is required' : 'Supporting documentation is not required' }}</li>
+                    </ul>
+                </div>
+            </section>
+        @endforeach
 
+        <div class="settings-actions">
+            <button type="submit" class="app-page-btn app-page-btn--primary" aria-label="Save leave policies">Save policies</button>
+        </div>
+    </form>
+
+    <div class="app-page-panel" style="margin-top:18px;background:#fffbeb;border-color:#fde68a;">
+        <h2 class="app-page-section-title" style="color:#92400e;">Important notes</h2>
+        <div class="app-info-box" style="background:#fff;border-color:#fde68a;">
+            <ul>
+                <li>Policy changes apply immediately to new leave requests.</li>
+                <li>Existing leave balances are not automatically adjusted.</li>
+                <li>To update individual balances, use User Management.</li>
+                <li>All changes are logged in the audit trail.</li>
+            </ul>
+        </div>
+    </div>
+</div>
 @endsection

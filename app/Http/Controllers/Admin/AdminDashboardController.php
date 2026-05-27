@@ -72,48 +72,23 @@ class AdminDashboardController extends Controller
 
         $activeEmployeesCount = User::employees()->where('is_active', 1)->count();
 
-        // Monthly leave requests grouped by application month (created_at), not leave month.
-        // This matches the employee dashboard behavior (apply in May for September counts in May).
-        $monthlyQuery = LeaveRequest::query()->byEmployeeApplicants()->whereRaw('LOWER(status) != ?', ['withdrawn']);
-        if ($monthFilter) {
-            $now = Carbon::now();
-            if (ctype_digit((string) $monthFilter)) {
-                $monthlyQuery->whereYear('created_at', (int) $monthFilter);
-            } elseif ($monthFilter === 'this_month') {
-                $monthlyQuery->whereYear('created_at', $now->year)
-                    ->whereMonth('created_at', $now->month);
-            } elseif ($monthFilter === 'this_quarter') {
-                $quarter = (int) ceil($now->month / 3);
-                $startMonth = ($quarter - 1) * 3 + 1;
-                $endMonth = $startMonth + 2;
-                $monthlyQuery->whereYear('created_at', $now->year)
-                    ->whereBetween(DB::raw('MONTH(created_at)'), [$startMonth, $endMonth]);
-            } elseif ($monthFilter === 'this_year') {
-                $monthlyQuery->whereYear('created_at', $now->year);
-            }
-        }
+        // Monthly charts: always Jan–Dec for one calendar year (submission month), like employee dashboard.
+        $chartYear = ctype_digit((string) $monthFilter) ? (int) $monthFilter : (int) Carbon::now()->year;
+        $barLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $barData = array_fill(0, 12, 0);
 
-        $monthlyData = $monthlyQuery->select(
-            DB::raw('YEAR(created_at) as year'),
-            DB::raw('MONTH(created_at) as month'),
-            DB::raw('COUNT(*) as total')
-        )
-            ->groupBy('year', 'month')
-            ->orderBy('year')
+        $monthlyChartQuery = LeaveRequest::query()
+            ->byEmployeeApplicants()
+            ->whereRaw('LOWER(status) != ?', ['withdrawn'])
+            ->whereYear('created_at', $chartYear);
+
+        $monthlyData = (clone $monthlyChartQuery)
+            ->select(DB::raw('MONTH(created_at) as month'), DB::raw('COUNT(*) as total'))
+            ->groupBy('month')
             ->orderBy('month')
             ->get();
 
-        // Always return Jan..Dec (no skipped months). Months with no data are 0.
-        $selectedYear = ctype_digit((string) $monthFilter) ? (int) $monthFilter : (int) Carbon::now()->year;
-        $barLabels = [];
-        $barData = array_fill(0, 12, 0);
-        for ($m = 1; $m <= 12; $m++) {
-            $barLabels[] = date('M Y', mktime(0, 0, 0, $m, 1, $selectedYear));
-        }
         foreach ($monthlyData as $row) {
-            if ((int) $row->year !== $selectedYear) {
-                continue;
-            }
             $idx = ((int) $row->month) - 1;
             if ($idx >= 0 && $idx < 12) {
                 $barData[$idx] = (int) $row->total;
@@ -169,17 +144,31 @@ class AdminDashboardController extends Controller
         $designationLabels = array_keys($designationCounts);
         $designationData = array_values($designationCounts);
 
-        $weekdayRows = (clone $baseQuery)
-            ->select(DB::raw('DAYOFWEEK(created_at) as day_num'), DB::raw('COUNT(*) as total'))
-            ->groupBy('day_num')
-            ->pluck('total', 'day_num')
-            ->toArray();
-        $weekdayMap = [1 => 'Sun', 2 => 'Mon', 3 => 'Tue', 4 => 'Wed', 5 => 'Thu', 6 => 'Fri', 7 => 'Sat'];
-        $weekdayLabels = [];
-        $weekdayData = [];
-        foreach ($weekdayMap as $num => $label) {
-            $weekdayLabels[] = $label;
-            $weekdayData[] = (int) ($weekdayRows[$num] ?? 0);
+        $monthlyStatusRows = (clone $monthlyChartQuery)
+            ->select(
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('LOWER(TRIM(status)) as status'),
+                DB::raw('COUNT(*) as total')
+            )
+            ->groupBy('month', 'status')
+            ->orderBy('month')
+            ->get();
+
+        $monthlyApprovedData = array_fill(0, 12, 0);
+        $monthlyPendingData = array_fill(0, 12, 0);
+        $monthlyRejectedData = array_fill(0, 12, 0);
+        foreach ($monthlyStatusRows as $row) {
+            $idx = ((int) $row->month) - 1;
+            if ($idx < 0 || $idx > 11) {
+                continue;
+            }
+            $count = (int) $row->total;
+            match ($row->status) {
+                'approved' => $monthlyApprovedData[$idx] = $count,
+                'pending' => $monthlyPendingData[$idx] = $count,
+                'rejected' => $monthlyRejectedData[$idx] = $count,
+                default => null,
+            };
         }
 
         return view('admin.dashboard', [
@@ -192,6 +181,7 @@ class AdminDashboardController extends Controller
             'activeEmployeesCount' => $activeEmployeesCount,
             'barLabels' => $barLabels,
             'barData' => $barData,
+            'chartYear' => $chartYear,
             'statusCounts' => $statusCounts,
             'statusPercentages' => $statusPercentages,
             'departmentLabels' => $departmentLabels,
@@ -200,8 +190,9 @@ class AdminDashboardController extends Controller
             'monthFilter' => $monthFilter,
             'designationLabels' => $designationLabels,
             'designationData' => $designationData,
-            'weekdayLabels' => $weekdayLabels,
-            'weekdayData' => $weekdayData,
+            'monthlyApprovedData' => $monthlyApprovedData,
+            'monthlyPendingData' => $monthlyPendingData,
+            'monthlyRejectedData' => $monthlyRejectedData,
         ]);
 
         

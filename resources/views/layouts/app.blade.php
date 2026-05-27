@@ -22,7 +22,7 @@
             position: fixed;
             top: 0; left: 0; right: 0;
             height: 90px;
-            background-color: #fff;
+            background-color: #ffffff !important;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -67,6 +67,7 @@
             text-decoration: none;
             padding: 10px 15px;
             border-radius: 8px;
+            background-color: transparent;
             transition: background-color 0.3s ease, color 0.3s ease;
             font-size: 15px;
             display: flex;
@@ -93,6 +94,7 @@
             text-decoration: none;
             display: flex;
             align-items: center;
+            background-color: transparent;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
@@ -117,7 +119,7 @@
             text-align: center;
             padding: 12px;
             border-bottom: 1px solid #eee;
-            background: #f9fafc;
+            background: #ffffff;
         }
 
         .dropdown-menu.notifications-dropdown .dropdown-item {
@@ -288,6 +290,7 @@
             margin-left: auto;
             margin-right: auto;
             min-height: calc(100vh - 90px);
+            background-color: #ffffff;
         }
 
         @media (max-width: 992px) {
@@ -392,9 +395,9 @@
     <nav class="navbar" role="navigation" aria-label="Main Navigation">
         <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
 
-        <div class="navbar-logo" onclick="window.location.href='{{ url('/') }}'">
+        <a class="navbar-logo" href="{{ route('dashboard') }}" aria-label="Go to dashboard">
             <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
-        </div>
+        </a>
 
         @auth
         @php
@@ -477,7 +480,7 @@
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
     <aside id="mobileSidebar" class="mobile-sidebar" aria-label="Mobile Navigation">
         <div class="mobile-sidebar-header">
-            <a class="mobile-sidebar-brand" href="{{ url('/') }}" aria-label="Moepi Publishing home">
+            <a class="mobile-sidebar-brand" href="{{ route('dashboard') }}" aria-label="Go to dashboard">
                 <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
             </a>
             @auth

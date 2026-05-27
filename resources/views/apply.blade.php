@@ -7,97 +7,6 @@
   html, body {
       margin: 0; padding: 0; height: 100%; min-height: 100vh; background: white;
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   .main-content {
       margin: 40px auto 0;
       padding: 40px 50px;
@@ -130,6 +39,19 @@
       color: #b2b6be;
       font-size: 14px;
       margin-bottom: 30px;
+  }
+  .form-alert {
+      margin-bottom: 20px;
+      padding: 12px 14px;
+      border-radius: 6px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      font-size: 14px;
+  }
+  .form-alert ul {
+      margin: 6px 0 0;
+      padding-left: 18px;
   }
   form.leave-form {
       display: flex;
@@ -164,34 +86,88 @@
       min-height: 70px;
       max-height: 150px;
   }
-  .file-upload {
+  .file-upload-wrap {
       flex: 1 1 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+  }
+  .file-upload-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+  }
+  .file-upload-title {
+      font-weight: 700;
+      color: #2d3748;
+      font-size: 14px;
+  }
+  .attachment-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+  }
+  .attachment-badge--optional {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
+  }
+  .attachment-badge--required {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+  }
+  .file-upload {
+      border: 2px dashed #55771dff;
+      border-radius: 8px;
+      background: #fafdf8;
+      transition: border-color 0.25s, background 0.25s;
+  }
+  .file-upload.required {
+      border-color: #cf2727 !important;
+      background: #fffafa;
+  }
+  .file-upload.is-dragover {
+      border-color: #138056;
+      background: #f0faf4;
+  }
+  .file-upload-zone {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      border: 2px dashed #55771dff;
-      border-radius: 8px;
-      color: #436e0bff;
-      font-size: 14px;
+      padding: 22px 16px;
+      text-align: center;
       cursor: pointer;
       position: relative;
-      text-align: center;
       user-select: none;
-      transition: border-color 0.25s;
   }
-  .file-upload.required {
-      border-color: #cf2727 !important;
-  }
-  .file-upload:hover {
+  .file-upload-zone:hover {
       background-color: #f9f9f9;
   }
-  .file-upload svg {
-      width: 36px;
-      height: 36px;
+  .file-upload-icon {
+      width: 40px;
+      height: 40px;
       margin-bottom: 10px;
-      fill: #888;
+      fill: #55771d;
+      opacity: 0.85;
+  }
+  .file-upload-text {
+      margin: 0 0 6px;
+      color: #436e0b;
+      font-size: 14px;
+  }
+  .file-upload-hint {
+      margin: 0;
+      color: #6b7280;
+      font-size: 12px;
+      line-height: 1.4;
   }
   .file-upload input[type="file"] {
       position: absolute;
@@ -202,12 +178,61 @@
       left: 0;
       cursor: pointer;
   }
-  #file-upload-filename {
-      margin-top: 10px;
-      color: #355900;
-      font-weight: 600;
+  .file-upload-list {
+      list-style: none;
+      margin: 0;
+      padding: 0 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+  }
+  .file-upload-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid #d1e7c4;
+      border-radius: 6px;
+      background: #fff;
       font-size: 13px;
-      overflow-wrap: break-word;
+      color: #2d3748;
+  }
+  .file-upload-item-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+  }
+  .file-upload-item-meta {
+      color: #6b7280;
+      font-size: 12px;
+      white-space: nowrap;
+  }
+  .file-upload-remove {
+      border: none;
+      background: #fee2e2;
+      color: #991b1b;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+  }
+  .file-upload-remove:hover {
+      background: #fecaca;
+  }
+  .file-upload-error {
+      margin: 0 12px 12px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      font-size: 12px;
   }
   form.leave-form .button-group {
       flex-basis: 100%;
@@ -253,6 +278,17 @@
     <h1>Leave Application</h1>
     <h2>Fill in the form to request a leave</h2>
 
+    @if ($errors->any())
+        <div class="form-alert" role="alert">
+            <strong>Please fix the following:</strong>
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form class="leave-form" method="POST" action="{{ route('leave.submit') }}" enctype="multipart/form-data" novalidate>
         @csrf
 
@@ -284,13 +320,30 @@
             <label for="half_day" style="margin-bottom: 0;">Half-Day Request (End Date will be ignored)</label>
         </div>
 
-        <div class="input-group file-upload" id="file-upload-container">
-            <div style="font-weight: 700; margin-bottom: 10px; color: #2d3748;">Attachment</div>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#888" aria-hidden="true">
-                <path d="M9 16h6v-2H9v2zm-2-6h10v-2H7v2zm1-6h8v2H8V4zm6 16h-4v-2h4v2zm-2-6l-4 4h3v4h2v-4h3l-4-4z"/>
-            </svg>
-            <input type="file" name="file_uploads[]" aria-label="Drag and drop or select files" multiple />
-            <div id="file-upload-filename"></div>
+        <div class="input-group file-upload-wrap">
+            <div class="file-upload-header">
+                <span class="file-upload-title">Attachment</span>
+                <span class="attachment-badge attachment-badge--optional" id="attachment-badge">Optional</span>
+            </div>
+            <div class="file-upload" id="file-upload-container">
+                <div class="file-upload-zone" id="file-upload-zone">
+                    <svg class="file-upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15.01l1.41 1.41L11 14.84V19h2v-4.16l1.59 1.59L16 15.01 12.01 11 8 15.01z"/>
+                    </svg>
+                    <p class="file-upload-text"><strong>Click to browse</strong> or drag files here</p>
+                    <p class="file-upload-hint" id="file-upload-hint">PDF, JPG, PNG, or Word — up to 10 MB per file. You can attach more than one file.</p>
+                    <input
+                        type="file"
+                        id="file_uploads"
+                        name="file_uploads[]"
+                        aria-label="Upload supporting documents"
+                        multiple
+                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,application/pdf,image/jpeg,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    />
+                </div>
+                <ul class="file-upload-list" id="file-upload-list" hidden></ul>
+                <p class="file-upload-error" id="file-upload-error" hidden role="alert"></p>
+            </div>
         </div>
 
         <div class="input-group" style="flex-basis: 100%;">
@@ -359,13 +412,229 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     halfDayCheckbox.dispatchEvent(new Event('change'));
 
-    const form = document.querySelector('form.leave-form');
-    form.addEventListener('submit', (e) => {
+    const leaveForm = document.querySelector('form.leave-form');
+    const fileUploadContainer = document.getElementById('file-upload-container');
+    const fileUploadZone = document.getElementById('file-upload-zone');
+    const fileUploadInput = document.getElementById('file_uploads');
+    const fileUploadList = document.getElementById('file-upload-list');
+    const fileUploadError = document.getElementById('file-upload-error');
+    const attachmentBadge = document.getElementById('attachment-badge');
+    const fileUploadHint = document.getElementById('file-upload-hint');
+    const leaveTypeSelect = document.getElementById('leave_type');
+    const startDateInput = document.getElementById('start_date');
+    const requiresProofByType = @json(\App\Models\LeavePolicy::all()->keyBy('leave_type')->map->requires_proof);
+    const allowHalfDaysByType = @json(\App\Models\LeavePolicy::all()->keyBy('leave_type')->map->allow_half_days);
+
+    const MAX_FILE_BYTES = 10 * 1024 * 1024;
+    const ALLOWED_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
+    let selectedFiles = [];
+
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function isAllowedFile(file) {
+        const name = (file.name || '').toLowerCase();
+        const ext = name.includes('.') ? name.split('.').pop() : '';
+        return ALLOWED_EXTENSIONS.includes(ext);
+    }
+
+    function showFileError(message) {
+        if (!fileUploadError) return;
+        fileUploadError.textContent = message;
+        fileUploadError.hidden = !message;
+    }
+
+    function syncFileInput() {
+        if (typeof DataTransfer === 'undefined') {
+            renderFileList();
+            return;
+        }
+        const dt = new DataTransfer();
+        selectedFiles.forEach((file) => dt.items.add(file));
+        fileUploadInput.files = dt.files;
+        renderFileList();
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function renderFileList() {
+        if (!fileUploadList) return;
+
+        if (!selectedFiles.length) {
+            fileUploadList.innerHTML = '';
+            fileUploadList.hidden = true;
+            return;
+        }
+
+        fileUploadList.hidden = false;
+        fileUploadList.innerHTML = selectedFiles.map((file, index) => {
+            const safeName = escapeHtml(file.name);
+            return `<li class="file-upload-item">
+                <span class="file-upload-item-name" title="${safeName}">${safeName}</span>
+                <span class="file-upload-item-meta">${formatFileSize(file.size)}</span>
+                <button type="button" class="file-upload-remove" data-index="${index}">Remove</button>
+            </li>`;
+        }).join('');
+
+        fileUploadList.querySelectorAll('.file-upload-remove').forEach((btn) => {
+            btn.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const idx = parseInt(btn.dataset.index, 10);
+                selectedFiles.splice(idx, 1);
+                showFileError('');
+                syncFileInput();
+                updateFileUploadRequirement();
+            });
+        });
+    }
+
+    function addFiles(fileList) {
+        const rejected = [];
+
+        Array.from(fileList || []).forEach((file) => {
+            if (!isAllowedFile(file)) {
+                rejected.push(`${file.name} (unsupported type)`);
+                return;
+            }
+            if (file.size > MAX_FILE_BYTES) {
+                rejected.push(`${file.name} (over 10 MB)`);
+                return;
+            }
+            const duplicate = selectedFiles.some((f) => f.name === file.name && f.size === file.size);
+            if (!duplicate) {
+                selectedFiles.push(file);
+            }
+        });
+
+        if (rejected.length) {
+            showFileError('Some files were not added: ' + rejected.join(', '));
+        } else {
+            showFileError('');
+        }
+
+        syncFileInput();
+        updateFileUploadRequirement();
+    }
+
+    fileUploadInput.addEventListener('change', function () {
+        if (fileUploadInput.files && fileUploadInput.files.length) {
+            addFiles(fileUploadInput.files);
+        }
+    });
+
+    ['dragenter', 'dragover'].forEach((eventName) => {
+        fileUploadZone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            fileUploadContainer.classList.add('is-dragover');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach((eventName) => {
+        fileUploadZone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            fileUploadContainer.classList.remove('is-dragover');
+        });
+    });
+
+    fileUploadZone.addEventListener('drop', (event) => {
+        addFiles(event.dataTransfer.files);
+    });
+
+    function updateFileUploadRequirement() {
+        const isRequired = !!requiresProofByType[leaveTypeSelect.value];
+
+        fileUploadInput.removeAttribute('required');
+
+        if (isRequired) {
+            fileUploadContainer.classList.add('required');
+            attachmentBadge.textContent = 'Required';
+            attachmentBadge.className = 'attachment-badge attachment-badge--required';
+            fileUploadHint.textContent = 'Supporting document required for this leave type. PDF, JPG, PNG, or Word — up to 10 MB per file.';
+        } else {
+            fileUploadContainer.classList.remove('required');
+            attachmentBadge.textContent = 'Optional';
+            attachmentBadge.className = 'attachment-badge attachment-badge--optional';
+            fileUploadHint.textContent = 'PDF, JPG, PNG, or Word — up to 10 MB per file. You can attach more than one file.';
+        }
+    }
+
+    window.validateAttachmentsBeforeSubmit = function () {
+        const type = leaveTypeSelect.value;
+        const needsProof = requiresProofByType[type] === true || requiresProofByType[type] === 1 || requiresProofByType[type] === '1';
+        if (!needsProof) {
+            return '';
+        }
+        if (selectedFiles.length === 0) {
+            return 'Please attach supporting proof for this leave type.';
+        }
+        syncFileInput();
+        if (fileUploadInput.files && fileUploadInput.files.length > 0) {
+            return '';
+        }
+        return 'Your attachment could not be read. Please select the file again.';
+    };
+
+    leaveTypeSelect.addEventListener('change', updateFileUploadRequirement);
+    updateFileUploadRequirement();
+
+    function updateHalfDayEligibility() {
+        const isAllowed = !!allowHalfDaysByType[leaveTypeSelect.value];
+        if (!isAllowed) {
+            halfDayCheckbox.checked = false;
+            halfDayCheckbox.disabled = true;
+            const endDateInput = document.getElementById('end_date');
+            endDateInput.disabled = false;
+        } else {
+            halfDayCheckbox.disabled = false;
+        }
+    }
+    leaveTypeSelect.addEventListener('change', updateHalfDayEligibility);
+    updateHalfDayEligibility();
+
+    function updateAnnualEligibility() {
+        const startDate = startDateInput.value;
+        const yearKey = startDate ? new Date(startDate).getFullYear() : nowYear;
+        const leaveBalances = leaveBalancesByYear[yearKey] || {};
+        const annualBalance = leaveBalances['Annual'] ?? leaveBalances['Annual Leave'] ?? 0;
+
+        const options = Array.from(leaveTypeSelect.options);
+        options.forEach((opt) => {
+            if (!opt.value) return;
+            if (annualBalance <= 0 && !allowedWhenAnnualExhausted.includes(opt.value)) {
+                opt.disabled = true;
+            } else {
+                opt.disabled = false;
+            }
+        });
+
+        if (leaveTypeSelect.value && leaveTypeSelect.options[leaveTypeSelect.selectedIndex]?.disabled) {
+            leaveTypeSelect.value = '';
+        }
+    }
+
+    startDateInput.addEventListener('change', updateAnnualEligibility);
+    leaveTypeSelect.addEventListener('change', updateAnnualEligibility);
+    updateAnnualEligibility();
+
+    leaveForm.addEventListener('submit', function (e) {
         e.preventDefault();
-        const leaveType = document.getElementById('leave_type').value;
-        const startDate = document.getElementById('start_date').value;
+
+        const leaveType = leaveTypeSelect.value;
+        const startDate = startDateInput.value;
         const endDate = document.getElementById('end_date').value;
-        const halfDay = document.getElementById('half_day').checked;
+        const halfDay = halfDayCheckbox.checked;
         const comment = (document.getElementById('important_comment')?.value || '').trim();
 
         if (!leaveType) {
@@ -405,7 +674,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 text: 'Start Date and End Date must be within the same year.',
                 confirmButtonText: 'OK'
             });
-            return false;
+            return;
         }
 
         let daysRequested = calculateWorkingDays(startDate, endDate);
@@ -421,10 +690,10 @@ document.addEventListener('DOMContentLoaded', function () {
             Swal.fire({
                 icon: 'error',
                 title: 'Annual Leave Limit Reached',
-                html: `You have exhausted your annual leave limit. You may only request <b>Sick</b> (with medical certificate), <b>Bereavement</b> (with proof), or <b>Maternity</b> (with proof).`,
+                html: 'You have exhausted your annual leave limit. You may only request <b>Sick</b> (with medical certificate), <b>Bereavement</b> (with proof), or <b>Maternity</b> (with proof).',
                 confirmButtonText: 'OK'
             });
-            return false;
+            return;
         }
 
         if (leaveType && !allowedWhenAnnualExhausted.includes(leaveType) && daysRequested > annualBalance) {
@@ -434,7 +703,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 html: `Your remaining annual leave balance is <b>${annualBalance}</b> day${annualBalance === 1 ? '' : 's'}. You requested <b>${daysRequested}</b> day${daysRequested === 1 ? '' : 's'} (excluding weekends and public holidays).`,
                 confirmButtonText: 'OK'
             });
-            return false;
+            return;
         }
 
         if (daysRequested > balance) {
@@ -444,79 +713,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 html: `Your remaining balance for <b>${leaveType || 'this leave type'}</b> is <b>${balance}</b> day${balance === 1 ? '' : 's'}. You requested <b>${daysRequested}</b> day${daysRequested === 1 ? '' : 's'} (excluding weekends and public holidays).`,
                 confirmButtonText: 'OK'
             });
-            return false;
+            return;
         }
 
-        e.target.submit();
+        const attachmentError = validateAttachmentsBeforeSubmit();
+        if (attachmentError) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Attachment Required',
+                text: attachmentError,
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        leaveForm.submit();
     });
-
-    const fileUploadContainer = document.getElementById('file-upload-container');
-    const fileUploadInput = fileUploadContainer.querySelector('input[type="file"]');
-    const fileUploadFilename = document.getElementById('file-upload-filename');
-    const leaveTypeSelect = document.getElementById('leave_type');
-    const startDateInput = document.getElementById('start_date');
-
-    fileUploadInput.addEventListener('change', function() {
-        if (fileUploadInput.files.length > 0) {
-            const fileNames = Array.from(fileUploadInput.files).map(f => f.name).join(', ');
-            fileUploadFilename.textContent = fileNames;
-        } else {
-            fileUploadFilename.textContent = '';
-        }
-    });
-
-    function updateFileUploadRequirement() {
-        const requiresProof = @json(\App\Models\LeavePolicy::all()->keyBy('leave_type')->map->requires_proof);
-        if (requiresProof[leaveTypeSelect.value]) {
-            fileUploadInput.required = true;
-            fileUploadContainer.classList.add('required');
-        } else {
-            fileUploadInput.required = false;
-            fileUploadContainer.classList.remove('required');
-        }
-    }
-    leaveTypeSelect.addEventListener('change', updateFileUploadRequirement);
-    updateFileUploadRequirement();
-
-    function updateHalfDayEligibility() {
-        const allowHalfDays = @json(\App\Models\LeavePolicy::all()->keyBy('leave_type')->map->allow_half_days);
-        const isAllowed = !!allowHalfDays[leaveTypeSelect.value];
-        if (!isAllowed) {
-            halfDayCheckbox.checked = false;
-            halfDayCheckbox.disabled = true;
-            const endDateInput = document.getElementById('end_date');
-            endDateInput.disabled = false;
-        } else {
-            halfDayCheckbox.disabled = false;
-        }
-    }
-    leaveTypeSelect.addEventListener('change', updateHalfDayEligibility);
-    updateHalfDayEligibility();
-
-    function updateAnnualEligibility() {
-        const startDate = startDateInput.value;
-        const yearKey = startDate ? new Date(startDate).getFullYear() : nowYear;
-        const leaveBalances = leaveBalancesByYear[yearKey] || {};
-        const annualBalance = leaveBalances['Annual'] ?? leaveBalances['Annual Leave'] ?? 0;
-
-        const options = Array.from(leaveTypeSelect.options);
-        options.forEach((opt) => {
-            if (!opt.value) return;
-            if (annualBalance <= 0 && !allowedWhenAnnualExhausted.includes(opt.value)) {
-                opt.disabled = true;
-            } else {
-                opt.disabled = false;
-            }
-        });
-
-        if (leaveTypeSelect.value && leaveTypeSelect.options[leaveTypeSelect.selectedIndex]?.disabled) {
-            leaveTypeSelect.value = '';
-        }
-    }
-
-    startDateInput.addEventListener('change', updateAnnualEligibility);
-    leaveTypeSelect.addEventListener('change', updateAnnualEligibility);
-    updateAnnualEligibility();
 });
 </script>
 

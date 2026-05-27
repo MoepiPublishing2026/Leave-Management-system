@@ -16,7 +16,8 @@ class ReportController extends Controller
         $startDate = $request->query('start_date');
         $endDate = $request->query('end_date');
         $monthFilter = $request->query('month', 'this_year');
-        $years = range((int) Carbon::now()->year, (int) Carbon::now()->year - 5);
+        $nowYear = (int) Carbon::now()->year;
+        $years = range($nowYear - 1, $nowYear - 5);
 
         // Base leave query excluding withdrawn
         $leaveQuery = LeaveRequest::query()

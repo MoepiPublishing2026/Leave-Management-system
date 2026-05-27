@@ -48,7 +48,7 @@ class NotificationsController extends Controller
         }
 
         if (($notificationModel->data['leave_request_id'] ?? null) && ($user->role ?? null) === 'admin') {
-            return redirect()->route('admin.requests', ['status' => 'Overdue']);
+            return redirect()->route('admin.requests', ['status' => 'overdue']);
         }
 
         if (($notificationModel->data['conversation_id'] ?? null) && in_array($user->role ?? null, ['admin', 'manager'], true)) {

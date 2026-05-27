@@ -10,8 +10,35 @@
   --ui-shadow-brand: 0 10px 25px rgba(178, 205, 22, 0.3);
 }
 
-html, body {
+html,
+body {
   font-family: var(--ui-font-sans);
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+main,
+main.content {
+  background-color: #ffffff;
+}
+
+/* Keep top navigation bars white across all roles/layouts */
+nav.navbar,
+header.navbar,
+.navbar {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+nav.menu a,
+.menu .nav-link,
+.nav-item.dropdown > a {
+  background-color: transparent;
+}
+
+.dropdown-menu.notifications-dropdown,
+.dropdown-menu.notifications-dropdown .dropdown-header {
+  background-color: #ffffff;
 }
 
 /* Hide browser-native password reveal (Edge/IE) when custom eye toggles are used */
@@ -154,28 +181,6 @@ html, body {
   :where(.leave-header-flex) { flex-wrap: wrap !important; gap: 10px !important; }
   :where(.leave-table) { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   :where(.leave-table th, .leave-table td) { padding: 10px 12px !important; white-space: nowrap; }
-
-  /* Calendar pages: shrink day boxes on mobile */
-  :where(.admin-calendar-page, .manager-calendar-page, .employee-calendar-page) .day {
-    height: 80px !important;
-    padding: 8px !important;
-    font-size: 0.8rem !important;
-  }
-  :where(.admin-calendar-page, .manager-calendar-page, .employee-calendar-page) .day-header {
-    padding: 6px !important;
-    font-size: 0.8rem !important;
-  }
-  /* Calendar leave badge: keep it neat on mobile */
-  :where(.admin-calendar-page, .manager-calendar-page, .employee-calendar-page) .leave-count {
-    font-size: 0.72rem !important;
-    padding: 2px 6px !important;
-    border-radius: 999px !important;
-    line-height: 1.1 !important;
-    white-space: nowrap !important;
-    max-width: calc(100% - 12px);
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 }
 
 @media (max-width: 420px) {

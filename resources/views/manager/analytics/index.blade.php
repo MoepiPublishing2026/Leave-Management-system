@@ -29,15 +29,38 @@
         border: 1px solid #ccc;
         font-size: 1rem;
     }
+    .filter-form .filter-clear {
+        margin-left: 10px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        text-decoration: none;
+        font-weight: 700;
+        color: #0f172a;
+        transition: background-color 0.15s ease, border-color 0.15s ease;
+        white-space: nowrap;
+    }
+    .filter-form .filter-clear:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+        color: #0f172a;
+    }
     .metrics-row {
         display: flex;
         flex-wrap: wrap;
         gap: 24px;
         margin-bottom: 40px;
+        align-items: stretch;
     }
     .metrics-col {
         flex: 1 1 calc(25% - 24px);
         min-width: 240px;
+        display: flex;
+    }
+    .metrics-col > .card {
+        flex: 1;
+        width: 100%;
     }
     .card {
         background: #fff;
@@ -92,9 +115,13 @@
         align-items: center;
         gap: 10px;
     }
-    .card small {
+    .card small,
+    .card .card-metric-note {
         font-size: 0.9rem;
         font-weight: 600;
+        min-height: 1.35rem;
+        margin-top: auto;
+        display: block;
     }
     .text-success { color: #22c55e !important; }
     .text-warning { color: #f59e0b !important; }
@@ -238,8 +265,10 @@
         .stats-row { gap: 12px; min-width: 0; }
         .table-card { min-width: 0; flex: 1 1 100%; }
         .chart-card { flex: 1 1 100%; min-width: 0; }
-        #designationPieChart { width: 100% !important; max-height: 320px !important; }
-
+        .leave-type-list {
+            max-height: none;
+            overflow: visible;
+        }
         .table-card > .card {
             min-width: 0;
         }
@@ -291,7 +320,7 @@
                     </option>
                 @endforeach
             </select>
-            <a href="{{ route('manager.analytics', ['month' => 'this_year', 'staff' => 'all']) }}" style="margin-left: 10px; padding: 6px 12px; border-radius: 6px; border: 1px solid #ccc; background: #f8f9fa; text-decoration: none; font-weight: 600; color: #0f172a;">Clear</a>
+            <a href="{{ route('manager.analytics', ['month' => 'this_year', 'staff' => 'all']) }}" class="filter-clear">Clear</a>
         </form>
     </div>
 
@@ -305,6 +334,7 @@
                     <div class="card-icon bg-blue-100 text-blue-600"><i class="fas fa-calendar-alt"></i></div>
                 </div>
                 <h3>{{ $totalLeaves }}</h3>
+                <small class="text-muted">Requested</small>
             </div>
         </div>
 
@@ -413,7 +443,10 @@
             <div class="card">
                 <h5><i class="fas fa-chart-pie me-2 text-success"></i>Leaves by Designation</h5>
                 <hr>
-                <canvas id="designationPieChart" style="max-height: 370px;"></canvas>
+                <div class="chart-body chart-body--ring">
+                    <canvas id="designationPieChart"></canvas>
+                </div>
+                <ul class="chart-html-legend" id="designationPieLegend" aria-label="Designation legend"></ul>
             </div>
         </div>
     </div>
@@ -466,6 +499,8 @@
 
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@include('partials.dashboard-charts-styles')
+@include('partials.dashboard-chart-vars')
 <script>
 const ctx = document.getElementById('designationPieChart').getContext('2d');
 const chartPalette = [
@@ -499,37 +534,37 @@ const colorForDesignation = (label) => {
     const key = normalizeDesignation(label) || 'unknown';
     return designationPalette[hashString(key) % designationPalette.length];
 };
-const colorsForLabels = (labels) => labels.map((label) => colorForDesignation(label));
+const designationLabels = @json($designationLabels);
+const designationColors = designationLabels.map((label) => colorForDesignation(label));
 const designationPct = @json($designationPercentages ?? []);
 
-const chart = new Chart(ctx, {
+new Chart(ctx, {
     type: 'pie',
     data: {
-        labels: @json($designationLabels),
+        labels: designationLabels,
         datasets: [{
             data: @json($designationData),
-            backgroundColor: colorsForLabels(@json($designationLabels)),
+            backgroundColor: designationColors,
             borderColor: '#fff',
             borderWidth: 2
         }]
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        generateLabels: (chart) => {
-                            const base = Chart.overrides.pie.plugins.legend.labels.generateLabels(chart);
-                            return base.map((item) => {
-                                const pct = (designationPct[item.text] ?? 0).toFixed(1);
-                                return { ...item, text: `${item.text} (${pct}%)` };
-                            });
-                        }
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: (ctx) => {
+                        const pct = (designationPct[ctx.label] ?? 0).toFixed(1);
+                        return `${ctx.label}: ${ctx.parsed} (${pct}%)`;
                     }
                 }
+            }
         }
     }
 });
+renderChartHtmlLegend('designationPieLegend', designationLabels, designationColors, designationPct);
 </script>
 @endsection
