@@ -34,27 +34,27 @@
     <div class="reports-stats">
         <div class="reports-stat reports-stat--total">
             <span class="reports-stat-icon"><i class="fas fa-list-ul" aria-hidden="true"></i></span>
-            <span class="reports-stat-label">Total Requests</span>
+            <span class="reports-stat-label">All Requests</span>
             <span class="reports-stat-value">{{ $totalRequests ?? 0 }}</span>
         </div>
         <div class="reports-stat reports-stat--pending">
             <span class="reports-stat-icon"><i class="fas fa-hourglass-half" aria-hidden="true"></i></span>
-            <span class="reports-stat-label">Pending</span>
+            <span class="reports-stat-label">Pending Requests</span>
             <span class="reports-stat-value">{{ $pendingRequests ?? 0 }}</span>
         </div>
         <div class="reports-stat reports-stat--overdue">
             <span class="reports-stat-icon"><i class="fas fa-exclamation-circle" aria-hidden="true"></i></span>
-            <span class="reports-stat-label">Overdue</span>
+            <span class="reports-stat-label">Overdue Requests</span>
             <span class="reports-stat-value">{{ $overdueRequests ?? 0 }}</span>
         </div>
         <div class="reports-stat reports-stat--approved">
             <span class="reports-stat-icon"><i class="fas fa-check-circle" aria-hidden="true"></i></span>
-            <span class="reports-stat-label">Approved</span>
+            <span class="reports-stat-label">Approved Requests</span>
             <span class="reports-stat-value">{{ $approvedRequests ?? 0 }}</span>
         </div>
         <div class="reports-stat reports-stat--rejected">
             <span class="reports-stat-icon"><i class="fas fa-ban" aria-hidden="true"></i></span>
-            <span class="reports-stat-label">Rejected</span>
+            <span class="reports-stat-label">Rejected Requests</span>
             <span class="reports-stat-value">{{ $rejectedRequests ?? 0 }}</span>
         </div>
     </div>
@@ -78,12 +78,12 @@
                     $isOverdue = method_exists($leave, 'isOverdue') ? $leave->isOverdue() : false;
                     $statusText = $isOverdue ? 'overdue' : strtolower((string) $leave->status);
                     $statusClass = match ($statusText) {
-                        'pending' => 'report-status--pending',
-                        'overdue' => 'report-status--overdue',
-                        'approved' => 'report-status--approved',
-                        'rejected' => 'report-status--rejected',
-                        'withdrawn' => 'report-status--withdrawn',
-                        default => 'report-status--default',
+                        'pending' => 'request-badge--pending',
+                        'overdue' => 'request-badge--overdue',
+                        'approved' => 'request-badge--approved',
+                        'rejected' => 'request-badge--rejected',
+                        'withdrawn' => 'request-badge--withdrawn',
+                        default => 'request-badge--pending',
                     };
                     $employeeName = trim(($leave->user->first_name ?? '') . ' ' . ($leave->user->last_name ?? ''));
                     if ($employeeName === '') {
@@ -96,9 +96,11 @@
                     <td>{{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }} – {{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}</td>
                     <td>{{ $leave->days }}</td>
                     <td>
-                        <span class="report-status {{ $statusClass }}">
-                            {{ $statusText === 'overdue' ? 'Overdue' : ucfirst($statusText) }}
-                        </span>
+                        @if ($statusText === 'overdue')
+                            <span class="request-badge request-badge--overdue">Overdue</span>
+                        @else
+                            <span class="request-badge {{ $statusClass }}">{{ ucfirst($statusText) }}</span>
+                        @endif
                     </td>
                     <td>{{ \Carbon\Carbon::parse($leave->created_at)->format('d M Y H:i') }}</td>
                 </tr>

@@ -100,21 +100,23 @@
                             <span class="request-badge request-badge--{{ $rowStatus === 'withdrawn' ? 'withdrawn' : $rowStatus }}">{{ ucfirst($rowStatus) }}</span>
                         @endif
                     </td>
-                    <td class="request-actions" onclick="event.stopPropagation();">
-                        @if ($canWithdraw)
-                            <form class="withdraw-form" method="POST" action="{{ route('leave.withdraw', $req->id) }}" style="margin:0;">
-                                @csrf
-                                @method('PATCH')
-                                <button type="button" class="request-btn request-btn--withdraw withdraw-request-btn">Withdraw</button>
-                            </form>
-                        @endif
-                        @if ($canDelete)
-                            <form class="delete-request-form" method="POST" action="{{ route('leave.destroy', $req) }}" style="margin:0;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">Delete</button>
-                            </form>
-                        @endif
+                    <td class="request-actions-cell" onclick="event.stopPropagation();">
+                        <div class="request-actions">
+                            @if ($canWithdraw)
+                                <form class="withdraw-form" method="POST" action="{{ route('leave.withdraw', $req->id) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="button" class="request-btn request-btn--withdraw withdraw-request-btn">Withdraw</button>
+                                </form>
+                            @endif
+                            @if ($canDelete)
+                                <form class="delete-request-form" method="POST" action="{{ route('leave.destroy', $req) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">Delete</button>
+                                </form>
+                            @endif
+                        </div>
                     </td>
                 </tr>
             @empty

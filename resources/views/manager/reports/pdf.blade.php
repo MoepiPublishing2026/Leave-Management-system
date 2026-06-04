@@ -29,11 +29,11 @@
 
     <table class="cards">
         <tr>
-            <td><div class="k">Total</div><div class="v">{{ $totalRequests ?? 0 }}</div></td>
-            <td><div class="k">Pending</div><div class="v">{{ $pendingRequests ?? 0 }}</div></td>
-            <td><div class="k">Overdue</div><div class="v">{{ $overdueRequests ?? 0 }}</div></td>
-            <td><div class="k">Approved</div><div class="v">{{ $approvedRequests ?? 0 }}</div></td>
-            <td><div class="k">Rejected</div><div class="v">{{ $rejectedRequests ?? 0 }}</div></td>
+            <td><div class="k">All Requests</div><div class="v">{{ $totalRequests ?? 0 }}</div></td>
+            <td><div class="k">Pending Requests</div><div class="v">{{ $pendingRequests ?? 0 }}</div></td>
+            <td><div class="k">Overdue Requests</div><div class="v">{{ $overdueRequests ?? 0 }}</div></td>
+            <td><div class="k">Approved Requests</div><div class="v">{{ $approvedRequests ?? 0 }}</div></td>
+            <td><div class="k">Rejected Requests</div><div class="v">{{ $rejectedRequests ?? 0 }}</div></td>
         </tr>
     </table>
 

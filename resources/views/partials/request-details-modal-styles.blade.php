@@ -1,12 +1,32 @@
 @once
 <style>
+    /* Above fixed navbar (z-index 10000+) */
+    .request-details-container.swal2-container {
+        z-index: 10150 !important;
+        padding: 88px 12px 16px !important;
+        align-items: flex-start !important;
+        justify-content: center !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    .request-details-container .swal2-popup.request-details-popup {
+        transform: none !important;
+        margin: 0 auto 16px !important;
+    }
     .request-details-popup.swal2-popup {
         padding: 0 !important;
         border-radius: 18px !important;
         border: 1px solid #dbe3ef !important;
         box-shadow: 0 24px 48px rgba(15, 61, 46, 0.18) !important;
-        overflow: hidden;
+        overflow: visible !important;
         max-width: 640px !important;
+        width: 100%;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    .request-details-popup .swal2-icon,
+    .request-details-popup .swal2-close {
+        display: none !important;
     }
     .request-details-popup .swal2-title {
         display: none !important;
@@ -15,7 +35,11 @@
         margin: 0 !important;
         padding: 0 !important;
         text-align: left !important;
-        overflow: visible !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        flex: 1 1 auto !important;
+        max-height: min(72vh, 720px) !important;
     }
     .request-details-popup .swal2-actions {
         margin: 0 !important;
@@ -24,6 +48,7 @@
         background: #f8fafc;
         width: 100%;
         box-sizing: border-box;
+        flex-shrink: 0;
     }
     .request-details-popup .swal2-confirm {
         background: #138056 !important;
@@ -242,6 +267,34 @@
     .rd-footer-link:hover {
         background: #0f6b47;
         color: #fff !important;
+    }
+
+    @media (max-width: 768px) {
+        .request-details-container.swal2-container {
+            padding: 76px 8px 12px !important;
+        }
+        .request-details-popup.swal2-popup {
+            max-width: calc(100vw - 16px) !important;
+            width: calc(100vw - 16px) !important;
+            border-radius: 14px !important;
+        }
+        .request-details-popup .swal2-html-container {
+            max-height: min(65vh, 560px) !important;
+        }
+        .request-details-popup .swal2-actions {
+            padding: 12px 16px 14px !important;
+        }
+        .rd-header {
+            padding: 16px 16px 12px;
+        }
+        .rd-employee,
+        .rd-body {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+        .rd-handled {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 @endonce

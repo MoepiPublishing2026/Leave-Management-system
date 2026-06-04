@@ -12,7 +12,7 @@
         font-size: 40px;
         color: #2c3e50;
         margin: 0 0 8px;
-        padding-left: 3px;
+        padding-left: 15px;
         border-left: 6px solid #138056;
         letter-spacing: 0.04em;
     }
@@ -120,17 +120,18 @@
     .reports-stat--approved { --stat-accent: #10b981; }
     .reports-stat--rejected { --stat-accent: #2fcfc5; }
     .reports-stat-label {
-        font-size: 0.78rem;
+        font-size: 0.95rem;
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #64748b;
+        color: #334155;
+        letter-spacing: 0.02em;
+        line-height: 1.3;
     }
     .reports-stat-value {
         font-size: 1.75rem;
         font-weight: 800;
         color: #0f172a;
         line-height: 1.1;
+        font-family: inherit;
     }
     .reports-stat-icon {
         font-size: 1.1rem;
@@ -138,10 +139,11 @@
         opacity: 0.9;
     }
     .reports-section-title {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         font-weight: 700;
         color: #2c3e50;
         margin: 0 0 12px;
+        letter-spacing: 0.02em;
     }
     .reports-table-wrap {
         overflow-x: auto;
@@ -153,7 +155,7 @@
     .reports-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.9rem;
+        font-size: 0.92rem;
         min-width: 720px;
     }
     .reports-table th,
@@ -161,12 +163,13 @@
         padding: 12px 14px;
         text-align: left;
         border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
     }
     .reports-table th {
         background: #f8fafc;
         font-weight: 700;
         color: #334155;
-        font-size: 0.8rem;
+        font-size: 0.82rem;
         text-transform: uppercase;
         letter-spacing: 0.04em;
     }
@@ -182,7 +185,7 @@
         color: #64748b;
         font-style: italic;
     }
-    .report-status {
+    .reports-page .request-badge {
         display: inline-block;
         padding: 5px 11px;
         border-radius: 999px;
@@ -190,13 +193,13 @@
         font-size: 0.72rem;
         text-transform: uppercase;
         letter-spacing: 0.03em;
+        font-family: inherit;
     }
-    .report-status--pending { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
-    .report-status--overdue { background: #fce7f3; color: #9d174d; border: 1px solid #f472b6; }
-    .report-status--approved { background: #dcfce7; color: #166534; border: 1px solid #22c55e; }
-    .report-status--rejected { background: #ccfbf1; color: #0f766e; border: 1px solid #2fcfc5; }
-    .report-status--withdrawn { background: #ffedd5; color: #7c2d12; border: 1px solid #fb923c; }
-    .report-status--default { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .reports-page .request-badge--pending { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
+    .reports-page .request-badge--approved { background: #dcfce7; color: #166534; border: 1px solid #22c55e; }
+    .reports-page .request-badge--rejected { background: #ccfbf1; color: #0f766e; border: 1px solid #2fcfc5; }
+    .reports-page .request-badge--withdrawn { background: #ffedd5; color: #7c2d12; border: 1px solid #fb923c; }
+    .reports-page .request-badge--overdue { background: #fce7f3; color: #9d174d; border: 1px solid #f472b6; }
     @media (max-width: 768px) {
         .reports-page h1 { font-size: 28px; }
         .reports-toolbar { flex-direction: column; align-items: stretch; }

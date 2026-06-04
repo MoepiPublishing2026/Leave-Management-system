@@ -145,15 +145,31 @@
             </div>
         `;
 
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
         Swal.fire({
-            title: ' ',
-            width: 640,
-            showCloseButton: true,
-            customClass: { popup: 'request-details-popup' },
+            width: isMobile ? 'auto' : 640,
+            position: 'top',
+            showCloseButton: false,
+            showIcon: false,
+            customClass: {
+                popup: 'request-details-popup',
+                container: 'request-details-container',
+            },
             html: html,
             showConfirmButton: true,
             confirmButtonText: 'Close',
             focusConfirm: false,
+            didOpen: (popup) => {
+                const container = popup?.closest('.swal2-container');
+                if (container) {
+                    container.style.zIndex = '10150';
+                    container.scrollTop = 0;
+                }
+                const htmlContainer = Swal.getHtmlContainer();
+                if (htmlContainer) {
+                    htmlContainer.scrollTop = 0;
+                }
+            },
         });
     };
 

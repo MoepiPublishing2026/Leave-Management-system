@@ -102,37 +102,37 @@
                             <span class="request-badge request-badge--{{ $rowStatus === 'withdrawn' ? 'withdrawn' : $rowStatus }}">{{ ucfirst($rowStatus) }}</span>
                         @endif
                     </td>
-                    <td class="request-actions" onclick="event.stopPropagation();">
-                        @if ($rowStatus === 'pending')
-                            @if ($req->isOverdue())
-                                @if ($req->overdue_escalated_at)
-                                    <span style="font-weight:800; color:#9d174d;" title="{{ $req->overdue_escalation_reason ?? '' }}">Reason Sent</span>
+                    <td class="request-actions-cell" onclick="event.stopPropagation();">
+                        <div class="request-actions">
+                            @if ($rowStatus === 'pending')
+                                @if ($req->isOverdue())
+                                    @if ($req->overdue_escalated_at)
+                                        <span class="request-actions-note" title="{{ $req->overdue_escalation_reason ?? '' }}">Reason Sent</span>
+                                    @else
+                                        <button type="button" class="request-btn request-btn--escalate" onclick="openLateReasonPopup({{ $req->id }})">Submit Reason</button>
+                                    @endif
                                 @else
-                                    <button type="button" class="request-btn request-btn--escalate" onclick="openLateReasonPopup({{ $req->id }})">Submit Reason</button>
+                                    <div class="request-actions-inline">
+                                        <form action="{{ route('manager.requests.approve', $req) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="request-btn request-btn--approve">Approve</button>
+                                        </form>
+                                        <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Reject</button>
+                                    </div>
                                 @endif
-                            @else
-                                <div class="request-actions-inline">
-                                    <form action="{{ route('manager.requests.approve', $req) }}" method="POST" style="margin:0;">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" class="request-btn request-btn--approve">Approve</button>
-                                    </form>
-                                    <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Reject</button>
-                                </div>
+                            @elseif ($rowStatus === 'rejected')
+                                <a href="{{ route('manager.requests.show_reason', $req) }}" class="request-link">View Reason</a>
                             @endif
-                        @elseif ($rowStatus === 'rejected')
-                            <a href="{{ route('manager.requests.show_reason', $req) }}" class="request-link">View Reason</a>
-                        @else
-                            &mdash;
-                        @endif
-                        <a href="{{ route('messages.leave', $req) }}" class="request-link">Messages</a>
-                        @if($canDelete)
-                            <form class="delete-request-form" method="POST" action="{{ route('manager.requests.destroy', $req) }}" style="margin:0;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">Delete</button>
-                            </form>
-                        @endif
+                            <a href="{{ route('messages.leave', $req) }}" class="request-link">Messages</a>
+                            @if($canDelete)
+                                <form class="delete-request-form" method="POST" action="{{ route('manager.requests.destroy', $req) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">Delete</button>
+                                </form>
+                            @endif
+                        </div>
                     </td>
                 </tr>
             @empty

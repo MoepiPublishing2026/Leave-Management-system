@@ -193,6 +193,7 @@
         padding: 12px 14px;
         text-align: left;
         border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
     }
     .requests-table th {
         background: #f8fafc;
@@ -254,16 +255,35 @@
     .request-badge--rejected { background: #ccfbf1; color: #0f766e; border: 1px solid #2fcfc5; }
     .request-badge--withdrawn { background: #ffedd5; color: #7c2d12; border: 1px solid #fb923c; }
     .request-badge--overdue { background: #fce7f3; color: #9d174d; border: 1px solid #f472b6; }
+    .requests-table td.request-actions-cell {
+        vertical-align: middle;
+    }
     .request-actions {
         display: flex;
-        flex-direction: column;
-        gap: 6px;
-        align-items: flex-start;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        min-height: 0;
+    }
+    .request-actions form {
+        display: inline-flex;
+        margin: 0;
+        align-items: center;
+    }
+    .request-actions-note {
+        font-weight: 800;
+        color: #9d174d;
+        line-height: 1.35;
     }
     .request-actions-inline {
-        display: flex;
+        display: inline-flex;
         flex-wrap: wrap;
+        align-items: center;
         gap: 8px;
+    }
+    .request-actions-inline form {
+        display: inline-flex;
+        margin: 0;
         align-items: center;
     }
     .request-link {
@@ -282,8 +302,9 @@
         border-radius: 8px;
         cursor: pointer;
         text-decoration: none;
-        display: inline-flex;
-        align-items: center;
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 1.35;
     }
     .request-btn--delete { background: #991b1b; color: #fff; }
     .request-btn--delete:hover { background: #7f1d1d; }

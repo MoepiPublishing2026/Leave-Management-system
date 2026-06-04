@@ -109,15 +109,17 @@
                             <span class="request-badge request-badge--{{ $rowStatus === 'withdrawn' ? 'withdrawn' : $rowStatus }}">{{ ucfirst($rowStatus) }}</span>
                         @endif
                     </td>
-                    <td class="request-actions" onclick="event.stopPropagation();">
-                        <a href="{{ route('messages.leave', $req) }}" class="request-link">Messages</a>
-                        @if($canDelete)
-                            <form class="delete-request-form" method="POST" action="{{ route('admin.requests.destroy', $req) }}" style="margin:0;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">Delete</button>
-                            </form>
-                        @endif
+                    <td class="request-actions-cell" onclick="event.stopPropagation();">
+                        <div class="request-actions">
+                            <a href="{{ route('messages.leave', $req) }}" class="request-link">Messages</a>
+                            @if($canDelete)
+                                <form class="delete-request-form" method="POST" action="{{ route('admin.requests.destroy', $req) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">Delete</button>
+                                </form>
+                            @endif
+                        </div>
                     </td>
                 </tr>
             @empty
