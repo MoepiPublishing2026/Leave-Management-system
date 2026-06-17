@@ -15,8 +15,6 @@
     }
     h1 {
         color: #2c3e50;
-        border-left: 6px solid #138056ff;
-        padding-left: 15px;
         font-weight: 700;
         font-size: 36px;
         margin-bottom: 20px;
@@ -63,7 +61,7 @@
     <h1>Company Leave Policies</h1>
 
     <h2>Annual Leave</h2>
-    <p>Annual leave is the primary leave balance for the year. Any approved leave taken reduces the annual leave balance, because these absences count against the annual allocation. Once the annual balance reaches 0, the system disables leave applications for other leave types, but still allows Sick leave (with medical certificate), Bereavement leave (with proof), and Maternity leave (with proof).</p>
+    <p>Annual leave is the primary leave balance for the year. Approved leave that counts against your annual pool reduces this balance. Sick, Maternity, Paternity, and Bereavement leave do not reduce your annual balance and have their own allocations. Once the annual balance reaches 0, other leave types are disabled, but Sick, Bereavement, Maternity, and Paternity can still be requested (with proof where required).</p>
     <p>Maternity leave is treated as a special case and does not reduce annual leave.</p>
 
     <h2>Sick Leave</h2>

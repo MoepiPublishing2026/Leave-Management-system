@@ -116,26 +116,27 @@
         box-sizing: border-box;
         min-height: 52px;
         padding: 15px 40px;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 18px;
         line-height: 1.25;
         border-radius: 12px;
         cursor: pointer;
-        border: none;
+        border: 1px solid #91bf14;
         background-color: #b2cd16;
-        color: white;
+        color: #0a1347;
         text-decoration: none;
         text-align: center;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        transition: background-color 0.3s ease;
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
     .button-group button.btn-form-action {
         font-family: inherit;
     }
     .button-group .btn-form-action:hover {
-        background-color: #0f140acc;
+        background-color: #9eb812;
+        color: #0a1347;
     }
     .branding {
         margin-top: 35px;
@@ -166,7 +167,7 @@
 </style>
 
 <div class="employee-create-page">
-    <h1 style="font-weight:700; font-size:40px; color:#2c3e50; margin:0 0 8px; padding-left:15px; border-left:6px solid #138056; letter-spacing:0.04em;">Add Employee</h1>
+    <h1 style="font-weight:700; font-size:40px; color:#2c3e50; margin:0 0 8px; letter-spacing:0.04em;">Add Employee</h1>
     <p style="margin:0 0 18px; color:#64748b; font-size:0.92rem;">Create a new user account and send their login details by email.</p>
 
     <div class="signup-container">

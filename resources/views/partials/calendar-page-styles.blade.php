@@ -10,8 +10,6 @@
         font-size: 40px;
         color: #2c3e50;
         margin: 0;
-        padding-left: 15px;
-        border-left: 6px solid #138056;
         letter-spacing: 0.04em;
         text-align: left;
     }
@@ -22,18 +20,18 @@
         padding: 0 4px 24px;
     }
     .calendar-page .calendar-panel {
-        background: #fff;
-        border: 1px solid #dbe3ef;
-        border-radius: 14px;
-        box-shadow: 0 6px 22px rgba(15, 61, 46, 0.06);
-        padding: 10px 10px 12px;
+        background: #eef2f6;
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+        padding: 14px;
     }
     .calendar-page .calendar-meta {
-        margin-top: 10px;
-        padding: 10px 12px;
-        border-radius: 10px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        background: #e2e8f0;
+        border: none;
     }
     .calendar-page .calendar-summary {
         margin: 0 0 8px;
@@ -68,19 +66,19 @@
     .calendar-page .calendar-legend-swatch {
         width: 14px;
         height: 14px;
-        border-radius: 3px;
-        border: 1px solid rgba(15, 23, 42, 0.1);
+        border-radius: 4px;
+        border: none;
         flex-shrink: 0;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
     }
     .calendar-page .calendar-legend-swatch--leave {
-        background: #d4edda;
-        border-left: 3px solid #138056;
+        background: #b8dfc8;
     }
     .calendar-page .calendar-legend-swatch--holiday { background: #fcd9a3; }
-    .calendar-page .calendar-legend-swatch--weekend { background: #e2e8f0; }
+    .calendar-page .calendar-legend-swatch--weekend { background: #cbd5e1; }
     .calendar-page .calendar-legend-swatch--today {
-        background: #fff;
-        box-shadow: inset 0 0 0 2px #4c1d95;
+        background: #f0dff5;
+        box-shadow: inset 0 0 0 2px #C154C1;
     }
     .calendar-page .calendar-legend-hint {
         margin: 6px 0 0;
@@ -90,7 +88,7 @@
     .calendar-page .calendar {
         display: grid;
         grid-template-columns: repeat(7, minmax(0, 1fr));
-        gap: 5px;
+        gap: 7px;
         align-items: stretch;
     }
     .calendar-page .calendar-spacer {
@@ -102,55 +100,64 @@
         text-align: center;
         background: #138056;
         color: #fff;
-        padding: 8px 3px;
-        border-radius: 7px;
-        font-size: 0.78rem;
-        letter-spacing: 0.02em;
+        padding: 9px 4px;
+        border-radius: 8px;
+        font-size: 0.76rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
     }
     .calendar-page .day {
-        border: 1px solid #dbe3ef;
-        border-radius: 8px;
-        padding: 6px 6px 5px;
-        min-height: 88px;
-        background: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 7px 7px 6px;
+        min-height: 92px;
+        background: #e2e8f0;
         position: relative;
         box-sizing: border-box;
         overflow: hidden;
-        transition: box-shadow 0.15s ease;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+        transition: transform 0.12s ease, box-shadow 0.15s ease;
     }
     .calendar-page .day-number {
-        display: block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.6rem;
+        height: 1.6rem;
         font-weight: 700;
-        font-size: 0.88rem;
+        font-size: 0.86rem;
         color: #334155;
-        line-height: 1.2;
+        line-height: 1;
     }
     .calendar-page--interactive .day:not(.day-weekend):not(.day-holiday) {
         cursor: pointer;
     }
     .calendar-page--interactive .day:not(.day-weekend):not(.day-holiday):hover {
-        box-shadow: 0 3px 12px rgba(19, 128, 86, 0.14);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(19, 128, 86, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.45);
     }
     .calendar-page .day:focus-visible {
         outline: 2px solid #138056;
         outline-offset: 2px;
     }
     .calendar-page .day.has-leave {
-        background: #d4edda !important;
-        border-color: #6aab82;
-        border-left-width: 4px;
-        border-left-color: #138056;
-        padding-left: 4px;
+        background: #b8dfc8 !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
     .calendar-page .day.has-leave .day-number {
         color: #0f3d2e;
     }
-    .calendar-page .day.day-today {
-        /* Keep Today distinct from leave styling */
-        box-shadow: inset 0 0 0 2px #4c1d95;
+    .calendar-page .day.day-today:not(.day-holiday):not(.has-leave) {
+        background: #f0dff5 !important;
+        box-shadow: inset 0 0 0 2px #C154C1, 0 2px 10px rgba(193, 84, 193, 0.12);
+    }
+    .calendar-page .day.day-today.has-leave {
+        box-shadow: inset 0 0 0 2px #C154C1, 0 2px 10px rgba(193, 84, 193, 0.12);
     }
     .calendar-page .day.day-today .day-number {
-        color: #4c1d95;
+        color: #9b3d9b;
+        background: rgba(193, 84, 193, 0.14);
+        border-radius: 999px;
     }
     .calendar-page .no-apply-icon {
         position: absolute;
@@ -181,60 +188,77 @@
         stroke-linejoin: round;
     }
     .calendar-page .day.day-weekend {
-        background: #eef2f7 !important;
-        border-color: #cbd5e1;
+        background: #cbd5e1 !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
     }
     .calendar-page .day.day-weekend .day-number {
-        color: #94a3b8;
+        color: #64748b;
     }
     .calendar-page .day.day-holiday {
-        background: #fff3d6 !important;
-        border-color: #e8b84a;
-        border-left-width: 4px;
-        border-left-color: #e8b84a;
-        padding-left: 4px;
+        background: #fde8b8 !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
     .calendar-page .day.day-holiday .day-number {
         color: #92400e;
+        background: rgba(255, 255, 255, 0.45);
+        border-radius: 999px;
     }
     .calendar-page .leave-count {
         position: absolute;
-        left: 4px;
-        right: 4px;
-        bottom: 4px;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
         font-weight: 700;
         color: #fff;
-        font-size: 0.65rem;
+        font-size: 0.64rem;
         background: #138056;
-        border: 1px solid #0f6644;
-        border-radius: 6px;
-        padding: 3px 5px;
+        border: none;
+        border-radius: 999px;
+        padding: 4px 6px;
         text-align: center;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         line-height: 1.2;
+        box-shadow: 0 2px 6px rgba(19, 128, 86, 0.25);
     }
     .calendar-page .leave-count-short {
         display: none;
     }
+    .calendar-page .no-leave-today-label {
+        position: absolute;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        font-weight: 700;
+        color: #9b3d9b;
+        font-size: 0.62rem;
+        background: rgba(193, 84, 193, 0.16);
+        border: none;
+        border-radius: 999px;
+        padding: 4px 6px;
+        text-align: center;
+        line-height: 1.2;
+        letter-spacing: 0.01em;
+    }
     .calendar-page .holiday-label {
         position: absolute;
-        left: 4px;
-        right: 4px;
-        bottom: 4px;
-        padding: 3px 5px;
-        border-radius: 6px;
-        background: rgba(255, 255, 255, 0.9);
-        font-size: 0.58rem;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        padding: 4px 6px;
+        border-radius: 999px;
+        background: #fff;
+        font-size: 0.6rem;
         font-weight: 700;
-        color: #92400e;
+        color: #b45309;
         text-align: center;
         line-height: 1.15;
         overflow: hidden;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
+        box-shadow: 0 2px 6px rgba(180, 83, 9, 0.12);
     }
     .calendar-page .day.has-leave .holiday-label {
         display: none;
@@ -260,10 +284,10 @@
     }
     .calendar-page .calendar-modal-summary {
         margin: 0 0 12px;
-        padding: 8px 12px;
-        border-radius: 8px;
-        background: #f0faf4;
-        border: 1px solid #c5e6d4;
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: #dcfce7;
+        border: none;
         font-size: 0.9rem;
         color: #334155;
     }
@@ -311,6 +335,13 @@
         }
         .calendar-page .holiday-label {
             font-size: 0.48rem;
+        }
+        .calendar-page .no-leave-today-label {
+            font-size: 0.5rem;
+            padding: 2px 4px;
+        }
+        .calendar-page .calendar {
+            gap: 4px;
         }
     }
 </style>

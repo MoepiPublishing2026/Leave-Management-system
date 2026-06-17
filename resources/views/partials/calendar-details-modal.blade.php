@@ -1,6 +1,7 @@
 @php
     $modalTitle = $modalTitle ?? 'Leave Details';
     $showUserInModal = $showUserInModal ?? true;
+    $today = $today ?? now()->toDateString();
 @endphp
 
 <div class="modal fade" id="leaveModal" tabindex="-1" aria-labelledby="leaveModalLabel" aria-hidden="true">
@@ -44,10 +45,13 @@
                 : 'My Leave — ' + formatted;
         }
 
+        const todayDate = @json($today);
         const dayEvents = events[date];
 
         if (!dayEvents || !dayEvents.length) {
-            details.innerHTML = '<p class="mb-0">No approved leave on this day.</p>';
+            details.innerHTML = date === todayDate
+                ? '<p class="mb-0">No leave today.</p>'
+                : '<p class="mb-0">No approved leave on this day.</p>';
         } else if (showUser) {
             const grouped = {};
             dayEvents.forEach(function (entry) {

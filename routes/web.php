@@ -168,6 +168,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/messages', [MessagesController::class, 'index'])->name('messages.index');
     Route::get('/messages/leave/{leaveRequest}', [MessagesController::class, 'openLeaveRequest'])->name('messages.leave');
     Route::post('/messages/{conversation}/send', [MessagesController::class, 'send'])->name('messages.send');
+    Route::get('/messages/voice/{message}', [MessagesController::class, 'voice'])->name('messages.voice');
+    Route::delete('/messages/{message}', [MessagesController::class, 'destroy'])->name('messages.destroy');
+    Route::post('/messages/{message}/forward', [MessagesController::class, 'forward'])->name('messages.forward');
 
     Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}/open', [NotificationsController::class, 'open'])->name('notifications.open');

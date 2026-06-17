@@ -62,8 +62,9 @@
             border-radius: 8px;
             background-color: transparent;
             transition: background-color 0.3s ease, color 0.3s ease;
-            display: flex;
+            display: inline-flex;
             align-items: center;
+            gap: 6px;
         }
 
         nav.menu a:hover,
@@ -326,6 +327,8 @@
         });
     </script>
 
+    @include('partials.filter-select-styles')
+    @include('partials.beautiful-date-picker')
     @stack('styles')
     @yield('head')
 </head>
@@ -414,7 +417,7 @@
         <a href="{{ route('admin.employees.index') }}" class="{{ request()->routeIs('admin.employees.*') ? 'active' : '' }}">Employees</a>
         <a href="{{ route('admin.requests') }}" class="{{ request()->routeIs('admin.requests') ? 'active' : '' }}">Requests</a>
         <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
-            <span>Messages</span>
+            Messages
             @if($unreadMessageCount > 0)
                 <span class="badge-notification">{{ $unreadMessageCount }}</span>
             @endif

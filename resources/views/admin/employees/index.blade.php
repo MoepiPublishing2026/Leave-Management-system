@@ -24,41 +24,42 @@
         background-color: #f9f9f9;
     }
     .delete-button {
-        background-color: #ef4444;
-        border: none;
-        color: white;
-        padding: 6px 12px;
-        border-radius: 5px;
+        background-color: #dc2626;
+        border: 1px solid #b91c1c;
+        color: #fff;
+        padding: 8px 14px;
+        border-radius: 8px;
         cursor: pointer;
         font-size: 14px;
+        font-weight: 700;
+        transition: background-color 0.15s ease, color 0.15s ease;
     }
     .delete-button:hover {
         background-color: #b91c1c;
+        color: #fff;
     }
-
-    /* New button style */
     .add-employee-button {
-        background-color: #0f6b4f;
-        color: white;
-        padding: 6px 12px;       /* reduced from 12px 20px */
+        background-color: #b2cd16;
+        border: 1px solid #91bf14;
+        color: #0a1347;
+        padding: 8px 14px;
         border-radius: 8px;
         text-decoration: none;
-        font-weight: 300;
+        font-weight: 700;
         float: right;
         margin-bottom: 10px;
-        transition: background-color 0.3s ease;
-        font-size: 25px;         /* add smaller font size */
+        font-size: 16px;
+        transition: background-color 0.15s ease, color 0.15s ease;
     }
     .add-employee-button:hover {
-        background-color: #173023ff;
+        background-color: #9eb812;
+        color: #0a1347;
     }
     h1 {
         font-weight: 700;
         font-size: 2.4rem;
         color: #2c3e50;
         margin: 0 0 20px 0;
-        border-left: 6px solid #138056ff;
-        padding-left: 15px;
         letter-spacing: 0.04em;
         margin-bottom:30px;
     }

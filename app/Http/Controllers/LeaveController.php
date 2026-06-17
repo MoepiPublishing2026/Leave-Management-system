@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewLeaveRequestNotification;
  use Yasumi\Yasumi;
 use Illuminate\Support\Facades\Storage;
+use App\Support\AnnualLeaveRules;
+use App\Support\LeaveRequestSearch;
+use App\Support\MonthlyLeaveStatusBreakdown;
 use App\Support\PercentageDistribution;
 
 
@@ -86,6 +89,8 @@ public function dashboard()
             ->count();
         $pendingCount = max(0, $pendingTotalCount - $overduePendingCount);
 
+        $allRequestsCount = LeaveRequest::where('user_id', $userId)->count();
+
         // Leave type counts
         $leaveTypeCounts = LeaveRequest::where('user_id', $userId)
             ->select('leave_type', \DB::raw('count(*) as total'))
@@ -106,35 +111,15 @@ public function dashboard()
                 ->count();
         }
 
-        $monthlyStatusRows = LeaveRequest::where('user_id', $userId)
-            ->whereYear('created_at', $dashboardYear)
-            ->select(
-                \DB::raw('MONTH(created_at) as month'),
-                \DB::raw('LOWER(TRIM(status)) as status'),
-                \DB::raw('COUNT(*) as total')
-            )
-            ->groupBy('month', 'status')
-            ->orderBy('month')
-            ->get();
-
-        $monthlyApprovedData = array_fill(0, 12, 0);
-        $monthlyPendingData = array_fill(0, 12, 0);
-        $monthlyRejectedData = array_fill(0, 12, 0);
-        $monthlyWithdrawnData = array_fill(0, 12, 0);
-        foreach ($monthlyStatusRows as $row) {
-            $idx = ((int) $row->month) - 1;
-            if ($idx < 0 || $idx > 11) {
-                continue;
-            }
-            $count = (int) $row->total;
-            match ($row->status) {
-                'approved' => $monthlyApprovedData[$idx] = $count,
-                'pending' => $monthlyPendingData[$idx] = $count,
-                'rejected' => $monthlyRejectedData[$idx] = $count,
-                'withdrawn' => $monthlyWithdrawnData[$idx] = $count,
-                default => null,
-            };
-        }
+        $monthlyBreakdown = MonthlyLeaveStatusBreakdown::fromQuery(
+            LeaveRequest::where('user_id', $userId)->whereYear('created_at', $dashboardYear),
+            'created_at'
+        );
+        $monthlyApprovedData = $monthlyBreakdown['monthlyApprovedData'];
+        $monthlyPendingData = $monthlyBreakdown['monthlyPendingData'];
+        $monthlyOverdueData = $monthlyBreakdown['monthlyOverdueData'];
+        $monthlyRejectedData = $monthlyBreakdown['monthlyRejectedData'];
+        $monthlyWithdrawnData = $monthlyBreakdown['monthlyWithdrawnData'];
 
         // Policies keyed by leave_type
         $policies = LeavePolicy::all()->keyBy('leave_type');
@@ -172,14 +157,8 @@ public function dashboard()
         $annualKey = $policies->has('Annual') ? 'Annual' : ($policies->has('Annual Leave') ? 'Annual Leave' : 'Annual');
         if ($policies->has($annualKey)) {
             $annualDefault = $policies[$annualKey]->default_days ?? 30;
-            $nonMaternityTaken = 0.0;
-            foreach ($leaveDaysCounted as $type => $takenDays) {
-                if (strtolower((string) $type) === 'maternity') {
-                    continue;
-                }
-                $nonMaternityTaken += (float) $takenDays;
-            }
-            $leaveBalances[$annualKey] = max(0, $annualDefault - $nonMaternityTaken);
+            $annualPoolUsed = AnnualLeaveRules::sumDaysAgainstAnnual($leaveDaysCounted);
+            $leaveBalances[$annualKey] = max(0, $annualDefault - $annualPoolUsed);
         }
 
         // Build utilization dataset (no hardcoded totals)
@@ -196,34 +175,30 @@ public function dashboard()
                 'remaining' => $remainingDays,
             ];
         }
-        // Mirror Annual override in utilization too (annual = annualDefault - nonMaternityTaken)
+        // Mirror Annual override in utilization too (annual pool excludes sick/maternity/paternity/bereavement)
         if ($policies->has($annualKey ?? 'Annual')) {
             $annualKeyResolved = $annualKey ?? 'Annual';
             $annualDefault = (float) ($policies[$annualKeyResolved]->default_days ?? 30);
-            $nonMaternityTaken = 0.0;
-            foreach ($leaveDaysCounted as $type => $takenDays) {
-                if (strtolower((string) $type) === 'maternity') {
-                    continue;
-                }
-                $nonMaternityTaken += (float) $takenDays;
-            }
+            $annualPoolUsed = AnnualLeaveRules::sumDaysAgainstAnnual($leaveDaysCounted);
             // replace/insert annual record
             $leaveUtilization = array_values(array_filter($leaveUtilization, fn ($it) => $it['type'] !== $annualKeyResolved));
             $leaveUtilization[] = [
                 'type' => $annualKeyResolved,
                 'total' => $annualDefault,
-                'used' => $nonMaternityTaken,
-                'remaining' => (float) max(0, $annualDefault - $nonMaternityTaken),
+                'used' => $annualPoolUsed,
+                'remaining' => (float) max(0, $annualDefault - $annualPoolUsed),
             ];
         }
 
         $statusPercentages = PercentageDistribution::oneDecimalPercents([
             'Pending' => (int) $pendingCount,
+            'Overdue' => (int) $overduePendingCount,
             'Rejected' => (int) $rejectedCount,
             'Approved' => (int) $approvedCount,
         ]);
 
         return view('dashboard', compact(
+            'allRequestsCount',
             'pendingCount',
             'approvedCount',
             'rejectedCount',
@@ -237,6 +212,7 @@ public function dashboard()
             'barData',
             'monthlyApprovedData',
             'monthlyPendingData',
+            'monthlyOverdueData',
             'monthlyRejectedData',
             'monthlyWithdrawnData',
             'leaveBalances',
@@ -292,16 +268,10 @@ public function leaveBalance(Request $request)
     $annualKey = $policies->has('Annual') ? 'Annual' : ($policies->has('Annual Leave') ? 'Annual Leave' : 'Annual');
     if ($policies->has($annualKey)) {
         $annualDefault = (float) ($policies[$annualKey]->default_days ?? 30);
-        $nonMaternityTaken = 0.0;
-        foreach ($leaveDaysCounted as $type => $takenDays) {
-            if (strtolower((string) $type) === 'maternity') {
-                continue;
-            }
-            $nonMaternityTaken += (float) $takenDays;
-        }
+        $annualPoolUsed = AnnualLeaveRules::sumDaysAgainstAnnual($leaveDaysCounted);
         $leaveBalances[$annualKey]['default_days'] = $annualDefault;
-        $leaveBalances[$annualKey]['taken_days'] = $nonMaternityTaken;
-        $leaveBalances[$annualKey]['remaining_days'] = (float) max(0, $annualDefault - $nonMaternityTaken);
+        $leaveBalances[$annualKey]['taken_days'] = $annualPoolUsed;
+        $leaveBalances[$annualKey]['remaining_days'] = (float) max(0, $annualDefault - $annualPoolUsed);
     }
 
     $selectedType = $request->query('type');
@@ -379,7 +349,7 @@ public function leaveBalance(Request $request)
         ? min(100, round(($annualTaken / $annualAllocated) * 100))
         : 0;
 
-    $notDisabledWhenAnnualExhausted = ['Annual', 'Annual Leave', 'Sick', 'Bereavement', 'Maternity'];
+    $notDisabledWhenAnnualExhausted = AnnualLeaveRules::notDisabledWhenAnnualExhaustedLabels();
 
     $pendingLeavesDisplay = $pendingLeaves;
     if (!empty($selectedType)) {
@@ -411,8 +381,7 @@ public function leaveBalance(Request $request)
         $taken = (float) ($info['taken_days'] ?? 0);
         $typeUsagePercent = $allocated > 0 ? min(100, (int) round(($taken / $allocated) * 100)) : 0;
         $isTypeDisabled = $annualRemaining <= 0 && !in_array($selectedType, $notDisabledWhenAnnualExhausted, true);
-        $countsAgainstAnnual = strtolower((string) $selectedType) !== strtolower((string) $annualKey)
-            && strtolower((string) $selectedType) !== 'maternity';
+        $countsAgainstAnnual = AnnualLeaveRules::countsAgainstAnnual((string) $selectedType);
 
         $focusedBalance = array_merge($info, [
             'type' => $selectedType,
@@ -540,14 +509,8 @@ public function applyForm()
             $leaveBalancesByYear[$year][$type] = max(0, $policy->default_days - $taken);
         }
 
-        $nonMaternityTaken = 0.0;
-        foreach (($leaveDaysCountedByYear[$year] ?? []) as $type => $takenDays) {
-            if (strtolower((string) $type) === 'maternity') {
-                continue;
-            }
-            $nonMaternityTaken += (float) $takenDays;
-        }
-        $leaveBalancesByYear[$year][$annualKey] = max(0, $annualDefault - $nonMaternityTaken);
+        $annualPoolUsed = AnnualLeaveRules::sumDaysAgainstAnnual($leaveDaysCountedByYear[$year] ?? []);
+        $leaveBalancesByYear[$year][$annualKey] = max(0, $annualDefault - $annualPoolUsed);
     }
 
     return view('apply', compact('publicHolidays', 'leaveBalancesByYear', 'nowYear'));
@@ -643,10 +606,10 @@ public function applyForm()
     $annualDefault = $policies[$annualKey]->default_days ?? 30;
     $annualTakenLeaves = LeaveRequest::where('user_id', $userId)
         ->where('status', 'approved')
-        ->whereRaw('LOWER(leave_type) != ?', ['maternity'])
         ->whereDate('end_date', '>=', $startOfYear->toDateString())
         ->whereDate('start_date', '<=', $endOfYear->toDateString())
-        ->get();
+        ->get()
+        ->filter(fn ($leave) => AnnualLeaveRules::countsAgainstAnnual((string) $leave->leave_type));
 
     $annualTakenDays = 0.0;
     foreach ($annualTakenLeaves as $leave) {
@@ -660,21 +623,21 @@ public function applyForm()
     }
 
     $annualBalance = max(0, $annualDefault - $annualTakenDays);
-    $leaveTypeLower = strtolower(trim((string) $leaveType));
-    $allowedWhenAnnualExhausted = ['sick', 'bereavement', 'maternity'];
-    if ($annualBalance <= 0 && !in_array($leaveTypeLower, $allowedWhenAnnualExhausted, true)) {
-        return redirect()->back()
-            ->withErrors([
-                'balance' => 'You have exhausted your annual leave limit. You may only request Sick (with medical certificate), Bereavement (with proof), or Maternity (with proof).',
-            ])
-            ->withInput();
-    }
-    if (!in_array($leaveTypeLower, $allowedWhenAnnualExhausted, true) && $requestedDays > $annualBalance) {
-        return redirect()->back()
-            ->withErrors([
-                'balance' => "Your remaining annual leave balance is $annualBalance days. You requested $requestedDays days (excluding weekends and public holidays).",
-            ])
-            ->withInput();
+    if (AnnualLeaveRules::countsAgainstAnnual((string) $leaveType)) {
+        if ($annualBalance <= 0) {
+            return redirect()->back()
+                ->withErrors([
+                    'balance' => AnnualLeaveRules::exhaustedAnnualMessage(),
+                ])
+                ->withInput();
+        }
+        if ($requestedDays > $annualBalance) {
+            return redirect()->back()
+                ->withErrors([
+                    'balance' => "Your remaining annual leave balance is $annualBalance days. You requested $requestedDays days (excluding weekends and public holidays).",
+                ])
+                ->withInput();
+        }
     }
 
     $leavesTakenRaw = LeaveRequest::where('user_id', $userId)
@@ -824,17 +787,7 @@ public function myRequests(Request $request)
     }
 
     if ($effectiveSearch !== '') {
-        $query->where(function ($q) use ($effectiveSearch) {
-            $q->where('leave_type', 'like', '%' . $effectiveSearch . '%')
-                ->orWhereRaw('LOWER(status) like ?', ['%' . strtolower($effectiveSearch) . '%'])
-                ->orWhere('start_date', 'like', '%' . $effectiveSearch . '%')
-                ->orWhere('end_date', 'like', '%' . $effectiveSearch . '%')
-                ->orWhere('important_comment', 'like', '%' . $effectiveSearch . '%');
-
-            if (ctype_digit($effectiveSearch)) {
-                $q->orWhere('id', (int) $effectiveSearch);
-            }
-        });
+        LeaveRequestSearch::apply($query, $effectiveSearch, false);
     }
 
     $leaveRequests = $query->paginate(10)->withQueryString();
@@ -859,10 +812,10 @@ public function destroy($id)
     $currentYear = (int) Carbon::now()->year;
     $requestYear = $leaveRequest->start_date ? (int) Carbon::parse($leaveRequest->start_date)->year : $currentYear;
     $isPreviousYear = $requestYear === ($currentYear - 1);
-    if (!($status === 'withdrawn' || $isPreviousYear)) {
+    if (! $isPreviousYear) {
         return redirect()
             ->route('leave.myRequests')
-            ->with('error', 'Only withdrawn requests or requests from the previous year can be deleted.');
+            ->with('error', 'Only requests from the previous year can be deleted.');
     }
 
     try {

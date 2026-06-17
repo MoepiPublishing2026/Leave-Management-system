@@ -49,7 +49,7 @@
 
                 <p>
                     @if($type === 'Annual')
-                        Annual leave is the primary leave balance for the year. Any approved leave taken reduces the employee's annual balance, because these absences count against the annual allocation. Once the annual balance reaches 0, the system disables leave applications for other leave types, but still allows Sick leave (with medical certificate), Bereavement leave (with proof), and Maternity leave (with proof). Maternity leave is treated as a special case and does not reduce annual leave.
+                        Annual leave is the primary leave balance for the year. Approved leave that counts against your annual pool reduces this balance. Sick, Maternity, Paternity, and Bereavement leave do not reduce your annual balance and have their own allocations. Once the annual balance reaches 0, other leave types are disabled, but Sick, Bereavement, Maternity, and Paternity can still be requested (with proof where required).
                     @elseif($type === 'Sick')
                         Sick leave is granted up to {{ $policy->default_days }} days for illness or injury. Employees must notify their manager as early as possible and provide a medical certificate for absences exceeding 2 days.
                     @elseif(in_array($type, ['Maternity', 'Paternity']))

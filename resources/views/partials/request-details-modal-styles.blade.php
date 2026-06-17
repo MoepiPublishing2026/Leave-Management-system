@@ -51,11 +51,17 @@
         flex-shrink: 0;
     }
     .request-details-popup .swal2-confirm {
-        background: #138056 !important;
+        background: #b2cd16 !important;
+        color: #0a1347 !important;
+        border: 1px solid #91bf14 !important;
         border-radius: 10px !important;
         font-weight: 700 !important;
         padding: 10px 28px !important;
         box-shadow: none !important;
+    }
+    .request-details-popup .swal2-confirm:hover {
+        background: #9eb812 !important;
+        color: #0a1347 !important;
     }
     .request-details-popup .swal2-confirm:focus {
         box-shadow: 0 0 0 3px rgba(19, 128, 86, 0.25) !important;
@@ -88,18 +94,20 @@
     .rd-badge {
         display: inline-flex;
         align-items: center;
-        padding: 6px 14px;
-        border-radius: 999px;
-        font-size: 0.72rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        justify-content: center;
+        min-width: 5.5rem;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: 0.01em;
     }
-    .rd-badge--pending { background: #fef9c3; color: #854d0e; border: 1px solid #facc15; }
-    .rd-badge--approved { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
-    .rd-badge--rejected { background: #ccfbf1; color: #0f766e; border: 1px solid #2fcfc5; }
-    .rd-badge--withdrawn { background: #ccfbf1; color: #0f766e; border: 1px solid #2fcfc5; }
-    .rd-badge--overdue { background: #fce7f3; color: #9d174d; border: 1px solid #d946ef; }
+    .rd-badge--pending { background: #C291A4; }
+    .rd-badge--approved { background: #E27A53; }
+    .rd-badge--rejected { background: #87AFC7; }
+    .rd-badge--withdrawn { background: #D2B55B; }
+    .rd-badge--overdue { background: #C154C1; }
 
     .rd-employee {
         padding: 14px 22px;
@@ -256,17 +264,18 @@
         gap: 8px;
         margin-top: 4px;
         padding: 10px 16px;
-        background: #138056;
-        color: #fff !important;
+        background: #b2cd16;
+        color: #0a1347 !important;
+        border: 1px solid #91bf14;
         border-radius: 10px;
         font-weight: 700;
         font-size: 0.88rem;
         text-decoration: none !important;
-        transition: background 0.15s ease;
+        transition: background 0.15s ease, color 0.15s ease;
     }
     .rd-footer-link:hover {
-        background: #0f6b47;
-        color: #fff !important;
+        background: #9eb812;
+        color: #0a1347 !important;
     }
 
     @media (max-width: 768px) {

@@ -39,6 +39,7 @@
                 <th>Requested By</th>
                 <th>Start</th>
                 <th>End</th>
+                <th>Submitted</th>
                 <th>Status</th>
                 <th style="min-width: 180px;">Actions</th>
             </tr>
@@ -68,7 +69,9 @@
                     $currentYear = (int) now()->year;
                     $requestYear = $req->start_date ? (int) \Carbon\Carbon::parse($req->start_date)->year : $currentYear;
                     $isPreviousYear = $requestYear === ($currentYear - 1);
-                    $canDelete = ($rowStatus === 'withdrawn') || $isPreviousYear;
+                    $canDelete = $isPreviousYear;
+
+                    $canMessage = $req->managerCanOpenChat(auth()->user());
 
                     $details = [
                         'id' => $req->id,
@@ -83,7 +86,7 @@
                         'isOverdue' => $req->isOverdue(),
                         'comment' => (string) ($req->important_comment ?? ''),
                         'files' => $fileLinks,
-                        'messagesUrl' => route('messages.leave', $req),
+                        'messagesUrl' => $canMessage ? route('messages.leave', $req) : null,
                         'lateReasonSent' => (bool) $req->overdue_escalated_at,
                         'lateReason' => (string) ($req->overdue_escalation_reason ?? ''),
                         'rejectionReason' => (string) ($req->rejection_reason ?? ''),
@@ -95,6 +98,7 @@
                     <td>{{ $employeeFull }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>
+                    <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y H:i') : '—' }}</td>
                     <td>
                         @if ($req->isOverdue())
                             <span class="request-badge request-badge--overdue">Overdue</span>
@@ -124,7 +128,9 @@
                             @elseif ($rowStatus === 'rejected')
                                 <a href="{{ route('manager.requests.show_reason', $req) }}" class="request-link">View Reason</a>
                             @endif
-                            <a href="{{ route('messages.leave', $req) }}" class="request-link">Messages</a>
+                            @if($canMessage)
+                                <a href="{{ route('messages.leave', $req) }}" class="request-link">Messages</a>
+                            @endif
                             @if($canDelete)
                                 <form class="delete-request-form" method="POST" action="{{ route('manager.requests.destroy', $req) }}">
                                     @csrf
@@ -137,7 +143,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="requests-empty">No leave requests found for this filter.</td>
+                    <td colspan="8" class="requests-empty">No leave requests found for this filter.</td>
                 </tr>
             @endforelse
             </tbody>
@@ -183,6 +189,7 @@ function openRejectPopup(requestId) {
         inputAttributes: { 'aria-label': 'Rejection reason' },
         showCancelButton: true,
         confirmButtonText: 'Reject',
+        confirmButtonColor: '#dc2626',
         cancelButtonText: 'Cancel',
         preConfirm: (value) => {
             const v = (value || '').trim();

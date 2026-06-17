@@ -39,6 +39,7 @@
                 <th>Type</th>
                 <th>Start</th>
                 <th>End</th>
+                <th>Submitted</th>
                 <th>Status</th>
                 <th style="min-width: 140px;">Actions</th>
             </tr>
@@ -67,7 +68,7 @@
                     $currentYear = (int) now()->year;
                     $requestYear = $req->start_date ? (int) \Carbon\Carbon::parse($req->start_date)->year : $currentYear;
                     $isPreviousYear = $requestYear === ($currentYear - 1);
-                    $canDelete = ($rowStatus === 'withdrawn') || $isPreviousYear;
+                    $canDelete = $isPreviousYear;
 
                     $details = [
                         'id' => $req->id,
@@ -93,6 +94,7 @@
                     <td>{{ $req->leave_type }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>
+                    <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y H:i') : '—' }}</td>
                     <td>
                         @if ($req->isOverdue())
                             <span class="request-badge request-badge--overdue">Overdue</span>
@@ -121,7 +123,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="requests-empty">No leave requests found for this filter.</td>
+                    <td colspan="7" class="requests-empty">No leave requests found for this filter.</td>
                 </tr>
             @endforelse
             </tbody>

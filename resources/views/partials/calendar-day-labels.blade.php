@@ -1,4 +1,6 @@
-@if(!empty($hasLeave))
+@if(!empty($isToday) && empty($hasLeave))
+    <span class="no-leave-today-label">No leave today</span>
+@elseif(!empty($hasLeave))
     <span class="leave-count" title="{{ $leaveCountTitle ?? '' }}">
         <span class="leave-count-full">{{ $leaveCountFull ?? '' }}</span>
         <span class="leave-count-short">{{ $leaveCountShort ?? '' }}</span>

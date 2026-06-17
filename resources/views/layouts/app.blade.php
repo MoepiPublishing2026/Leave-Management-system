@@ -388,6 +388,8 @@
         });
     </script>
 
+    @include('partials.filter-select-styles')
+    @include('partials.beautiful-date-picker')
     @stack('styles')
     @yield('head')
 </head>

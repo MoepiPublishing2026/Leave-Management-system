@@ -68,8 +68,9 @@
             background-color: transparent;
             transition: background-color 0.3s ease, color 0.3s ease;
             font-size: 15px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
+            gap: 6px;
         }
         nav.menu a.active, nav.menu a:hover {
             background-color: #eff106;
@@ -371,6 +372,8 @@
         });
     </script>
 
+    @include('partials.filter-select-styles')
+    @include('partials.beautiful-date-picker')
     @stack('styles')
     @yield('head')
 </head>
@@ -499,7 +502,7 @@
         <a href="{{ route('manager.dashboard') }}" class="{{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">Dashboard</a>
         <a href="{{ route('manager.requests.index', ['status' => 'all']) }}" class="{{ request()->routeIs('manager.requests.index') ? 'active' : '' }}">Requests</a>
         <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
-            <span>Messages</span>
+            Messages
             @if($unreadMessageCount > 0)
                 <span class="badge-notification">{{ $unreadMessageCount }}</span>
             @endif

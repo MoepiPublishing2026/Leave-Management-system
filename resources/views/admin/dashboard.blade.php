@@ -9,7 +9,7 @@
         padding: 0;
     }
     .admin-container {
-        font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         width: 100%;
         max-width: 1200px;
         padding: 16px 18px 28px;
@@ -31,79 +31,81 @@
     .cards {
         display: flex;
         flex-wrap: nowrap;
-        gap: 16px;
+        gap: 12px;
         margin-bottom: 40px;
+        width: 100%;
         overflow-x: auto;
         padding-bottom: 8px;
     }
    .card {
-    background: white;
+    background: #f8fafc;
     border-radius: 16px;
-    padding: 12px 10px;
+    padding: 12px 8px;
     box-shadow: 0 6px 16px rgba(8, 8, 8, 0.15);
-    color: black;
+    color: #fff;
     cursor: pointer;
     transition: box-shadow 0.3s ease;
     text-align: center;
-    border-left: 5px solid; /* keep left border */
-    border: 1px solid transparent; /* default transparent border */
+    border: 1px solid #e5e7eb;
     text-decoration: none;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    width: 210px;
-    height: 96px;
-    min-height: 96px;
-    min-width: 210px;
-    flex: 0 0 210px;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 88px;
+    min-height: 88px;
     box-sizing: border-box;
 }
 
-/* Override the border color for each card color class, using the same color for the 1px border */
 .card-pending {
-    border-left: 6px solid #dab00cff;
-    border-top: 1px solid #dab00cff;
-    border-right: 1px solid #dab00cff;
-    border-bottom: 1px solid #dab00cff;
-    color: #44380aff;
+    background: #C291A4;
+    border-color: #C291A4;
+    color: #fff;
 }
 
 .card-approved {
-    border-left: 6px solid #53e21aff;
-    border-top: 1px solid #53e21aff;
-    border-right: 1px solid #53e21aff;
-    border-bottom: 1px solid #53e21aff;
-    color: #1c7737ff;
+    background: #E27A53;
+    border-color: #E27A53;
+    color: #fff;
 }
 
 .card-rejected {
-    border-left: 5px solid #2fcfc5ff;
-    border-top: 1px solid #2fcfc5ff;
-    border-right: 1px solid #2fcfc5ff;
-    border-bottom: 1px solid #2fcfc5ff;
-    color: #0a1347;
+    background: #87AFC7;
+    border-color: #87AFC7;
+    color: #fff;
 }
 
-.card-active {
-    border-left: 5px solid #2fcfc5ff;
-    border-top: 1px solid #2fcfc5ff;
-    border-right: 1px solid #2fcfc5ff;
-    border-bottom: 1px solid #2fcfc5ff;
-    color: #4b1010ff;
+.card-onleave {
+    background: #87AFC7;
+    border-color: #87AFC7;
+    color: #fff;
 }
- .card-all {
-    border-left: 6px solid #eb0e8fff;
-    border-top: 1px solid #eb0e8fff;
-    border-right: 1px solid #eb0e8fff;
-    border-bottom: 1px solid #eb0e8fff;
-    color: #881f54ff;
+.card-sixth {
+    background: #D2B55B;
+    border-color: #D2B55B;
+    color: #fff;
 }
- .card-overdue {
-    border-left: 6px solid #d946ef;
-    border-top: 1px solid #d946ef;
-    border-right: 1px solid #d946ef;
-    border-bottom: 1px solid #d946ef;
-    color: #7a135d;
+.card-all {
+    background: #00C0A3;
+    border-color: #00C0A3;
+    color: #fff;
+}
+.card-overdue {
+    background: #C154C1;
+    border-color: #C154C1;
+    color: #fff;
+}
+.card .card-title,
+.card .card-value {
+    color: #fff;
+}
+.card .card-title svg {
+    display: none;
+}
+.card .card-title {
+    justify-content: center;
+    text-align: center;
 }
 
     .card:hover {
@@ -111,9 +113,9 @@
     }
    
     .card-title {
-        font-size: 1.05rem;
+        font-size: 0.88rem;
         font-weight: 600;
-        margin: 4px 0 8px 0;
+        margin: 2px 0 6px 0;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -121,7 +123,7 @@
     }
     .card-value {
         font-weight: bold;
-        font-size: 1.7rem;
+        font-size: 1.45rem;
         margin-top: 0;
     }
     .dash-charts-grid {
@@ -166,75 +168,36 @@
 
 <h1>Admin Dashboard</h1>
 <div class="admin-container">
-    <div style="display:flex; justify-content:flex-end; margin-bottom: 10px;">
-        <form method="GET" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-            <label style="font-weight:800; color:#334155;">Filter</label>
-            <select name="month" onchange="this.form.submit()" style="padding:8px 10px; border-radius:10px; border:2px solid #a5d817; font-weight:800;">
-                <option value="this_year" {{ ($monthFilter ?? 'this_year') === 'this_year' ? 'selected' : '' }}>This Year</option>
-                <option value="this_quarter" {{ ($monthFilter ?? '') === 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
-                <option value="this_month" {{ ($monthFilter ?? '') === 'this_month' ? 'selected' : '' }}>This Month</option>
-                @php $nowY = (int) \Illuminate\Support\Carbon::now()->year; @endphp
-                @foreach(range($nowY - 1, $nowY - 5) as $y)
-                    <option value="{{ $y }}" {{ (string) ($monthFilter ?? '') === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
-                @endforeach
-            </select>
-            <noscript><button type="submit">Apply</button></noscript>
-        </form>
-    </div>
+@include('partials.dashboard-period-filter', ['monthFilter' => $monthFilter ?? 'this_year'])
     <div class="cards" id="cardsContainer" role="list">
 
         <a href="{{ route('admin.requests', ['status' => 'all', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="All leave requests" class="card card-all">
-            <div class="card-title">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-                All Requests
-            </div>
+            <div class="card-title">All Requests</div>
             <div class="card-value">{{ $allRequestsCount ?? 0 }}</div>
         </a>
 
         <a href="{{ route('admin.requests', ['status' => 'pending', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="Pending leave requests" class="card card-pending">
-            <div class="card-title">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="24" height="24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3" />
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-                </svg>
-                Pending Requests
-            </div>
+            <div class="card-title">Pending Requests</div>
             <div class="card-value">{{ $pendingRequestsCount }}</div>
         </a>
 
         <a href="{{ route('admin.requests', ['status' => 'overdue', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="Overdue leave requests" class="card card-overdue">
-            <div class="card-title">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Overdue Requests
-            </div>
+            <div class="card-title">Overdue Requests</div>
             <div class="card-value">{{ $overduePendingCount ?? 0 }}</div>
         </a>
 
-        <a href="{{ route('admin.calendar') }}" role="listitem" aria-label="Employees on leave today" class="card card-approved">
-            <div class="card-title">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-                On Leave Today
-            </div>
+        <a href="{{ route('admin.requests', ['status' => 'approved', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="Approved leave requests" class="card card-approved">
+            <div class="card-title">Approved Requests</div>
+            <div class="card-value">{{ $approvedRequestsCount ?? 0 }}</div>
+        </a>
+
+        <a href="{{ route('admin.calendar') }}" role="listitem" aria-label="Employees on leave today" class="card card-onleave">
+            <div class="card-title">On Leave Today</div>
             <div class="card-value">{{ $onLeaveTodayCount }}</div>
         </a>
 
-        <a href="{{ route('admin.employees.index') }}" role="listitem" aria-label="Active employees count" class="card card-active">
-            <div class="card-title">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
-                    <circle cx="12" cy="7" r="4" />
-                    <path d="M5.5 21h13a2 2 0 0 0 2-2 7.5 7.5 0 0 0-15 0 2 2 0 0 0 2 2z" />
-                </svg>
-                Active Employees
-            </div>
+        <a href="{{ route('admin.employees.index') }}" role="listitem" aria-label="Active employees count" class="card card-sixth">
+            <div class="card-title">Active Employees</div>
             <div class="card-value">{{ $activeEmployeesCount }}</div>
         </a>
 
@@ -350,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return fixedTypeColors[key] || colorForKey(key);
     };
 
-    Chart.defaults.font.family = '"Century Gothic", CenturyGothic, AppleGothic, sans-serif';
+    window.applyBoldChartDefaults();
     Chart.defaults.font.size = 12;
     Chart.defaults.color = '#2c3e50';
     Chart.defaults.maintainAspectRatio = false;
@@ -426,9 +389,10 @@ document.addEventListener('DOMContentLoaded', () => {
             labels: statusPieLabels,
             datasets: [{
                 data: [
-                    {{ $statusCounts['pending'] ?? $statusCounts['Pending'] ?? 0 }},
-                    {{ $statusCounts['rejected'] ?? $statusCounts['Rejected'] ?? 0 }},
-                    {{ $statusCounts['approved'] ?? $statusCounts['Approved'] ?? 0 }}
+                    {{ $statusPieCounts['Pending'] ?? 0 }},
+                    {{ $statusPieCounts['Overdue'] ?? 0 }},
+                    {{ $statusPieCounts['Rejected'] ?? 0 }},
+                    {{ $statusPieCounts['Approved'] ?? 0 }}
                 ],
                 backgroundColor: statusPieColors,
                 borderColor: '#fff',
@@ -466,6 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthlyTotals = padMonthlySeries(@json($barData));
     const monthlyApproved = padMonthlySeries(@json($monthlyApprovedData));
     const monthlyPending = padMonthlySeries(@json($monthlyPendingData));
+    const monthlyOverdue = padMonthlySeries(@json($monthlyOverdueData));
     const monthlyRejected = padMonthlySeries(@json($monthlyRejectedData));
     const monthAxisTicks = { autoSkip: false, maxRotation: 0, minRotation: 0 };
     const monthlyColor = window.leaveMonthlyApplicationsColor;
@@ -590,6 +555,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: monthlyPending,
                     backgroundColor: colorForStatus('Pending'),
                     borderColor: colorForStatus('Pending'),
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    stack: 'status'
+                },
+                {
+                    label: 'Overdue',
+                    data: monthlyOverdue,
+                    backgroundColor: colorForStatus('Overdue'),
+                    borderColor: colorForStatus('Overdue'),
                     borderWidth: 1,
                     borderRadius: 4,
                     stack: 'status'

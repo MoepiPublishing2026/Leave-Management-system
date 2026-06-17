@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use App\Models\LeaveRequest;
 use App\Models\User;
+use App\Support\MonthlyLeaveStatusBreakdown;
 use App\Support\PercentageDistribution;
 use Illuminate\Support\Carbon;
 use Yasumi\Yasumi;
@@ -50,6 +51,8 @@ class AdminDashboardController extends Controller
             ->whereDate('start_date', '<', Carbon::today())->count();
         $pendingRequestsCount = max(0, $pendingTotalCount - $overduePendingCount);
 
+        $approvedRequestsCount = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['approved'])->count();
+
         $today = Carbon::today();
         $isTodayDisabled = $today->isWeekend();
         if (!$isTodayDisabled) {
@@ -72,17 +75,17 @@ class AdminDashboardController extends Controller
 
         $activeEmployeesCount = User::employees()->where('is_active', 1)->count();
 
-        // Monthly charts: always Jan–Dec for one calendar year (submission month), like employee dashboard.
+        // Monthly applications line chart: when requests were submitted (created_at).
         $chartYear = ctype_digit((string) $monthFilter) ? (int) $monthFilter : (int) Carbon::now()->year;
         $barLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         $barData = array_fill(0, 12, 0);
 
-        $monthlyChartQuery = LeaveRequest::query()
+        $monthlyApplicationsQuery = LeaveRequest::query()
             ->byEmployeeApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn'])
             ->whereYear('created_at', $chartYear);
 
-        $monthlyData = (clone $monthlyChartQuery)
+        $monthlyData = (clone $monthlyApplicationsQuery)
             ->select(DB::raw('MONTH(created_at) as month'), DB::raw('COUNT(*) as total'))
             ->groupBy('month')
             ->orderBy('month')
@@ -95,6 +98,13 @@ class AdminDashboardController extends Controller
             }
         }
 
+        // Monthly status breakdown: when requests were submitted (created_at), same scope as applications chart.
+        $monthlyBreakdown = MonthlyLeaveStatusBreakdown::fromQuery(clone $monthlyApplicationsQuery, 'created_at');
+        $monthlyApprovedData = $monthlyBreakdown['monthlyApprovedData'];
+        $monthlyPendingData = $monthlyBreakdown['monthlyPendingData'];
+        $monthlyOverdueData = $monthlyBreakdown['monthlyOverdueData'];
+        $monthlyRejectedData = $monthlyBreakdown['monthlyRejectedData'];
+
         $rawStatusCounts = (clone $baseQuery)->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status')
@@ -105,10 +115,18 @@ class AdminDashboardController extends Controller
         }
 
         $statusPercentages = PercentageDistribution::oneDecimalPercents([
-            'Pending' => (int) ($statusCounts['pending'] ?? 0),
+            'Pending' => (int) $pendingRequestsCount,
+            'Overdue' => (int) $overduePendingCount,
             'Rejected' => (int) ($statusCounts['rejected'] ?? 0),
             'Approved' => (int) ($statusCounts['approved'] ?? 0),
         ]);
+
+        $statusPieCounts = [
+            'Pending' => (int) $pendingRequestsCount,
+            'Overdue' => (int) $overduePendingCount,
+            'Rejected' => (int) ($statusCounts['rejected'] ?? 0),
+            'Approved' => (int) ($statusCounts['approved'] ?? 0),
+        ];
 
         $departmentCountsRaw = (clone $baseQuery)->join('users', 'leave_requests.user_id', '=', 'users.id')
             ->where('users.role', 'employee')
@@ -144,39 +162,13 @@ class AdminDashboardController extends Controller
         $designationLabels = array_keys($designationCounts);
         $designationData = array_values($designationCounts);
 
-        $monthlyStatusRows = (clone $monthlyChartQuery)
-            ->select(
-                DB::raw('MONTH(created_at) as month'),
-                DB::raw('LOWER(TRIM(status)) as status'),
-                DB::raw('COUNT(*) as total')
-            )
-            ->groupBy('month', 'status')
-            ->orderBy('month')
-            ->get();
-
-        $monthlyApprovedData = array_fill(0, 12, 0);
-        $monthlyPendingData = array_fill(0, 12, 0);
-        $monthlyRejectedData = array_fill(0, 12, 0);
-        foreach ($monthlyStatusRows as $row) {
-            $idx = ((int) $row->month) - 1;
-            if ($idx < 0 || $idx > 11) {
-                continue;
-            }
-            $count = (int) $row->total;
-            match ($row->status) {
-                'approved' => $monthlyApprovedData[$idx] = $count,
-                'pending' => $monthlyPendingData[$idx] = $count,
-                'rejected' => $monthlyRejectedData[$idx] = $count,
-                default => null,
-            };
-        }
-
         return view('admin.dashboard', [
             'allRequestsCount' => $allRequestsCount,
             'leaveTypeCounts' => $leaveTypeCounts,
             'leaveTypePercentages' => $leaveTypePercentages,
             'pendingRequestsCount' => $pendingRequestsCount,
             'overduePendingCount' => $overduePendingCount,
+            'approvedRequestsCount' => $approvedRequestsCount,
             'onLeaveTodayCount' => $onLeaveTodayCount,
             'activeEmployeesCount' => $activeEmployeesCount,
             'barLabels' => $barLabels,
@@ -184,6 +176,7 @@ class AdminDashboardController extends Controller
             'chartYear' => $chartYear,
             'statusCounts' => $statusCounts,
             'statusPercentages' => $statusPercentages,
+            'statusPieCounts' => $statusPieCounts,
             'departmentLabels' => $departmentLabels,
             'departmentData' => $departmentData,
             'departmentPercentages' => $departmentPercentages,
@@ -192,6 +185,7 @@ class AdminDashboardController extends Controller
             'designationData' => $designationData,
             'monthlyApprovedData' => $monthlyApprovedData,
             'monthlyPendingData' => $monthlyPendingData,
+            'monthlyOverdueData' => $monthlyOverdueData,
             'monthlyRejectedData' => $monthlyRejectedData,
         ]);
 

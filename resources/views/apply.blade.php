@@ -250,29 +250,20 @@
       cursor: pointer;
       user-select: none;
   }
-  form.leave-form .button-group .submit-btn {
-      background-color: #b2cd16;
-      color: #1b1b17;
-      box-shadow: 0px 10px 50px #b2cd160f;
-      transition: background-color 0.25s;
-  }
-  form.leave-form .button-group .submit-btn:hover {
-      background-color: #d5e02d;
-  }
+  form.leave-form .button-group .submit-btn,
   form.leave-form .button-group .cancel-btn {
-      background-color: #0a1347;
-      color: #eff106;
-      box-shadow: 0px 10px 50px #9f9f9f4f;
+      background-color: #b2cd16;
+      color: #0a1347;
+      border: 1px solid #91bf14;
+      box-shadow: 0 4px 14px rgba(178, 205, 22, 0.2);
       transition: background-color 0.25s;
   }
+  form.leave-form .button-group .submit-btn:hover,
   form.leave-form .button-group .cancel-btn:hover {
-      background-color: #7a7a7a;
-      color: white;
+      background-color: #9eb812;
+      color: #0a1347;
   }
 </style>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <div class="main-content">
     <h1>Leave Application</h1>
@@ -307,12 +298,12 @@
 
         <div class="input-group" style="flex: 1 1 45%;">
             <label for="start_date">Start Date:</label>
-            <input id="start_date" name="start_date" type="text" value="{{ old('start_date') }}" required />
+            <input id="start_date" name="start_date" type="text" class="app-date-picker" data-fp-custom value="{{ old('start_date') }}" placeholder="Select start date" autocomplete="off" required />
         </div>
 
         <div class="input-group" style="flex: 1 1 45%;">
             <label for="end_date">End Date:</label>
-            <input id="end_date" name="end_date" type="text" value="{{ old('end_date') }}" />
+            <input id="end_date" name="end_date" type="text" class="app-date-picker" data-fp-custom value="{{ old('end_date') }}" placeholder="Select end date" autocomplete="off" />
         </div>
 
         <div class="input-group" style="flex-basis: 100%; flex-direction: row; align-items: center; gap: 10px;">
@@ -365,23 +356,37 @@ document.addEventListener('DOMContentLoaded', function () {
     const publicHolidays = @json($publicHolidays);
     const leaveBalancesByYear = @json($leaveBalancesByYear);
     const nowYear = @json($nowYear);
-    const allowedWhenAnnualExhausted = ['Sick', 'Bereavement', 'Maternity'];
+    function countsAgainstAnnual(leaveType) {
+        if (!leaveType) return false;
+        const excluded = @json(\App\Support\AnnualLeaveRules::EXCLUDED_FROM_ANNUAL);
+        return !excluded.includes(leaveType.toLowerCase());
+    }
 
     const disableDates = [
         function(date) { return (date.getDay() === 0 || date.getDay() === 6); },
         ...publicHolidays
     ];
 
-    flatpickr("#start_date", {
-        dateFormat: "Y-m-d",
+    const fpOptions = {
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'M j, Y',
+        allowInput: false,
+        disableMobile: true,
         disable: disableDates,
-        minDate: "today"
-    });
+        minDate: 'today',
+    };
 
-    flatpickr("#end_date", {
-        dateFormat: "Y-m-d",
-        disable: disableDates,
-        minDate: "today"
+    ['#start_date', '#end_date'].forEach((selector) => {
+        const input = document.querySelector(selector);
+        if (!input) return;
+        if (!input.closest('.app-date-picker-wrap')) {
+            const wrap = document.createElement('span');
+            wrap.className = 'app-date-picker-wrap';
+            input.parentNode.insertBefore(wrap, input);
+            wrap.appendChild(input);
+        }
+        flatpickr(input, fpOptions);
     });
 
     function calculateWorkingDays(startDate, endDate) {
@@ -612,7 +617,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const options = Array.from(leaveTypeSelect.options);
         options.forEach((opt) => {
             if (!opt.value) return;
-            if (annualBalance <= 0 && !allowedWhenAnnualExhausted.includes(opt.value)) {
+            if (annualBalance <= 0 && countsAgainstAnnual(opt.value)) {
                 opt.disabled = true;
             } else {
                 opt.disabled = false;
@@ -686,24 +691,26 @@ document.addEventListener('DOMContentLoaded', function () {
         const annualBalance = leaveBalances['Annual'] ?? leaveBalances['Annual Leave'] ?? 0;
         const balance = leaveBalances[leaveType] ?? 0;
 
-        if (annualBalance <= 0 && leaveType && !allowedWhenAnnualExhausted.includes(leaveType)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Annual Leave Limit Reached',
-                html: 'You have exhausted your annual leave limit. You may only request <b>Sick</b> (with medical certificate), <b>Bereavement</b> (with proof), or <b>Maternity</b> (with proof).',
-                confirmButtonText: 'OK'
-            });
-            return;
-        }
+        if (countsAgainstAnnual(leaveType)) {
+            if (annualBalance <= 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Annual Leave Limit Reached',
+                    html: 'You have exhausted your annual leave limit. You may still request <b>Sick</b> (with medical certificate), <b>Bereavement</b> (with proof), <b>Maternity</b> (with proof), or <b>Paternity</b> (with proof).',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
 
-        if (leaveType && !allowedWhenAnnualExhausted.includes(leaveType) && daysRequested > annualBalance) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Annual Leave Balance Exceeded',
-                html: `Your remaining annual leave balance is <b>${annualBalance}</b> day${annualBalance === 1 ? '' : 's'}. You requested <b>${daysRequested}</b> day${daysRequested === 1 ? '' : 's'} (excluding weekends and public holidays).`,
-                confirmButtonText: 'OK'
-            });
-            return;
+            if (daysRequested > annualBalance) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Annual Leave Balance Exceeded',
+                    html: `Your remaining annual leave balance is <b>${annualBalance}</b> day${annualBalance === 1 ? '' : 's'}. You requested <b>${daysRequested}</b> day${daysRequested === 1 ? '' : 's'} (excluding weekends and public holidays).`,
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
         }
 
         if (daysRequested > balance) {

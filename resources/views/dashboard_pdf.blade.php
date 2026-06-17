@@ -14,8 +14,6 @@
     }
     h1 {
         color: #2c3e50;
-        border-left: 6px solid #138056ff;
-        padding-left: 15px;
         font-weight: 700;
         font-size: 36px;
         margin-bottom: 20px;

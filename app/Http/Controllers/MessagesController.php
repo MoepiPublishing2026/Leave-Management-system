@@ -7,9 +7,12 @@ use App\Models\LeaveRequestConversation;
 use App\Models\LeaveRequestMessage;
 use App\Models\User;
 use App\Notifications\MessageReceivedNotification;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Carbon;
 
@@ -58,8 +61,92 @@ class MessagesController extends Controller
                 if (!Schema::hasColumn('leave_request_messages', 'read_at')) {
                     $table->timestamp('read_at')->nullable();
                 }
+                if (!Schema::hasColumn('leave_request_messages', 'voice_path')) {
+                    $table->string('voice_path')->nullable();
+                }
+                if (!Schema::hasColumn('leave_request_messages', 'reply_to_message_id')) {
+                    $table->unsignedBigInteger('reply_to_message_id')->nullable();
+                }
+                if (!Schema::hasColumn('leave_request_messages', 'deleted_for_everyone_at')) {
+                    $table->timestamp('deleted_for_everyone_at')->nullable();
+                }
             });
         }
+
+        if (!Schema::hasTable('leave_request_message_hidden')) {
+            Schema::create('leave_request_message_hidden', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('message_id');
+                $table->unsignedBigInteger('user_id');
+                $table->timestamps();
+
+                $table->unique(['message_id', 'user_id']);
+                $table->foreign('message_id')->references('id')->on('leave_request_messages')->onDelete('cascade');
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            });
+        }
+    }
+
+    private function messageVisibleToUserQuery(int $userId): Builder
+    {
+        return LeaveRequestMessage::query()
+            ->whereNotExists(function ($q) use ($userId) {
+                $q->select(DB::raw(1))
+                    ->from('leave_request_message_hidden as h')
+                    ->whereColumn('h.message_id', 'leave_request_messages.id')
+                    ->where('h.user_id', $userId);
+            });
+    }
+
+    private function userCanAccessMessage(User $user, LeaveRequestMessage $message): bool
+    {
+        $conversation = $message->conversation;
+
+        return $conversation && $this->userCanAccessConversation($user, $conversation);
+    }
+
+    private function conversationsQueryFor(User $user): Builder
+    {
+        $query = LeaveRequestConversation::query();
+
+        if (($user->role ?? null) === 'manager') {
+            $query->where('manager_id', $user->id);
+        } elseif (($user->role ?? null) === 'admin') {
+            $query->where('admin_id', $user->id);
+        }
+
+        return $query;
+    }
+
+    private function userCanAccessConversation(User $user, LeaveRequestConversation $conversation): bool
+    {
+        if (($user->role ?? null) === 'manager') {
+            return (int) $conversation->manager_id === (int) $user->id;
+        }
+
+        if (($user->role ?? null) === 'admin') {
+            return (int) $conversation->admin_id === (int) $user->id;
+        }
+
+        return false;
+    }
+
+    private function managerMayOpenLeaveChat(User $manager, LeaveRequest $leave): bool
+    {
+        return $leave->managerCanOpenChat($manager);
+    }
+
+    private function assignAdminToConversation(LeaveRequestConversation $conversation, User $admin): void
+    {
+        if (!$conversation->admin_id) {
+            $conversation->admin_id = $admin->id;
+            $conversation->save();
+        }
+    }
+
+    private function defaultAdminId(): ?int
+    {
+        return User::where('role', 'admin')->orderBy('id')->value('id');
     }
 
     public function index(Request $request)
@@ -72,7 +159,7 @@ class MessagesController extends Controller
 
         $conversationId = $request->query('conversation');
 
-        $conversationsQuery = LeaveRequestConversation::query()
+        $conversations = $this->conversationsQueryFor($user)
             ->with([
                 'leaveRequest.user',
                 'manager',
@@ -86,13 +173,8 @@ class MessagesController extends Controller
                     $q->whereNull('read_at')->where('sender_id', '!=', $user->id);
                 },
             ])
-            ->latest('updated_at');
-
-        if (($user->role ?? null) === 'manager') {
-            $conversationsQuery->where('manager_id', $user->id);
-        }
-
-        $conversations = $conversationsQuery->get();
+            ->latest('updated_at')
+            ->get();
 
         if ($conversations->isNotEmpty()) {
             $now = Carbon::now();
@@ -103,26 +185,37 @@ class MessagesController extends Controller
         }
 
         $activeConversation = null;
+        $activeMessages = collect();
+
         if ($conversationId) {
-            $activeConversation = LeaveRequestConversation::with(['leaveRequest.user', 'manager', 'admin', 'messages.sender'])
+            $activeConversation = $this->conversationsQueryFor($user)
+                ->with(['leaveRequest.user', 'manager', 'admin'])
                 ->find($conversationId);
-        }
 
-        if ($activeConversation) {
-            if (($user->role ?? null) === 'manager' && $activeConversation->manager_id !== $user->id) {
-                abort(403);
+            if ($activeConversation) {
+                $now = Carbon::now();
+                LeaveRequestMessage::where('conversation_id', $activeConversation->id)
+                    ->where('sender_id', '!=', $user->id)
+                    ->whereNull('read_at')
+                    ->update(['read_at' => $now, 'delivered_at' => $now]);
+
+                $activeMessages = $this->messageVisibleToUserQuery($user->id)
+                    ->where('conversation_id', $activeConversation->id)
+                    ->with(['sender', 'replyTo.sender'])
+                    ->oldest()
+                    ->get();
             }
-
-            $now = Carbon::now();
-            LeaveRequestMessage::where('conversation_id', $activeConversation->id)
-                ->where('sender_id', '!=', $user->id)
-                ->whereNull('read_at')
-                ->update(['read_at' => $now, 'delivered_at' => $now]);
         }
+
+        $forwardConversations = $conversations
+            ->when($activeConversation, fn ($c) => $c->where('id', '!=', $activeConversation->id))
+            ->values();
 
         return view('messages.index', [
             'conversations' => $conversations,
             'activeConversation' => $activeConversation,
+            'activeMessages' => $activeMessages,
+            'forwardConversations' => $forwardConversations,
         ]);
     }
 
@@ -135,42 +228,50 @@ class MessagesController extends Controller
         }
 
         $conversation = null;
+
         if (($user->role ?? null) === 'manager') {
+            if (!$this->managerMayOpenLeaveChat($user, $leaveRequest)) {
+                abort(403, 'This conversation belongs to another manager.');
+            }
+
             $conversation = LeaveRequestConversation::firstOrCreate([
                 'leave_request_id' => $leaveRequest->id,
                 'manager_id' => $user->id,
             ]);
 
             if (!$conversation->admin_id) {
-                $conversation->admin_id = User::where('role', 'admin')->value('id');
+                $conversation->admin_id = $this->defaultAdminId();
                 $conversation->save();
             }
         } else {
-            $conversation = LeaveRequestConversation::where('leave_request_id', $leaveRequest->id)->latest()->first();
-            if (!$conversation) {
-                $managerId = $leaveRequest->handled_by ?? $leaveRequest->overdue_escalated_by ?? User::where('role', 'manager')->value('id');
-                if ($managerId) {
-                    $conversation = LeaveRequestConversation::firstOrCreate([
-                        'leave_request_id' => $leaveRequest->id,
-                        'manager_id' => $managerId,
-                    ]);
-                }
+            $managerId = $leaveRequest->handled_by
+                ?? $leaveRequest->overdue_escalated_by
+                ?? LeaveRequestConversation::where('leave_request_id', $leaveRequest->id)->value('manager_id')
+                ?? User::where('role', 'manager')->orderBy('id')->value('id');
+
+            if (!$managerId) {
+                return redirect()->route('messages.index')->with('error', 'No manager is linked to this request yet.');
             }
-            if (!$conversation && $leaveRequest->overdue_escalated_by) {
+
+            $conversation = LeaveRequestConversation::where('leave_request_id', $leaveRequest->id)
+                ->where('manager_id', $managerId)
+                ->where(function ($q) use ($user) {
+                    $q->where('admin_id', $user->id)->orWhereNull('admin_id');
+                })
+                ->first();
+
+            if (!$conversation) {
                 $conversation = LeaveRequestConversation::firstOrCreate([
                     'leave_request_id' => $leaveRequest->id,
-                    'manager_id' => $leaveRequest->overdue_escalated_by,
+                    'manager_id' => $managerId,
                 ]);
             }
 
-            if ($conversation && !$conversation->admin_id) {
-                $conversation->admin_id = $user->id;
-                $conversation->save();
-            }
+            $this->assignAdminToConversation($conversation, $user);
         }
 
-        if (!$conversation) {
-            return redirect()->route('messages.index');
+        if (!$conversation || !$this->userCanAccessConversation($user, $conversation)) {
+            abort(403);
         }
 
         return redirect()->route('messages.index', ['conversation' => $conversation->id]);
@@ -184,33 +285,66 @@ class MessagesController extends Controller
             abort(403);
         }
 
-        if (($user->role ?? null) === 'manager' && $conversation->manager_id !== $user->id) {
+        if (!$this->userCanAccessConversation($user, $conversation)) {
             abort(403);
         }
 
         $validated = $request->validate([
-            'body' => 'required|string|max:2000',
+            'body' => 'nullable|string|max:2000',
+            'voice' => 'nullable|file|mimetypes:audio/webm,audio/ogg,audio/mp4,audio/mpeg,audio/wav,audio/x-wav,video/webm|max:5120',
+            'reply_to_message_id' => 'nullable|integer|exists:leave_request_messages,id',
         ]);
 
+        $body = trim((string) ($validated['body'] ?? ''));
+        if ($body === '' && !$request->hasFile('voice')) {
+            return back()->withErrors(['body' => 'Type a message or record a voice note.'])->withInput();
+        }
+
+        $replyToId = $validated['reply_to_message_id'] ?? null;
+        if ($replyToId) {
+            $replyMessage = LeaveRequestMessage::find($replyToId);
+            if (
+                !$replyMessage
+                || (int) $replyMessage->conversation_id !== (int) $conversation->id
+                || !$this->messageVisibleToUserQuery($user->id)->whereKey($replyMessage->id)->exists()
+            ) {
+                return back()->withErrors(['body' => 'The message you are replying to is not available.'])->withInput();
+            }
+        }
+
         if (($user->role ?? null) === 'manager' && !$conversation->admin_id) {
-            $conversation->admin_id = User::where('role', 'admin')->value('id');
+            $conversation->admin_id = $this->defaultAdminId();
             $conversation->save();
+        }
+
+        if (($user->role ?? null) === 'admin') {
+            $this->assignAdminToConversation($conversation, $user);
+        }
+
+        $voicePath = null;
+        if ($request->hasFile('voice')) {
+            $voicePath = $request->file('voice')->store(
+                'message-voices/' . $conversation->id,
+                'public'
+            );
+            if ($body === '') {
+                $body = 'Voice message';
+            }
         }
 
         $message = LeaveRequestMessage::create([
             'conversation_id' => $conversation->id,
             'sender_id' => $user->id,
-            'body' => $validated['body'],
+            'reply_to_message_id' => $replyToId,
+            'body' => $body,
+            'voice_path' => $voicePath,
         ]);
 
         $conversation->touch();
 
-        $recipientId = null;
-        if (($user->role ?? null) === 'manager') {
-            $recipientId = $conversation->admin_id;
-        } else {
-            $recipientId = $conversation->manager_id;
-        }
+        $recipientId = ($user->role ?? null) === 'manager'
+            ? $conversation->admin_id
+            : $conversation->manager_id;
 
         if ($recipientId) {
             $recipient = User::find($recipientId);
@@ -221,5 +355,127 @@ class MessagesController extends Controller
         }
 
         return redirect()->route('messages.index', ['conversation' => $conversation->id]);
+    }
+
+    public function voice(LeaveRequestMessage $message)
+    {
+        $this->ensureChatTablesExist();
+        $user = Auth::user();
+        if (!in_array($user->role ?? null, ['admin', 'manager'], true)) {
+            abort(403);
+        }
+
+        $conversation = $message->conversation;
+        if (!$conversation || !$this->userCanAccessConversation($user, $conversation)) {
+            abort(403);
+        }
+
+        if (!$message->voice_path || !Storage::disk('public')->exists($message->voice_path)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->response($message->voice_path);
+    }
+
+    public function destroy(Request $request, LeaveRequestMessage $message)
+    {
+        $this->ensureChatTablesExist();
+        $user = Auth::user();
+        if (!in_array($user->role ?? null, ['admin', 'manager'], true)) {
+            abort(403);
+        }
+
+        if (!$this->userCanAccessMessage($user, $message)) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'scope' => 'required|in:me,everyone',
+        ]);
+
+        if ($validated['scope'] === 'everyone') {
+            if ((int) $message->sender_id !== (int) $user->id) {
+                abort(403, 'Only the sender can delete a message for everyone.');
+            }
+
+            $message->deleted_for_everyone_at = Carbon::now();
+            $message->save();
+        } else {
+            DB::table('leave_request_message_hidden')->updateOrInsert(
+                [
+                    'message_id' => $message->id,
+                    'user_id' => $user->id,
+                ],
+                [
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]
+            );
+        }
+
+        return redirect()->route('messages.index', ['conversation' => $message->conversation_id]);
+    }
+
+    public function forward(Request $request, LeaveRequestMessage $message)
+    {
+        $this->ensureChatTablesExist();
+        $user = Auth::user();
+        if (!in_array($user->role ?? null, ['admin', 'manager'], true)) {
+            abort(403);
+        }
+
+        if (!$this->userCanAccessMessage($user, $message)) {
+            abort(403);
+        }
+
+        if ($message->isDeletedForEveryone()) {
+            return back()->with('error', 'This message can no longer be forwarded.');
+        }
+
+        $validated = $request->validate([
+            'target_conversation_id' => 'required|integer|exists:leave_request_conversations,id',
+        ]);
+
+        $targetConversation = $this->conversationsQueryFor($user)->find($validated['target_conversation_id']);
+        if (!$targetConversation) {
+            abort(403);
+        }
+
+        $forwardBody = $message->isVoice() ? 'Voice message' : trim((string) $message->body);
+        if ($forwardBody === '') {
+            return back()->with('error', 'There is nothing to forward in this message.');
+        }
+
+        $voicePath = null;
+        if ($message->voice_path && Storage::disk('public')->exists($message->voice_path)) {
+            $extension = pathinfo($message->voice_path, PATHINFO_EXTENSION) ?: 'webm';
+            $newPath = 'message-voices/' . $targetConversation->id . '/fwd_' . $message->id . '_' . time() . '.' . $extension;
+            Storage::disk('public')->copy($message->voice_path, $newPath);
+            $voicePath = $newPath;
+        }
+
+        LeaveRequestMessage::create([
+            'conversation_id' => $targetConversation->id,
+            'sender_id' => $user->id,
+            'body' => $forwardBody,
+            'voice_path' => $voicePath,
+        ]);
+
+        $targetConversation->touch();
+
+        $recipientId = ($user->role ?? null) === 'manager'
+            ? $targetConversation->admin_id
+            : $targetConversation->manager_id;
+
+        if ($recipientId) {
+            $recipient = User::find($recipientId);
+            if ($recipient) {
+                $senderName = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) ?: 'User';
+                $recipient->notify(new MessageReceivedNotification($targetConversation->id, $targetConversation->leave_request_id, $senderName));
+            }
+        }
+
+        return redirect()->route('messages.index', ['conversation' => $targetConversation->id])
+            ->with('success', 'Message forwarded.');
     }
 }

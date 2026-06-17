@@ -9,7 +9,7 @@
     padding: 0;
   }
   .dashboard-container {
-    font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     width: 100%;
     max-width: 1200px;
     padding: 16px 18px 28px;
@@ -91,21 +91,18 @@
   .leave-balance-item {
     background-color: rgb(252, 213, 234);
     border-radius: 16px;
-    padding: 18px 26px;
+    padding: 14px 18px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     flex-grow: 1;
-    min-width: 230px;
-    max-width: 320px;
-    font-size: 1.25rem;
+    min-width: 200px;
+    max-width: 280px;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #050505ff;
     box-shadow: 0 3px 7px rgba(13, 59, 53, 0.12);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
     border-left: 5px solid #f00e65;
     border-top: 1px solid #f00e65;
     border-right: 1px solid #f00e65;
@@ -118,71 +115,73 @@
     opacity: 0.55;
     filter: grayscale(0.25);
   }
-  .leave-balance-item.disabled .leave-days {
-    color: #6b7280;
-  }
   .leave-type {
-    flex-basis: 60%;
-    overflow: hidden;
+    text-align: center;
     white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  .leave-days {
-    flex-basis: 40%;
-    font-weight: 700;
-    color: #850621;
-    text-align: right;
-    padding-left: 12px;
   }
 
   .cards {
     display: flex;
     flex-wrap: nowrap;
-    gap: 16px;
+    gap: 12px;
     margin-bottom: 40px;
+    width: 100%;
     overflow-x: auto;
     overflow-y: visible;
     padding: 4px 2px 8px;
   }
   .card {
-    background: white;
+    background: #f8fafc;
     border-radius: 16px;
-    padding: 14px 10px 10px;
+    padding: 12px 8px 10px;
     box-shadow: 0 6px 16px rgba(8, 8, 8, 0.15);
     border: 1px solid #e5e7eb;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 110px;
-    min-width: 190px;
-    flex: 1 1 190px;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 92px;
     cursor: move;
     position: relative;
     transition: box-shadow 0.3s ease;
-    border-left: 5px solid;
     text-decoration: none;
+    box-sizing: border-box;
   }
   .card:hover {
     box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     z-index: 2;
   }
-  .card-pending { border-color: #dab00cff; color: #44380aff; }
-  .card-approved { border-color: #53e21aff; color: #1c7737ff; }
-  .card-rejected { border-color: #2fcfc5ff; color: #0a1347; }
-  .card-overdue { border-color: #d946ef; color: #7a135d; }
-  .card-withdrawn { border-color: #6e4111; color: #3f2a0a; }
+  .card-all { background: #00C0A3; border-color: #00C0A3; color: #fff; }
+  .card-pending { background: #C291A4; border-color: #C291A4; color: #fff; }
+  .card-approved { background: #E27A53; border-color: #E27A53; color: #fff; }
+  .card-rejected { background: #87AFC7; border-color: #87AFC7; color: #fff; }
+  .card-overdue { background: #C154C1; border-color: #C154C1; color: #fff; }
+  .card-withdrawn { background: #D2B55B; border-color: #D2B55B; color: #fff; }
+  .card .card-title,
+  .card .card-value {
+    color: #fff;
+  }
+  .card .card-title svg,
+  .card .card-title .icon {
+    display: none;
+  }
+  .card .card-title {
+    justify-content: center;
+    text-align: center;
+  }
   .card-title {
-    font-size: 1.08rem;
+    font-size: 0.88rem;
     font-weight: 600;
-    margin: 4px 0 10px 0;
+    margin: 2px 0 6px 0;
     display: flex;
     align-items: center;
     gap: 8px;
   }
   .card-value {
     font-weight: bold;
-    font-size: 1.85rem;
+    font-size: 1.45rem;
     margin-top: 0;
   }
 
@@ -317,76 +316,51 @@
       @php
         $annualKey = array_key_exists('Annual', $leaveBalances) ? 'Annual' : (array_key_exists('Annual Leave', $leaveBalances) ? 'Annual Leave' : 'Annual');
         $annualBalance = $leaveBalances[$annualKey] ?? 0;
-        $notDisabledWhenAnnualExhausted = ['Annual', 'Annual Leave', 'Sick', 'Bereavement', 'Maternity'];
+        $notDisabledWhenAnnualExhausted = \App\Support\AnnualLeaveRules::notDisabledWhenAnnualExhaustedLabels();
       @endphp
       @foreach ($leaveBalances as $type => $daysLeft)
         @php
           $isDisabled = $annualBalance <= 0 && !in_array($type, $notDisabledWhenAnnualExhausted, true);
         @endphp
         <li class="leave-balance-item {{ $isDisabled ? 'disabled' : '' }}"
-            title="{{ $type }} Leave"
+            title="{{ $type }} Leave — {{ $daysLeft }} day{{ $daysLeft == 1 ? '' : 's' }} remaining{{ $isDisabled ? ' (Disabled)' : '' }}"
+            aria-label="{{ $type }} Leave, {{ $daysLeft }} days remaining{{ $isDisabled ? ', disabled' : '' }}"
             onclick="{{ $isDisabled ? '' : 'event.stopPropagation(); window.location=\'' . route('leave.balance', ['type' => $type]) . '\'' }}"
             style="{{ $isDisabled ? '' : 'cursor: pointer;' }}">
-          <span class="leave-type">{{ $type }} Leave</span>
-          <span class="leave-days">
-            {{ $daysLeft }} days left{{ $isDisabled ? ' (Disabled)' : '' }}
-          </span>
+          <span class="leave-type">{{ $type }} Leave{{ $isDisabled ? ' (Disabled)' : '' }}</span>
         </li>
       @endforeach
     </ul>
   </div>
 
   <div class="cards" id="cardsContainer" role="list">
-    <a href="{{ route('leave.status', ['status' => 'pending']) }}" role="listitem" aria-label="Pending Leaves count" class="card card-pending" style="color:#a16207;">
-      <div class="card-title">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="#facc15" viewBox="0 0 24 24" stroke-width="2" stroke="#facc15" stroke-linejoin="round" stroke-linecap="round">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 8v4l3 3" />
-        </svg>
-        Pending Leaves
-      </div>
+    <a href="{{ route('leave.status', ['status' => 'all']) }}" role="listitem" aria-label="All leave requests" class="card card-all">
+      <div class="card-title">All Requests</div>
+      <div class="card-value">{{ $allRequestsCount ?? 0 }}</div>
+    </a>
+
+    <a href="{{ route('leave.status', ['status' => 'pending']) }}" role="listitem" aria-label="Pending Leaves count" class="card card-pending">
+      <div class="card-title">Pending Leaves</div>
       <div class="card-value">{{ $pendingCount }}</div>
     </a>
 
     <a href="{{ route('leave.status', ['status' => 'overdue']) }}" role="listitem" aria-label="Overdue Leaves count" class="card card-overdue">
-      <div class="card-title">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="#d946ef" viewBox="0 0 24 24" stroke-width="2" stroke="#d946ef" stroke-linejoin="round" stroke-linecap="round">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 8v4" />
-          <path d="M12 16h.01" />
-        </svg>
-        Overdue Leaves
-      </div>
+      <div class="card-title">Overdue Leaves</div>
       <div class="card-value">{{ $overduePendingCount ?? 0 }}</div>
     </a>
 
-    <a href="{{ route('leave.status', ['status' => 'approved']) }}" role="listitem" aria-label="Approved Leaves count" class="card card-approved" style="color:#064e3b;">
-      <div class="card-title">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="#10b981" viewBox="0 0 24 24" stroke-width="2" stroke="#10b981" stroke-linejoin="round" stroke-linecap="round">
-          <path d="M5 13l4 4L19 7" />
-        </svg>
-        Approved Leaves
-      </div>
+    <a href="{{ route('leave.status', ['status' => 'approved']) }}" role="listitem" aria-label="Approved Leaves count" class="card card-approved">
+      <div class="card-title">Approved Leaves</div>
       <div class="card-value">{{ $approvedCount }}</div>
     </a>
 
     <a href="{{ route('leave.status', ['status' => 'rejected']) }}" role="listitem" aria-label="Rejected Leaves count" class="card card-rejected">
-      <div class="card-title">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="#2fcfc5" viewBox="0 0 24 24" stroke-width="2" stroke="#2fcfc5" stroke-linejoin="round" stroke-linecap="round">
-          <path d="M6 18L18 6M6 6l12 12" />
-        </svg>
-        Rejected Leaves
-      </div>
+      <div class="card-title">Rejected Leaves</div>
       <div class="card-value">{{ $rejectedCount }}</div>
     </a>
 
     <a href="{{ route('leave.status', ['status' => 'withdrawn']) }}" role="listitem" aria-label="Withdrawn Leaves count" class="card card-withdrawn">
-      <div class="card-title">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="#6e4111" viewBox="0 0 24 24" stroke-width="2" stroke="#6e4111" stroke-linejoin="round" stroke-linecap="round">
-          <path d="M6 18L18 6M6 6l12 12" />
-        </svg>
-        Withdrawn Leaves
-      </div>
+      <div class="card-title">Withdrawn Leaves</div>
       <div class="card-value">{{ $withdrawnCount ?? 0 }}</div>
     </a>
   </div>
@@ -495,7 +469,7 @@
       return fixedTypeColors[key] || hashToColor(key);
     };
 
-    Chart.defaults.font.family = '"Century Gothic", CenturyGothic, AppleGothic, sans-serif';
+    window.applyBoldChartDefaults();
     Chart.defaults.font.size = 12;
     Chart.defaults.color = '#2c3e50';
     Chart.defaults.maintainAspectRatio = false;
@@ -517,6 +491,7 @@
     const monthlyTotals = padMonthlySeries(@json($barData));
     const monthlyApproved = padMonthlySeries(@json($monthlyApprovedData));
     const monthlyPending = padMonthlySeries(@json($monthlyPendingData));
+    const monthlyOverdue = padMonthlySeries(@json($monthlyOverdueData));
     const monthlyRejected = padMonthlySeries(@json($monthlyRejectedData));
     const monthlyWithdrawn = padMonthlySeries(@json($monthlyWithdrawnData));
     const monthAxisTicks = { autoSkip: false, maxRotation: 0, minRotation: 0 };
@@ -607,6 +582,15 @@
             stack: 'status'
           },
           {
+            label: 'Overdue',
+            data: monthlyOverdue,
+            backgroundColor: colorForStatus('Overdue'),
+            borderColor: colorForStatus('Overdue'),
+            borderWidth: 1,
+            borderRadius: 4,
+            stack: 'status'
+          },
+          {
             label: 'Rejected',
             data: monthlyRejected,
             backgroundColor: colorForStatus('Rejected'),
@@ -654,6 +638,7 @@
         datasets: [{
           data: [
             {{ $pendingCount }},
+            {{ $overduePendingCount ?? 0 }},
             {{ $rejectedCount }},
             {{ $approvedCount }}
           ],

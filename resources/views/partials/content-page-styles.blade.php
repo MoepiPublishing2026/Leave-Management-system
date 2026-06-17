@@ -20,8 +20,6 @@
         font-size: 40px;
         color: #2c3e50;
         margin: 0;
-        padding-left: 15px;
-        border-left: 6px solid #138056;
         letter-spacing: 0.04em;
     }
     .app-page-lead {
@@ -49,9 +47,9 @@
     }
     .app-page-panel {
         background: #fff;
-        border: 1px solid #dbe3ef;
+        border: none;
         border-radius: 14px;
-        box-shadow: 0 6px 22px rgba(15, 61, 46, 0.06);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
         padding: 22px 24px;
         margin-bottom: 18px;
     }
@@ -72,26 +70,17 @@
         font-size: 0.88rem;
         border-radius: 8px;
         cursor: pointer;
-        border: none;
+        border: 1px solid #91bf14;
         text-decoration: none;
+        background: #b2cd16;
+        color: #0a1347;
         transition: background-color 0.15s ease, color 0.15s ease;
     }
-    .app-page-btn--primary {
-        background: #138056;
-        color: #fff;
-    }
-    .app-page-btn--primary:hover {
-        background: #0f6b47;
-        color: #fff;
-    }
-    .app-page-btn--secondary {
-        background: #fff;
-        color: #334155;
-        border: 1px solid #cbd5e1;
-    }
+    .app-page-btn:hover,
+    .app-page-btn--primary:hover,
     .app-page-btn--secondary:hover {
-        background: #f1f5f9;
-        color: #0f172a;
+        background: #9eb812;
+        color: #0a1347;
     }
     .app-form-grid {
         display: grid;
@@ -122,23 +111,24 @@
     .app-form-group select,
     .app-form-group textarea {
         width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
+        padding: 10px 14px;
+        border: none;
+        border-radius: 10px;
         font-size: 0.92rem;
         color: #334155;
-        background: #fff;
+        background: #e2e8f0;
         box-sizing: border-box;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
     }
     .app-form-group input:focus,
     .app-form-group select:focus,
     .app-form-group textarea:focus {
         outline: none;
-        border-color: #138056;
-        box-shadow: 0 0 0 3px rgba(19, 128, 86, 0.12);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(19, 128, 86, 0.14);
     }
     .app-form-group input[readonly] {
-        background: #f8fafc;
+        background: #eef2f6;
         color: #64748b;
         cursor: not-allowed;
     }
@@ -186,26 +176,25 @@
         display: inline-flex;
         align-items: center;
         padding: 5px 11px;
-        border-radius: 999px;
+        border-radius: 8px;
         font-size: 0.72rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
+        font-weight: 600;
+        letter-spacing: 0.02em;
         background: #ecfdf5;
         color: #047857;
-        border: 1px solid #86efac;
+        border: none;
     }
     .app-badge--muted {
-        background: #f1f5f9;
+        background: #e2e8f0;
         color: #475569;
-        border-color: #cbd5e1;
     }
     .app-info-box {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background: #eef2f6;
+        border: none;
         border-radius: 12px;
         padding: 16px 18px;
         margin-top: 8px;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
     }
     .app-info-box ul {
         margin: 8px 0 0;

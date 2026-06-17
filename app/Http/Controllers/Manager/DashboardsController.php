@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Manager;
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use App\Notifications\LeaveStatusNotification;
+use App\Support\MonthlyLeaveStatusBreakdown;
 use App\Support\PercentageDistribution;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use Yasumi\Yasumi;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 class DashboardsController extends Controller
@@ -59,7 +61,27 @@ class DashboardsController extends Controller
 
         $approvedRequestsCount = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['approved'])->count();
         $rejectedRequestsCount = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['rejected'])->count();
-        
+
+        $today = Carbon::today();
+        $isTodayDisabled = $today->isWeekend();
+        if (!$isTodayDisabled) {
+            $holidays = Yasumi::create('SouthAfrica', (int) $today->year);
+            $holidayDates = [];
+            foreach ($holidays as $holiday) {
+                $holidayDates[] = $holiday->format('Y-m-d');
+            }
+            $isTodayDisabled = in_array($today->toDateString(), $holidayDates, true);
+        }
+
+        $onLeaveTodayCount = 0;
+        if (!$isTodayDisabled) {
+            $onLeaveTodayCount = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['approved'])
+                ->whereDate('start_date', '<=', $today)
+                ->whereDate('end_date', '>=', $today)
+                ->distinct('user_id')
+                ->count('user_id');
+        }
+
         $leaveTypeCounts = (clone $baseQuery)->select('leave_type')
             ->groupBy('leave_type')
             ->selectRaw('count(*) as total')
@@ -69,26 +91,28 @@ class DashboardsController extends Controller
 
         $statusCounts = [
             'Pending' => $pendingRequestsCount,
+            'Overdue' => $overduePendingCount,
             'Rejected' => $rejectedRequestsCount,
             'Approved' => $approvedRequestsCount,
         ];
         $statusPercentages = PercentageDistribution::oneDecimalPercents([
             'Pending' => (int) $pendingRequestsCount,
+            'Overdue' => (int) $overduePendingCount,
             'Rejected' => (int) $rejectedRequestsCount,
             'Approved' => (int) $approvedRequestsCount,
         ]);
 
-        // Monthly charts: always Jan–Dec for one calendar year (submission month), like employee dashboard.
+        // Monthly applications line chart: when requests were submitted (created_at).
         $chartYear = ctype_digit((string) $monthFilter) ? (int) $monthFilter : (int) Carbon::now()->year;
         $barLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         $barData = array_fill(0, 12, 0);
 
-        $monthlyChartQuery = LeaveRequest::query()
+        $monthlyApplicationsQuery = LeaveRequest::query()
             ->byEmployeeApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn'])
             ->whereYear('created_at', $chartYear);
 
-        $monthlyData = (clone $monthlyChartQuery)
+        $monthlyData = (clone $monthlyApplicationsQuery)
             ->select(DB::raw('MONTH(created_at) as month'), DB::raw('COUNT(*) as total'))
             ->groupBy('month')
             ->orderBy('month')
@@ -100,6 +124,13 @@ class DashboardsController extends Controller
                 $barData[$idx] = (int) $row->total;
             }
         }
+
+        // Monthly status breakdown: when requests were submitted (created_at), same scope as applications chart.
+        $monthlyBreakdown = MonthlyLeaveStatusBreakdown::fromQuery(clone $monthlyApplicationsQuery, 'created_at');
+        $monthlyApprovedData = $monthlyBreakdown['monthlyApprovedData'];
+        $monthlyPendingData = $monthlyBreakdown['monthlyPendingData'];
+        $monthlyOverdueData = $monthlyBreakdown['monthlyOverdueData'];
+        $monthlyRejectedData = $monthlyBreakdown['monthlyRejectedData'];
 
         $departmentCountsRaw = (clone $baseQuery)
             ->join('users', 'leave_requests.user_id', '=', 'users.id')
@@ -135,40 +166,13 @@ class DashboardsController extends Controller
         $designationLabels = array_keys($designationCounts);
         $designationData = array_values($designationCounts);
 
-        $monthlyStatusRows = (clone $monthlyChartQuery)
-            ->select(
-                DB::raw('MONTH(created_at) as month'),
-                DB::raw('LOWER(TRIM(status)) as status'),
-                DB::raw('COUNT(*) as total')
-            )
-            ->groupBy('month', 'status')
-            ->orderBy('month')
-            ->get();
-
-        $monthlyApprovedData = array_fill(0, 12, 0);
-        $monthlyPendingData = array_fill(0, 12, 0);
-        $monthlyRejectedData = array_fill(0, 12, 0);
-        foreach ($monthlyStatusRows as $row) {
-            $idx = ((int) $row->month) - 1;
-            if ($idx < 0 || $idx > 11) {
-                continue;
-            }
-            $count = (int) $row->total;
-            match ($row->status) {
-                'approved' => $monthlyApprovedData[$idx] = $count,
-                'pending' => $monthlyPendingData[$idx] = $count,
-                'rejected' => $monthlyRejectedData[$idx] = $count,
-                default => null,
-            };
-        }
-
         return view('manager.dashboard.index', compact(
             'allRequestsCount', 'pendingRequestsCount', 'approvedRequestsCount', 'rejectedRequestsCount',
-            'overduePendingCount',
+            'overduePendingCount', 'onLeaveTodayCount',
             'leaveTypeCounts', 'leaveTypePercentages', 'statusCounts', 'statusPercentages',
             'barLabels', 'barData', 'chartYear', 'departmentLabels', 'departmentData', 'departmentPercentages',
             'monthFilter', 'designationLabels', 'designationData',
-            'monthlyApprovedData', 'monthlyPendingData', 'monthlyRejectedData'
+            'monthlyApprovedData', 'monthlyPendingData', 'monthlyOverdueData', 'monthlyRejectedData'
         ));
     }
 

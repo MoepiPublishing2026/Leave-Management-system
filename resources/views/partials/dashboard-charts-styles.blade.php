@@ -42,7 +42,7 @@
         align-items: center;
         gap: 6px;
         font-size: 0.8rem;
-        font-weight: 600;
+        font-weight: 800;
         color: #2c3e50;
         line-height: 1.25;
         max-width: 100%;

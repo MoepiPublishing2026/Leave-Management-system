@@ -11,7 +11,7 @@
         padding: 30px;
         background: white;
         border-radius: 12px;
-        box-shadow: 0 0 12px #ddd;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
     }
     h1 {
         font-weight: 700;
@@ -23,8 +23,6 @@
         display: block;
         font-weight: 600;
         margin-bottom: 6px;
-        border-left: 4px solid #a5d817;
-        padding-left: 8px;
         color: #4a4a4a;
     }
     input[type="text"],
@@ -33,14 +31,15 @@
     input[type="password"],
     input[type="file"] {
         width: 100%;
-        padding: 10px;
+        padding: 10px 14px;
         margin-bottom: 18px;
-        border: 2px solid #a5d817;
-        border-radius: 6px;
+        border: none;
+        border-radius: 10px;
         font-size: 15px;
         color: #333;
         box-sizing: border-box;
-        transition: border-color 0.3s;
+        background: #e2e8f0;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
     }
     input[type="text"]:focus,
     input[type="email"]:focus,
@@ -48,8 +47,8 @@
     input[type="password"]:focus,
     input[type="file"]:focus {
         outline: none;
-        border-color: #819c0f;
-        background-color: #f3f9d2;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(19, 128, 86, 0.14);
     }
     .error-message {
         color: red;
@@ -58,17 +57,18 @@
         margin-bottom: 10px;
     }
     button[type="submit"] {
-        background-color: #a5d817;
-        color: #1b1b17;
+        background-color: #b2cd16;
+        color: #0a1347;
         font-weight: 700;
         padding: 12px 30px;
-        border: none;
+        border: 1px solid #91bf14;
         border-radius: 8px;
         cursor: pointer;
         transition: background-color 0.3s;
     }
     button[type="submit"]:hover {
-        background-color: #819c0f;
+        background-color: #9eb812;
+        color: #0a1347;
     }
     .password-toggle {
         position: relative;

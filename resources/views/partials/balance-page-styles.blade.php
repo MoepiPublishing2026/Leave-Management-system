@@ -12,8 +12,6 @@
         font-size: 40px;
         color: #2c3e50;
         margin: 0 0 8px;
-        padding-left: 15px;
-        border-left: 6px solid #138056;
         letter-spacing: 0.04em;
     }
     .balance-page-lead {
@@ -85,35 +83,18 @@
         font-size: 0.88rem;
         border-radius: 8px;
         cursor: pointer;
-        border: none;
+        border: 1px solid #91bf14;
         text-decoration: none;
-        transition: background-color 0.15s ease, color 0.15s ease;
-    }
-    .balance-btn--primary {
-        background: #138056;
-        color: #fff;
-    }
-    .balance-btn--primary:hover {
-        background: #0f6b47;
-        color: #fff;
-    }
-    .balance-btn--apply {
         background: #b2cd16;
         color: #0a1347;
-        border: 1px solid #91bf14;
+        transition: background-color 0.15s ease, color 0.15s ease;
     }
-    .balance-btn--apply:hover {
+    .balance-btn:hover,
+    .balance-btn--primary:hover,
+    .balance-btn--apply:hover,
+    .balance-btn--secondary:hover {
         background: #9eb812;
         color: #0a1347;
-    }
-    .balance-btn--secondary {
-        background: #fff;
-        color: #334155;
-        border: 1px solid #cbd5e1;
-    }
-    .balance-btn--secondary:hover {
-        background: #f1f5f9;
-        color: #0f172a;
     }
 
     /* Dashboard-matched leave type cards */

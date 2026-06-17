@@ -60,6 +60,8 @@
             }
             if ($hasLeave) {
                 $ariaParts[] = $leaveCountFull;
+            } elseif ($isToday) {
+                $ariaParts[] = 'No leave today';
             }
             if ($isWeekend && !$isHoliday) {
                 $ariaParts[] = 'Weekend';
@@ -77,6 +79,7 @@
             <span class="day-number">{{ $day }}</span>
             @include('partials.calendar-day-labels', [
                 'hasLeave' => $hasLeave,
+                'isToday' => $isToday,
                 'leaveCountTitle' => $leaveCountFull,
                 'leaveCountFull' => $leaveCountFull,
                 'leaveCountShort' => $leaveCount,

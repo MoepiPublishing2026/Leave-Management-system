@@ -56,5 +56,6 @@
     @include('partials.calendar-details-modal', [
         'events' => $events,
         'showUserInModal' => $showUserInModal,
+        'today' => $today,
     ])
 </div>

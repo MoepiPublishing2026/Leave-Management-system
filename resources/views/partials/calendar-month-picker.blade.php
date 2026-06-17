@@ -26,21 +26,22 @@
         width: 42px;
         height: 42px;
         border-radius: 50%;
-        border: 2px solid #bfe6d1;
+        border: 1px solid #e2e8f0;
         background: #fff;
-        color: #138056;
+        color: #5c7212;
         text-decoration: none;
         font-size: 22px;
         line-height: 1;
-        box-shadow: 0 6px 18px rgba(19, 128, 86, 0.18);
-        transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
         user-select: none;
     }
     .cal-nav-btn:hover {
-        background: #e8f7ef;
-        box-shadow: 0 4px 14px rgba(19, 128, 86, 0.16);
+        background: rgba(178, 205, 22, 0.18);
+        border-color: #b2cd16;
+        box-shadow: 0 4px 14px rgba(74, 92, 18, 0.15);
         transform: translateY(-1px);
-        color: #0f6644;
+        color: #0a1347;
     }
     .cal-nav-picker {
         position: relative;
@@ -51,17 +52,18 @@
         gap: 12px;
         min-width: 220px;
         padding: 10px 18px;
-        border: 2px solid #bfe6d1;
+        border: 1px solid #cbd5e1;
         border-radius: 999px;
-        background: linear-gradient(135deg, #ffffff 0%, #eaf8f1 100%);
-        box-shadow: 0 10px 26px rgba(19, 128, 86, 0.20);
+        background: #fff;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
         cursor: pointer;
-        transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        transition: border-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s ease;
     }
     .cal-nav-current:hover,
     .cal-nav-current[aria-expanded="true"] {
-        border-color: #138056;
-        box-shadow: 0 12px 34px rgba(19, 128, 86, 0.26);
+        border-color: #b2cd16;
+        box-shadow: 0 0 0 3px rgba(178, 205, 22, 0.28), 0 8px 24px rgba(74, 92, 18, 0.12);
+        transform: translateY(-1px);
     }
     .cal-nav-current-text {
         display: flex;
@@ -81,13 +83,13 @@
     .cal-nav-current-year {
         font-size: 0.9rem;
         font-weight: 800;
-        color: #0f6644;
+        color: #5c7212;
     }
     .cal-nav-chevron {
         margin-left: auto;
         width: 18px;
         height: 18px;
-        color: #138056;
+        color: #5c7212;
         transition: transform 0.2s ease;
     }
     .cal-nav-current[aria-expanded="true"] .cal-nav-chevron {
@@ -100,11 +102,11 @@
         transform: translateX(-50%);
         z-index: 30;
         width: min(320px, 92vw);
-        padding: 16px;
-        border-radius: 18px;
-        border: 2px solid #bfe6d1;
+        padding: 8px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
         background: #fff;
-        box-shadow: 0 20px 55px rgba(44, 62, 80, 0.22);
+        box-shadow: 0 14px 36px rgba(15, 23, 42, 0.16);
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
@@ -127,17 +129,18 @@
     .cal-nav-year-btn {
         width: 34px;
         height: 34px;
-        border: none;
+        border: 1px solid #e2e8f0;
         border-radius: 10px;
-        background: #f3fbf6;
-        color: #138056;
+        background: #fff;
+        color: #5c7212;
         font-size: 1.25rem;
         line-height: 1;
         cursor: pointer;
-        transition: background 0.15s ease;
+        transition: background-color 0.15s ease, border-color 0.15s ease;
     }
     .cal-nav-year-btn:hover:not(:disabled) {
-        background: #e1f5ed;
+        background: rgba(178, 205, 22, 0.2);
+        border-color: #b2cd16;
     }
     .cal-nav-year-btn:disabled {
         opacity: 0.35;
@@ -158,47 +161,47 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 10px 6px;
-        border-radius: 12px;
-        border: 1px solid #e3eee8;
-        background: #ffffff;
-        color: #1f2937;
-        font-size: 0.92rem;
+        padding: 10px 8px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        color: #334155;
+        font-size: 0.9rem;
         font-weight: 700;
         text-decoration: none;
-        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+        transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
     }
     .cal-nav-month:hover {
-        background: #e8f7ef;
-        border-color: #138056;
-        color: #0f6644;
+        background: rgba(178, 205, 22, 0.2);
+        border-color: #b2cd16;
+        color: #0a1347;
         transform: translateY(-1px);
     }
     .cal-nav-month.is-active {
-        background: linear-gradient(135deg, #138056 0%, #1a9d6a 100%);
-        border-color: #138056;
-        color: #fff;
-        box-shadow: 0 8px 20px rgba(19, 128, 86, 0.38);
+        background: #b2cd16;
+        border-color: #91bf14;
+        color: #0a1347;
+        box-shadow: 0 4px 14px rgba(178, 205, 22, 0.35);
     }
     .cal-nav-today {
         display: block;
         width: 100%;
         margin-top: 12px;
         padding: 9px 12px;
-        border: none;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #138056 0%, #1a9d6a 100%);
-        color: #fff;
+        border: 1px solid #91bf14;
+        border-radius: 10px;
+        background: #b2cd16;
+        color: #0a1347;
         font-size: 0.88rem;
         font-weight: 700;
         text-align: center;
         text-decoration: none;
-        transition: filter 0.15s ease, transform 0.12s ease;
+        transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
     }
     .cal-nav-today:hover {
-        filter: brightness(1.05);
+        background: #9eb812;
+        color: #0a1347;
         transform: translateY(-1px);
-        color: #fff;
     }
     @media (max-width: 480px) {
         .cal-nav-current {

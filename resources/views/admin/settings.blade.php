@@ -32,8 +32,8 @@
         accent-color: #138056;
     }
     .settings-summary {
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
+        background: #dcfce7;
+        border: none;
         border-radius: 10px;
         padding: 14px 16px;
         color: #166534;
@@ -103,9 +103,9 @@
         </div>
     </form>
 
-    <div class="app-page-panel" style="margin-top:18px;background:#fffbeb;border-color:#fde68a;">
+    <div class="app-page-panel" style="margin-top:18px;background:#fef9c3;">
         <h2 class="app-page-section-title" style="color:#92400e;">Important notes</h2>
-        <div class="app-info-box" style="background:#fff;border-color:#fde68a;">
+        <div class="app-info-box" style="background:#fefce8;">
             <ul>
                 <li>Policy changes apply immediately to new leave requests.</li>
                 <li>Existing leave balances are not automatically adjusted.</li>

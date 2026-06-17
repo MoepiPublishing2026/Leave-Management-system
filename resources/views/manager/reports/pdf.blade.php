@@ -11,9 +11,9 @@
         .subtitle { margin: 4px 0 0; color: #475569; }
         .meta { margin-top: 6px; color: #64748b; font-size: 11px; }
         .cards { margin: 14px 0 12px; width: 100%; border-collapse: collapse; }
-        .cards td { padding: 8px 10px; border: 1px solid #e2e8f0; }
-        .k { color: #64748b; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }
-        .v { font-weight: 800; font-size: 18px; line-height: 1.05; color: #111827; }
+        .cards td { padding: 10px 8px; vertical-align: middle; }
+        .k { font-size: 11px; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 4px; }
+        .v { font-weight: 800; font-size: 18px; line-height: 1.05; }
         table.data { width: 100%; border-collapse: collapse; }
         table.data th { background: #f1f5f9; text-align: left; padding: 8px; border: 1px solid #e2e8f0; }
         table.data td { padding: 7px 8px; border: 1px solid #e2e8f0; vertical-align: top; }
@@ -27,15 +27,7 @@
         <p class="meta">Generated: {{ optional($generatedAt)->timezone(config('app.timezone'))->format('Y-m-d H:i') }}</p>
     </div>
 
-    <table class="cards">
-        <tr>
-            <td><div class="k">All Requests</div><div class="v">{{ $totalRequests ?? 0 }}</div></td>
-            <td><div class="k">Pending Requests</div><div class="v">{{ $pendingRequests ?? 0 }}</div></td>
-            <td><div class="k">Overdue Requests</div><div class="v">{{ $overdueRequests ?? 0 }}</div></td>
-            <td><div class="k">Approved Requests</div><div class="v">{{ $approvedRequests ?? 0 }}</div></td>
-            <td><div class="k">Rejected Requests</div><div class="v">{{ $rejectedRequests ?? 0 }}</div></td>
-        </tr>
-    </table>
+    @include('partials.reports-pdf-cards')
 
     <table class="data">
         <thead>

@@ -10,7 +10,7 @@
 
     <div class="reports-toolbar">
         <form id="reportsFilterForm" method="GET" action="{{ route($filterRoute) }}" class="reports-filter-form reports-toolbar-forms">
-            <select name="month" aria-label="Period" onchange="this.form.submit()">
+            <select name="month" class="filter-select" aria-label="Period" onchange="this.form.submit()">
                 <option value="this_year" {{ ($monthFilter ?? 'this_year') === 'this_year' ? 'selected' : '' }}>This Year</option>
                 <option value="this_quarter" {{ ($monthFilter ?? '') === 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
                 <option value="this_month" {{ ($monthFilter ?? '') === 'this_month' ? 'selected' : '' }}>This Month</option>
@@ -18,8 +18,8 @@
                     <option value="{{ $y }}" {{ (string) ($monthFilter ?? '') === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
                 @endforeach
             </select>
-            <input type="date" name="start_date" value="{{ request('start_date') }}" aria-label="Start date" />
-            <input type="date" name="end_date" value="{{ request('end_date') }}" aria-label="End date" />
+            <input type="text" name="start_date" class="app-date-picker" value="{{ request('start_date') }}" placeholder="Start date" autocomplete="off" aria-label="Start date" />
+            <input type="text" name="end_date" class="app-date-picker" value="{{ request('end_date') }}" placeholder="End date" autocomplete="off" aria-label="End date" />
             <button type="submit" class="reports-btn reports-btn--primary">Filter</button>
             <a href="{{ route($filterRoute) }}" class="reports-btn reports-btn--secondary">Clear</a>
         </form>
@@ -31,31 +31,26 @@
         </form>
     </div>
 
-    <div class="reports-stats">
-        <div class="reports-stat reports-stat--total">
-            <span class="reports-stat-icon"><i class="fas fa-list-ul" aria-hidden="true"></i></span>
-            <span class="reports-stat-label">All Requests</span>
-            <span class="reports-stat-value">{{ $totalRequests ?? 0 }}</span>
+    <div class="cards" role="list">
+        <div class="card card-all" role="listitem">
+            <div class="card-title">All Requests</div>
+            <div class="card-value">{{ $totalRequests ?? 0 }}</div>
         </div>
-        <div class="reports-stat reports-stat--pending">
-            <span class="reports-stat-icon"><i class="fas fa-hourglass-half" aria-hidden="true"></i></span>
-            <span class="reports-stat-label">Pending Requests</span>
-            <span class="reports-stat-value">{{ $pendingRequests ?? 0 }}</span>
+        <div class="card card-pending" role="listitem">
+            <div class="card-title">Pending Requests</div>
+            <div class="card-value">{{ $pendingRequests ?? 0 }}</div>
         </div>
-        <div class="reports-stat reports-stat--overdue">
-            <span class="reports-stat-icon"><i class="fas fa-exclamation-circle" aria-hidden="true"></i></span>
-            <span class="reports-stat-label">Overdue Requests</span>
-            <span class="reports-stat-value">{{ $overdueRequests ?? 0 }}</span>
+        <div class="card card-overdue" role="listitem">
+            <div class="card-title">Overdue Requests</div>
+            <div class="card-value">{{ $overdueRequests ?? 0 }}</div>
         </div>
-        <div class="reports-stat reports-stat--approved">
-            <span class="reports-stat-icon"><i class="fas fa-check-circle" aria-hidden="true"></i></span>
-            <span class="reports-stat-label">Approved Requests</span>
-            <span class="reports-stat-value">{{ $approvedRequests ?? 0 }}</span>
+        <div class="card card-approved" role="listitem">
+            <div class="card-title">Approved Requests</div>
+            <div class="card-value">{{ $approvedRequests ?? 0 }}</div>
         </div>
-        <div class="reports-stat reports-stat--rejected">
-            <span class="reports-stat-icon"><i class="fas fa-ban" aria-hidden="true"></i></span>
-            <span class="reports-stat-label">Rejected Requests</span>
-            <span class="reports-stat-value">{{ $rejectedRequests ?? 0 }}</span>
+        <div class="card card-rejected" role="listitem">
+            <div class="card-title">Rejected Requests</div>
+            <div class="card-value">{{ $rejectedRequests ?? 0 }}</div>
         </div>
     </div>
 

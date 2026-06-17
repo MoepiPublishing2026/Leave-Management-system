@@ -6,7 +6,7 @@
 <style>
     body, html { margin: 0; padding: 0; }
     .manager-container {
-        font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         max-width: 1200px;
         padding: 16px 18px 28px;
         min-height: 100vh;
@@ -25,62 +25,82 @@
     }
     .cards {
         display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
+        flex-wrap: nowrap;
+        gap: 12px;
         margin-bottom: 40px;
-        overflow-x: hidden;
+        width: 100%;
+        overflow-x: auto;
         padding-bottom: 8px;
     }
     .card {
-        background: white;
+        background: #f8fafc;
         border-radius: 16px;
-        padding: 11px 12px 10px;
+        padding: 11px 8px 10px;
         box-shadow: 0 6px 16px rgba(8, 8, 8, 0.15);
         border: 1px solid #e5e7eb;
-    cursor: pointer;
-    transition: box-shadow 0.3s ease;
+        cursor: pointer;
+        transition: box-shadow 0.3s ease;
         text-align: center;
-        border-left: 5px solid;
         text-decoration: none;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        width: 210px;
-        height: 96px;
-        min-height: 96px;
-        min-width: 210px;
-        color: black;
-        flex: 0 0 210px;
-        max-width: 210px;
+        flex: 1 1 0;
+        min-width: 0;
+        height: 88px;
+        min-height: 88px;
+        color: #fff;
         box-sizing: border-box;
     }
     .card:hover {
         box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     }
-     .card-all {
-        border-color: #eb0e8fff;
-        color: #881f54ff;
+    .card-all {
+        background: #00C0A3;
+        border-color: #00C0A3;
+        color: #fff;
     }
     .card-approved {
-        border-color: #53e21aff;
-        color: #1c7737ff;
+        background: #E27A53;
+        border-color: #E27A53;
+        color: #fff;
     }
     .card-pending {
-        border-color: #dab00cff;
-        color: #44380aff;
+        background: #C291A4;
+        border-color: #C291A4;
+        color: #fff;
     }
     .card-overdue {
-        border-color: #d946ef;
-        color: #7a135d;
+        background: #C154C1;
+        border-color: #C154C1;
+        color: #fff;
     }
     .card-rejected {
-        border-color: #2fcfc5ff;
-        color: #0a1347;
+        background: #87AFC7;
+        border-color: #87AFC7;
+        color: #fff;
+    }
+    .card-sixth {
+        background: #D2B55B;
+        border-color: #D2B55B;
+        color: #fff;
+    }
+    .card .card-title,
+    .card .card-value {
+        color: #fff;
+    }
+    .card .card-title svg,
+    .card .card-title .icon {
+        display: none;
+    }
+    .card .card-title {
+        justify-content: center;
+        text-align: center;
     }
     .card-title {
-        font-size: 1rem;
+        font-size: 0.88rem;
         font-weight: 600;
-        margin: 3px 0 6px 0;
+        margin: 2px 0 6px 0;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -88,7 +108,7 @@
     }
     .card-value {
         font-weight: bold;
-        font-size: 1.6rem;
+        font-size: 1.45rem;
         margin-top: 0;
     }
     .charts-container {
@@ -146,72 +166,37 @@
   <h1>Manager Dashboard</h1>
 
 <div class="manager-container">
-    <div style="display:flex; justify-content:flex-end; margin-bottom: 10px;">
-        <form method="GET" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-            <label style="font-weight:800; color:#334155;">Filter</label>
-            <select name="month" onchange="this.form.submit()" style="padding:8px 10px; border-radius:10px; border:2px solid #a5d817; font-weight:800;">
-                <option value="this_year" {{ ($monthFilter ?? 'this_year') === 'this_year' ? 'selected' : '' }}>This Year</option>
-                <option value="this_quarter" {{ ($monthFilter ?? '') === 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
-                <option value="this_month" {{ ($monthFilter ?? '') === 'this_month' ? 'selected' : '' }}>This Month</option>
-                @php $nowY = (int) \Illuminate\Support\Carbon::now()->year; @endphp
-                @foreach(range($nowY - 1, $nowY - 5) as $y)
-                    <option value="{{ $y }}" {{ (string) ($monthFilter ?? '') === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
-                @endforeach
-            </select>
-            <noscript><button type="submit">Apply</button></noscript>
-        </form>
-    </div>
-  
+@include('partials.dashboard-period-filter', ['monthFilter' => $monthFilter ?? 'this_year'])
     
     <div class="cards">
     <a href="{{ route('manager.requests.index', ['status' => 'all', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-all">
-        <div class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18" />
-            </svg>
-            All Requests
-        </div>
+        <div class="card-title">All Requests</div>
         <div class="card-value">{{ $allRequestsCount }}</div>
     </a>
 
     <a href="{{ route('manager.requests.index', ['status' => 'pending', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-pending">
-        <div class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Pending Requests
-        </div>
+        <div class="card-title">Pending Requests</div>
         <div class="card-value">{{ $pendingRequestsCount }}</div>
     </a>
 
     <a href="{{ route('manager.requests.index', ['status' => 'overdue', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-overdue">
-        <div class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Overdue Requests
-        </div>
+        <div class="card-title">Overdue Requests</div>
         <div class="card-value">{{ $overduePendingCount ?? 0 }}</div>
     </a>
 
     <a href="{{ route('manager.requests.index', ['status' => 'approved', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-approved">
-        <div class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Approved Requests
-        </div>
+        <div class="card-title">Approved Requests</div>
         <div class="card-value">{{ $approvedRequestsCount }}</div>
     </a>
 
     <a href="{{ route('manager.requests.index', ['status' => 'rejected', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-rejected">
-        <div class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            Rejected Requests
-        </div>
+        <div class="card-title">Rejected Requests</div>
         <div class="card-value">{{ $rejectedRequestsCount }}</div>
+    </a>
+
+    <a href="{{ route('manager.calendar') }}" class="card card-sixth" aria-label="Employees on leave today">
+        <div class="card-title">On Leave Today</div>
+        <div class="card-value">{{ $onLeaveTodayCount ?? 0 }}</div>
     </a>
 </div>
 
@@ -323,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const getColorForLabel = (label) => hashToColor(normalizeKey(label) || String(label || '').trim().toLowerCase());
 
-    Chart.defaults.font.family = '"Century Gothic", CenturyGothic, AppleGothic, sans-serif';
+    window.applyBoldChartDefaults();
     Chart.defaults.font.size = 12;
     Chart.defaults.color = '#2c3e50';
     Chart.defaults.maintainAspectRatio = false;
@@ -374,6 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
             datasets: [{
                 data: [
                     {{ $statusCounts['Pending'] ?? 0 }},
+                    {{ $statusCounts['Overdue'] ?? 0 }},
                     {{ $statusCounts['Rejected'] ?? 0 }},
                     {{ $statusCounts['Approved'] ?? 0 }}
                 ],
@@ -413,6 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthlyTotals = padMonthlySeries(@json($barData));
     const monthlyApproved = padMonthlySeries(@json($monthlyApprovedData));
     const monthlyPending = padMonthlySeries(@json($monthlyPendingData));
+    const monthlyOverdue = padMonthlySeries(@json($monthlyOverdueData));
     const monthlyRejected = padMonthlySeries(@json($monthlyRejectedData));
     const monthAxisTicks = { autoSkip: false, maxRotation: 0, minRotation: 0 };
     const monthlyColor = window.leaveMonthlyApplicationsColor;
@@ -536,6 +523,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: monthlyPending,
                     backgroundColor: colorForStatus('Pending'),
                     borderColor: colorForStatus('Pending'),
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    stack: 'status'
+                },
+                {
+                    label: 'Overdue',
+                    data: monthlyOverdue,
+                    backgroundColor: colorForStatus('Overdue'),
+                    borderColor: colorForStatus('Overdue'),
                     borderWidth: 1,
                     borderRadius: 4,
                     stack: 'status'

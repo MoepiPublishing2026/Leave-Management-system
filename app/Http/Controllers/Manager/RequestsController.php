@@ -10,6 +10,7 @@ use App\Mail\LeaveResponseMail;
 use Illuminate\Support\Facades\Mail;
 use App\Notifications\LeaveStatusNotification;
 use Illuminate\Support\Facades\Auth;
+use App\Support\LeaveRequestSearch;
 use Illuminate\Support\Carbon;
 use App\Models\User;
 use App\Notifications\OverdueLeaveEscalatedNotification;
@@ -85,24 +86,7 @@ class RequestsController extends Controller
         }
 
         if ($effectiveSearch !== '') {
-            $query->where(function ($q) use ($effectiveSearch) {
-                $q->where('leave_type', 'like', '%' . $effectiveSearch . '%')
-                    ->orWhereRaw('LOWER(status) like ?', ['%' . strtolower($effectiveSearch) . '%'])
-                    ->orWhere('start_date', 'like', '%' . $effectiveSearch . '%')
-                    ->orWhere('end_date', 'like', '%' . $effectiveSearch . '%')
-                    ->orWhere('important_comment', 'like', '%' . $effectiveSearch . '%')
-                    ->orWhereHas('user', function ($q2) use ($effectiveSearch) {
-                        $q2->where('first_name', 'like', '%' . $effectiveSearch . '%')
-                            ->orWhere('last_name', 'like', '%' . $effectiveSearch . '%')
-                            ->orWhere('email', 'like', '%' . $effectiveSearch . '%')
-                            ->orWhere('department', 'like', '%' . $effectiveSearch . '%')
-                            ->orWhere('designation', 'like', '%' . $effectiveSearch . '%');
-                    });
-
-                if (ctype_digit($effectiveSearch)) {
-                    $q->orWhere('id', (int) $effectiveSearch);
-                }
-            });
+            LeaveRequestSearch::apply($query, $effectiveSearch);
         }
 
         $requests = $query->orderByDesc('created_at')->paginate(10)->withQueryString();
@@ -282,10 +266,10 @@ public function escalate(Request $r, $id)
         $currentYear = (int) \Carbon\Carbon::now()->year;
         $requestYear = $leaveRequest->start_date ? (int) \Carbon\Carbon::parse($leaveRequest->start_date)->year : $currentYear;
         $isPreviousYear = $requestYear === ($currentYear - 1);
-        if (!($status === 'withdrawn' || $isPreviousYear)) {
+        if (! $isPreviousYear) {
             return redirect()
                 ->back()
-                ->with('error', 'Only withdrawn requests or requests from the previous year can be deleted.');
+                ->with('error', 'Only requests from the previous year can be deleted.');
         }
 
         try {

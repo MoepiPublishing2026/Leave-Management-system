@@ -18,8 +18,6 @@
         font-size: 36px;
         color: #2c3e50;
         margin: 0 0 18px 0;
-        border-left: 6px solid #138056ff;
-        padding-left: 15px;
         letter-spacing: 0.04em;
     }
     .filter-links { margin-bottom: 16px; }

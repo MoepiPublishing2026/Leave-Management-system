@@ -12,8 +12,6 @@
         font-size: 40px;
         color: #2c3e50;
         margin: 0 0 8px;
-        padding-left: 15px;
-        border-left: 6px solid #138056;
         letter-spacing: 0.04em;
     }
     .reports-page-lead {
@@ -45,20 +43,8 @@
         gap: 8px;
         align-items: center;
     }
-    .reports-filter-form select,
-    .reports-filter-form input[type="date"] {
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        padding: 8px 12px;
-        font-size: 0.9rem;
-        background: #fff;
-        color: #334155;
-    }
-    .reports-filter-form select:focus,
-    .reports-filter-form input[type="date"]:focus {
-        outline: none;
-        border-color: #138056;
-        box-shadow: 0 0 0 3px rgba(19, 128, 86, 0.12);
+    .reports-filter-form .app-date-picker {
+        min-width: 148px;
     }
     .reports-btn {
         display: inline-flex;
@@ -69,74 +55,89 @@
         font-size: 0.88rem;
         border-radius: 8px;
         cursor: pointer;
-        border: none;
+        border: 1px solid #91bf14;
         text-decoration: none;
-        transition: background-color 0.15s ease;
+        background: #b2cd16;
+        color: #0a1347;
+        transition: background-color 0.15s ease, color 0.15s ease;
     }
-    .reports-btn--primary {
-        background: #138056;
-        color: #fff;
-    }
-    .reports-btn--primary:hover {
-        background: #0f6b47;
-        color: #fff;
-    }
-    .reports-btn--secondary {
-        background: #fff;
-        color: #334155;
-        border: 1px solid #cbd5e1;
-    }
-    .reports-btn--secondary:hover {
-        background: #f1f5f9;
-    }
-    .reports-btn--export {
-        background: #0f766e;
-        color: #fff;
-    }
+    .reports-btn:hover,
+    .reports-btn--primary:hover,
+    .reports-btn--secondary:hover,
     .reports-btn--export:hover {
-        background: #0d655e;
-        color: #fff;
+        background: #9eb812;
+        color: #0a1347;
     }
-    .reports-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 14px;
+    .reports-page .cards {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 12px;
         margin-bottom: 24px;
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 8px;
     }
-    .reports-stat {
-        background: #fff;
-        border: 1px solid #dbe3ef;
-        border-radius: 14px;
-        padding: 16px;
-        box-shadow: 0 6px 22px rgba(15, 61, 46, 0.06);
+    .reports-page .card {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 12px 8px;
+        box-shadow: 0 6px 16px rgba(8, 8, 8, 0.15);
+        color: #fff;
+        text-align: center;
+        border: 1px solid #e5e7eb;
         display: flex;
         flex-direction: column;
-        gap: 6px;
-        border-left: 5px solid var(--stat-accent, #64748b);
+        justify-content: center;
+        flex: 1 1 0;
+        min-width: 0;
+        height: 88px;
+        min-height: 88px;
+        box-sizing: border-box;
     }
-    .reports-stat--total { --stat-accent: #64748b; }
-    .reports-stat--pending { --stat-accent: #facc15; }
-    .reports-stat--overdue { --stat-accent: #d946ef; }
-    .reports-stat--approved { --stat-accent: #10b981; }
-    .reports-stat--rejected { --stat-accent: #2fcfc5; }
-    .reports-stat-label {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #334155;
-        letter-spacing: 0.02em;
+    .reports-page .card-all {
+        background: #00C0A3;
+        border-color: #00C0A3;
+    }
+    .reports-page .card-pending {
+        background: #C291A4;
+        border-color: #C291A4;
+    }
+    .reports-page .card-overdue {
+        background: #C154C1;
+        border-color: #C154C1;
+    }
+    .reports-page .card-approved {
+        background: #E27A53;
+        border-color: #E27A53;
+    }
+    .reports-page .card-rejected {
+        background: #87AFC7;
+        border-color: #87AFC7;
+    }
+    .reports-page .card-onleave {
+        background: #87AFC7;
+        border-color: #87AFC7;
+    }
+    .reports-page .card-sixth {
+        background: #D2B55B;
+        border-color: #D2B55B;
+    }
+    .reports-page .card .card-title,
+    .reports-page .card .card-value {
+        color: #fff;
+    }
+    .reports-page .card-title {
+        font-size: 0.88rem;
+        font-weight: 600;
+        margin: 2px 0 6px 0;
+        text-align: center;
         line-height: 1.3;
     }
-    .reports-stat-value {
-        font-size: 1.75rem;
-        font-weight: 800;
-        color: #0f172a;
+    .reports-page .card-value {
+        font-weight: bold;
+        font-size: 1.45rem;
+        margin-top: 0;
         line-height: 1.1;
-        font-family: inherit;
-    }
-    .reports-stat-icon {
-        font-size: 1.1rem;
-        color: var(--stat-accent, #64748b);
-        opacity: 0.9;
     }
     .reports-section-title {
         font-size: 1.05rem;
@@ -187,19 +188,22 @@
     }
     .reports-page .request-badge {
         display: inline-block;
-        padding: 5px 11px;
-        border-radius: 999px;
-        font-weight: 800;
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
+        min-width: 5.5rem;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.78rem;
+        text-align: center;
+        color: #fff;
+        border: none;
+        letter-spacing: 0.01em;
         font-family: inherit;
     }
-    .reports-page .request-badge--pending { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
-    .reports-page .request-badge--approved { background: #dcfce7; color: #166534; border: 1px solid #22c55e; }
-    .reports-page .request-badge--rejected { background: #ccfbf1; color: #0f766e; border: 1px solid #2fcfc5; }
-    .reports-page .request-badge--withdrawn { background: #ffedd5; color: #7c2d12; border: 1px solid #fb923c; }
-    .reports-page .request-badge--overdue { background: #fce7f3; color: #9d174d; border: 1px solid #f472b6; }
+    .reports-page .request-badge--pending { background: #C291A4; }
+    .reports-page .request-badge--approved { background: #E27A53; }
+    .reports-page .request-badge--rejected { background: #87AFC7; }
+    .reports-page .request-badge--withdrawn { background: #D2B55B; }
+    .reports-page .request-badge--overdue { background: #C154C1; }
     @media (max-width: 768px) {
         .reports-page h1 { font-size: 28px; }
         .reports-toolbar { flex-direction: column; align-items: stretch; }

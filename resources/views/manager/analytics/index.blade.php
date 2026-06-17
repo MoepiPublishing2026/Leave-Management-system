@@ -4,9 +4,12 @@
 <style>
     /* Scope page styles so navbar/sidebar layout stays consistent */
     .manager-analytics-page {
-        font-family: "Century Gothic", sans-serif;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         background-color: white;
-        color: #333;
+        color: #1e293b;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 4px 32px;
     }
     .page-header {
         display: flex;
@@ -18,33 +21,28 @@
     }
     .page-header h2 {
         font-weight: 700;
-        font-size: 2.4rem;
-        color: #1e293b;
-        margin-bottom: 6px;
+        font-size: 40px;
+        color: #2c3e50;
         margin: 0;
-    }
-    .filter-form select {
-        padding: 6px 12px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        font-size: 1rem;
+        letter-spacing: 0.04em;
     }
     .filter-form .filter-clear {
-        margin-left: 10px;
-        padding: 6px 12px;
-        border-radius: 6px;
-        border: 1px solid #cbd5e1;
-        background: #f8fafc;
+        margin-left: 0;
+        padding: 10px 16px;
+        border-radius: 10px;
+        border: 1px solid #91bf14;
+        background: #b2cd16;
         text-decoration: none;
         font-weight: 700;
-        color: #0f172a;
-        transition: background-color 0.15s ease, border-color 0.15s ease;
+        font-size: 0.92rem;
+        color: #0a1347;
+        transition: background-color 0.15s ease, color 0.15s ease;
         white-space: nowrap;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     }
     .filter-form .filter-clear:hover {
-        background: #f1f5f9;
-        border-color: #94a3b8;
-        color: #0f172a;
+        background: #9eb812;
+        color: #0a1347;
     }
     .metrics-row {
         display: flex;
@@ -190,8 +188,6 @@
         font-size: 2.4rem;
         color: #2c3e50;
         margin: 0 0 20px 0;
-        border-left: 6px solid #138056ff;
-        padding-left: 15px;
         letter-spacing: 0.04em;
     }
     tr:hover td {
@@ -298,13 +294,12 @@
     }
 </style>
 
-
 <div class="manager-analytics-page">
 <div class="container-fluid">
     <div class="page-header">
         <h2>Analytics & Insights</h2>
         <form method="GET" class="filter-form" id="monthFilterForm">
-            <select name="month" onchange="document.getElementById('monthFilterForm').submit()">
+            <select name="month" class="filter-select" onchange="document.getElementById('monthFilterForm').submit()">
                 <option value="this_year" {{ $monthFilter == 'this_year' ? 'selected' : '' }}>This Year</option>
                 <option value="this_month" {{ $monthFilter == 'this_month' ? 'selected' : '' }}>This Month</option>
                 <option value="this_quarter" {{ $monthFilter == 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
@@ -312,7 +307,7 @@
                     <option value="{{ $year }}" {{ (string) $monthFilter === (string) $year ? 'selected' : '' }}>{{ $year }}</option>
                 @endforeach
             </select>
-            <select name="staff" onchange="document.getElementById('monthFilterForm').submit()">
+            <select name="staff" class="filter-select" onchange="document.getElementById('monthFilterForm').submit()">
                 <option value="all" {{ (string) ($staff ?? 'all') === 'all' ? 'selected' : '' }}>All Employees</option>
                 @foreach(($staffOptions ?? []) as $u)
                     <option value="{{ $u->id }}" {{ (string) ($staff ?? 'all') === (string) $u->id ? 'selected' : '' }}>
@@ -503,6 +498,7 @@
 @include('partials.dashboard-chart-vars')
 <script>
 const ctx = document.getElementById('designationPieChart').getContext('2d');
+window.applyBoldChartDefaults();
 const chartPalette = [
     '#1d4ed8',
     '#3b82f6',
@@ -555,6 +551,8 @@ new Chart(ctx, {
         plugins: {
             legend: { display: false },
             tooltip: {
+                bodyFont: { size: 13, weight: '700' },
+                titleFont: { size: 13, weight: '700' },
                 callbacks: {
                     label: (ctx) => {
                         const pct = (designationPct[ctx.label] ?? 0).toFixed(1);

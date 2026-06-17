@@ -65,7 +65,7 @@
             $linkParams = array_merge(['status' => $filterKey], $filterParams);
         @endphp
         <a href="{{ route($filterRoute, $linkParams) }}"
-           class="requests-filter {{ $status === $filterKey ? 'is-active' : '' }}"
+           class="requests-filter requests-filter--{{ $filterKey }} {{ $status === $filterKey ? 'is-active' : '' }}"
            role="tab"
            aria-selected="{{ $status === $filterKey ? 'true' : 'false' }}">
             {{ $filterLabel }}

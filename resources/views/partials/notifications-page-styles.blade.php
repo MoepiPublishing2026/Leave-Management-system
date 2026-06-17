@@ -12,8 +12,6 @@
         font-size: 40px;
         color: #2c3e50;
         margin: 0 0 8px;
-        padding-left: 15px;
-        border-left: 6px solid #138056;
         letter-spacing: 0.04em;
     }
     .notifications-lead {
@@ -43,18 +41,18 @@
         font-size: 0.88rem;
         border-radius: 8px;
         cursor: pointer;
-        border: none;
+        border: 1px solid #91bf14;
         text-decoration: none;
+        background: #b2cd16;
+        color: #0a1347;
         transition: background-color 0.15s ease, color 0.15s ease;
     }
-    .notifications-btn--primary { background: #138056; color: #fff; }
-    .notifications-btn--primary:hover { background: #0f6b47; color: #fff; }
-    .notifications-btn--secondary {
-        background: #fff;
-        color: #334155;
-        border: 1px solid #cbd5e1;
+    .notifications-btn:hover,
+    .notifications-btn--primary:hover,
+    .notifications-btn--secondary:hover {
+        background: #9eb812;
+        color: #0a1347;
     }
-    .notifications-btn--secondary:hover { background: #f1f5f9; color: #0f172a; }
 
     .notifications-list {
         list-style: none;

@@ -12,8 +12,6 @@
         font-size: 40px;
         color: #2c3e50;
         margin: 0 0 8px;
-        padding-left: 15px;
-        border-left: 6px solid #138056;
         letter-spacing: 0.04em;
     }
     .requests-page-lead {
@@ -96,63 +94,59 @@
         font-size: 0.88rem;
         border-radius: 8px;
         cursor: pointer;
-        border: none;
+        border: 1px solid #91bf14;
         text-decoration: none;
+        background: #b2cd16;
+        color: #0a1347;
         transition: background-color 0.15s ease, color 0.15s ease;
     }
-    .requests-btn--primary {
-        background: #138056;
-        color: #fff;
-    }
-    .requests-btn--primary:hover {
-        background: #0f6b47;
-        color: #fff;
-    }
-    .requests-btn--secondary {
-        background: #fff;
-        color: #334155;
-        border: 1px solid #cbd5e1;
-    }
-    .requests-btn--secondary:hover {
-        background: #f1f5f9;
-        color: #0f172a;
-    }
-    .requests-btn--search {
-        background: #0f766e;
-        color: #fff;
-    }
+    .requests-btn:hover,
+    .requests-btn--primary:hover,
+    .requests-btn--secondary:hover,
     .requests-btn--search:hover {
-        background: #0d655e;
-        color: #fff;
+        background: #9eb812;
+        color: #0a1347;
     }
     .requests-filters {
-        display: flex;
+        display: inline-flex;
         flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 14px;
+        gap: 4px;
+        margin-bottom: 16px;
+        padding: 4px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        max-width: 100%;
     }
     .requests-filter {
         display: inline-flex;
         align-items: center;
-        padding: 7px 14px;
-        border-radius: 999px;
-        font-weight: 700;
-        font-size: 0.84rem;
+        justify-content: center;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.86rem;
         text-decoration: none;
-        color: #475569;
-        background: #fff;
-        border: 1px solid #dbe3ef;
-        transition: all 0.15s ease;
+        color: #64748b;
+        background: transparent;
+        border: none;
+        transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+        white-space: nowrap;
     }
     .requests-filter:hover {
-        border-color: #138056;
-        color: #138056;
+        color: #334155;
+        background: rgba(255, 255, 255, 0.65);
     }
     .requests-filter.is-active {
-        background: #138056;
-        border-color: #138056;
         color: #fff;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
     }
+    .requests-filter--all.is-active { background: #00C0A3; }
+    .requests-filter--pending.is-active { background: #C291A4; }
+    .requests-filter--overdue.is-active { background: #C154C1; }
+    .requests-filter--approved.is-active { background: #E27A53; }
+    .requests-filter--rejected.is-active { background: #87AFC7; }
+    .requests-filter--withdrawn.is-active { background: #D2B55B; }
     .requests-month-chip {
         display: inline-flex;
         align-items: center;
@@ -186,7 +180,7 @@
         width: 100%;
         border-collapse: collapse;
         font-size: 0.92rem;
-        min-width: 680px;
+        min-width: 760px;
     }
     .requests-table th,
     .requests-table td {
@@ -214,10 +208,10 @@
         background: #f8fafc;
     }
     .requests-table tbody tr.overdue-row {
-        background: #fff1f2;
+        background: #faf5fb;
     }
     .requests-table tbody tr.overdue-row:hover {
-        background: #ffe4e6;
+        background: #f3e8f8;
     }
     .requests-empty {
         text-align: center;
@@ -243,18 +237,22 @@
     }
     .request-badge {
         display: inline-block;
-        padding: 5px 11px;
-        border-radius: 999px;
-        font-weight: 800;
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
+        min-width: 5.5rem;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.78rem;
+        text-align: center;
+        color: #fff;
+        border: none;
+        letter-spacing: 0.01em;
+        line-height: 1.25;
     }
-    .request-badge--pending { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
-    .request-badge--approved { background: #dcfce7; color: #166534; border: 1px solid #22c55e; }
-    .request-badge--rejected { background: #ccfbf1; color: #0f766e; border: 1px solid #2fcfc5; }
-    .request-badge--withdrawn { background: #ffedd5; color: #7c2d12; border: 1px solid #fb923c; }
-    .request-badge--overdue { background: #fce7f3; color: #9d174d; border: 1px solid #f472b6; }
+    .request-badge--pending { background: #C291A4; }
+    .request-badge--approved { background: #E27A53; }
+    .request-badge--rejected { background: #87AFC7; }
+    .request-badge--withdrawn { background: #D2B55B; }
+    .request-badge--overdue { background: #C154C1; }
     .requests-table td.request-actions-cell {
         vertical-align: middle;
     }
@@ -298,24 +296,52 @@
         padding: 6px 14px;
         font-weight: 700;
         font-size: 0.82rem;
-        border: none;
         border-radius: 8px;
         cursor: pointer;
         text-decoration: none;
         display: inline-block;
         vertical-align: middle;
         line-height: 1.35;
+        transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
-    .request-btn--delete { background: #991b1b; color: #fff; }
-    .request-btn--delete:hover { background: #7f1d1d; }
-    .request-btn--withdraw { background: #b45309; color: #fff; }
-    .request-btn--withdraw:hover { background: #92400e; }
-    .request-btn--approve { background: #10b981; color: #fff; }
-    .request-btn--approve:hover { background: #0e9b6e; }
-    .request-btn--reject { background: #ef4444; color: #fff; }
-    .request-btn--reject:hover { background: #dc2626; }
-    .request-btn--escalate { background: #ec4899; color: #fff; }
-    .request-btn--escalate:hover { background: #db2777; }
+    .request-btn--approve,
+    .request-btn--escalate {
+        border: 1px solid #91bf14;
+        background: #b2cd16;
+        color: #0a1347;
+    }
+    .request-btn--approve:hover,
+    .request-btn--escalate:hover {
+        background: #9eb812;
+        color: #0a1347;
+    }
+    .request-btn--reject {
+        background: #dc2626;
+        border: 1px solid #b91c1c;
+        color: #fff;
+    }
+    .request-btn--reject:hover {
+        background: #b91c1c;
+        color: #fff;
+    }
+    .request-btn--delete {
+        background: #dc2626;
+        border-color: #b91c1c;
+        color: #fff;
+    }
+    .request-btn--delete:hover {
+        background: #b91c1c;
+        color: #fff;
+    }
+    .request-btn--withdraw {
+        background: #b45309;
+        border-color: #92400e;
+        color: #fff;
+    }
+    .request-btn--withdraw:hover {
+        background: #92400e;
+        color: #fff;
+    }
     @media (max-width: 768px) {
         .requests-page h1 {
             font-size: 28px;

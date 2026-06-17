@@ -4,173 +4,475 @@
 
 @section('content')
 <style>
+    .messages-page-title {
+        font-weight: 700;
+        font-size: 40px;
+        color: #2c3e50;
+        margin: 0 0 14px;
+        letter-spacing: 0.04em;
+    }
     .messages-wrap {
-        max-width: 1400px;
-        margin: 20px auto 60px;
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 0 10px #a7bd8dff;
+        max-width: 1200px;
+        margin: 0 auto 40px;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 8px 28px rgba(74, 92, 18, 0.14);
         overflow: hidden;
         display: grid;
-        grid-template-columns: 360px 1fr;
-        min-height: 75vh;
+        grid-template-columns: 340px 1fr;
+        min-height: 72vh;
     }
     .messages-sidebar {
-        border-right: 1px solid #e5e7eb;
-        background: #fbfbfb;
+        background: linear-gradient(180deg, #5c7212 0%, #8faa1a 32%, #b2cd16 62%, #d8ea5c 100%);
+        border-right: none;
         display: flex;
         flex-direction: column;
+        min-height: 0;
     }
-    .messages-sidebar h2 {
-        margin: 0;
+    .messages-sidebar-head {
         padding: 16px 18px;
-        font-size: 18px;
+        font-size: 1.05rem;
         font-weight: 800;
-        color: #2c3e50;
-        border-bottom: 1px solid #e5e7eb;
+        color: #fff;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.12);
+        letter-spacing: 0.02em;
     }
     .thread-list {
         overflow-y: auto;
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
+        flex: 1;
     }
     .thread {
-        display: block;
-        padding: 12px 12px;
-        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
         text-decoration: none;
-        border: 1px solid #e5e7eb;
-        background: white;
-        color: #111827;
-        transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        color: inherit;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+        transition: background-color 0.12s ease;
+    }
+    .thread:hover {
+        background: rgba(255, 255, 255, 0.22);
     }
     .thread.active {
-        border-color: #138056ff;
-        box-shadow: 0 6px 18px rgba(19, 128, 86, 0.18);
+        background: rgba(255, 255, 255, 0.22);
+        box-shadow: inset 3px 0 0 #fff;
     }
-    .thread-title {
+    .thread-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        overflow: hidden;
+        background: #fff;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(10, 19, 71, 0.12);
+    }
+    .thread-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .thread-avatar-fallback {
+        font-size: 0.95rem;
         font-weight: 800;
-        font-size: 14px;
-        color: #0a1347;
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
+        color: #5c7212;
+        letter-spacing: 0.02em;
     }
-    .thread-sub {
-        margin-top: 6px;
-        font-size: 13px;
-        color: #475569;
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
+    .thread-body {
+        flex: 1;
+        min-width: 0;
     }
-    .thread-preview {
-        margin-top: 8px;
-        font-size: 13px;
-        color: #334155;
+    .thread-row-top {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+    .thread-name {
+        font-weight: 700;
+        font-size: 1rem;
+        color: #fff;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    .thread-unread {
-        display: inline-flex;
+    .thread-time {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.82);
+        flex-shrink: 0;
+        font-weight: 600;
+    }
+    .thread-row-bottom {
+        display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+    .thread-preview {
+        font-size: 0.84rem;
+        color: rgba(255, 255, 255, 0.88);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+        min-width: 0;
+        font-weight: 500;
+    }
+    .thread-unread {
+        flex-shrink: 0;
         min-width: 20px;
         height: 20px;
         padding: 0 6px;
         border-radius: 999px;
-        background: #138056ff;
-        color: white;
-        font-size: 12px;
-        font-weight: 900;
-        flex-shrink: 0;
+        background: #fff;
+        color: #5c7212;
+        font-size: 0.72rem;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     .messages-main {
         display: flex;
         flex-direction: column;
         min-width: 0;
+        background: #eef1e6;
     }
     .messages-header {
-        border-bottom: 1px solid #e5e7eb;
-        padding: 16px 18px;
+        border-bottom: none;
+        padding: 12px 16px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
         gap: 12px;
+        background: linear-gradient(90deg, #c8de2e 0%, #b2cd16 55%, #9eb812 100%);
+        box-shadow: 0 2px 10px rgba(74, 92, 18, 0.15);
     }
-    .messages-header h3 {
+    .messages-header-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        overflow: hidden;
+        background: #fff;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .messages-header-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .messages-header-avatar span {
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #5c7212;
+    }
+    .messages-header-text h3 {
         margin: 0;
-        font-size: 16px;
-        font-weight: 900;
-        color: #2c3e50;
+        font-size: 1rem;
+        font-weight: 800;
+        color: #fff;
     }
-    .messages-header .meta {
-        color: #64748b;
-        font-size: 13px;
-        font-weight: 700;
-        text-align: right;
-        white-space: nowrap;
+    .messages-header-text .meta {
+        margin-top: 2px;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: 1.35;
     }
     .messages-body {
         flex: 1;
-        padding: 18px;
+        padding: 16px 18px;
         overflow-y: auto;
-        background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        align-items: stretch;
+        gap: 6px;
+        background: linear-gradient(180deg, #f3f6eb 0%, #e8eddf 100%);
     }
     .bubble-row {
         display: flex;
+        width: 100%;
     }
     .bubble-row.me {
         justify-content: flex-end;
     }
+    .bubble-row:not(.me) {
+        justify-content: flex-start;
+    }
     .bubble {
-        max-width: 70%;
-        padding: 10px 12px;
-        border-radius: 14px;
-        border: 1px solid #e5e7eb;
-        background: white;
-        color: #111827;
-        font-size: 14px;
-        line-height: 1.4;
+        display: inline-block;
+        width: auto;
+        min-width: 88px;
+        max-width: 72%;
+        padding: 10px 14px 8px;
+        border-radius: 10px;
+        background: #fff;
+        color: #111b21;
+        font-size: 0.95rem;
+        line-height: 1.45;
+        word-break: break-word;
+        vertical-align: top;
+        box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+    }
+    .bubble-line {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: flex-start;
+        gap: 6px 10px;
+        max-width: 100%;
+    }
+    .bubble-text {
         white-space: pre-wrap;
         word-break: break-word;
     }
+    .bubble-row:not(.me) .bubble {
+        flex: 0 0 auto;
+        width: auto;
+    }
     .bubble-row.me .bubble {
-        background: #eafff1;
-        border-color: #9ee7c2;
+        background: linear-gradient(135deg, #b2cd16 0%, #9eb812 100%);
+        color: #fff;
+        box-shadow: 0 2px 6px rgba(74, 92, 18, 0.2);
+        flex: 0 0 auto;
+        width: auto;
     }
     .bubble-meta {
-        margin-top: 6px;
-        font-size: 12px;
-        font-weight: 700;
-        color: #64748b;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #667781;
+        white-space: nowrap;
+        flex-shrink: 0;
+        line-height: 1.3;
+        padding-top: 2px;
+    }
+    .bubble-row.me .bubble-meta {
+        color: rgba(255, 255, 255, 0.88);
+    }
+    .ticks.gray { color: rgba(255, 255, 255, 0.75); }
+    .ticks.blue { color: #fff; }
+    .bubble:has(audio) {
+        min-width: 248px;
+    }
+    .bubble audio {
+        width: 220px;
+        height: 36px;
+        margin-bottom: 4px;
+        display: block;
+    }
+    .bubble-voice-meta {
         display: flex;
-        justify-content: space-between;
-        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 4px;
+        padding-top: 2px;
     }
-    .ticks {
-        display: inline-flex;
+    .bubble.is-deleted .bubble-text {
+        font-style: italic;
+        opacity: 0.85;
+    }
+    .bubble-reply {
+        border-left: 3px solid #b2cd16;
+        padding: 6px 10px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.06);
+        max-width: 100%;
+    }
+    .bubble-row.me .bubble-reply {
+        border-left-color: rgba(255, 255, 255, 0.85);
+        background: rgba(255, 255, 255, 0.16);
+    }
+    .bubble-reply-name {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: #5c7212;
+        margin-bottom: 2px;
+    }
+    .bubble-row.me .bubble-reply-name {
+        color: rgba(255, 255, 255, 0.95);
+    }
+    .bubble-reply-text {
+        display: block;
+        font-size: 0.82rem;
+        opacity: 0.9;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 260px;
+    }
+    .bubble-wrap {
+        display: inline-block;
+        max-width: min(82%, 100%);
+    }
+    .bubble {
+        cursor: pointer;
+        transition: outline-color 0.12s ease, box-shadow 0.12s ease;
+    }
+    .bubble:hover {
+        box-shadow: 0 2px 10px rgba(74, 92, 18, 0.22);
+    }
+    .bubble.is-selected {
+        outline: 3px solid #eff106;
+        outline-offset: 2px;
+    }
+    .messages-options-hint {
+        margin: 0 0 10px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: rgba(178, 205, 22, 0.22);
+        color: #3d4f0f;
+        font-size: 0.88rem;
+        font-weight: 700;
+        text-align: center;
+    }
+    .message-actions-bar {
+        display: flex;
+        flex-wrap: wrap;
         align-items: center;
-        gap: 2px;
-        font-weight: 900;
-        letter-spacing: -1px;
+        gap: 8px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        background: #233138;
+        color: #e9edef;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
     }
-    .ticks.gray {
+    .message-actions-bar[hidden] {
+        display: none !important;
+    }
+    .message-actions-label {
+        flex: 1 1 100%;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.75);
+        margin-bottom: 2px;
+    }
+    .message-actions-bar button {
+        padding: 9px 14px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        font: inherit;
+        font-size: 0.88rem;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .message-actions-bar button:hover {
+        background: rgba(255, 255, 255, 0.22);
+    }
+    .message-actions-bar button.danger {
+        background: rgba(220, 38, 38, 0.35);
+    }
+    .message-actions-bar button.danger:hover {
+        background: rgba(220, 38, 38, 0.5);
+    }
+    .message-actions-bar button.close-btn {
+        margin-left: auto;
+        background: transparent;
+        font-size: 1.1rem;
+        padding: 6px 10px;
+    }
+    .reply-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        border-left: 4px solid #b2cd16;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.75);
+    }
+    .reply-bar-text {
+        flex: 1;
+        min-width: 0;
+    }
+    .reply-bar-text strong {
+        display: block;
+        font-size: 0.8rem;
+        color: #5c7212;
+        margin-bottom: 2px;
+    }
+    .reply-bar-text span {
+        display: block;
+        font-size: 0.85rem;
+        color: #334155;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .reply-bar-cancel {
+        border: none;
+        background: transparent;
+        font-size: 1.25rem;
+        line-height: 1;
         color: #64748b;
+        cursor: pointer;
+        padding: 4px;
     }
-    .ticks.blue {
-        color: #1d4ed8;
+    .forward-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 10040;
+        background: rgba(10, 19, 71, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .forward-modal {
+        width: min(420px, 100%);
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    }
+    .forward-modal h4 {
+        margin: 0 0 12px;
+        font-size: 1.05rem;
+        color: #0a1347;
+    }
+    .forward-modal select {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font: inherit;
+        margin-bottom: 14px;
+    }
+    .forward-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    .forward-modal-actions button {
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-weight: 700;
+        cursor: pointer;
+        border: 1px solid #d1d5db;
+        background: #fff;
+    }
+    .forward-modal-actions button.primary {
+        background: #b2cd16;
+        border-color: #91bf14;
+        color: #fff;
     }
     .messages-compose {
-        border-top: 1px solid #e5e7eb;
-        padding: 14px 18px;
-        background: white;
+        border-top: none;
+        padding: 12px 16px;
+        background: linear-gradient(180deg, #e8eddf 0%, #dfe8c8 100%);
     }
     .compose-form {
         display: flex;
@@ -179,187 +481,629 @@
     }
     .compose-form textarea {
         flex: 1;
-        min-height: 44px;
-        max-height: 140px;
-        resize: vertical;
-        padding: 10px 12px;
-        border-radius: 12px;
-        border: 1px solid #cbd5e1;
+        min-height: 42px;
+        max-height: 120px;
+        resize: none;
+        padding: 10px 14px;
+        border-radius: 24px;
+        border: 1px solid rgba(145, 191, 20, 0.45);
+        background: #fff;
         font-family: inherit;
-        font-size: 14px;
+        font-size: 0.95rem;
         outline: none;
+        box-shadow: inset 0 1px 2px rgba(10, 19, 71, 0.04);
     }
     .compose-form textarea:focus {
-        border-color: #138056ff;
-        box-shadow: 0 0 0 3px rgba(19, 128, 86, 0.12);
+        border-color: #b2cd16;
+        box-shadow: 0 0 0 3px rgba(178, 205, 22, 0.28);
     }
-    .compose-form button {
-        padding: 10px 18px;
-        border-radius: 12px;
-        border: none;
-        font-weight: 900;
-        background: #138056ff;
-        color: white;
+    .compose-form button[type="submit"] {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        font-weight: 700;
+        font-size: 1rem;
+        line-height: 1;
+        background: linear-gradient(135deg, #c8de2e 0%, #b2cd16 100%);
+        color: #fff;
         cursor: pointer;
+        box-shadow: 0 3px 10px rgba(74, 92, 18, 0.22);
     }
-    .compose-form button:hover {
-        background: #0f6b47;
+    .compose-form button[type="submit"]:hover {
+        background: linear-gradient(135deg, #b2cd16 0%, #9eb812 100%);
+    }
+    .compose-voice-btn {
+        width: auto;
+        min-width: 44px;
+        height: 44px;
+        padding: 0 14px;
+        border-radius: 22px;
+        border: 1px solid rgba(145, 191, 20, 0.55);
+        background: #fff;
+        color: #5c7212;
+        font-size: 0.82rem;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        line-height: 1;
+        cursor: pointer;
+        flex-shrink: 0;
+        font-family: inherit;
+    }
+    .compose-voice-btn.is-recording {
+        background: #dc2626;
+        border-color: #b91c1c;
+        color: #fff;
+        animation: voice-pulse 1s ease-in-out infinite;
+    }
+    .voice-status {
+        margin-top: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #5c7212;
+    }
+    .voice-status.is-recording {
+        color: #dc2626;
+    }
+    @keyframes voice-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.06); }
     }
     .compose-error {
         margin-top: 8px;
-        font-size: 13px;
-        font-weight: 800;
+        font-size: 0.82rem;
+        font-weight: 700;
         color: #b91c1c;
     }
-    .empty {
-        padding: 40px 18px;
-        color: #64748b;
-        font-weight: 700;
+    .messages-sidebar .messages-empty {
+        padding: 48px 20px;
         text-align: center;
+        color: rgba(255, 255, 255, 0.92);
+        font-weight: 600;
+        font-size: 0.92rem;
     }
-    @media (max-width: 900px) {
-        .messages-wrap {
-            grid-template-columns: 1fr;
-        }
-        .messages-sidebar {
-            border-right: none;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        /* WhatsApp-like behavior: list -> thread */
-        .messages-wrap.is-mobile-thread .messages-sidebar {
-            display: none;
-        }
-        .messages-wrap:not(.is-mobile-thread) .messages-main {
-            display: none;
-        }
-        .mobile-back {
-            display: inline-flex !important;
-        }
+    .messages-body .messages-empty {
+        padding: 48px 20px;
+        text-align: center;
+        color: #5c7212;
+        font-weight: 600;
+        font-size: 0.92rem;
     }
-
-    .mobile-back {
-        display: none;
-        border: 1px solid #e5e7eb;
-        background: #fff;
-        color: #0a1347;
-        font-weight: 900;
-        padding: 8px 10px;
-        border-radius: 12px;
-        text-decoration: none;
+    .messages-empty-pane {
+        flex: 1;
+        display: flex;
         align-items: center;
         justify-content: center;
+        background: linear-gradient(180deg, #f3f6eb 0%, #e8eddf 100%);
+        color: #5c7212;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+    .mobile-back {
+        display: none;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: none;
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        font-weight: 800;
+        font-size: 1.2rem;
+        text-decoration: none;
         line-height: 1;
-        flex-shrink: 0;
+    }
+    @media (max-width: 900px) {
+        .messages-page-title { font-size: 28px; }
+        .messages-wrap { grid-template-columns: 1fr; }
+        .messages-wrap.is-mobile-thread .messages-sidebar { display: none; }
+        .messages-wrap:not(.is-mobile-thread) .messages-main { display: none; }
+        .mobile-back { display: inline-flex; }
     }
 </style>
 
+@php
+    $isAdmin = (auth()->user()->role ?? null) === 'admin';
+    $meId = auth()->id();
+
+    $threadTime = function ($date) {
+        if (!$date) {
+            return '';
+        }
+        $c = \Carbon\Carbon::parse($date);
+        if ($c->isToday()) {
+            return $c->format('H:i');
+        }
+        if ($c->isYesterday()) {
+            return 'Yesterday';
+        }
+        if ($c->isCurrentWeek()) {
+            return $c->format('l');
+        }
+        return $c->format('d/m/y');
+    };
+
+    $userInitials = function ($user) {
+        if (!$user) {
+            return '?';
+        }
+        $a = strtoupper(substr((string) ($user->first_name ?? ''), 0, 1));
+        $b = strtoupper(substr((string) ($user->last_name ?? ''), 0, 1));
+        $init = trim($a . $b);
+        return $init !== '' ? $init : '?';
+    };
+@endphp
+
+<h1 class="messages-page-title">Messages</h1>
+
+@if(session('error'))
+    <p style="color:#b91c1c;font-weight:700;margin:0 0 12px;">{{ session('error') }}</p>
+@endif
+
 <div class="messages-wrap {{ $activeConversation ? 'is-mobile-thread' : '' }}">
-    <div class="messages-sidebar">
-        <h2>Messages</h2>
+    <aside class="messages-sidebar" aria-label="Chats">
+        <div class="messages-sidebar-head">Chats</div>
         <div class="thread-list">
             @forelse($conversations as $c)
                 @php
-                    $activeId = $activeConversation?->id;
-                    $employee = $c->leaveRequest?->user;
-                    $employeeName = trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? '')) ?: 'Employee';
+                    $otherUser = $isAdmin ? $c->manager : $c->admin;
+                    $otherName = trim(($otherUser->first_name ?? '') . ' ' . ($otherUser->last_name ?? '')) ?: ($isAdmin ? 'Manager' : 'Admin');
                     $lastMessage = $c->messages->first();
-                    $preview = $lastMessage?->body ?? 'No messages yet';
-                    $isAdmin = (auth()->user()->role ?? null) === 'admin';
-                    $otherName = $isAdmin
-                        ? (trim(($c->manager?->first_name ?? '') . ' ' . ($c->manager?->last_name ?? '')) ?: 'Manager')
-                        : (trim(($c->admin?->first_name ?? '') . ' ' . ($c->admin?->last_name ?? '')) ?: 'Admin');
+                    if ($lastMessage) {
+                        if ($lastMessage->deleted_for_everyone_at) {
+                            $label = 'This message was deleted';
+                        } elseif (!empty($lastMessage->voice_path)) {
+                            $label = 'Voice message';
+                        } else {
+                            $label = $lastMessage->body;
+                        }
+                        $preview = ($lastMessage->sender_id === $meId ? 'You: ' : '') . $label;
+                    } else {
+                        $preview = 'No messages yet';
+                    }
                 @endphp
-                <a class="thread {{ $activeId === $c->id ? 'active' : '' }}" href="{{ route('messages.index', ['conversation' => $c->id]) }}">
-                    <div class="thread-title">
-                        <span>{{ $otherName }}</span>
-                        <span style="display:flex; align-items:center; gap:10px;">
+                <a class="thread {{ ($activeConversation?->id) === $c->id ? 'active' : '' }}"
+                   href="{{ route('messages.index', ['conversation' => $c->id]) }}">
+                    <div class="thread-avatar" aria-hidden="true">
+                        @if(!empty($otherUser?->profile_picture))
+                            <img src="{{ route('users.profile_picture', ['user' => $otherUser->id]) }}?v={{ optional($otherUser->updated_at)->timestamp }}" alt="">
+                        @else
+                            <span class="thread-avatar-fallback">{{ $userInitials($otherUser) }}</span>
+                        @endif
+                    </div>
+                    <div class="thread-body">
+                        <div class="thread-row-top">
+                            <span class="thread-name">{{ $otherName }}</span>
+                            <span class="thread-time">{{ $threadTime($c->updated_at) }}</span>
+                        </div>
+                        <div class="thread-row-bottom">
+                            <span class="thread-preview">{{ $preview }}</span>
                             @if(($c->unread_count ?? 0) > 0)
                                 <span class="thread-unread">{{ $c->unread_count }}</span>
                             @endif
-                        </span>
+                        </div>
                     </div>
-                    <div class="thread-sub">
-                        <span>Leave #{{ $c->leave_request_id }} — {{ $employeeName }}</span>
-                        <span>{{ optional($c->updated_at)->diffForHumans() }}</span>
-                    </div>
-                    <div class="thread-preview">{{ $preview }}</div>
                 </a>
             @empty
-                <div class="empty">No conversations yet.</div>
+                <div class="messages-empty">No chats yet</div>
             @endforelse
         </div>
-    </div>
+    </aside>
 
-    <div class="messages-main">
+    <section class="messages-main" aria-label="Conversation">
         @if(!$activeConversation)
-            <div class="empty">Select a conversation to start chatting.</div>
+            <div class="messages-empty-pane">Select a chat to view messages</div>
         @else
             @php
                 $employee = $activeConversation->leaveRequest?->user;
                 $employeeName = trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? '')) ?: 'Employee';
-                $meId = auth()->id();
-                $isAdmin = (auth()->user()->role ?? null) === 'admin';
-                $otherName = $isAdmin
-                    ? (trim(($activeConversation->manager?->first_name ?? '') . ' ' . ($activeConversation->manager?->last_name ?? '')) ?: 'Manager')
-                    : (trim(($activeConversation->admin?->first_name ?? '') . ' ' . ($activeConversation->admin?->last_name ?? '')) ?: 'Admin');
+                $otherUser = $isAdmin ? $activeConversation->manager : $activeConversation->admin;
+                $otherName = trim(($otherUser->first_name ?? '') . ' ' . ($otherUser->last_name ?? '')) ?: ($isAdmin ? 'Manager' : 'Admin');
+                $leave = $activeConversation->leaveRequest;
             @endphp
-            <div class="messages-header">
-                <a class="mobile-back" href="{{ route('messages.index') }}" aria-label="Back to chats">←</a>
-                <div>
-                    <h3>{{ $otherName }}</h3>
-                    <div class="meta">Leave #{{ $activeConversation->leave_request_id }} — {{ $employeeName }} • {{ $activeConversation->leaveRequest?->leave_type ?? '' }} • {{ $activeConversation->leaveRequest?->status ?? '' }}</div>
+            <header class="messages-header">
+                <a class="mobile-back" href="{{ route('messages.index') }}" aria-label="Back">←</a>
+                <div class="messages-header-avatar" aria-hidden="true">
+                    @if(!empty($otherUser?->profile_picture))
+                        <img src="{{ route('users.profile_picture', ['user' => $otherUser->id]) }}?v={{ optional($otherUser->updated_at)->timestamp }}" alt="">
+                    @else
+                        <span>{{ $userInitials($otherUser) }}</span>
+                    @endif
                 </div>
-                <div class="meta">{{ optional($activeConversation->updated_at)->diffForHumans() }}</div>
-            </div>
+                <div class="messages-header-text">
+                    <h3>{{ $otherName }}</h3>
+                    <div class="meta">
+                        Leave #{{ $activeConversation->leave_request_id }}
+                        · {{ $employeeName }}
+                        · {{ $leave?->leave_type ?? 'Leave' }}
+                        @if($leave?->start_date && $leave?->end_date)
+                            · {{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }} – {{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}
+                        @endif
+                        @if($leave?->status)
+                            · {{ ucfirst($leave->status) }}
+                        @endif
+                    </div>
+                </div>
+            </header>
 
             <div class="messages-body" id="messagesBody">
-                @foreach($activeConversation->messages()->with('sender')->oldest()->get() as $m)
+                @if($activeMessages->isNotEmpty())
+                    <p class="messages-options-hint">Click any message — options appear below</p>
+                @endif
+                @forelse($activeMessages as $m)
                     @php
                         $isMe = $m->sender_id === $meId;
-                        $senderName = trim(($m->sender?->first_name ?? '') . ' ' . ($m->sender?->last_name ?? '')) ?: 'User';
+                        $isDeleted = $m->isDeletedForEveryone();
+                        $replySender = $m->replyTo?->sender;
+                        $replySenderName = $replySender
+                            ? (trim(($replySender->first_name ?? '') . ' ' . ($replySender->last_name ?? '')) ?: 'User')
+                            : 'User';
+                        $copyText = $m->copyableText();
+                        $senderName = trim(($m->sender->first_name ?? '') . ' ' . ($m->sender->last_name ?? '')) ?: 'User';
                     @endphp
                     <div class="bubble-row {{ $isMe ? 'me' : '' }}">
-                        <div class="bubble">
-                            {{ $m->body }}
-                            <div class="bubble-meta">
-                                <span>{{ $senderName }}</span>
-                                <span style="display:flex; align-items:center; gap:8px;">
-                                    <span>{{ optional($m->created_at)->format('d M Y H:i') }}</span>
-                                    @if ($isMe)
-                                        @if ($m->read_at)
-                                            <span class="ticks blue" title="Seen">✓✓</span>
-                                        @elseif ($m->delivered_at)
-                                            <span class="ticks gray" title="Delivered">✓✓</span>
-                                        @else
-                                            <span class="ticks gray" title="Sent">✓</span>
+                        <div class="bubble-wrap">
+                            <div class="bubble {{ $isDeleted ? 'is-deleted' : '' }}"
+                                 data-message-id="{{ $m->id }}"
+                                 data-copy-text="{{ $copyText }}"
+                                 data-is-mine="{{ $isMe ? '1' : '0' }}"
+                                 data-is-deleted="{{ $isDeleted ? '1' : '0' }}"
+                                 data-sender-name="{{ $senderName }}"
+                                 title="Click for message options">
+                            @if($m->replyTo)
+                                <div class="bubble-reply">
+                                    <span class="bubble-reply-name">{{ $replySenderName }}</span>
+                                    <span class="bubble-reply-text">{{ $m->replyTo->displayBody() }}</span>
+                                </div>
+                            @endif
+                            @if(!empty($m->voice_path) && !$isDeleted)
+                                <audio controls preload="metadata" src="{{ route('messages.voice', ['message' => $m->id]) }}"></audio>
+                                @if(trim((string) $m->body) !== '' && strcasecmp(trim((string) $m->body), 'Voice message') !== 0)
+                                    <div class="bubble-line">
+                                        <span class="bubble-text">{{ $m->body }}</span>
+                                    </div>
+                                @endif
+                                <div class="bubble-voice-meta">
+                                    <span class="bubble-meta">
+                                        {{ optional($m->created_at)->format('H:i') }}
+                                        @if ($isMe)
+                                            @if ($m->read_at)
+                                                <span class="ticks blue" title="Read"> ✓✓</span>
+                                            @elseif ($m->delivered_at)
+                                                <span class="ticks gray" title="Delivered"> ✓✓</span>
+                                            @else
+                                                <span class="ticks gray" title="Sent"> ✓</span>
+                                            @endif
                                         @endif
-                                    @endif
-                                </span>
+                                    </span>
+                                </div>
+                            @else
+                                <div class="bubble-line">
+                                    <span class="bubble-text">{{ $m->displayBody() }}</span>
+                                    <span class="bubble-meta">
+                                        {{ optional($m->created_at)->format('H:i') }}
+                                        @if ($isMe)
+                                            @if ($m->read_at)
+                                                <span class="ticks blue" title="Read"> ✓✓</span>
+                                            @elseif ($m->delivered_at)
+                                                <span class="ticks gray" title="Delivered"> ✓✓</span>
+                                            @else
+                                                <span class="ticks gray" title="Sent"> ✓</span>
+                                            @endif
+                                        @endif
+                                    </span>
+                                </div>
+                            @endif
                             </div>
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <div class="messages-empty">No messages yet</div>
+                @endforelse
             </div>
 
             <div class="messages-compose">
-                <form class="compose-form" method="POST" action="{{ route('messages.send', ['conversation' => $activeConversation->id]) }}">
+                <div class="message-actions-bar" id="messageActionsBar" hidden>
+                    <span class="message-actions-label">Message options</span>
+                    <button type="button" data-action="reply">Reply</button>
+                    <button type="button" data-action="copy">Copy</button>
+                    <button type="button" data-action="forward">Forward</button>
+                    <button type="button" data-action="delete-me" class="danger">Delete for me</button>
+                    <button type="button" data-action="delete-everyone" class="danger" hidden>Delete for everyone</button>
+                    <button type="button" class="close-btn" id="clearMessageSelection" aria-label="Close">✕</button>
+                </div>
+                <div class="reply-bar" id="replyBar" hidden>
+                    <div class="reply-bar-text">
+                        <strong id="replyBarName"></strong>
+                        <span id="replyBarPreview"></span>
+                    </div>
+                    <button type="button" class="reply-bar-cancel" id="cancelReply" aria-label="Cancel reply">×</button>
+                </div>
+                <form class="compose-form" id="composeForm" method="POST" action="{{ route('messages.send', ['conversation' => $activeConversation->id]) }}" enctype="multipart/form-data">
                     @csrf
-                    <textarea name="body" required placeholder="Type a message...">{{ old('body') }}</textarea>
-                    <button type="submit">Send</button>
+                    <input type="hidden" name="reply_to_message_id" id="replyToInput" value="">
+                    <input type="file" name="voice" id="voiceInput" accept="audio/*" hidden>
+                    <button type="button" class="compose-voice-btn" id="voiceRecordBtn" aria-label="Record voice note" title="Tap to record a voice note"><span id="voiceRecordLabel">Voice</span></button>
+                    <textarea name="body" id="composeBody" placeholder="Type a message" rows="1">{{ old('body') }}</textarea>
+                    <button type="submit" aria-label="Send">➤</button>
                 </form>
+                <div class="voice-status" id="voiceStatus" hidden></div>
                 @error('body')
+                    <div class="compose-error">{{ $message }}</div>
+                @enderror
+                @error('voice')
                     <div class="compose-error">{{ $message }}</div>
                 @enderror
             </div>
         @endif
-    </div>
+    </section>
 </div>
+
+@if($activeConversation)
+    <form id="deleteMessageForm" method="POST" action="" hidden>
+        @csrf
+        @method('DELETE')
+        <input type="hidden" name="scope" id="deleteScopeInput" value="me">
+    </form>
+
+    <div id="forwardModalBackdrop" class="forward-modal-backdrop" hidden>
+        <div class="forward-modal" role="dialog" aria-labelledby="forwardModalTitle">
+            <h4 id="forwardModalTitle">Forward message</h4>
+            <form id="forwardForm" method="POST" action="">
+                @csrf
+                <select name="target_conversation_id" id="forwardTargetSelect" required>
+                    <option value="">Choose a chat</option>
+                    @foreach($forwardConversations as $fc)
+                        @php
+                            $fcOther = $isAdmin ? $fc->manager : $fc->admin;
+                            $fcOtherName = trim(($fcOther->first_name ?? '') . ' ' . ($fcOther->last_name ?? '')) ?: ($isAdmin ? 'Manager' : 'Admin');
+                            $fcEmployee = $fc->leaveRequest?->user;
+                            $fcEmployeeName = trim(($fcEmployee->first_name ?? '') . ' ' . ($fcEmployee->last_name ?? '')) ?: 'Employee';
+                        @endphp
+                        <option value="{{ $fc->id }}">{{ $fcOtherName }} · Leave #{{ $fc->leave_request_id }} · {{ $fcEmployeeName }}</option>
+                    @endforeach
+                </select>
+                <div class="forward-modal-actions">
+                    <button type="button" id="forwardCancelBtn">Cancel</button>
+                    <button type="submit" class="primary">Forward</button>
+                </div>
+            </form>
+            @if($forwardConversations->isEmpty())
+                <p style="margin:0;font-size:0.88rem;color:#64748b;">You have no other chats to forward to.</p>
+            @endif
+        </div>
+    </div>
+@endif
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const box = document.getElementById('messagesBody');
         if (box) box.scrollTop = box.scrollHeight;
+
+        const form = document.getElementById('composeForm');
+        const voiceBtn = document.getElementById('voiceRecordBtn');
+        const voiceInput = document.getElementById('voiceInput');
+        const voiceStatus = document.getElementById('voiceStatus');
+        const voiceRecordLabel = document.getElementById('voiceRecordLabel');
+        const messageActionsBar = document.getElementById('messageActionsBar');
+        const deleteMessageForm = document.getElementById('deleteMessageForm');
+        const forwardModalBackdrop = document.getElementById('forwardModalBackdrop');
+        const forwardForm = document.getElementById('forwardForm');
+        const replyBar = document.getElementById('replyBar');
+        const replyBarName = document.getElementById('replyBarName');
+        const replyBarPreview = document.getElementById('replyBarPreview');
+        const replyToInput = document.getElementById('replyToInput');
+        const cancelReply = document.getElementById('cancelReply');
+        const composeBody = document.getElementById('composeBody');
+        const clearMessageSelection = document.getElementById('clearMessageSelection');
+
+        let activeBubble = null;
+
+        const closeActions = () => {
+            if (messageActionsBar) messageActionsBar.hidden = true;
+            document.querySelectorAll('.bubble.is-selected').forEach((el) => el.classList.remove('is-selected'));
+            activeBubble = null;
+        };
+
+        const openActions = (bubble) => {
+            if (!messageActionsBar || !bubble) return;
+            document.querySelectorAll('.bubble.is-selected').forEach((el) => el.classList.remove('is-selected'));
+            activeBubble = bubble;
+            bubble.classList.add('is-selected');
+
+            const isMine = bubble.dataset.isMine === '1';
+            const isDeleted = bubble.dataset.isDeleted === '1';
+            const deleteEveryoneBtn = messageActionsBar.querySelector('[data-action="delete-everyone"]');
+            const forwardBtn = messageActionsBar.querySelector('[data-action="forward"]');
+            const copyBtn = messageActionsBar.querySelector('[data-action="copy"]');
+            const replyBtn = messageActionsBar.querySelector('[data-action="reply"]');
+
+            if (deleteEveryoneBtn) deleteEveryoneBtn.hidden = !isMine || isDeleted;
+            if (forwardBtn) forwardBtn.hidden = isDeleted;
+            if (copyBtn) copyBtn.hidden = isDeleted || !bubble.dataset.copyText;
+            if (replyBtn) replyBtn.hidden = isDeleted;
+
+            messageActionsBar.hidden = false;
+            messageActionsBar.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        };
+
+        const clearReply = () => {
+            if (replyBar) replyBar.hidden = true;
+            if (replyToInput) replyToInput.value = '';
+            if (replyBarName) replyBarName.textContent = '';
+            if (replyBarPreview) replyBarPreview.textContent = '';
+        };
+
+        const startReply = (bubble) => {
+            if (!bubble || bubble.dataset.isDeleted === '1') return;
+            const preview = bubble.querySelector('.bubble-text')?.textContent?.trim()
+                || (bubble.querySelector('audio') ? 'Voice message' : '');
+            if (replyBar) replyBar.hidden = false;
+            if (replyBarName) replyBarName.textContent = bubble.dataset.senderName || 'User';
+            if (replyBarPreview) replyBarPreview.textContent = preview;
+            if (replyToInput) replyToInput.value = bubble.dataset.messageId || '';
+            composeBody?.focus();
+            closeActions();
+        };
+
+        document.querySelectorAll('.bubble').forEach((bubble) => {
+            bubble.addEventListener('click', (event) => {
+                if (event.target.closest('audio')) return;
+                event.preventDefault();
+                if (activeBubble === bubble && !messageActionsBar?.hidden) {
+                    closeActions();
+                    return;
+                }
+                openActions(bubble);
+            });
+
+            bubble.addEventListener('contextmenu', (event) => {
+                if (event.target.closest('audio')) return;
+                event.preventDefault();
+                openActions(bubble);
+            });
+        });
+
+        messageActionsBar?.addEventListener('click', async (event) => {
+            const button = event.target.closest('button[data-action]');
+            if (!button || !activeBubble) return;
+
+            const action = button.dataset.action;
+            const messageId = activeBubble.dataset.messageId;
+            const copyText = activeBubble.dataset.copyText || '';
+
+            if (action === 'reply') {
+                startReply(activeBubble);
+                return;
+            }
+
+            if (action === 'copy') {
+                try {
+                    await navigator.clipboard.writeText(copyText);
+                } catch (error) {
+                    const helper = document.createElement('textarea');
+                    helper.value = copyText;
+                    document.body.appendChild(helper);
+                    helper.select();
+                    document.execCommand('copy');
+                    helper.remove();
+                }
+                closeActions();
+                return;
+            }
+
+            if (action === 'forward') {
+                if (forwardForm && forwardModalBackdrop) {
+                    forwardForm.action = `{{ url('/messages') }}/${messageId}/forward`;
+                    forwardModalBackdrop.hidden = false;
+                }
+                closeActions();
+                return;
+            }
+
+            if (action === 'delete-me' || action === 'delete-everyone') {
+                if (deleteMessageForm) {
+                    deleteMessageForm.action = `{{ url('/messages') }}/${messageId}`;
+                    const scopeInput = document.getElementById('deleteScopeInput');
+                    if (scopeInput) {
+                        scopeInput.value = action === 'delete-everyone' ? 'everyone' : 'me';
+                    }
+                    deleteMessageForm.submit();
+                }
+                closeActions();
+            }
+        });
+
+        clearMessageSelection?.addEventListener('click', closeActions);
+
+        cancelReply?.addEventListener('click', clearReply);
+
+        document.getElementById('forwardCancelBtn')?.addEventListener('click', () => {
+            if (forwardModalBackdrop) forwardModalBackdrop.hidden = true;
+        });
+
+        forwardModalBackdrop?.addEventListener('click', (event) => {
+            if (event.target === forwardModalBackdrop) {
+                forwardModalBackdrop.hidden = true;
+            }
+        });
+
+        if (!form || !voiceBtn || !voiceInput) return;
+
+        let mediaRecorder = null;
+        let mediaStream = null;
+        let chunks = [];
+        let isRecording = false;
+
+        const stopStream = () => {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach((track) => track.stop());
+                mediaStream = null;
+            }
+        };
+
+        voiceBtn.addEventListener('click', async () => {
+            if (isRecording) {
+                mediaRecorder?.stop();
+                return;
+            }
+
+            if (!navigator.mediaDevices?.getUserMedia) {
+                alert('Voice notes are not supported in this browser.');
+                return;
+            }
+
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+                    ? 'audio/webm;codecs=opus'
+                    : (MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '');
+
+                mediaRecorder = mimeType
+                    ? new MediaRecorder(mediaStream, { mimeType })
+                    : new MediaRecorder(mediaStream);
+
+                chunks = [];
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        chunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    stopStream();
+                    voiceBtn.classList.remove('is-recording');
+                    if (voiceRecordLabel) voiceRecordLabel.textContent = 'Voice';
+                    voiceStatus.hidden = true;
+                    voiceStatus.classList.remove('is-recording');
+                    isRecording = false;
+
+                    if (!chunks.length) {
+                        return;
+                    }
+
+                    const type = mediaRecorder.mimeType || 'audio/webm';
+                    const blob = new Blob(chunks, { type });
+                    const ext = type.includes('ogg') ? 'ogg' : 'webm';
+                    const file = new File([blob], `voice-note.${ext}`, { type });
+
+                    const transfer = new DataTransfer();
+                    transfer.items.add(file);
+                    voiceInput.files = transfer.files;
+                    form.submit();
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                voiceBtn.classList.add('is-recording');
+                if (voiceRecordLabel) voiceRecordLabel.textContent = 'Stop';
+                voiceStatus.hidden = false;
+                voiceStatus.classList.add('is-recording');
+                voiceStatus.textContent = 'Recording… Tap the microphone again to stop and send';
+            } catch (error) {
+                stopStream();
+                alert('Microphone access was denied or unavailable.');
+            }
+        });
     });
 </script>
 @endsection

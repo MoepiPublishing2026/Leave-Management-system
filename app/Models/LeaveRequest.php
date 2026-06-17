@@ -60,4 +60,37 @@ class LeaveRequest extends Model
 
         return Carbon::parse($this->start_date)->lt(Carbon::today());
     }
+
+    /** Whether this manager may open the private admin↔manager chat for this request. */
+    public function managerCanOpenChat(User $manager): bool
+    {
+        $managerId = (int) $manager->id;
+        $status = strtolower(trim((string) ($this->status ?? '')));
+
+        if ($status === 'withdrawn') {
+            return false;
+        }
+
+        if ($this->conversations()->where('manager_id', $managerId)->exists()) {
+            return true;
+        }
+
+        if ($this->conversations()->where('manager_id', '!=', $managerId)->exists()) {
+            return false;
+        }
+
+        if ((int) ($this->handled_by ?? 0) === $managerId) {
+            return true;
+        }
+
+        if ((int) ($this->overdue_escalated_by ?? 0) === $managerId) {
+            return true;
+        }
+
+        if (!$this->conversations()->exists() && $this->handled_by === null) {
+            return true;
+        }
+
+        return false;
+    }
 }
