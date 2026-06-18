@@ -45,12 +45,25 @@
         box-shadow: 0 0 0 3px rgba(178, 205, 22, 0.28);
     }
     .flatpickr-calendar {
+        width: 307.875px !important;
+        min-width: 307.875px !important;
         border-radius: 12px !important;
         border: 1px solid #e2e8f0 !important;
         box-shadow: 0 14px 36px rgba(15, 23, 42, 0.16) !important;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        overflow: hidden;
         padding: 4px 0 8px;
+    }
+    .flatpickr-innerContainer,
+    .flatpickr-rContainer,
+    .flatpickr-days,
+    .dayContainer {
+        width: 100% !important;
+    }
+    .dayContainer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        box-sizing: border-box;
     }
     .flatpickr-months {
         background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
@@ -70,17 +83,22 @@
         color: #1e293b;
     }
     span.flatpickr-weekday {
+        flex: 1 0 14.2857143%;
+        max-width: 14.2857143%;
+        box-sizing: border-box;
         color: #64748b;
         font-weight: 700;
         font-size: 0.78rem;
     }
     .flatpickr-day {
+        flex: 1 0 14.2857143%;
+        max-width: 14.2857143%;
+        box-sizing: border-box;
         border-radius: 8px;
         font-weight: 600;
         color: #334155;
-        max-width: 36px;
-        height: 36px;
-        line-height: 36px;
+        height: 39px;
+        line-height: 39px;
     }
     .flatpickr-day:hover,
     .flatpickr-day:focus {
