@@ -83,7 +83,7 @@
         top: calc(100% + 6px);
         left: 0;
         right: 0;
-        z-index: 12050;
+        z-index: 9000;
         margin: 0;
         padding: 6px;
         list-style: none;
@@ -140,6 +140,14 @@
 
         const ENHANCE_SELECTOR = 'select:not([data-filter-enhanced]):not(.filter-select__native):not([data-native-select])';
 
+        const shouldEnhanceSelect = (select) => {
+            if (!select || select.tagName !== 'SELECT') return false;
+            if (select.closest('.swal2-container, .flatpickr-calendar')) return false;
+            if (select.classList.contains('swal2-select')) return false;
+            if (select.classList.contains('flatpickr-monthDropdown-months')) return false;
+            return true;
+        };
+
         const closeAllFilterSelects = () => {
             document.querySelectorAll('.filter-select-wrap.is-open').forEach((wrap) => {
                 wrap.classList.remove('is-open');
@@ -178,6 +186,7 @@
         };
 
         const enhanceSelect = (select) => {
+            if (!shouldEnhanceSelect(select)) return;
             if (select.dataset.filterEnhanced === '1') return;
             select.dataset.filterEnhanced = '1';
 
@@ -236,8 +245,14 @@
         };
 
         window.initFilterSelects = function initFilterSelects(root) {
-            (root || document).querySelectorAll(ENHANCE_SELECTOR).forEach(enhanceSelect);
+            (root || document).querySelectorAll(ENHANCE_SELECTOR).forEach((select) => {
+                if (shouldEnhanceSelect(select)) {
+                    enhanceSelect(select);
+                }
+            });
         };
+
+        window.closeAllFilterSelects = closeAllFilterSelects;
 
         document.addEventListener('click', (event) => {
             if (event.target.closest('.filter-select-wrap')) {

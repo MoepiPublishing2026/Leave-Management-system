@@ -53,8 +53,8 @@
     justify-content: center;
     flex: 1 1 0;
     min-width: 0;
-    height: 88px;
-    min-height: 88px;
+    height: 94px;
+    min-height: 94px;
     box-sizing: border-box;
 }
 
@@ -113,7 +113,7 @@
     }
    
     .card-title {
-        font-size: 0.88rem;
+        font-size: 1rem;
         font-weight: 600;
         margin: 2px 0 6px 0;
         display: flex;
@@ -123,7 +123,7 @@
     }
     .card-value {
         font-weight: bold;
-        font-size: 1.45rem;
+        font-size: 1.65rem;
         margin-top: 0;
     }
     .dash-charts-grid {

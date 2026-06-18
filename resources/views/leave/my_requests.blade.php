@@ -64,11 +64,8 @@
                     $handledName = trim(($req->handledBy->first_name ?? '') . ' ' . ($req->handledBy->last_name ?? ''));
                     $lateReasonName = trim(($req->overdueEscalatedBy->first_name ?? '') . ' ' . ($req->overdueEscalatedBy->last_name ?? ''));
                     $rowStatus = strtolower(trim((string) ($req->status ?? '')));
-                    $canWithdraw = $rowStatus === 'pending';
-                    $currentYear = (int) now()->year;
-                    $requestYear = $req->start_date ? (int) \Carbon\Carbon::parse($req->start_date)->year : $currentYear;
-                    $isPreviousYear = $requestYear === ($currentYear - 1);
-                    $canDelete = $isPreviousYear;
+                    $canWithdraw = $req->canBeWithdrawnByEmployee();
+                    $canDelete = $req->canBeDeletedByEmployee();
 
                     $details = [
                         'id' => $req->id,

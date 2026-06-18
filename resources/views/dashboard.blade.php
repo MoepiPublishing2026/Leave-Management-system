@@ -142,7 +142,7 @@
     justify-content: center;
     flex: 1 1 0;
     min-width: 0;
-    min-height: 92px;
+    min-height: 96px;
     cursor: move;
     position: relative;
     transition: box-shadow 0.3s ease;
@@ -172,7 +172,7 @@
     text-align: center;
   }
   .card-title {
-    font-size: 0.88rem;
+    font-size: 1rem;
     font-weight: 600;
     margin: 2px 0 6px 0;
     display: flex;
@@ -181,7 +181,7 @@
   }
   .card-value {
     font-weight: bold;
-    font-size: 1.45rem;
+    font-size: 1.65rem;
     margin-top: 0;
   }
 

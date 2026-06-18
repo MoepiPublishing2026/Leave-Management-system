@@ -19,7 +19,7 @@ return [
         'sick' => '#a855f7',          // purple
         'maternity' => '#f59e0b',     // amber
         'paternity' => '#6366f1',     // indigo
-        'bereavement' => '#ef4444',   // red
+        'bereavement' => '#C19A68',
         'unpaid' => '#F08080',        // light coral
         'compassionate' => '#22c55e', // green
         'study' => '#14b8a6',         // teal

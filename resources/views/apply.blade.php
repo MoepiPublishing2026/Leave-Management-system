@@ -265,6 +265,10 @@
   }
 </style>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+@include('partials.flatpickr-grid-fix')
+
 <div class="main-content">
     <h1>Leave Application</h1>
     <h2>Fill in the form to request a leave</h2>
@@ -298,12 +302,12 @@
 
         <div class="input-group" style="flex: 1 1 45%;">
             <label for="start_date">Start Date:</label>
-            <input id="start_date" name="start_date" type="text" class="app-date-picker" data-fp-custom value="{{ old('start_date') }}" placeholder="Select start date" autocomplete="off" required />
+            <input id="start_date" name="start_date" type="text" value="{{ old('start_date') }}" required />
         </div>
 
         <div class="input-group" style="flex: 1 1 45%;">
             <label for="end_date">End Date:</label>
-            <input id="end_date" name="end_date" type="text" class="app-date-picker" data-fp-custom value="{{ old('end_date') }}" placeholder="Select end date" autocomplete="off" />
+            <input id="end_date" name="end_date" type="text" value="{{ old('end_date') }}" />
         </div>
 
         <div class="input-group" style="flex-basis: 100%; flex-direction: row; align-items: center; gap: 10px;">
@@ -369,25 +373,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const fpOptions = {
         dateFormat: 'Y-m-d',
-        altInput: true,
-        altFormat: 'M j, Y',
-        allowInput: false,
-        disableMobile: true,
         disable: disableDates,
         minDate: 'today',
     };
 
-    ['#start_date', '#end_date'].forEach((selector) => {
-        const input = document.querySelector(selector);
-        if (!input) return;
-        if (!input.closest('.app-date-picker-wrap')) {
-            const wrap = document.createElement('span');
-            wrap.className = 'app-date-picker-wrap';
-            input.parentNode.insertBefore(wrap, input);
-            wrap.appendChild(input);
-        }
-        flatpickr(input, fpOptions);
-    });
+    flatpickr('#start_date', fpOptions);
+    flatpickr('#end_date', fpOptions);
 
     function calculateWorkingDays(startDate, endDate) {
         if (!startDate || !endDate) return 0;

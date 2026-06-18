@@ -18,8 +18,8 @@
                     <option value="{{ $y }}" {{ (string) ($monthFilter ?? '') === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
                 @endforeach
             </select>
-            <input type="text" name="start_date" class="app-date-picker" value="{{ request('start_date') }}" placeholder="Start date" autocomplete="off" aria-label="Start date" />
-            <input type="text" name="end_date" class="app-date-picker" value="{{ request('end_date') }}" placeholder="End date" autocomplete="off" aria-label="End date" />
+            <input type="text" name="start_date" id="reports_start_date" class="reports-date-input" value="{{ request('start_date') }}" placeholder="Start date" autocomplete="off" aria-label="Start date" />
+            <input type="text" name="end_date" id="reports_end_date" class="reports-date-input" value="{{ request('end_date') }}" placeholder="End date" autocomplete="off" aria-label="End date" />
             <button type="submit" class="reports-btn reports-btn--primary">Filter</button>
             <a href="{{ route($filterRoute) }}" class="reports-btn reports-btn--secondary">Clear</a>
         </form>
@@ -109,7 +109,17 @@
     </div>
 </div>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+@include('partials.flatpickr-grid-fix')
+
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const reportsFpOptions = { dateFormat: 'Y-m-d', disableMobile: true };
+    flatpickr('#reports_start_date', reportsFpOptions);
+    flatpickr('#reports_end_date', reportsFpOptions);
+});
+
 document.getElementById('reportsFilterForm')?.addEventListener('submit', function (e) {
     const form = this;
     const start = form.querySelector('input[name="start_date"]')?.value || '';

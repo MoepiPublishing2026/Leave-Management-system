@@ -43,8 +43,39 @@
         gap: 8px;
         align-items: center;
     }
-    .reports-filter-form .app-date-picker {
+    .reports-filter-form .filter-select-wrap {
         min-width: 148px;
+        flex: 0 0 auto;
+    }
+    .reports-filter-form .reports-date-input,
+    .reports-filter-form .reports-date-input.flatpickr-input {
+        width: 148px;
+        min-width: 148px;
+        flex: 0 0 auto;
+        margin: 0;
+        padding: 10px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        background: #fff;
+        font-family: inherit;
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: #1e293b;
+        line-height: 1.2;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        box-sizing: border-box;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        cursor: pointer;
+    }
+    .reports-filter-form .reports-date-input:hover,
+    .reports-filter-form .reports-date-input.flatpickr-input:hover {
+        border-color: #94a3b8;
+    }
+    .reports-filter-form .reports-date-input:focus,
+    .reports-filter-form .reports-date-input.flatpickr-input:focus {
+        outline: none;
+        border-color: #b2cd16;
+        box-shadow: 0 0 0 3px rgba(178, 205, 22, 0.28);
     }
     .reports-btn {
         display: inline-flex;
@@ -90,8 +121,8 @@
         justify-content: center;
         flex: 1 1 0;
         min-width: 0;
-        height: 88px;
-        min-height: 88px;
+        height: 94px;
+        min-height: 94px;
         box-sizing: border-box;
     }
     .reports-page .card-all {
@@ -127,7 +158,7 @@
         color: #fff;
     }
     .reports-page .card-title {
-        font-size: 0.88rem;
+        font-size: 1rem;
         font-weight: 600;
         margin: 2px 0 6px 0;
         text-align: center;
@@ -135,7 +166,7 @@
     }
     .reports-page .card-value {
         font-weight: bold;
-        font-size: 1.45rem;
+        font-size: 1.65rem;
         margin-top: 0;
         line-height: 1.1;
     }

@@ -61,6 +61,25 @@ class LeaveRequest extends Model
         return Carbon::parse($this->start_date)->lt(Carbon::today());
     }
 
+    public function canBeWithdrawnByEmployee(): bool
+    {
+        $status = strtolower(trim((string) ($this->status ?? '')));
+
+        return $status === 'pending' && ! $this->isOverdue();
+    }
+
+    public function canBeDeletedByEmployee(): bool
+    {
+        if ($this->isOverdue()) {
+            return true;
+        }
+
+        $currentYear = (int) Carbon::now()->year;
+        $requestYear = $this->start_date ? (int) Carbon::parse($this->start_date)->year : $currentYear;
+
+        return $requestYear === ($currentYear - 1);
+    }
+
     /** Whether this manager may open the private admin↔manager chat for this request. */
     public function managerCanOpenChat(User $manager): bool
     {

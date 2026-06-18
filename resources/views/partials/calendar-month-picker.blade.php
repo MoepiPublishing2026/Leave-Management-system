@@ -100,7 +100,7 @@
         top: calc(100% + 10px);
         left: 50%;
         transform: translateX(-50%);
-        z-index: 30;
+        z-index: 10050;
         width: min(320px, 92vw);
         padding: 8px;
         border-radius: 12px;

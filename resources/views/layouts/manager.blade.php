@@ -373,7 +373,7 @@
     </script>
 
     @include('partials.filter-select-styles')
-    @include('partials.beautiful-date-picker')
+    @include('partials.sweetalert-guard')
     @stack('styles')
     @yield('head')
 </head>
@@ -548,51 +548,7 @@
         });
     </script>
 
-    @if (session('success'))
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Success',
-                text: @json(session('success')),
-                timer: 3500,
-                timerProgressBar: true,
-                showConfirmButton: false
-            });
-        </script>
-    @endif
-    @if (session('error'))
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: @json(session('error')),
-                confirmButtonText: 'OK'
-            });
-        </script>
-    @endif
-    @if (session('status'))
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Success',
-                text: @json(session('status')),
-                timer: 3500,
-                timerProgressBar: true,
-                showConfirmButton: false
-            });
-        </script>
-    @endif
-    @if ($errors->any())
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Please fix the following errors:',
-                html: '<ul style="text-align:left;">' + @json($errors->all()).map(e => '<li>' + e + '</li>').join('') + '</ul>',
-                confirmButtonText: 'OK',
-                width: '40em'
-            });
-        </script>
-    @endif
+    @include('partials.session-flash-swal')
 
     @stack('scripts')
 </body>

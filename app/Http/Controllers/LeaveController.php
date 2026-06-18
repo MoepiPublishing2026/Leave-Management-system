@@ -808,14 +808,10 @@ public function destroy($id)
         ->where('user_id', Auth::id())
         ->firstOrFail();
 
-    $status = strtolower(trim((string) $leaveRequest->status));
-    $currentYear = (int) Carbon::now()->year;
-    $requestYear = $leaveRequest->start_date ? (int) Carbon::parse($leaveRequest->start_date)->year : $currentYear;
-    $isPreviousYear = $requestYear === ($currentYear - 1);
-    if (! $isPreviousYear) {
+    if (! $leaveRequest->canBeDeletedByEmployee()) {
         return redirect()
             ->route('leave.myRequests')
-            ->with('error', 'Only requests from the previous year can be deleted.');
+            ->with('error', 'Only overdue requests or requests from the previous year can be deleted.');
     }
 
     try {
@@ -837,8 +833,15 @@ public function withdraw($id)
 {
     $leaveRequest = LeaveRequest::where('id', $id)
         ->where('user_id', Auth::id())
-        ->whereRaw('LOWER(status) = ?', ['pending'])
         ->firstOrFail();
+
+    if (! $leaveRequest->canBeWithdrawnByEmployee()) {
+        $message = $leaveRequest->isOverdue()
+            ? 'Overdue requests cannot be withdrawn. Please delete the request instead.'
+            : 'Only pending requests that have not started can be withdrawn.';
+
+        return redirect()->route('leave.myRequests')->with('error', $message);
+    }
 
     $leaveRequest->status = 'withdrawn';
     $leaveRequest->save();
