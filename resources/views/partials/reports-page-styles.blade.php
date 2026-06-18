@@ -236,8 +236,66 @@
     .reports-page .request-badge--withdrawn { background: #D2B55B; }
     .reports-page .request-badge--overdue { background: #C154C1; }
     @media (max-width: 768px) {
-        .reports-page h1 { font-size: 28px; }
-        .reports-toolbar { flex-direction: column; align-items: stretch; }
+        .reports-page {
+            padding: 0 12px 24px;
+        }
+        .reports-page h1 {
+            font-size: 28px;
+        }
+        .reports-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .reports-toolbar-forms,
+        .reports-filter-form {
+            width: 100%;
+        }
+        .reports-filter-form .filter-select-wrap,
+        .reports-filter-form .reports-date-input,
+        .reports-filter-form .reports-date-input.flatpickr-input {
+            width: 100%;
+            min-width: 0;
+            flex: 1 1 100%;
+        }
+        .reports-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .reports-page .cards {
+            display: flex;
+            flex-wrap: wrap;
+            overflow-x: visible;
+            gap: 10px;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .reports-page .card {
+            flex: 1 1 calc(50% - 10px);
+            min-width: 0;
+            width: auto;
+            max-width: none;
+            height: auto;
+            min-height: 88px;
+            padding: 12px 10px;
+        }
+        .reports-page .card:last-child:nth-child(odd) {
+            flex-basis: 100%;
+        }
+        .reports-page .card-title {
+            font-size: 0.92rem;
+            line-height: 1.25;
+        }
+        .reports-page .card-value {
+            font-size: 1.5rem;
+        }
+    }
+    @media (max-width: 420px) {
+        .reports-page .card {
+            flex: 1 1 100%;
+        }
+        .reports-page .card:last-child:nth-child(odd) {
+            flex-basis: 100%;
+        }
     }
 </style>
 @endonce
