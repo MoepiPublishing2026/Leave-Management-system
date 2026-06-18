@@ -131,6 +131,28 @@
             flex: 1 1 100%;
             min-width: 0;
         }
+        .leave-form .input-group {
+            flex: 1 1 100%;
+            min-width: 0;
+            width: 100%;
+            max-width: 100%;
+        }
+        .leave-form .filter-select-wrap {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        .leave-form .filter-select__trigger,
+        .leave-form .filter-select__menu {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        .leave-form .filter-select__menu {
+            left: 0;
+            right: 0;
+        }
     }
 </style>
 <script>
@@ -145,6 +167,10 @@
             if (select.closest('.swal2-container, .flatpickr-calendar')) return false;
             if (select.classList.contains('swal2-select')) return false;
             if (select.classList.contains('flatpickr-monthDropdown-months')) return false;
+            if (select.hasAttribute('data-native-select')) return false;
+            if (select.closest('form.leave-form') && window.matchMedia('(max-width: 768px)').matches) {
+                return false;
+            }
             return true;
         };
 

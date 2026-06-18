@@ -25,7 +25,17 @@
           min-height: auto;
       }
       form.leave-form {
-          gap: 16px 16px;
+          gap: 16px;
+      }
+      form.leave-form .input-group {
+          flex: 1 1 100% !important;
+          min-width: 0;
+          width: 100%;
+          max-width: 100%;
+      }
+      form.leave-form .input-group select {
+          width: 100%;
+          max-width: 100%;
       }
   }
   .main-content h1 {
@@ -288,7 +298,7 @@
         @csrf
 
         <label class="section-title" style="flex-basis:100%;font-size:16px;margin-bottom:5px;">Leave Info</label>
-        <div class="input-group">
+        <div class="input-group" style="flex: 1 1 100%;">
             <label for="leave_type">Types of Leaves:</label>
             <select id="leave_type" name="leave_type" required>
                 <option value="">Select Leave Type</option>
