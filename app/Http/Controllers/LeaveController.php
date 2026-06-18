@@ -811,7 +811,7 @@ public function destroy($id)
     if (! $leaveRequest->canBeDeletedByEmployee()) {
         return redirect()
             ->route('leave.myRequests')
-            ->with('error', 'Only overdue requests or requests from the previous year can be deleted.');
+            ->with('error', 'This request cannot be deleted.');
     }
 
     try {
@@ -837,7 +837,9 @@ public function withdraw($id)
 
     if (! $leaveRequest->canBeWithdrawnByEmployee()) {
         $message = $leaveRequest->isOverdue()
-            ? 'Overdue requests cannot be withdrawn. Please delete the request instead.'
+            ? ($leaveRequest->canBeDeletedByEmployee()
+                ? 'Overdue requests cannot be withdrawn. Please delete the request instead.'
+                : 'Overdue requests from this year cannot be withdrawn or deleted. Contact your manager if you need help.')
             : 'Only pending requests that have not started can be withdrawn.';
 
         return redirect()->route('leave.myRequests')->with('error', $message);

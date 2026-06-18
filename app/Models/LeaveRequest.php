@@ -70,12 +70,12 @@ class LeaveRequest extends Model
 
     public function canBeDeletedByEmployee(): bool
     {
-        if ($this->isOverdue()) {
-            return true;
-        }
-
         $currentYear = (int) Carbon::now()->year;
         $requestYear = $this->start_date ? (int) Carbon::parse($this->start_date)->year : $currentYear;
+
+        if ($this->isOverdue()) {
+            return $requestYear < $currentYear;
+        }
 
         return $requestYear === ($currentYear - 1);
     }
