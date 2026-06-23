@@ -10,6 +10,7 @@ use App\Mail\LeaveResponseMail;
 use Illuminate\Support\Facades\Mail;
 use App\Notifications\LeaveStatusNotification;
 use Illuminate\Support\Facades\Auth;
+use App\Support\LeaveProofRules;
 use App\Support\LeaveRequestSearch;
 use Illuminate\Support\Carbon;
 use App\Models\User;
@@ -106,6 +107,10 @@ public function approve($id)
 
     if ($leave->isOverdue()) {
         return redirect()->back()->with('error', 'Overdue requests cannot be approved. Submit a late response reason instead.');
+    }
+
+    if (! LeaveProofRules::canApprove($leave)) {
+        return redirect()->back()->with('error', LeaveProofRules::approvalBlockedReason($leave) ?? 'Supporting proof is required before approval.');
     }
 
     $this->ensureHandledColumnsExist();

@@ -63,17 +63,11 @@
                     <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
                         @php $statusLower = strtolower(trim($leave->status)); @endphp
                         @if ($leave->isOverdue())
-                            <span style="background: #fce7f3; color: #9d174d; border: 1px solid #f472b6; padding: 4px 12px; border-radius: 12px; font-weight: 700;">Overdue</span>
-                        @elseif ($statusLower === 'pending')
-                            <span style="background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; padding: 4px 12px; border-radius: 12px; font-weight: 600;">Pending</span>
-                        @elseif ($statusLower === 'approved')
-                            <span style="background: #dcfce7; color: #166534; border: 1px solid #22c55e; padding: 4px 12px; border-radius: 12px; font-weight: 600;">Approved</span>
-                        @elseif ($statusLower === 'rejected')
-                            <span style="background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; padding: 4px 12px; border-radius: 12px; font-weight: 600;">Rejected</span>
+                            <span class="request-badge request-badge--overdue">Overdue</span>
                         @elseif ($statusLower === 'withdrawn')
-                            <span style="background: #fef3c7; color: #78350f; border: 1px solid #fbbf24; padding: 4px 12px; border-radius: 12px; font-weight: 600;">Withdrawn</span>
+                            <span class="request-badge request-badge--withdrawn">Withdrawn</span>
                         @else
-                            <span style="background: #e5e7eb; color: #374151; border: 1px solid #d1d5db; padding: 4px 12px; border-radius: 12px; font-weight: 600;">{{ ucfirst($leave->status) }}</span>
+                            <span class="request-badge request-badge--{{ $statusLower }}">{{ ucfirst($leave->status) }}</span>
                         @endif
                     </td>
                     <td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #911111; font-style: italic;">

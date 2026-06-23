@@ -20,6 +20,12 @@
     if (!empty($monthFilter)) {
         $filterParams['month'] = $monthFilter;
     }
+    $activeSearch = trim((string) ($search ?? ''));
+    if ($activeSearch !== '') {
+        $filterParams['search'] = $activeSearch;
+    }
+    $clearSearchParams = array_merge(['status' => $status], $filterParams);
+    unset($clearSearchParams['search']);
     $resultTotal = $resultTotal ?? null;
 @endphp
 
@@ -54,7 +60,7 @@
             @endif
             <input type="text" name="search" placeholder="{{ $searchPlaceholder ?? 'Search requests...' }}" value="{{ $search ?? '' }}" aria-label="Search requests" />
             <button type="submit" class="requests-btn requests-btn--search">Search</button>
-            <a href="{{ route($filterRoute, array_merge(['status' => $status], $filterParams)) }}" class="requests-btn requests-btn--secondary">Clear</a>
+            <a href="{{ route($filterRoute, $clearSearchParams) }}" class="requests-btn requests-btn--secondary">Clear</a>
         </form>
     </div>
 </div>

@@ -62,7 +62,7 @@ class EmployeeController extends Controller
         Mail::to($user->email)->send(new WelcomeUserMail($user, $rawPassword));
 
         return redirect()->route('admin.employees.index')->with('success', 'Employee added successfully.');
-    }catch (\Exception $e) {
+    } catch (\Exception $e) {
     // Log the error for debugging
     Log::error($e->getMessage());
 
@@ -73,6 +73,65 @@ class EmployeeController extends Controller
         }
 
 }
+
+    public function edit($id)
+    {
+        $employee = User::findOrFail($id);
+        return view('admin.employees.edit', compact('employee'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $employee = User::findOrFail($id);
+
+        $request->validate([
+            'first_name' => ['required', 'string', 'max:15', 'regex:/^[a-zA-Z]+$/'],
+            'last_name' => ['required', 'string', 'max:15', 'regex:/^[a-zA-Z]+$/'],
+            'department' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z][A-Za-z\s&\-\/]*$/'],
+            'designation' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z][A-Za-z\s&\-\/]*$/'],
+            'email' => 'required|email:rfc|max:255|unique:users,email,' . $employee->id,
+            'password' => 'nullable|string|min:6|confirmed',
+            'role' => 'required|in:employee,manager,admin',
+        ], [
+            'first_name.regex' => 'First name must only contain letters.',
+            'last_name.regex' => 'Last name must only contain letters.',
+            'department.regex' => 'Department must only contain letters (no numbers).',
+            'designation.regex' => 'Designation must only contain letters (no numbers).',
+        ]);
+
+        $isSelf = (int) Auth::id() === (int) $employee->id;
+        $isActive = $request->boolean('is_active');
+
+        if ($isSelf && $request->role !== 'admin') {
+            return redirect()->back()
+                ->withErrors(['role' => 'You cannot change your own role.'])
+                ->withInput();
+        }
+
+        if ($isSelf && !$isActive) {
+            return redirect()->back()
+                ->withErrors(['is_active' => 'You cannot deactivate your own account.'])
+                ->withInput();
+        }
+
+        $data = [
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'department' => $request->department,
+            'designation' => $request->designation,
+            'email' => $request->email,
+            'role' => $request->role,
+            'is_active' => $isActive,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $employee->update($data);
+
+        return redirect()->route('admin.employees.index')->with('success', 'Employee updated successfully.');
+    }
 
     public function destroy($id)
     {

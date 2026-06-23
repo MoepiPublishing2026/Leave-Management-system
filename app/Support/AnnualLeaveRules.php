@@ -10,6 +10,7 @@ class AnnualLeaveRules
         'maternity',
         'paternity',
         'bereavement',
+        'unpaid',
     ];
 
     public static function isExcludedFromAnnual(string $leaveType): bool
@@ -40,7 +41,7 @@ class AnnualLeaveRules
     /** @return list<string> */
     public static function notDisabledWhenAnnualExhaustedLabels(): array
     {
-        return ['Annual', 'Annual Leave', 'Sick', 'Bereavement', 'Maternity', 'Paternity'];
+        return ['Annual', 'Annual Leave', 'Sick', 'Bereavement', 'Maternity', 'Paternity', 'Unpaid'];
     }
 
     public static function isAllowedWhenAnnualExhausted(string $leaveType): bool
@@ -57,6 +58,6 @@ class AnnualLeaveRules
 
     public static function exhaustedAnnualMessage(): string
     {
-        return 'You have exhausted your annual leave limit. You may still request Sick (with medical certificate), Bereavement (with proof), Maternity (with proof), or Paternity (with proof).';
+        return 'You have exhausted your annual leave limit. You may still request Sick, Bereavement (with proof), Maternity (with proof), Paternity (with proof), or Unpaid leave.';
     }
 }

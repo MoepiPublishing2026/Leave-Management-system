@@ -5,6 +5,11 @@
 @section('content')
 @include('partials.requests-page-styles')
 
+@php
+    use App\Support\LeaveProofRules;
+    use App\Support\LeaveAttachmentLinks;
+@endphp
+
 <div class="requests-page">
     <h1>Leave Requests</h1>
     <p class="requests-page-lead">
@@ -47,23 +52,11 @@
             <tbody>
             @forelse($requests as $index => $req)
                 @php
-                    $files = [];
-                    if (!empty($req->file_uploads)) {
-                        $decoded = json_decode($req->file_uploads, true);
-                        $files = is_array($decoded) ? $decoded : [$req->file_uploads];
-                    }
+                    $fileLinks = LeaveAttachmentLinks::forRequest($req);
 
                     $employeeFirst = $req->user->first_name ?? '';
                     $employeeLast = $req->user->last_name ?? '';
                     $employeeFull = trim($employeeFirst . ' ' . $employeeLast) ?: 'User';
-
-                    $fileLinks = [];
-                    foreach ($files as $i => $file) {
-                        $fileLinks[] = [
-                            'label' => 'File ' . ($i + 1),
-                            'url' => route('leave.attachments.show', ['leaveRequest' => $req->id, 'attachment' => $i + 1]),
-                        ];
-                    }
 
                     $rowStatus = strtolower(trim((string) ($req->status ?? '')));
                     $currentYear = (int) now()->year;
@@ -72,6 +65,12 @@
                     $canDelete = $isPreviousYear;
 
                     $canMessage = $req->managerCanOpenChat(auth()->user());
+                    $canApproveWithProof = LeaveProofRules::canApprove($req);
+                    $proofBlockReason = LeaveProofRules::approvalBlockedReason($req);
+                    $proofDeferred = LeaveProofRules::allowsDeferredProof($req->leave_type) && LeaveProofRules::requiresProof($req->leave_type);
+                    $certificateNote = LeaveProofRules::managerCertificateNote($req);
+                    $certificateStatusLabel = LeaveProofRules::doctorsLetterStatusLabel($req);
+                    $doctorsLetterMissing = LeaveProofRules::isProofPastDeadline($req);
 
                     $details = [
                         'id' => $req->id,
@@ -86,6 +85,13 @@
                         'isOverdue' => $req->isOverdue(),
                         'comment' => (string) ($req->important_comment ?? ''),
                         'files' => $fileLinks,
+                        'proofDeferred' => $proofDeferred,
+                        'proofAttached' => LeaveProofRules::hasProofAttached($req),
+                        'proofDeadline' => LeaveProofRules::proofDeadlineAt($req) ? LeaveProofRules::proofDeadlineAt($req)->format('d M Y') : '',
+                        'certificateNote' => (string) ($certificateNote ?? ''),
+                        'proofStatusLabel' => (string) ($certificateStatusLabel ?? ''),
+                        'doctorsLetterMissing' => $doctorsLetterMissing,
+                        'proofBlockReason' => (string) ($proofBlockReason ?? ''),
                         'messagesUrl' => $canMessage ? route('messages.leave', $req) : null,
                         'lateReasonSent' => (bool) $req->overdue_escalated_at,
                         'lateReason' => (string) ($req->overdue_escalation_reason ?? ''),
@@ -99,11 +105,14 @@
                     <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>
                     <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y H:i') : '—' }}</td>
-                    <td>
+                    <td class="request-status-cell">
                         @if ($req->isOverdue())
                             <span class="request-badge request-badge--overdue">Overdue</span>
                         @else
                             <span class="request-badge request-badge--{{ $rowStatus === 'withdrawn' ? 'withdrawn' : $rowStatus }}">{{ ucfirst($rowStatus) }}</span>
+                        @endif
+                        @if ($certificateStatusLabel)
+                            <span class="request-badge {{ $doctorsLetterMissing ? 'request-badge--letter-missing' : 'request-badge--letter-required' }}">{{ $certificateStatusLabel }}</span>
                         @endif
                     </td>
                     <td class="request-actions-cell" onclick="event.stopPropagation();">
@@ -117,11 +126,15 @@
                                     @endif
                                 @else
                                     <div class="request-actions-inline">
-                                        <form action="{{ route('manager.requests.approve', $req) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="request-btn request-btn--approve">Approve</button>
-                                        </form>
+                                        @if ($canApproveWithProof)
+                                            <form action="{{ route('manager.requests.approve', $req) }}" method="POST">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="request-btn request-btn--approve">Approve</button>
+                                            </form>
+                                        @else
+                                            <span class="request-actions-note" title="{{ $proofBlockReason }}">Awaiting proof</span>
+                                        @endif
                                         <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Reject</button>
                                     </div>
                                 @endif

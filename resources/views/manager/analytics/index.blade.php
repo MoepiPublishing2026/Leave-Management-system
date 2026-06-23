@@ -493,76 +493,13 @@
 </div>
 
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 @include('partials.dashboard-charts-styles')
 @include('partials.dashboard-chart-vars')
 <script>
 const ctx = document.getElementById('designationPieChart').getContext('2d');
 window.applyBoldChartDefaults();
-const chartPalette = [
-    '#1d4ed8',
-    '#3b82f6',
-    '#0ea5e9',
-    '#06b6d4',
-    '#14b8a6',
-    '#6366f1',
-    '#8b5cf6',
-    '#a855f7',
-    '#d946ef',
-    '#ec4899',
-    '#F08080',
-    '#2ecc71',
-    '#64748b',
-    '#94a3b8'
-];
-const hashString = (str) => {
-    let h = 0;
-    const s = String(str || '');
-    for (let i = 0; i < s.length; i += 1) {
-        h = ((h << 5) - h) + s.charCodeAt(i);
-        h |= 0;
-    }
-    return Math.abs(h);
-};
-const designationPalette = @json(config('designation_colors.palette'));
-const normalizeDesignation = (value) => String(value || '').trim().toLowerCase();
-const colorForDesignation = (label) => {
-    const key = normalizeDesignation(label) || 'unknown';
-    return designationPalette[hashString(key) % designationPalette.length];
-};
-const designationLabels = @json($designationLabels);
-const designationColors = designationLabels.map((label) => colorForDesignation(label));
-const designationPct = @json($designationPercentages ?? []);
-
-new Chart(ctx, {
-    type: 'pie',
-    data: {
-        labels: designationLabels,
-        datasets: [{
-            data: @json($designationData),
-            backgroundColor: designationColors,
-            borderColor: '#fff',
-            borderWidth: 2
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                bodyFont: { size: 13, weight: '700' },
-                titleFont: { size: 13, weight: '700' },
-                callbacks: {
-                    label: (ctx) => {
-                        const pct = (designationPct[ctx.label] ?? 0).toFixed(1);
-                        return `${ctx.label}: ${ctx.parsed} (${pct}%)`;
-                    }
-                }
-            }
-        }
-    }
-});
-renderChartHtmlLegend('designationPieLegend', designationLabels, designationColors, designationPct);
+window.finalizeChartDefaults();
+@include('partials.analytics-designation-chart-script')
 </script>
 @endsection

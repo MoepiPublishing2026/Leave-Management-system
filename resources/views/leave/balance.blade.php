@@ -9,6 +9,10 @@
     $fmtDays = function ($n) {
         return rtrim(rtrim(number_format((float) $n, 1), '0'), '.');
     };
+    $statusColors = config('leave_status_colors.colors', []);
+    $chartPending = $statusColors['pending'] ?? '#C291A4';
+    $chartApproved = $statusColors['approved'] ?? '#E27A53';
+    $chartDeclined = $statusColors['rejected'] ?? '#87AFC7';
     $annualInfo = $leaveBalances[$annualKey] ?? ['default_days' => 0, 'taken_days' => 0, 'remaining_days' => 0];
     $annualAllocated = (float) ($annualInfo['default_days'] ?? 0);
     $annualTaken = (float) ($annualInfo['taken_days'] ?? 0);
@@ -43,23 +47,20 @@
         </div>
 
         @if($annualAllocated > 0)
-            <div class="balance-annual-strip">
-                <div>
-                    <div class="strip-label">Annual leave remaining</div>
-                    <div class="strip-value">{{ $fmtDays($annualRemaining) }}</div>
-                    <div class="strip-caption">
-                        {{ $fmtDays($annualTaken) }} of {{ $fmtDays($annualAllocated) }} days used in {{ $year }}
-                    </div>
+            <div class="balance-summary-grid" style="margin-bottom: 22px;">
+                <div class="balance-summary-card">
+                    <div class="balance-summary-k">Annual remaining</div>
+                    <div class="balance-summary-v">{{ $fmtDays($annualRemaining) }}</div>
+                    <div class="balance-summary-cap">days available in {{ $year }}</div>
                 </div>
-                <div class="strip-meter">
-                    <div class="balance-usage-label">
-                        <span>Annual usage</span>
-                        <span>{{ $annualUsagePercent }}%</span>
-                    </div>
-                    <div class="balance-usage-track">
-                        <div class="balance-usage-fill {{ $annualUsagePercent >= 90 ? 'is-danger' : ($annualUsagePercent >= 70 ? 'is-warn' : '') }}"
-                             style="width: {{ max($annualUsagePercent, 2) }}%;"></div>
-                    </div>
+            </div>
+            <div class="balance-usage-panel">
+                <div class="balance-usage-label">
+                    <span>Annual usage in {{ $year }}</span>
+                    <span>{{ $annualUsagePercent }}% · {{ $fmtDays($annualTaken) }} / {{ $fmtDays($annualAllocated) }} days</span>
+                </div>
+                <div class="balance-usage-track">
+                    <div class="balance-usage-fill" style="width: {{ max($annualUsagePercent, 2) }}%;"></div>
                 </div>
             </div>
         @endif
@@ -81,7 +82,15 @@
             $taken = (float) ($focusedBalance['taken_days'] ?? 0);
             $remaining = (float) ($focusedBalance['remaining_days'] ?? 0);
             $usagePct = (int) ($focusedBalance['usage_percent'] ?? 0);
-            $meterClass = $usagePct >= 90 ? 'is-danger' : ($usagePct >= 70 ? 'is-warn' : '');
+            $remainingPct = $allocated > 0 ? min(100, (int) round(($remaining / $allocated) * 100)) : 0;
+            $usedMeterWidth = max($usagePct, $taken > 0 ? 12 : 0);
+            $remainingMeterWidth = max($remainingPct, $remaining > 0 ? 12 : 0);
+            $statusMax = max(1, (int) ($requestCounts['pending'] ?? 0), (int) ($requestCounts['approved'] ?? 0), (int) ($requestCounts['rejected'] ?? 0));
+            $pendingBarHeight = max(12, (int) round(((int) ($requestCounts['pending'] ?? 0) / $statusMax) * 48));
+            $approvedBarHeight = max(12, (int) round(((int) ($requestCounts['approved'] ?? 0) / $statusMax) * 48));
+            $declinedBarHeight = max(12, (int) round(((int) ($requestCounts['rejected'] ?? 0) / $statusMax) * 48));
+            $docLabel = !empty($focusedBalance['requires_proof']) ? 'Required' : 'Not required';
+            $halfDayLabel = !empty($focusedBalance['allow_half_days']) ? 'Allowed' : 'Not allowed';
         @endphp
 
         <h1>{{ $selectedType }} Leave</h1>
@@ -111,20 +120,39 @@
             </div>
         </div>
 
-        <div class="balance-hero">
-            <div>
-                <div class="hero-label">{{ $selectedType }} remaining</div>
-                <div class="hero-value">{{ $fmtDays($remaining) }}</div>
-                <div class="hero-caption">days available in {{ $year }}</div>
-            </div>
-            <div class="balance-stat-row">
-                <div class="balance-stat balance-stat--used">
-                    <div class="stat-k">Used</div>
-                    <div class="stat-v">{{ $fmtDays($taken) }}</div>
+        <div class="balance-summary-grid">
+            <div class="balance-summary-card">
+                <div class="balance-summary-k">{{ $selectedType }} remaining</div>
+                <div class="balance-summary-body">
+                    <div class="balance-summary-v">{{ $fmtDays($remaining) }}</div>
+                    <div class="balance-summary-cap">days available in {{ $year }}</div>
                 </div>
-                <div class="balance-stat balance-stat--alloc">
-                    <div class="stat-k">Allocated</div>
-                    <div class="stat-v">{{ $fmtDays($allocated) }}</div>
+            </div>
+            <div class="balance-summary-card balance-summary-card--used">
+                <div class="balance-summary-k">Used</div>
+                <div class="balance-summary-body balance-summary-body--meter">
+                    <div class="balance-summary-meter">
+                        <div class="balance-summary-meter-fill" style="width: {{ $usedMeterWidth }}%;">
+                            {{ $fmtDays($taken) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="balance-summary-card balance-summary-card--remaining-meter">
+                <div class="balance-summary-k">Remaining</div>
+                <div class="balance-summary-body balance-summary-body--meter">
+                    <div class="balance-summary-meter">
+                        <div class="balance-summary-meter-fill" style="width: {{ $remainingMeterWidth }}%;">
+                            {{ $fmtDays($remaining) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="balance-summary-card balance-summary-card--allocated">
+                <div class="balance-summary-k">Allocated</div>
+                <div class="balance-summary-body">
+                    <div class="balance-summary-v">{{ $fmtDays($allocated) }}</div>
+                    <div class="balance-summary-cap balance-summary-cap--spacer" aria-hidden="true">&nbsp;</div>
                 </div>
             </div>
         </div>
@@ -146,35 +174,38 @@
         @endif
 
         @if($allocated > 0)
-            <div class="balance-panel balance-usage">
+            <div class="balance-usage-panel">
                 <div class="balance-usage-label">
                     <span>Usage in {{ $year }}</span>
                     <span>{{ $usagePct }}% · {{ $fmtDays($taken) }} / {{ $fmtDays($allocated) }} days</span>
                 </div>
                 <div class="balance-usage-track">
-                    <div class="balance-usage-fill {{ $meterClass }}" style="width: {{ max($usagePct, 2) }}%;"></div>
+                    <div class="balance-usage-fill" style="width: {{ max($usagePct, 2) }}%;"></div>
                 </div>
             </div>
         @endif
 
-        <div class="balance-panel">
-            <div class="balance-facts">
-                <div class="balance-fact">
-                    Half days
-                    <strong>{{ !empty($focusedBalance['allow_half_days']) ? 'Allowed' : 'Not allowed' }}</strong>
+        <div class="balance-detail-grid">
+            <div class="balance-detail-card balance-detail-card--status">
+                <div class="detail-k">Requests status</div>
+                <div class="balance-status-bars" role="img" aria-label="Pending {{ $requestCounts['pending'] ?? 0 }}, approved {{ $requestCounts['approved'] ?? 0 }}, declined {{ $requestCounts['rejected'] ?? 0 }}">
+                    <div class="balance-status-bar" style="height: {{ $pendingBarHeight }}px; background: {{ $chartPending }};" title="Pending: {{ $requestCounts['pending'] ?? 0 }}"></div>
+                    <div class="balance-status-bar" style="height: {{ $approvedBarHeight }}px; background: {{ $chartApproved }};" title="Approved: {{ $requestCounts['approved'] ?? 0 }}"></div>
+                    <div class="balance-status-bar" style="height: {{ $declinedBarHeight }}px; background: {{ $chartDeclined }};" title="Declined: {{ $requestCounts['rejected'] ?? 0 }}"></div>
                 </div>
-                <div class="balance-fact">
-                    Documents
-                    <strong>{{ !empty($focusedBalance['requires_proof']) ? 'Required' : 'Not required' }}</strong>
-                </div>
-                <div class="balance-fact">
-                    Pending requests
-                    <strong>{{ $requestCounts['pending'] ?? 0 }} ({{ $fmtDays($pendingDaysTotal) }} days)</strong>
-                </div>
-                <div class="balance-fact">
-                    Approved requests
-                    <strong>{{ $requestCounts['approved'] ?? 0 }}</strong>
-                </div>
+                <div class="detail-v detail-v--status-meta">Declined: {{ $requestCounts['rejected'] ?? 0 }}</div>
+            </div>
+            <div class="balance-detail-card">
+                <div class="detail-k">Pending requests</div>
+                <div class="detail-v">{{ $requestCounts['pending'] ?? 0 }} ({{ $fmtDays($pendingDaysTotal) }} days)</div>
+            </div>
+            <div class="balance-detail-card">
+                <div class="detail-k">Documents</div>
+                <div class="detail-v">{{ $docLabel }} · Half days {{ strtolower($halfDayLabel) }}</div>
+            </div>
+            <div class="balance-detail-card">
+                <div class="detail-k">Approved requests</div>
+                <div class="detail-v">{{ $requestCounts['approved'] ?? 0 }}</div>
             </div>
         </div>
 
@@ -223,7 +254,7 @@
                                     <td>{{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }}</td>
                                     <td>{{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}</td>
                                     <td>{{ $fmtDays($leave->days ?? 0) }}</td>
-                                    <td><span class="balance-badge balance-badge--pending">Pending</span></td>
+                                    <td><span class="request-badge request-badge--pending">Pending</span></td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -250,7 +281,7 @@
                                 <td>{{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }}</td>
                                 <td>{{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}</td>
                                 <td>{{ $fmtDays($leave->days ?? 0) }}</td>
-                                <td><span class="balance-badge balance-badge--approved">Approved</span></td>
+                                <td><span class="request-badge request-badge--approved">Approved</span></td>
                             </tr>
                         @empty
                             <tr>

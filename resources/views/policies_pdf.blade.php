@@ -3,91 +3,93 @@
 <head>
     <meta charset="utf-8" />
     <title>Company Leave Policies</title>
-   <style>
-    .policy-container {
-        font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
-        max-width: 900px;
-        margin: 40px auto 80px;
-        background: white;
-        padding: 30px 40px;
-        border-radius: 20px;
-        box-shadow: 0 6px 20px rgba(163, 71, 71, 0.08);
-    }
-    h1 {
-        color: #2c3e50;
-        font-weight: 700;
-        font-size: 36px;
-        margin-bottom: 20px;
-        letter-spacing: 0.04em;
-    }
-    .download-pdf-btn {
-    position: absolute;
-    top: 20px;
-    right: 40px; /* adjust as needed */
-    background-color: #138056ff;
-    color: white;
-    font-weight: 700;
-    padding: 10px 18px;
-    border-radius: 8px;
-    text-decoration: none;
-    box-shadow: 0 4px 15px rgba(19, 128, 86, 0.3);
-    transition: background-color 0.25s;
-    z-index: 10000;
-}
-.download-pdf-btn:hover {
-    background-color: #0e6b3f;
-}
-
-    h2 {
-        font-weight: 600;
-        color: #138056ff;
-        margin-top: 30px;
-        margin-bottom: 10px;
-    }
-    p, ul {
-        font-size: 18px;
-        line-height: 1.6;
-        color: #333333;
-        margin-bottom: 15px;
-    }
-    ul {
-        list-style-type: disc;
-        padding-left: 20px;
-    }
-</style>
-
-
-<div class="policy-container">
+    <style>
+        body {
+            font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 24px 32px 48px;
+        }
+        h1 {
+            color: #2c3e50;
+            font-weight: 700;
+            font-size: 28px;
+            margin: 0 0 24px;
+        }
+        h2 {
+            font-weight: 600;
+            color: #138056;
+            font-size: 18px;
+            margin: 22px 0 8px;
+        }
+        p {
+            font-size: 13px;
+            line-height: 1.55;
+            margin: 0 0 10px;
+        }
+        .policy-badges {
+            margin: 0 0 10px;
+        }
+        .policy-badge {
+            display: inline-block;
+            background: #e8f5ef;
+            color: #138056;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin: 0 6px 6px 0;
+        }
+        .policy-badge--muted {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        ul {
+            font-size: 13px;
+            line-height: 1.55;
+            margin: 0 0 14px;
+            padding-left: 20px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #334155;
+            margin: 28px 0 8px;
+        }
+    </style>
+</head>
+<body>
     <h1>Company Leave Policies</h1>
+    <p style="font-size:12px;color:#64748b;margin-bottom:20px;">Generated {{ now()->format('d M Y') }} — reflects current policy settings.</p>
 
-    <h2>Annual Leave</h2>
-    <p>Annual leave is the primary leave balance for the year. Approved leave that counts against your annual pool reduces this balance. Sick, Maternity, Paternity, and Bereavement leave do not reduce your annual balance and have their own allocations. Once the annual balance reaches 0, other leave types are disabled, but Sick, Bereavement, Maternity, and Paternity can still be requested (with proof where required).</p>
-    <p>Maternity leave is treated as a special case and does not reduce annual leave.</p>
+    @foreach ($leaveTypes as $type)
+        @php $policy = $policies[$type] ?? null; @endphp
+        <h2>{{ $type }} Leave</h2>
+        @if ($policy)
+            <div class="policy-badges">
+                <span class="policy-badge">{{ (int) $policy->default_days }} days per year</span>
+                @if ($policy->max_carry_over)
+                    <span class="policy-badge policy-badge--muted">Carry over: {{ (int) $policy->max_carry_over }} days</span>
+                @endif
+                @if ($policy->allow_half_days)
+                    <span class="policy-badge policy-badge--muted">Half days allowed</span>
+                @endif
+                @if ($policy->requires_proof)
+                    <span class="policy-badge">Proof required</span>
+                @endif
+            </div>
+        @endif
+        <p>@include('partials.policy-leave-type-text', ['type' => $type, 'policy' => $policy])</p>
+    @endforeach
 
-    <h2>Sick Leave</h2>
-    <p>Sick leave is granted for illness or injury. Employees must notify their manager as early as possible and provide a medical certificate for absences exceeding 2 days.</p>
-
-    <h2>Maternity / Paternity Leave</h2>
-    <p>Maternity leave of 12 weeks and paternity leave of 5 days are provided according to the applicable legislation. Proper documentation and notice are required.</p>
-
-    <h2>Bereavement Leave</h2>
-    <p>Employees may take up to 5 days of paid bereavement leave for the death of immediate family members.</p>
-
-    <h2>Unpaid Leave</h2>
-    <p>Employees may request unpaid leave for personal reasons. Approval is at the discretion of management and based on operational requirements.</p>
-
-    <h2>Study Leave</h2>
-    <p>Study leave may be requested for approved training or educational programs. Supporting documentation is required, and approval is subject to operational requirements.</p>
-
-    <h2>Leave Application Process</h2>
+    <div class="section-title">Leave application process</div>
     <ul>
-        <li>Submit leave application through the system with all required details.</li>
+        <li>Submit leave applications through the system with all required details.</li>
         <li>Approvals are made by the employee's direct manager.</li>
-        <li>Leave balances are maintained and visible to employees on their dashboard.</li>
+        <li>Leave balances are maintained and visible on your dashboard.</li>
     </ul>
 
-    <h2>Return to Work</h2>
+    <div class="section-title">Return to work</div>
     <p>Upon return from extended leave, employees must provide certification if applicable and coordinate with HR for any necessary updates.</p>
-</div>
 </body>
 </html>

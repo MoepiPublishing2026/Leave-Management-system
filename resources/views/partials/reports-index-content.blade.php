@@ -140,7 +140,7 @@ document.getElementById('reportsFilterForm')?.addEventListener('submit', functio
     Swal.fire({
         icon: 'success',
         title: 'Filter Successful',
-        text: 'Filtering was successful. You can now proceed to export the CSV.',
+        text: 'Filtering was successful. You can now proceed to export the PDF.',
         confirmButtonText: 'OK'
     }).then((result) => {
         if (result.isConfirmed) {

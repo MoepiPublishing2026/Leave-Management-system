@@ -4,6 +4,10 @@
     .chart-card {
         overflow: visible;
     }
+    .chart-card h3 {
+        font-weight: 700;
+        color: #0f172a;
+    }
     .chart-body {
         position: relative;
         width: 100%;
@@ -36,14 +40,15 @@
         gap: 8px 12px;
         justify-content: center;
         width: 100%;
+        font-weight: 700 !important;
     }
     .chart-html-legend-item {
         display: inline-flex;
         align-items: center;
         gap: 6px;
         font-size: 0.8rem;
-        font-weight: 800;
-        color: #2c3e50;
+        font-weight: 700 !important;
+        color: #0f172a;
         line-height: 1.25;
         max-width: 100%;
     }
@@ -56,6 +61,8 @@
     }
     .chart-html-legend-label {
         word-break: break-word;
+        font-weight: 700 !important;
+        color: #0f172a;
     }
     @media (max-width: 768px) {
         .chart-card {
@@ -71,7 +78,11 @@
         }
         .chart-body--plot {
             height: auto;
-            min-height: 220px;
+            min-height: 280px;
+            padding-bottom: 8px;
+        }
+        .chart-body--plot canvas {
+            max-height: none !important;
         }
         .chart-html-legend {
             justify-content: flex-start;

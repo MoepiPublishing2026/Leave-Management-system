@@ -47,23 +47,7 @@
                     @endif
                 </div>
 
-                <p>
-                    @if($type === 'Annual')
-                        Annual leave is the primary leave balance for the year. Approved leave that counts against your annual pool reduces this balance. Sick, Maternity, Paternity, and Bereavement leave do not reduce your annual balance and have their own allocations. Once the annual balance reaches 0, other leave types are disabled, but Sick, Bereavement, Maternity, and Paternity can still be requested (with proof where required).
-                    @elseif($type === 'Sick')
-                        Sick leave is granted up to {{ $policy->default_days }} days for illness or injury. Employees must notify their manager as early as possible and provide a medical certificate for absences exceeding 2 days.
-                    @elseif(in_array($type, ['Maternity', 'Paternity']))
-                        {{ $type }} leave of {{ $policy->default_days }} days is provided according to applicable legislation. Proper documentation and notice are required.
-                    @elseif($type === 'Bereavement')
-                        Employees may take up to {{ $policy->default_days }} days of paid bereavement leave for the death of immediate family members.
-                    @elseif($type === 'Unpaid')
-                        Employees may request unpaid leave for personal reasons. Approval is at the discretion of management and based on operational requirements.
-                    @elseif($type === 'Study')
-                        Study leave may be requested for approved training or educational programs. Supporting documentation is required, and approval is subject to operational requirements.
-                    @else
-                        {{ $type }} leave details are as per company policy. Employees are allowed {{ $policy->default_days }} days annually.
-                    @endif
-                </p>
+                <p>@include('partials.policy-leave-type-text', ['type' => $type, 'policy' => $policy])</p>
             @else
                 <p>Policy details are currently unavailable.</p>
             @endif

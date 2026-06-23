@@ -22,7 +22,7 @@
     h1 {
         font-weight: 700;
         font-size: 40px;
-        color: #2c3e50;
+        color: #0f172a;
         margin: 0 0 24px 0;
     
         padding-left: 15px;
@@ -58,24 +58,6 @@
     box-sizing: border-box;
 }
 
-.card-pending {
-    background: #C291A4;
-    border-color: #C291A4;
-    color: #fff;
-}
-
-.card-approved {
-    background: #E27A53;
-    border-color: #E27A53;
-    color: #fff;
-}
-
-.card-rejected {
-    background: #87AFC7;
-    border-color: #87AFC7;
-    color: #fff;
-}
-
 .card-onleave {
     background: #87AFC7;
     border-color: #87AFC7;
@@ -86,22 +68,11 @@
     border-color: #D2B55B;
     color: #fff;
 }
-.card-all {
-    background: #00C0A3;
-    border-color: #00C0A3;
+.card-onleave .card-title,
+.card-onleave .card-value,
+.card-sixth .card-title,
+.card-sixth .card-value {
     color: #fff;
-}
-.card-overdue {
-    background: #C154C1;
-    border-color: #C154C1;
-    color: #fff;
-}
-.card .card-title,
-.card .card-value {
-    color: #fff;
-}
-.card .card-title svg {
-    display: none;
 }
 .card .card-title {
     justify-content: center;
@@ -147,7 +118,7 @@
         margin: 0 0 10px 0;
         font-weight: 700;
         font-size: 1rem;
-        color: #2c3e50;
+        color: #0f172a;
     }
     .chart-body {
         position: relative;
@@ -229,6 +200,7 @@
             <div class="chart-body chart-body--plot">
                 <canvas id="monthlyStatusStackedBar"></canvas>
             </div>
+            <ul class="chart-html-legend" id="monthlyStatusStackedBarLegend" aria-label="Monthly status legend"></ul>
         </div>
         <div class="chart-card">
             <h3>Requests by Department</h3>
@@ -250,7 +222,7 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 @include('partials.dashboard-charts-styles')
 @include('partials.dashboard-chart-vars')
 <script>
@@ -314,9 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.applyBoldChartDefaults();
-    Chart.defaults.font.size = 12;
-    Chart.defaults.color = '#2c3e50';
-    Chart.defaults.maintainAspectRatio = false;
+    window.finalizeChartDefaults();
 
     const container = document.getElementById('cardsContainer');
     let dragged;
@@ -359,13 +329,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 borderWidth: 2,
             }]
         },
-        options: {
-            responsive: true,
+        options: mergeChartOptions({
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    bodyFont: { size: 14 },
-                    titleFont: { weight: '700' },
                     callbacks: {
                         label: (ctx) => {
                             const pct = (leaveTypePct[ctx.label] ?? 0).toFixed(1);
@@ -374,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-        }
+        })
     });
     renderChartHtmlLegend('leaveDoughnutLegend', leaveTypeLabels, leaveTypeColors, leaveTypePct);
 
@@ -399,13 +366,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 borderWidth: 2
             }]
         },
-        options: {
-            responsive: true,
+        options: mergeChartOptions({
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    bodyFont: { size: 14 },
-                    titleFont: { weight: '700' },
                     callbacks: {
                         label: (ctx) => {
                             const pct = (statusPct[ctx.label] ?? 0).toFixed(1);
@@ -414,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-        }
+        })
     });
     renderChartHtmlLegend('statusPieLegend', statusPieLabels, statusPieColors, statusPct);
 
@@ -432,10 +396,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthlyPending = padMonthlySeries(@json($monthlyPendingData));
     const monthlyOverdue = padMonthlySeries(@json($monthlyOverdueData));
     const monthlyRejected = padMonthlySeries(@json($monthlyRejectedData));
-    const monthAxisTicks = { autoSkip: false, maxRotation: 0, minRotation: 0 };
     const monthlyColor = window.leaveMonthlyApplicationsColor;
 
-    new Chart(document.getElementById('monthlyLine'), {
+    const monthlyLineChart = new Chart(document.getElementById('monthlyLine'), {
         type: 'line',
         data: {
             labels: monthlyLabels,
@@ -450,18 +413,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 pointHoverRadius: 7
             }]
         },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
-            },
+        options: mergeChartOptions({
+            layout: window.getMonthChartLayout(),
+            plugins: { legend: { display: false } },
             scales: {
-                x: { ticks: monthAxisTicks },
+                x: { ticks: window.getMonthAxisTicks() },
                 y: { beginAtZero: true, ticks: { stepSize: 1 } }
             }
-        }
+        })
     });
+    window.registerMonthAxisChart(monthlyLineChart);
 
     const deptPolarCanvas = document.getElementById('departmentPolar');
     if (deptPolarCanvas) {
@@ -470,25 +431,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const deptPct = @json($departmentPercentages ?? []);
         const polarLegendGen = Chart.overrides?.polarArea?.plugins?.legend?.labels?.generateLabels
             || Chart.overrides?.doughnut?.plugins?.legend?.labels?.generateLabels;
-        const deptColors = deptLabels.map((d) => colorForKey(String(d || '').trim().toLowerCase()));
+        const deptColors = deptLabels.map((d) => colorForGroupLabel(d));
         new Chart(deptPolarCanvas, {
             type: 'polarArea',
             data: {
                 labels: deptLabels,
                 datasets: [{
                     data: deptData,
-                    backgroundColor: deptLabels.map((d) => hexToRgba(colorForKey(String(d || '').trim().toLowerCase()), 0.65)),
+                    backgroundColor: deptLabels.map((d) => hexToRgba(colorForGroupLabel(d), 0.65)),
                     borderColor: '#fff',
                     borderWidth: 2
                 }]
             },
-            options: {
-                responsive: true,
+            options: mergeChartOptions({
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        bodyFont: { size: 14 },
-                        titleFont: { weight: '700' },
                         callbacks: {
                             label: (ctx) => {
                                 const pct = (deptPct[ctx.label] ?? 0).toFixed(1);
@@ -496,20 +454,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
                     }
-                }
-            }
+                },
+                scales: window.polarAreaChartScales,
+            })
         });
         renderChartHtmlLegend('departmentPolarLegend', deptLabels, deptColors, deptPct);
     }
 
     const designationLabels = @json($designationLabels ?? []);
     const designationData = @json($designationData ?? []);
-    const designationPalette = @json(config('designation_colors.palette'));
-    const normalizeDesignation = (value) => String(value || '').trim().toLowerCase();
-    const colorForDesignation = (label) => {
-        const key = normalizeDesignation(label) || 'unknown';
-        return designationPalette[hashString(key) % designationPalette.length];
-    };
 
     new Chart(document.getElementById('designationBar'), {
         type: 'bar',
@@ -518,29 +471,16 @@ document.addEventListener('DOMContentLoaded', () => {
             datasets: [{
                 label: 'Requests',
                 data: designationData,
-                backgroundColor: designationLabels.map((l) => hexToRgba(colorForDesignation(l), 0.8)),
-                borderColor: designationLabels.map((l) => colorForDesignation(l)),
+                backgroundColor: designationLabels.map((l) => hexToRgba(colorForGroupLabel(l), 0.8)),
+                borderColor: designationLabels.map((l) => colorForGroupLabel(l)),
                 borderWidth: 2,
                 borderRadius: 8
             }]
         },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
-            },
-            scales: {
-                y: { beginAtZero: true, ticks: { precision: 0 } }
-            }
-        }
+        options: window.categoryBarChartOptions({ precision: 0 }),
     });
 
-    new Chart(document.getElementById('monthlyStatusStackedBar'), {
-        type: 'bar',
-        data: {
-            labels: monthlyLabels,
-            datasets: [
+    const monthlyStatusDatasets = [
                 {
                     label: 'Approved',
                     data: monthlyApproved,
@@ -577,28 +517,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     borderRadius: 4,
                     stack: 'status'
                 }
-            ]
+            ];
+
+    const monthlyStatusChart = new Chart(document.getElementById('monthlyStatusStackedBar'), {
+        type: 'bar',
+        data: {
+            labels: monthlyLabels,
+            datasets: monthlyStatusDatasets
         },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { font: { size: 13, weight: '600' }, color: '#2c3e50' }
-                },
-                tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
-            },
-            scales: {
-                x: {
-                    type: 'category',
-                    stacked: true,
-                    offset: true,
-                    ticks: monthAxisTicks
-                },
-                y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
-            }
-        }
+        options: window.statusStackedBarChartOptions()
     });
+    window.registerMonthAxisChart(monthlyStatusChart);
+    window.renderDatasetLegend('monthlyStatusStackedBarLegend', monthlyStatusDatasets);
 
 });
 </script>

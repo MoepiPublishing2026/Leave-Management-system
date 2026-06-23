@@ -142,11 +142,6 @@
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
     }
     .requests-filter--all.is-active { background: #00C0A3; }
-    .requests-filter--pending.is-active { background: #C291A4; }
-    .requests-filter--overdue.is-active { background: #C154C1; }
-    .requests-filter--approved.is-active { background: #E27A53; }
-    .requests-filter--rejected.is-active { background: #87AFC7; }
-    .requests-filter--withdrawn.is-active { background: #D2B55B; }
     .requests-month-chip {
         display: inline-flex;
         align-items: center;
@@ -248,11 +243,6 @@
         letter-spacing: 0.01em;
         line-height: 1.25;
     }
-    .request-badge--pending { background: #C291A4; }
-    .request-badge--approved { background: #E27A53; }
-    .request-badge--rejected { background: #87AFC7; }
-    .request-badge--withdrawn { background: #D2B55B; }
-    .request-badge--overdue { background: #C154C1; }
     .requests-table td.request-actions-cell {
         vertical-align: middle;
     }
@@ -341,6 +331,55 @@
     .request-btn--withdraw:hover {
         background: #92400e;
         color: #fff;
+    }
+    .request-btn--view {
+        background: #ecfdf5;
+        border-color: #86efac;
+        color: #047857;
+    }
+    .request-btn--view:hover {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    .request-existing-files {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 6px;
+        width: 100%;
+    }
+    .request-status-cell {
+        min-width: 120px;
+    }
+    .request-status-cell .request-badge {
+        display: inline-block;
+        margin-top: 0;
+        margin-bottom: 4px;
+    }
+    .request-status-cell .request-badge:last-child {
+        margin-bottom: 0;
+    }
+    .request-badge--letter-required {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fcd34d;
+    }
+    .request-badge--letter-missing {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+    }
+    .proof-upload-form {
+        margin: 0;
+    }
+    .proof-upload-input {
+        display: none;
+    }
+    .proof-upload-modal-note {
+        margin: 0 0 8px;
+        font-size: 0.92rem;
+        color: #475569;
+        line-height: 1.45;
     }
     @media (max-width: 768px) {
         .requests-page h1 {

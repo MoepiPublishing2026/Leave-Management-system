@@ -2,6 +2,10 @@
 
 @section('title', 'All Leave Requests')
 
+@php
+    use App\Support\LeaveAttachmentLinks;
+@endphp
+
 @section('content')
 <style>
     body {
@@ -52,20 +56,6 @@
     tr:hover {
         background-color: #f2f2f2;
     }
-    .badge {
-        display: inline-block;
-        padding: 6px 14px;
-        border-radius: 12px;
-        font-size: 0.9rem;
-        color: white;
-        font-weight: 600;
-        text-transform: capitalize;
-        white-space: nowrap;
-        user-select: none;
-    }
-    .badge-pending { background-color: #facc15; color: black; }
-    .badge-approved { background-color: #10b981; }
-    .badge-rejected { background-color: #ef4444; }
 </style>
 
 <h1>All Leave Requests</h1>
@@ -120,26 +110,25 @@
                     <td>{{ \Carbon\Carbon::parse($request->start_date)->format('d M Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($request->end_date)->format('d M Y') }}</td>
                     <td>
-                        <span class="badge badge-{{ strtolower($request->status) }}">
+                        <span class="request-badge request-badge--{{ strtolower($request->status) }}">
                             {{ ucfirst($request->status) }}
                         </span>
                     </td>
                     <td>{{ $request->important_comment ?? '-' }}</td>
                     <td>
-                        @php
-                            $files = [];
-                            if (!empty($request->file_uploads)) {
-                                $decoded = json_decode($request->file_uploads, true);
-                                if (is_array($decoded)) {
-                                    $files = $decoded;
-                                } else {
-                                    $files = [$request->file_uploads];
-                                }
-                            }
-                        @endphp
-                        @if(count($files) > 0)
-                            @foreach($files as $i => $file)
-                                <a href="{{ route('leave.attachments.show', ['leaveRequest' => $request->id, 'attachment' => $i + 1]) }}" target="_blank">File {{ $i + 1 }}</a>@if($i < count($files) - 1) | @endif
+                        @php $fileLinks = LeaveAttachmentLinks::forRequest($request); @endphp
+                        @if(count($fileLinks) > 0)
+                            @foreach($fileLinks as $fileLink)
+                                <button
+                                    type="button"
+                                    class="attachment-preview-btn"
+                                    data-preview-url="{{ $fileLink['url'] }}"
+                                    data-download-url="{{ $fileLink['downloadUrl'] }}"
+                                    data-extension="{{ $fileLink['extension'] }}"
+                                    data-label="{{ $fileLink['name'] }}"
+                                    data-previewable="{{ $fileLink['previewable'] ? '1' : '0' }}"
+                                    style="margin-right:6px;padding:4px 10px;border:1px solid #86efac;background:#ecfdf5;border-radius:8px;font-weight:700;color:#047857;cursor:pointer;"
+                                >Preview {{ $fileLink['label'] }}</button>
                             @endforeach
                         @else
                             &mdash;
@@ -161,4 +150,12 @@
         {{ $requests->links('pagination::bootstrap-4') }}
     </div>
 </div>
+
+@include('partials.requests-page-scripts', [
+    'showEmployee' => false,
+    'showDays' => false,
+    'showHandledMeta' => false,
+    'enableWithdraw' => false,
+    'enableProofUpload' => false,
+])
 @endsection

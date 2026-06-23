@@ -96,6 +96,7 @@ Route::post('/apply-for-leave', [LeaveController::class, 'submit'])
     ->middleware('auth')->name('leave.submit');
 
 Route::get('/leave/my-requests', [LeaveController::class, 'myRequests'])->middleware('auth')->name('leave.myRequests');
+Route::post('/leave/requests/{id}/proof', [LeaveController::class, 'uploadProof'])->middleware('auth')->name('leave.uploadProof');
 Route::patch('/leave/withdraw/{id}', [LeaveController::class, 'withdraw'])->middleware('auth')->name('leave.withdraw');
 Route::delete('/leave/requests/{id}', [LeaveController::class, 'destroy'])->name('leave.destroy')->middleware('auth');
 Route::get('/leave/balance', [LeaveController::class, 'leaveBalance'])->name('leave.balance')->middleware('auth');
@@ -126,6 +127,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
  Route::get('employees/create', [EmployeeController::class, 'create'])->name('employees.create');
     Route::post('employees', [EmployeeController::class, 'store'])->name('employees.store');
+    Route::get('employees/{id}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
+    Route::put('employees/{id}', [EmployeeController::class, 'update'])->name('employees.update');
     Route::delete('employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
    
      Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
@@ -178,6 +181,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/notifications/mark-read', [NotificationsController::class, 'markAsRead'])->name('notifications.mark.read');
 
     Route::get('/users/{user}/profile-picture', [AuthController::class, 'profilePicture'])->name('users.profile_picture');
-    Route::get('/leave-requests/{leaveRequest}/attachments/{attachment}', [LeaveController::class, 'downloadAttachment'])
+    Route::get('/leave-requests/{leaveRequest}/attachments/{attachment}', [LeaveController::class, 'showAttachment'])
         ->name('leave.attachments.show');
 });

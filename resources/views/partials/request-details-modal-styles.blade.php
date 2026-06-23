@@ -103,11 +103,6 @@
         color: #fff;
         letter-spacing: 0.01em;
     }
-    .rd-badge--pending { background: #C291A4; }
-    .rd-badge--approved { background: #E27A53; }
-    .rd-badge--rejected { background: #87AFC7; }
-    .rd-badge--withdrawn { background: #D2B55B; }
-    .rd-badge--overdue { background: #C154C1; }
 
     .rd-employee {
         padding: 14px 22px;
@@ -206,12 +201,107 @@
 
     .rd-files {
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
         gap: 8px;
         list-style: none;
         margin: 0;
         padding: 0;
     }
+    .rd-file-item {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 12px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+    }
+    .rd-file-name {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 700;
+        font-size: 0.84rem;
+        color: #1e293b;
+    }
+    .rd-file-name svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        color: #047857;
+    }
+    .rd-file-actions {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .rd-file-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 7px 12px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-decoration: none;
+        border: 1px solid transparent;
+        cursor: pointer;
+        background: #ecfdf5;
+        border-color: #86efac;
+        color: #047857;
+    }
+    .rd-file-btn:hover {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    .rd-file-btn--download {
+        background: #eff6ff;
+        border-color: #93c5fd;
+        color: #1d4ed8;
+    }
+    .rd-file-btn--download:hover {
+        background: #dbeafe;
+        color: #1e3a8a;
+    }
+
+    .attachment-preview-popup {
+        padding: 0 0 12px;
+    }
+    .attachment-preview-wrap {
+        width: 100%;
+        min-height: 240px;
+    }
+    .attachment-preview-frame {
+        width: 100%;
+        height: min(70vh, 620px);
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #fff;
+    }
+    .attachment-preview-image {
+        display: block;
+        max-width: 100%;
+        max-height: min(70vh, 620px);
+        margin: 0 auto;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+    }
+    .attachment-preview-note {
+        margin: 0;
+        padding: 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        color: #475569;
+        font-size: 0.92rem;
+        line-height: 1.5;
+    }
+    .attachment-preview-container {
+        z-index: 10200 !important;
+    }
+
     .rd-file-link {
         display: inline-flex;
         align-items: center;

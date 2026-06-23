@@ -22,6 +22,30 @@
     .input-group .filter-select-wrap {
         width: 100%;
         min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    .leave-form .filter-select-wrap {
+        display: flex;
+        flex-direction: column;
+        align-self: stretch;
+    }
+    .leave-form .filter-select__trigger {
+        box-sizing: border-box;
+        min-width: 0;
+        max-width: 100%;
+    }
+    .leave-form .filter-select__label {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .leave-form .filter-select__menu {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
     .balance-year-form .filter-select-wrap {
         min-width: 148px;
@@ -119,6 +143,17 @@
     .filter-select__option.is-selected:hover {
         background: #9eb812;
     }
+    /* Leave apply form: open list flows below trigger instead of overlapping fields. */
+    .leave-form .filter-select-wrap.is-open .filter-select__menu {
+        position: static;
+        top: auto;
+        left: auto;
+        right: auto;
+        margin-top: 6px;
+    }
+    .leave-form .input-group:has(.filter-select-wrap) {
+        overflow: visible;
+    }
     .filter-form .filter-clear,
     .reports-filter-form .reports-btn--secondary {
         margin-left: 0;
@@ -152,6 +187,7 @@
         .leave-form .filter-select__menu {
             left: 0;
             right: 0;
+            max-height: min(280px, 45vh);
         }
     }
 </style>
@@ -162,16 +198,32 @@
 
         const ENHANCE_SELECTOR = 'select:not([data-filter-enhanced]):not(.filter-select__native):not([data-native-select])';
 
+        const MOBILE_LEAVE_QUERY = '(max-width: 768px)';
+
+        const isMobileLeaveSelect = (select) => (
+            !!select?.closest('form.leave-form')
+            && typeof window.matchMedia === 'function'
+            && window.matchMedia(MOBILE_LEAVE_QUERY).matches
+        );
+
         const shouldEnhanceSelect = (select) => {
             if (!select || select.tagName !== 'SELECT') return false;
             if (select.closest('.swal2-container, .flatpickr-calendar')) return false;
             if (select.classList.contains('swal2-select')) return false;
             if (select.classList.contains('flatpickr-monthDropdown-months')) return false;
             if (select.hasAttribute('data-native-select')) return false;
-            if (select.closest('form.leave-form') && window.matchMedia('(max-width: 768px)').matches) {
-                return false;
-            }
+            if (isMobileLeaveSelect(select)) return false;
             return true;
+        };
+
+        const revertEnhancedSelect = (select) => {
+            if (!select || select.dataset.filterEnhanced !== '1') return;
+            const wrap = select.closest('.filter-select-wrap');
+            if (!wrap) return;
+            wrap.parentNode.insertBefore(select, wrap);
+            wrap.remove();
+            select.classList.remove('filter-select__native');
+            delete select.dataset.filterEnhanced;
         };
 
         const closeAllFilterSelects = () => {
@@ -272,8 +324,18 @@
 
         window.initFilterSelects = function initFilterSelects(root) {
             (root || document).querySelectorAll(ENHANCE_SELECTOR).forEach((select) => {
+                if (select.closest('form.leave-form') && isMobileLeaveSelect(select)) {
+                    revertEnhancedSelect(select);
+                    return;
+                }
                 if (shouldEnhanceSelect(select)) {
                     enhanceSelect(select);
+                }
+            });
+
+            (root || document).querySelectorAll('form.leave-form select.filter-select__native').forEach((select) => {
+                if (isMobileLeaveSelect(select)) {
+                    revertEnhancedSelect(select);
                 }
             });
         };
@@ -298,6 +360,12 @@
         } else {
             boot();
         }
+
+        let leaveSelectResizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(leaveSelectResizeTimer);
+            leaveSelectResizeTimer = setTimeout(() => window.initFilterSelects(), 150);
+        });
     })();
 </script>
 @endonce

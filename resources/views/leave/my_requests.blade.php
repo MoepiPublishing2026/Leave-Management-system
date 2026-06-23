@@ -5,6 +5,11 @@
 @section('content')
 @include('partials.requests-page-styles')
 
+@php
+    use App\Support\LeaveProofRules;
+    use App\Support\LeaveAttachmentLinks;
+@endphp
+
 <div class="requests-page">
     <h1>My Leave Requests</h1>
     <p class="requests-page-lead">
@@ -41,31 +46,28 @@
                 <th>End</th>
                 <th>Submitted</th>
                 <th>Status</th>
-                <th style="min-width: 140px;">Actions</th>
+                <th style="min-width: 180px;">Actions</th>
             </tr>
             </thead>
             <tbody>
             @forelse($leaveRequests as $index => $req)
                 @php
-                    $files = [];
-                    if (!empty($req->file_uploads)) {
-                        $decoded = json_decode($req->file_uploads, true);
-                        $files = is_array($decoded) ? $decoded : [$req->file_uploads];
-                    }
-
-                    $fileLinks = [];
-                    foreach ($files as $i => $file) {
-                        $fileLinks[] = [
-                            'label' => 'File ' . ($i + 1),
-                            'url' => route('leave.attachments.show', ['leaveRequest' => $req->id, 'attachment' => $i + 1]),
-                        ];
-                    }
+                    $fileLinks = LeaveAttachmentLinks::forRequest($req);
 
                     $handledName = trim(($req->handledBy->first_name ?? '') . ' ' . ($req->handledBy->last_name ?? ''));
                     $lateReasonName = trim(($req->overdueEscalatedBy->first_name ?? '') . ' ' . ($req->overdueEscalatedBy->last_name ?? ''));
                     $rowStatus = strtolower(trim((string) ($req->status ?? '')));
                     $canWithdraw = $req->canBeWithdrawnByEmployee();
                     $canDelete = $req->canBeDeletedByEmployee();
+                    $showAttachmentControls = LeaveProofRules::employeeCanManageAttachments($req);
+                    $canSubmitAttachment = LeaveProofRules::employeeCanSubmitAttachmentNow($req);
+                    $attachmentActionLabel = LeaveProofRules::employeeAttachmentActionLabel($req);
+                    $canUploadProof = $canSubmitAttachment;
+                    $showCertificateUpload = $showAttachmentControls;
+                    $proofWindowOpens = LeaveProofRules::proofWindowOpensAt($req);
+                    $proofDeadline = LeaveProofRules::proofDeadlineAt($req);
+                    $proofStatusLabel = LeaveProofRules::employeeProofStatusLabel($req);
+                    $doctorsLetterMissing = LeaveProofRules::isProofPastDeadline($req);
 
                     $details = [
                         'id' => $req->id,
@@ -77,6 +79,11 @@
                         'isOverdue' => $req->isOverdue(),
                         'comment' => (string) ($req->important_comment ?? ''),
                         'files' => $fileLinks,
+                        'proofDeferred' => LeaveProofRules::allowsDeferredProof($req->leave_type) && LeaveProofRules::requiresProof($req->leave_type),
+                        'proofAttached' => LeaveProofRules::hasProofAttached($req),
+                        'proofDeadline' => $proofDeadline ? $proofDeadline->format('d M Y') : '',
+                        'proofStatusLabel' => (string) ($proofStatusLabel ?? ''),
+                        'doctorsLetterMissing' => $doctorsLetterMissing,
                         'lateReasonSent' => (bool) $req->overdue_escalated_at,
                         'lateReason' => (string) ($req->overdue_escalation_reason ?? ''),
                         'lateReasonBy' => $lateReasonName,
@@ -92,15 +99,50 @@
                     <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>
                     <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y H:i') : '—' }}</td>
-                    <td>
+                    <td class="request-status-cell">
                         @if ($req->isOverdue())
                             <span class="request-badge request-badge--overdue">Overdue</span>
                         @else
                             <span class="request-badge request-badge--{{ $rowStatus === 'withdrawn' ? 'withdrawn' : $rowStatus }}">{{ ucfirst($rowStatus) }}</span>
                         @endif
+                        @if ($proofStatusLabel)
+                            <span class="request-badge {{ $doctorsLetterMissing ? 'request-badge--letter-missing' : 'request-badge--letter-required' }}">{{ $proofStatusLabel }}</span>
+                        @endif
                     </td>
                     <td class="request-actions-cell" onclick="event.stopPropagation();">
                         <div class="request-actions">
+                            @if ($showAttachmentControls)
+                                @if (count($fileLinks) > 0)
+                                    <div class="request-existing-files">
+                                        @foreach ($fileLinks as $fileLink)
+                                            <button
+                                                type="button"
+                                                class="request-btn request-btn--view attachment-preview-btn"
+                                                data-preview-url="{{ $fileLink['url'] }}"
+                                                data-download-url="{{ $fileLink['downloadUrl'] }}"
+                                                data-extension="{{ $fileLink['extension'] }}"
+                                                data-label="{{ $fileLink['name'] }}"
+                                                data-previewable="{{ $fileLink['previewable'] ? '1' : '0' }}"
+                                            >View {{ $fileLink['label'] }}</button>
+                                        @endforeach
+                                    </div>
+                                @endif
+                                @if ($canSubmitAttachment)
+                                <form class="proof-upload-form" method="POST" action="{{ route('leave.uploadProof', $req) }}" enctype="multipart/form-data">
+                                    @csrf
+                                    <input type="file" name="file_uploads[]" class="proof-upload-input" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple required>
+                                    <button
+                                        type="button"
+                                        class="request-btn request-btn--approve proof-upload-btn"
+                                        data-can-upload="1"
+                                        data-is-replace="{{ count($fileLinks) > 0 ? '1' : '0' }}"
+                                        data-opens-at="{{ $proofWindowOpens ? $proofWindowOpens->format('d M Y') : '' }}"
+                                        data-deadline="{{ $proofDeadline ? $proofDeadline->format('d M Y') : '' }}"
+                                        data-action-label="{{ $attachmentActionLabel }}"
+                                    >{{ $attachmentActionLabel }}</button>
+                                </form>
+                                @endif
+                            @endif
                             @if ($canWithdraw)
                                 <form class="withdraw-form" method="POST" action="{{ route('leave.withdraw', $req->id) }}">
                                     @csrf
@@ -139,6 +181,7 @@
     'showDays' => true,
     'showHandledMeta' => true,
     'enableWithdraw' => true,
+    'enableProofUpload' => true,
     'deleteWarning' => 'It will be permanently removed, including any attachments.',
 ])
 @endsection

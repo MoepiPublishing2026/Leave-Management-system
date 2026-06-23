@@ -391,6 +391,7 @@
     @include('partials.filter-select-styles')
     @include('partials.sweetalert-guard')
     @stack('styles')
+    @include('partials.dashboard-status-card-styles')
     @yield('head')
 </head>
 <body>

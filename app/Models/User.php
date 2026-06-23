@@ -18,6 +18,11 @@ class User extends Authenticatable
         'email',
         'password',
         'role',  // 'admin', 'manager', 'employee'
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     protected $hidden = [

@@ -6,9 +6,8 @@ return [
     | Designation colors
     |--------------------------------------------------------------------------
     |
-    | Used to keep designation colors consistent across dashboards + analytics.
-    | We use hashing into a shared palette so any designation label will always
-    | map to the same color everywhere.
+    | Used to keep department and designation colors consistent across dashboards
+    | and analytics. Any label (e.g. IT) maps to the same color in every chart.
     */
     'palette' => [
         '#2563eb', // blue

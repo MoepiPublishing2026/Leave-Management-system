@@ -15,6 +15,7 @@ use App\Notifications\NewLeaveRequestNotification;
  use Yasumi\Yasumi;
 use Illuminate\Support\Facades\Storage;
 use App\Support\AnnualLeaveRules;
+use App\Support\LeaveProofRules;
 use App\Support\LeaveRequestSearch;
 use App\Support\MonthlyLeaveStatusBreakdown;
 use App\Support\PercentageDistribution;
@@ -175,7 +176,7 @@ public function dashboard()
                 'remaining' => $remainingDays,
             ];
         }
-        // Mirror Annual override in utilization too (annual pool excludes sick/maternity/paternity/bereavement)
+        // Mirror Annual override in utilization too (annual pool excludes sick/maternity/paternity/bereavement/unpaid)
         if ($policies->has($annualKey ?? 'Annual')) {
             $annualKeyResolved = $annualKey ?? 'Annual';
             $annualDefault = (float) ($policies[$annualKeyResolved]->default_days ?? 30);
@@ -537,12 +538,12 @@ public function applyForm()
         $rules['important_comment'] = 'required|string|max:512';
     }
 
-    if ($policy && $policy->requires_proof) {
+    if ($policy && $policy->requires_proof && ! LeaveProofRules::allowsDeferredProof($leaveType)) {
         $rules['file_uploads'] = 'required|array|min:1';
-        $rules['file_uploads.*'] = 'file|max:10240';
+        $rules['file_uploads.*'] = 'file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx';
     } else {
         $rules['file_uploads'] = 'nullable|array';
-        $rules['file_uploads.*'] = 'file|max:10240';
+        $rules['file_uploads.*'] = 'file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx';
     }
 
     $messages = [
@@ -552,11 +553,12 @@ public function applyForm()
         'file_uploads.min' => 'Please attach at least one supporting document.',
         'file_uploads.*.max' => 'Each attachment must be 10 MB or smaller.',
         'file_uploads.*.file' => 'Each attachment must be a valid file.',
+        'file_uploads.*.mimes' => 'Attachments must be PDF, JPG, PNG, or Word documents.',
     ];
 
     $validated = $request->validate($rules, $messages);
 
-    if ($policy && $policy->requires_proof && !$request->hasFile('file_uploads')) {
+    if ($policy && $policy->requires_proof && ! LeaveProofRules::allowsDeferredProof($leaveType) && ! $request->hasFile('file_uploads')) {
         return redirect()->back()
             ->withErrors(['file_uploads' => 'Proof (attachment) is required for this type of leave.'])
             ->withInput();
@@ -717,7 +719,64 @@ public function applyForm()
     }
     Notification::send($managers, new NewLeaveRequestNotification($leaveRequest));
 
-    return redirect()->route('apply')->with('success', 'Leave application submitted successfully!');
+    $successMessage = 'Leave application submitted successfully!';
+    if ($policy && $policy->requires_proof && LeaveProofRules::allowsDeferredProof($leaveType) && ! $request->hasFile('file_uploads')) {
+        $proofDeadline = Carbon::parse($validated['start_date'])->addDay()->format('d M Y');
+        $successMessage = 'Sick leave submitted. Once your manager approves it, upload your doctor\'s letter from My Leave Requests on your leave start date, by '.$proofDeadline.' at the latest.';
+    }
+
+    return redirect()->route('apply')->with('success', $successMessage);
+}
+
+public function uploadProof(Request $request, $id)
+{
+    $leaveRequest = LeaveRequest::where('id', $id)
+        ->where('user_id', Auth::id())
+        ->firstOrFail();
+
+    if (! LeaveProofRules::employeeCanManageAttachments($leaveRequest)) {
+        return redirect()->route('leave.myRequests')->with('error', 'Attachments cannot be changed for this request.');
+    }
+
+    if (! LeaveProofRules::employeeCanSubmitAttachmentNow($leaveRequest)) {
+        $deadline = LeaveProofRules::proofDeadlineAt($leaveRequest);
+        $message = $deadline
+            ? 'Attachments can only be uploaded or replaced from your leave start date through '.$deadline->format('d M Y').'.'
+            : 'Attachments cannot be uploaded for this request at this time.';
+
+        return redirect()->route('leave.myRequests')->with('error', $message);
+    }
+
+    $validated = $request->validate([
+        'file_uploads' => 'required|array|min:1',
+        'file_uploads.*' => 'file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx',
+    ], [
+        'file_uploads.required' => 'Please attach at least one supporting document.',
+        'file_uploads.min' => 'Please attach at least one supporting document.',
+        'file_uploads.*.max' => 'Each attachment must be 10 MB or smaller.',
+        'file_uploads.*.mimes' => 'Attachments must be PDF, JPG, PNG, or Word documents.',
+    ]);
+
+    $replacing = LeaveProofRules::hasProofAttached($leaveRequest);
+    if ($replacing) {
+        \App\Support\LeaveAttachmentLinks::deleteStoredFiles($leaveRequest);
+    }
+
+    $paths = [];
+    foreach ($request->file('file_uploads') as $file) {
+        $paths[] = $file->store('leave_files', 'public');
+    }
+
+    $leaveRequest->file_uploads = json_encode($paths);
+    $leaveRequest->save();
+
+    $message = $replacing
+        ? 'Attachment replaced successfully.'
+        : (LeaveProofRules::allowsDeferredProof($leaveRequest->leave_type)
+            ? 'Doctor\'s letter uploaded successfully.'
+            : 'Attachment uploaded successfully.');
+
+    return redirect()->route('leave.myRequests')->with('success', $message);
 }
 
 
@@ -876,7 +935,7 @@ public function leavesByDate($date)
     return view('admin.leaves.bydate', compact('leaves', 'date'));
 }
 
-public function downloadAttachment(LeaveRequest $leaveRequest, int $attachment)
+public function showAttachment(\Illuminate\Http\Request $request, LeaveRequest $leaveRequest, int $attachment)
 {
     $user = auth()->user();
     $role = strtolower(trim((string) ($user->role ?? '')));
@@ -885,15 +944,7 @@ public function downloadAttachment(LeaveRequest $leaveRequest, int $attachment)
         abort(403);
     }
 
-    $files = [];
-    if (!empty($leaveRequest->file_uploads)) {
-        $decoded = json_decode($leaveRequest->file_uploads, true);
-        if (is_array($decoded)) {
-            $files = $decoded;
-        } else {
-            $files = [$leaveRequest->file_uploads];
-        }
-    }
+    $files = \App\Support\LeaveAttachmentLinks::paths($leaveRequest);
 
     $idx = max(1, (int) $attachment) - 1;
     $path = $files[$idx] ?? null;
@@ -909,8 +960,18 @@ public function downloadAttachment(LeaveRequest $leaveRequest, int $attachment)
 
     $fullPath = $disk->path($path);
     $downloadName = basename($path) ?: ('attachment_' . ($idx + 1));
+    $mime = $disk->mimeType($path) ?: 'application/octet-stream';
+    $previewable = \App\Support\LeaveAttachmentLinks::isPreviewablePath($path);
+    $forceDownload = $request->boolean('download');
 
-    return response()->download($fullPath, $downloadName);
+    if ($forceDownload || !$previewable) {
+        return response()->download($fullPath, $downloadName, ['Content-Type' => $mime]);
+    }
+
+    return response()->file($fullPath, [
+        'Content-Type' => $mime,
+        'Content-Disposition' => 'inline; filename="' . str_replace('"', '', $downloadName) . '"',
+    ]);
 }
 
 }

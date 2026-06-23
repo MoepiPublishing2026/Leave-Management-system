@@ -23,6 +23,30 @@
     tr:nth-child(even) {
         background-color: #f9f9f9;
     }
+    .employee-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+    }
+    .edit-button {
+        background-color: #850621;
+        border: 1px solid #680523;
+        color: #fff;
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: background-color 0.15s ease;
+    }
+    .edit-button:hover {
+        background-color: #680523;
+        color: #fff;
+    }
     .delete-button {
         background-color: #dc2626;
         border: 1px solid #b91c1c;
@@ -37,6 +61,23 @@
     .delete-button:hover {
         background-color: #b91c1c;
         color: #fff;
+    }
+    .flash-message {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        font-size: 0.92rem;
+    }
+    .flash-message--success {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #86efac;
+    }
+    .flash-message--error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
     }
     .add-employee-button {
         background-color: #b2cd16;
@@ -71,6 +112,13 @@
     <a href="{{ route('admin.employees.create') }}" class="add-employee-button">+ Add Employee</a>
 </div>
 
+@if(session('success'))
+    <div class="flash-message flash-message--success">{{ session('success') }}</div>
+@endif
+@if(session('error'))
+    <div class="flash-message flash-message--error">{{ session('error') }}</div>
+@endif
+
 <table>
     <thead>
         <tr>
@@ -95,11 +143,14 @@
                 <td>{{ ucfirst($employee->role) }}</td>
                 <td>{{ $employee->is_active ? 'Active' : 'Inactive' }}</td>
                 <td>
-                    <form id="delete-form-{{ $employee->id }}" action="{{ route('admin.employees.destroy', $employee->id) }}" method="POST" style="display:none;">
-                        @csrf
-                        @method('DELETE')
-                    </form>
-                    <button type="button" class="delete-button delete-employee-btn" data-employee-id="{{ $employee->id }}">Delete</button>
+                    <div class="employee-actions">
+                        <a href="{{ route('admin.employees.edit', $employee->id) }}" class="edit-button">Edit</a>
+                        <form id="delete-form-{{ $employee->id }}" action="{{ route('admin.employees.destroy', $employee->id) }}" method="POST" style="display:none;">
+                            @csrf
+                            @method('DELETE')
+                        </form>
+                        <button type="button" class="delete-button delete-employee-btn" data-employee-id="{{ $employee->id }}">Delete</button>
+                    </div>
                 </td>
             </tr>
         @endforeach

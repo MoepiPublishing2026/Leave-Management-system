@@ -125,36 +125,20 @@
         min-height: 94px;
         box-sizing: border-box;
     }
-    .reports-page .card-all {
-        background: #00C0A3;
-        border-color: #00C0A3;
-    }
-    .reports-page .card-pending {
-        background: #C291A4;
-        border-color: #C291A4;
-    }
-    .reports-page .card-overdue {
-        background: #C154C1;
-        border-color: #C154C1;
-    }
-    .reports-page .card-approved {
-        background: #E27A53;
-        border-color: #E27A53;
-    }
-    .reports-page .card-rejected {
-        background: #87AFC7;
-        border-color: #87AFC7;
-    }
     .reports-page .card-onleave {
         background: #87AFC7;
         border-color: #87AFC7;
+        color: #fff;
     }
     .reports-page .card-sixth {
         background: #D2B55B;
         border-color: #D2B55B;
+        color: #fff;
     }
-    .reports-page .card .card-title,
-    .reports-page .card .card-value {
+    .reports-page .card-onleave .card-title,
+    .reports-page .card-onleave .card-value,
+    .reports-page .card-sixth .card-title,
+    .reports-page .card-sixth .card-value {
         color: #fff;
     }
     .reports-page .card-title {
@@ -230,11 +214,6 @@
         letter-spacing: 0.01em;
         font-family: inherit;
     }
-    .reports-page .request-badge--pending { background: #C291A4; }
-    .reports-page .request-badge--approved { background: #E27A53; }
-    .reports-page .request-badge--rejected { background: #87AFC7; }
-    .reports-page .request-badge--withdrawn { background: #D2B55B; }
-    .reports-page .request-badge--overdue { background: #C154C1; }
     @media (max-width: 768px) {
         .reports-page {
             padding: 0 12px 24px;

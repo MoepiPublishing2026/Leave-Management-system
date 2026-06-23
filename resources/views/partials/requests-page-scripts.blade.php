@@ -3,6 +3,7 @@
     $showDays = $showDays ?? false;
     $showHandledMeta = $showHandledMeta ?? false;
     $enableWithdraw = $enableWithdraw ?? false;
+    $enableProofUpload = $enableProofUpload ?? false;
     $deleteWarning = $deleteWarning ?? 'This request will be permanently removed.';
 @endphp
 @include('partials.request-details-modal-styles')
@@ -51,6 +52,86 @@
         </div>`;
     }
 
+    function renderFileActions(file) {
+        const label = escapeHtml(file.label || 'File');
+        const name = escapeHtml(file.name || file.label || 'Attachment');
+        const previewUrl = escapeHtml(file.url || '');
+        const downloadUrl = escapeHtml(file.downloadUrl || file.url || '');
+        const extension = escapeHtml(file.extension || '');
+        const previewable = file.previewable === true || file.previewable === 1 || file.previewable === '1';
+
+        return `<li class="rd-file-item">
+            <span class="rd-file-name">${fileIconSvg}${label}</span>
+            <span class="rd-file-actions">
+                ${previewable
+                    ? `<button type="button" class="rd-file-btn rd-file-btn--preview attachment-preview-btn" data-preview-url="${previewUrl}" data-download-url="${downloadUrl}" data-extension="${extension}" data-label="${name}" data-previewable="1">Preview</button>`
+                    : `<button type="button" class="rd-file-btn rd-file-btn--preview attachment-preview-btn" data-preview-url="${previewUrl}" data-download-url="${downloadUrl}" data-extension="${extension}" data-label="${name}" data-previewable="0">View info</button>`
+                }
+                <a class="rd-file-btn rd-file-btn--download" href="${downloadUrl}">Download</a>
+            </span>
+        </li>`;
+    }
+
+    window.openAttachmentPreview = function (file) {
+        const previewUrl = file.previewUrl || file.url || '';
+        const downloadUrl = file.downloadUrl || previewUrl;
+        const extension = String(file.extension || '').toLowerCase();
+        const label = file.label || 'Attachment';
+        const previewable = file.previewable === true || file.previewable === 1 || file.previewable === '1';
+
+        let bodyHtml = '';
+        if (previewable && extension === 'pdf') {
+            bodyHtml = `<iframe class="attachment-preview-frame" src="${escapeHtml(previewUrl)}" title="${escapeHtml(label)} preview"></iframe>`;
+        } else if (previewable && ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) {
+            bodyHtml = `<img class="attachment-preview-image" src="${escapeHtml(previewUrl)}" alt="${escapeHtml(label)} preview">`;
+        } else {
+            bodyHtml = `<p class="attachment-preview-note">Preview is not available for this file type in the browser. Download the file to open it.</p>`;
+        }
+
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        Swal.fire({
+            title: escapeHtml(label),
+            width: isMobile ? 'auto' : 900,
+            html: `<div class="attachment-preview-wrap">${bodyHtml}</div>`,
+            showCloseButton: true,
+            showConfirmButton: true,
+            confirmButtonText: 'Download',
+            showDenyButton: previewable,
+            denyButtonText: 'Open in tab',
+            customClass: {
+                popup: 'attachment-preview-popup',
+                container: 'attachment-preview-container',
+            },
+            didOpen: (popup) => {
+                const container = popup?.closest('.swal2-container');
+                if (container) {
+                    container.style.zIndex = '10200';
+                }
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.open(downloadUrl, '_blank', 'noopener');
+            } else if (result.isDenied && previewable) {
+                window.open(previewUrl, '_blank', 'noopener');
+            }
+        });
+    };
+
+    // Capture phase: action cells call stopPropagation on bubble, which blocked preview clicks.
+    document.addEventListener('click', (e) => {
+        const previewBtn = e.target.closest('.attachment-preview-btn');
+        if (!previewBtn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        window.openAttachmentPreview({
+            previewUrl: previewBtn.getAttribute('data-preview-url') || '',
+            downloadUrl: previewBtn.getAttribute('data-download-url') || '',
+            extension: previewBtn.getAttribute('data-extension') || '',
+            label: previewBtn.getAttribute('data-label') || 'Attachment',
+            previewable: previewBtn.getAttribute('data-previewable') === '1',
+        });
+    }, true);
+
     window.openRequestDetails = function (details) {
         const isOverdue = !!details.isOverdue;
         const statusKey = isOverdue ? 'overdue' : String(details.status || '').toLowerCase();
@@ -96,8 +177,26 @@
 
         const files = Array.isArray(details.files) ? details.files : [];
         const filesHtml = files.length
-            ? `<ul class="rd-files">${files.map(f => `<li><a class="rd-file-link" href="${escapeHtml(f.url)}" target="_blank" rel="noopener noreferrer">${fileIconSvg}${escapeHtml(f.label)}</a></li>`).join('')}</ul>`
+            ? `<ul class="rd-files">${files.map(renderFileActions).join('')}</ul>`
             : '<span class="rd-box rd-box--muted" style="display:block;border:none;padding:0;background:transparent;">No attachments</span>';
+
+        let proofHtml = '';
+        if (details.proofDeferred) {
+            const proofStatus = details.proofAttached
+                ? 'Doctor\'s letter uploaded'
+                : (details.certificateNote || details.proofStatusLabel || 'Doctor\'s letter required after approval');
+            const proofBoxClass = details.doctorsLetterMissing ? 'warning' : (details.proofAttached ? '' : 'info');
+            const deadlineNote = details.proofDeadline
+                ? `<div class="rd-box rd-box--muted" style="margin-top:6px;">Upload deadline: ${escapeHtml(details.proofDeadline)}</div>`
+                : '';
+            proofHtml = `
+                <div class="rd-section">
+                    <h4 class="rd-section-title">Doctor's letter</h4>
+                    <div class="rd-box ${proofBoxClass}">${escapeHtml(proofStatus)}</div>
+                    ${deadlineNote}
+                </div>
+            `;
+        }
 
         const commentInner = details.comment
             ? escapeHtml(details.comment)
@@ -138,6 +237,7 @@
                         <h4 class="rd-section-title">Attachments</h4>
                         ${filesHtml}
                     </div>
+                    ${proofHtml}
                     ${sectionBlock('Late response reason', lateInner, lateBoxClass)}
                     ${sectionBlock('Rejection reason', rejectionInner, rejectionBoxClass)}
                     ${messagesHtml}
@@ -211,6 +311,88 @@
                 confirmButtonText: 'Yes, withdraw it',
             }).then((result) => {
                 if (result.isConfirmed) form.submit();
+            });
+        });
+    });
+    @endif
+
+    @if ($enableProofUpload)
+    document.querySelectorAll('.proof-upload-btn').forEach((btn) => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const form = btn.closest('form');
+            const input = form ? form.querySelector('.proof-upload-input') : null;
+            if (!form || !input) return;
+
+            const canUpload = btn.getAttribute('data-can-upload') === '1';
+            const isReplace = btn.getAttribute('data-is-replace') === '1';
+            const actionLabel = btn.getAttribute('data-action-label') || (isReplace ? 'Replace attachment' : 'Upload attachment');
+            const opensAt = btn.getAttribute('data-opens-at') || '';
+            const deadline = btn.getAttribute('data-deadline') || '';
+
+            if (!canUpload) {
+                Swal.fire({
+                    title: 'Upload not yet available',
+                    html: opensAt && deadline
+                        ? `<p class="proof-upload-modal-note">Upload or replace your document from <strong>${escapeHtml(opensAt)}</strong> through <strong>${escapeHtml(deadline)}</strong>.</p>`
+                        : '<p class="proof-upload-modal-note">Upload will be available when allowed for this request.</p>',
+                    icon: 'info',
+                    confirmButtonColor: '#65a30d',
+                    confirmButtonText: 'OK',
+                });
+                return;
+            }
+
+            const replaceNote = isReplace
+                ? '<p class="proof-upload-modal-note">This will replace your current file(s) with the new upload.</p>'
+                : '';
+            const deadlineNote = deadline
+                ? `<p class="proof-upload-modal-note">Upload your document by <strong>${escapeHtml(deadline)}</strong> at the latest.</p>`
+                : '';
+
+            Swal.fire({
+                title: escapeHtml(actionLabel),
+                html: `${replaceNote}${deadlineNote}<p class="proof-upload-modal-note">PDF, JPG, PNG, or Word — up to 10 MB per file.</p>`,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#65a30d',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Choose file',
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    input.click();
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll('.proof-upload-input').forEach((input) => {
+        input.addEventListener('change', function () {
+            const form = input.closest('form');
+            if (!form || !input.files || input.files.length === 0) return;
+
+            const count = input.files.length;
+            const label = count === 1 ? '1 file' : `${count} files`;
+            const uploadBtn = form.querySelector('.proof-upload-btn');
+            const isReplace = uploadBtn?.getAttribute('data-is-replace') === '1';
+            const actionLabel = uploadBtn?.getAttribute('data-action-label') || (isReplace ? 'Replace attachment' : 'Upload attachment');
+
+            Swal.fire({
+                title: isReplace ? 'Replace now?' : 'Upload now?',
+                text: `${label} selected. ${isReplace ? 'Replace' : 'Upload'} the document for this leave request?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#65a30d',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Upload',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                } else {
+                    input.value = '';
+                }
             });
         });
     });

@@ -23,19 +23,35 @@
           margin-top: 18px;
           padding: 18px 14px;
           min-height: auto;
+          width: 100%;
+          max-width: 100%;
+          box-sizing: border-box;
+          overflow-x: clip;
       }
       form.leave-form {
           gap: 16px;
-      }
-      form.leave-form .input-group {
-          flex: 1 1 100% !important;
+          width: 100%;
+          max-width: 100%;
           min-width: 0;
-          width: 100%;
-          max-width: 100%;
+          box-sizing: border-box;
       }
-      form.leave-form .input-group select {
-          width: 100%;
-          max-width: 100%;
+      form.leave-form .input-group,
+      form.leave-form .input-group--half {
+          flex: 1 1 100% !important;
+          min-width: 0 !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box;
+      }
+      form.leave-form .input-group select,
+      form.leave-form .input-group .filter-select-wrap,
+      form.leave-form .input-group .filter-select__trigger,
+      form.leave-form .input-group .filter-select__menu,
+      form.leave-form .input-group input[type="text"],
+      form.leave-form .input-group textarea {
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box;
       }
   }
   .main-content h1 {
@@ -74,6 +90,14 @@
       display: flex;
       flex-direction: column;
       min-width: 230px;
+      max-width: 100%;
+      box-sizing: border-box;
+  }
+  form.leave-form .input-group--full {
+      flex: 1 1 100%;
+  }
+  form.leave-form .input-group--half {
+      flex: 1 1 45%;
   }
   form.leave-form .input-group label {
       margin-bottom: 5px;
@@ -298,7 +322,7 @@
         @csrf
 
         <label class="section-title" style="flex-basis:100%;font-size:16px;margin-bottom:5px;">Leave Info</label>
-        <div class="input-group" style="flex: 1 1 100%;">
+        <div class="input-group input-group--full">
             <label for="leave_type">Types of Leaves:</label>
             <select id="leave_type" name="leave_type" required>
                 <option value="">Select Leave Type</option>
@@ -310,12 +334,12 @@
             </select>
         </div>
 
-        <div class="input-group" style="flex: 1 1 45%;">
+        <div class="input-group input-group--half">
             <label for="start_date">Start Date:</label>
             <input id="start_date" name="start_date" type="text" value="{{ old('start_date') }}" required />
         </div>
 
-        <div class="input-group" style="flex: 1 1 45%;">
+        <div class="input-group input-group--half">
             <label for="end_date">End Date:</label>
             <input id="end_date" name="end_date" type="text" value="{{ old('end_date') }}" />
         </div>
@@ -387,7 +411,6 @@ document.addEventListener('DOMContentLoaded', function () {
         minDate: 'today',
     };
 
-    flatpickr('#start_date', fpOptions);
     flatpickr('#end_date', fpOptions);
 
     function calculateWorkingDays(startDate, endDate) {
@@ -558,16 +581,38 @@ document.addEventListener('DOMContentLoaded', function () {
         addFiles(event.dataTransfer.files);
     });
 
+    function isSickLeaveType(type) {
+        return String(type || '').toLowerCase() === 'sick';
+    }
+
     function updateFileUploadRequirement() {
-        const isRequired = !!requiresProofByType[leaveTypeSelect.value];
+        const leaveType = leaveTypeSelect.value;
+        const needsProofAtSubmit = !!requiresProofByType[leaveType] && !isSickLeaveType(leaveType);
+        const isDeferredSick = !!requiresProofByType[leaveType] && isSickLeaveType(leaveType);
+        const startDate = startDateInput ? startDateInput.value : '';
 
         fileUploadInput.removeAttribute('required');
 
-        if (isRequired) {
+        if (needsProofAtSubmit) {
             fileUploadContainer.classList.add('required');
             attachmentBadge.textContent = 'Required';
             attachmentBadge.className = 'attachment-badge attachment-badge--required';
             fileUploadHint.textContent = 'Supporting document required for this leave type. PDF, JPG, PNG, or Word — up to 10 MB per file.';
+        } else if (isDeferredSick) {
+            fileUploadContainer.classList.remove('required');
+            attachmentBadge.textContent = 'Optional now';
+            attachmentBadge.className = 'attachment-badge attachment-badge--optional';
+            let hint = 'Submit without a doctor\'s letter. Once your manager approves, upload the letter from My Leave Requests on your sick leave start date through the following day.';
+            if (startDate) {
+                const start = new Date(startDate + 'T00:00:00');
+                if (!isNaN(start.getTime())) {
+                    const deadline = new Date(start);
+                    deadline.setDate(deadline.getDate() + 1);
+                    const deadlineLabel = deadline.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                    hint = `Submit without a doctor\'s letter. After approval, upload it from My Leave Requests by ${deadlineLabel} at the latest. You may attach it now if you already have it.`;
+                }
+            }
+            fileUploadHint.textContent = hint;
         } else {
             fileUploadContainer.classList.remove('required');
             attachmentBadge.textContent = 'Optional';
@@ -578,8 +623,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     window.validateAttachmentsBeforeSubmit = function () {
         const type = leaveTypeSelect.value;
-        const needsProof = requiresProofByType[type] === true || requiresProofByType[type] === 1 || requiresProofByType[type] === '1';
-        if (!needsProof) {
+        const needsProofAtSubmit = requiresProofByType[type] === true || requiresProofByType[type] === 1 || requiresProofByType[type] === '1';
+        if (!needsProofAtSubmit || isSickLeaveType(type)) {
+            syncFileInput();
             return '';
         }
         if (selectedFiles.length === 0) {
@@ -593,6 +639,15 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     leaveTypeSelect.addEventListener('change', updateFileUploadRequirement);
+    if (startDateInput) {
+        startDateInput.addEventListener('change', updateFileUploadRequirement);
+    }
+    flatpickr('#start_date', {
+        ...fpOptions,
+        onChange: function () {
+            updateFileUploadRequirement();
+        },
+    });
     updateFileUploadRequirement();
 
     function updateHalfDayEligibility() {
@@ -697,7 +752,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 Swal.fire({
                     icon: 'error',
                     title: 'Annual Leave Limit Reached',
-                    html: 'You have exhausted your annual leave limit. You may still request <b>Sick</b> (with medical certificate), <b>Bereavement</b> (with proof), <b>Maternity</b> (with proof), or <b>Paternity</b> (with proof).',
+                    html: 'You have exhausted your annual leave limit. You may still request <b>Sick</b>, <b>Bereavement</b> (with proof), <b>Maternity</b> (with proof), <b>Paternity</b> (with proof), or <b>Unpaid</b> leave.',
                     confirmButtonText: 'OK'
                 });
                 return;

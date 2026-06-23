@@ -5,6 +5,10 @@
 @section('content')
 @include('partials.requests-page-styles')
 
+@php
+    use App\Support\LeaveAttachmentLinks;
+@endphp
+
 <div class="requests-page">
     <h1>Leave Requests</h1>
     <p class="requests-page-lead">
@@ -26,7 +30,6 @@
             'pending' => 'Pending',
             'approved' => 'Approved',
             'rejected' => 'Rejected',
-            'withdrawn' => 'Withdrawn',
             'overdue' => 'Overdue',
         ],
     ])
@@ -48,23 +51,11 @@
             <tbody>
             @forelse($requests as $index => $req)
                 @php
-                    $files = [];
-                    if (!empty($req->file_uploads)) {
-                        $decoded = json_decode($req->file_uploads, true);
-                        $files = is_array($decoded) ? $decoded : [$req->file_uploads];
-                    }
+                    $fileLinks = LeaveAttachmentLinks::forRequest($req);
 
                     $employeeFirst = $req->user->first_name ?? '';
                     $employeeLast = $req->user->last_name ?? '';
                     $employeeFull = trim($employeeFirst . ' ' . $employeeLast) ?: 'User';
-
-                    $fileLinks = [];
-                    foreach ($files as $i => $file) {
-                        $fileLinks[] = [
-                            'label' => 'File ' . ($i + 1),
-                            'url' => route('leave.attachments.show', ['leaveRequest' => $req->id, 'attachment' => $i + 1]),
-                        ];
-                    }
 
                     $handledName = trim(($req->handledBy->first_name ?? '') . ' ' . ($req->handledBy->last_name ?? ''));
                     $lateReasonName = trim(($req->overdueEscalatedBy->first_name ?? '') . ' ' . ($req->overdueEscalatedBy->last_name ?? ''));

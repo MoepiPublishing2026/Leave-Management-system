@@ -23,6 +23,9 @@
     .dashboard-container {
       padding: 14px 12px 22px;
     }
+    .leave-balance-list.open {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
     .dash-charts-grid {
       grid-template-columns: 1fr;
     }
@@ -37,7 +40,7 @@
   h1 {
     font-weight: 700;
     font-size: 36px;
-    color: #2c3e50;
+    color: #0f172a;
     margin: 0 0 24px 0;
     padding-left: 15px;
     letter-spacing: 0.04em;
@@ -78,9 +81,9 @@
     padding-left: 0;
     list-style: none;
     margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 18px 24px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px 20px;
   }
   .leave-balance-list.open {
     max-height: 800px;
@@ -95,13 +98,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-grow: 1;
-    min-width: 200px;
-    max-width: 280px;
+    min-width: 0;
     font-size: 1.1rem;
     font-weight: 600;
     color: #050505ff;
-    box-shadow: 0 3px 7px rgba(13, 59, 53, 0.12);
+    box-shadow: 0 0 10px rgba(167, 189, 141, 0.85);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     border-left: 5px solid #f00e65;
     border-top: 1px solid #f00e65;
@@ -133,35 +134,27 @@
   .card {
     background: #f8fafc;
     border-radius: 16px;
-    padding: 12px 8px 10px;
-    box-shadow: 0 6px 16px rgba(8, 8, 8, 0.15);
-    border: 1px solid #e5e7eb;
+    padding: 14px 10px 12px;
+    box-shadow: 0 0 10px rgba(167, 189, 141, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.35);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 6px;
     flex: 1 1 0;
     min-width: 0;
-    min-height: 96px;
+    min-height: 100px;
     cursor: move;
     position: relative;
-    transition: box-shadow 0.3s ease;
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
     text-decoration: none;
     box-sizing: border-box;
   }
   .card:hover {
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 0 14px rgba(167, 189, 141, 1);
+    transform: translateY(-1px);
     z-index: 2;
-  }
-  .card-all { background: #00C0A3; border-color: #00C0A3; color: #fff; }
-  .card-pending { background: #C291A4; border-color: #C291A4; color: #fff; }
-  .card-approved { background: #E27A53; border-color: #E27A53; color: #fff; }
-  .card-rejected { background: #87AFC7; border-color: #87AFC7; color: #fff; }
-  .card-overdue { background: #C154C1; border-color: #C154C1; color: #fff; }
-  .card-withdrawn { background: #D2B55B; border-color: #D2B55B; color: #fff; }
-  .card .card-title,
-  .card .card-value {
-    color: #fff;
   }
   .card .card-title svg,
   .card .card-title .icon {
@@ -172,17 +165,22 @@
     text-align: center;
   }
   .card-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    margin: 2px 0 6px 0;
+    margin: 0;
+    min-height: 2.4em;
+    line-height: 1.2;
     display: flex;
     align-items: center;
+    justify-content: center;
+    text-align: center;
     gap: 8px;
   }
   .card-value {
-    font-weight: bold;
-    font-size: 1.65rem;
-    margin-top: 0;
+    font-weight: 700;
+    font-size: 1.75rem;
+    line-height: 1;
+    margin: 0;
   }
 
   .dash-charts-grid {
@@ -217,7 +215,7 @@
     margin: 0 0 10px 0;
     font-weight: 700;
     font-size: 1rem;
-    color: #2c3e50;
+    color: #0f172a;
   }
   .chart-body {
     position: relative;
@@ -260,6 +258,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px 12px;
     font-size: 0.8rem;
+    font-weight: 700;
   }
   .pyramid-legend-item {
     display: flex;
@@ -284,8 +283,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-weight: 600;
-    color: #2c3e50;
+    font-weight: 700;
+    color: #0f172a;
   }
   .pyramid-legend-value {
     font-weight: 800;
@@ -384,6 +383,7 @@
       <div class="chart-body chart-body--plot">
         <canvas id="monthlyStatusStackedBar"></canvas>
       </div>
+      <ul class="chart-html-legend" id="monthlyStatusStackedBarLegend" aria-label="Monthly status legend"></ul>
     </div>
     <div class="chart-card">
       <h3>Leave Requests by Status</h3>
@@ -414,7 +414,7 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 @include('partials.dashboard-charts-styles')
 @include('partials.dashboard-chart-vars')
 <script>
@@ -470,9 +470,7 @@
     };
 
     window.applyBoldChartDefaults();
-    Chart.defaults.font.size = 12;
-    Chart.defaults.color = '#2c3e50';
-    Chart.defaults.maintainAspectRatio = false;
+    window.finalizeChartDefaults();
 
     const leaveTypes = @json(array_keys($leaveTypeCounts));
     const leaveTypeData = @json(array_values($leaveTypeCounts));
@@ -494,7 +492,6 @@
     const monthlyOverdue = padMonthlySeries(@json($monthlyOverdueData));
     const monthlyRejected = padMonthlySeries(@json($monthlyRejectedData));
     const monthlyWithdrawn = padMonthlySeries(@json($monthlyWithdrawnData));
-    const monthAxisTicks = { autoSkip: false, maxRotation: 0, minRotation: 0 };
 
     new Chart(document.getElementById('leaveDoughnut'), {
       type: 'doughnut',
@@ -507,13 +504,10 @@
           borderWidth: 2
         }]
       },
-      options: {
-        responsive: true,
+      options: mergeChartOptions({
         plugins: {
           legend: { display: false },
           tooltip: {
-            bodyFont: { size: 14 },
-            titleFont: { weight: '700' },
             callbacks: {
               label: (ctx) => {
                 const perc = (leaveTypePct[ctx.label] ?? 0).toFixed(1);
@@ -522,7 +516,7 @@
             }
           }
         }
-      }
+      })
     });
     renderChartHtmlLegend('leaveDoughnutLegend', leaveTypes, leaveTypeColors, leaveTypePct);
 
@@ -530,7 +524,7 @@
     const statusPieLabels = window.leaveStatusPieLabels;
     const statusPieColors = window.statusColorsForLabels(statusPieLabels);
     const statusPct = @json($statusPercentages ?? []);
-    new Chart(document.getElementById('monthlyLine'), {
+    const monthlyLineChart = new Chart(document.getElementById('monthlyLine'), {
       type: 'line',
       data: {
         labels: monthlyLabels,
@@ -545,24 +539,18 @@
           pointHoverRadius: 7
         }]
       },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false },
-          tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
-        },
+      options: mergeChartOptions({
+        layout: window.getMonthChartLayout(),
+        plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: monthAxisTicks },
+          x: { ticks: window.getMonthAxisTicks() },
           y: { beginAtZero: true, ticks: { stepSize: 1 } }
         }
-      }
+      })
     });
+    window.registerMonthAxisChart(monthlyLineChart);
 
-    new Chart(document.getElementById('monthlyStatusStackedBar'), {
-      type: 'bar',
-      data: {
-        labels: monthlyLabels,
-        datasets: [
+    const monthlyStatusDatasets = [
           {
             label: 'Approved',
             data: monthlyApproved,
@@ -608,28 +596,18 @@
             borderRadius: 4,
             stack: 'status'
           }
-        ]
+        ];
+
+    const monthlyStatusChart = new Chart(document.getElementById('monthlyStatusStackedBar'), {
+      type: 'bar',
+      data: {
+        labels: monthlyLabels,
+        datasets: monthlyStatusDatasets
       },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { font: { size: 13, weight: '600' }, color: '#2c3e50' }
-          },
-          tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
-        },
-        scales: {
-          x: {
-            type: 'category',
-            stacked: true,
-            offset: true,
-            ticks: monthAxisTicks
-          },
-          y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
-        }
-      }
+      options: window.statusStackedBarChartOptions()
     });
+    window.registerMonthAxisChart(monthlyStatusChart);
+    window.renderDatasetLegend('monthlyStatusStackedBarLegend', monthlyStatusDatasets);
 
     new Chart(document.getElementById('statusPie'), {
       type: 'pie',
@@ -647,13 +625,10 @@
           borderWidth: 2
         }]
       },
-      options: {
-        responsive: true,
+      options: mergeChartOptions({
         plugins: {
           legend: { display: false },
           tooltip: {
-            bodyFont: { size: 14 },
-            titleFont: { weight: '700' },
             callbacks: {
               label: (ctx) => {
                 const pct = (statusPct[ctx.label] ?? 0).toFixed(1);
@@ -662,7 +637,7 @@
             }
           }
         }
-      }
+      })
     });
     renderChartHtmlLegend('statusPieLegend', statusPieLabels, statusPieColors, statusPct);
 
@@ -693,17 +668,13 @@
           }
         ]
       },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'bottom' },
-          tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
-        },
+      options: mergeChartOptions({
+        plugins: { legend: { position: 'bottom' } },
         scales: {
           x: { stacked: true },
           y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
         }
-      }
+      })
     });
 
     const leaveBalances = @json($leaveBalances);
@@ -767,13 +738,9 @@
           borderWidth: 2
         }]
       },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'bottom' },
-          tooltip: { bodyFont: { size: 14 }, titleFont: { weight: '700' } }
-        }
-      }
+      options: mergeChartOptions({
+        plugins: { legend: { position: 'bottom' } },
+      })
     });
 
     const leaveBalanceCard = document.getElementById('leaveBalanceCard');
