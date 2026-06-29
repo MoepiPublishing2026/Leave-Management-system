@@ -11,10 +11,73 @@
 
 @section('content')
 @include('partials.content-page-styles')
+<style>
+    .profile-picture-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: center;
+    }
+    .profile-picture-preview,
+    .profile-picture-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 3px solid #86efac;
+    }
+    .profile-picture-preview {
+        object-fit: cover;
+        display: block;
+    }
+    .profile-picture-placeholder {
+        background: #ecfdf5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: #138056;
+        font-size: 2rem;
+    }
+    .profile-picture-actions {
+        flex: 1;
+        min-width: 220px;
+    }
+    .profile-picture-input {
+        display: none;
+    }
+    .profile-picture-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+    .app-page-btn--danger {
+        background: #dc2626;
+        border: 1px solid #b91c1c;
+        color: #fff;
+    }
+    .app-page-btn--danger:hover {
+        background: #b91c1c;
+        color: #fff;
+    }
+    .profile-flash {
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-bottom: 16px;
+        background: #dcfce7;
+        color: #166534;
+        font-weight: 600;
+        font-size: 0.92rem;
+    }
+</style>
 
 <div class="app-page">
     <h1>Profile</h1>
     <p class="app-page-lead">Update your password and profile picture. Name and email are managed by your administrator.</p>
+
+    @if(session('success'))
+        <div class="profile-flash">{{ session('success') }}</div>
+    @endif
 
     <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
         @csrf
@@ -77,20 +140,27 @@
 
         <div class="app-page-panel">
             <h2 class="app-page-section-title">Profile picture</h2>
-            <div style="display:flex; flex-wrap:wrap; gap:20px; align-items:center;">
-                <div>
+            <div class="profile-picture-row">
+                <div class="profile-picture-preview-wrap">
                     @if ($user->profile_picture)
-                        <img id="profilePreview" src="{{ route('users.profile_picture', ['user' => $user->id]) }}?v={{ optional($user->updated_at)->timestamp }}" alt="Profile picture" style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 3px solid #86efac;" />
+                        <img id="profilePreview" src="{{ route('users.profile_picture', ['user' => $user->id]) }}?v={{ optional($user->updated_at)->timestamp }}" alt="Profile picture" class="profile-picture-preview" />
                     @else
-                        <div id="profilePreviewPlaceholder" style="width:120px;height:120px;border-radius:50%;background:#ecfdf5;border:3px solid #86efac;display:flex;align-items:center;justify-content:center;font-weight:800;color:#138056;font-size:2rem;">
+                        <div id="profilePreviewPlaceholder" class="profile-picture-placeholder">
                             {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}
                         </div>
-                        <img id="profilePreview" alt="Profile picture preview" style="display:none;width:120px;height:120px;object-fit:cover;border-radius:50%;border:3px solid #86efac;" />
+                        <img id="profilePreview" alt="Profile picture preview" class="profile-picture-preview" style="display:none;" />
                     @endif
                 </div>
-                <div class="app-form-group" style="flex:1;min-width:220px;">
-                    <label for="profile_picture">Upload new photo</label>
-                    <input id="profile_picture" name="profile_picture" type="file" accept="image/*" />
+                <div class="profile-picture-actions">
+                    <input id="profile_picture" name="profile_picture" type="file" accept="image/*" class="profile-picture-input" />
+                    <div class="profile-picture-buttons">
+                        <button type="button" class="app-page-btn app-page-btn--secondary" id="profilePictureChooseBtn">
+                            {{ $user->profile_picture ? 'Replace photo' : 'Upload photo' }}
+                        </button>
+                        @if ($user->profile_picture)
+                            <button type="button" class="app-page-btn app-page-btn--danger" id="profilePictureRemoveBtn">Remove photo</button>
+                        @endif
+                    </div>
                     <span class="app-form-hint">JPG, PNG, or WebP up to 10 MB. Large photos are resized automatically.</span>
                 </div>
             </div>
@@ -98,6 +168,13 @@
 
         <button type="submit" class="app-page-btn app-page-btn--primary">Save changes</button>
     </form>
+
+    @if ($user->profile_picture)
+        <form id="profilePictureRemoveForm" method="POST" action="{{ route('profile.picture.destroy') }}" style="display:none;">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endif
 </div>
 
 <script>
@@ -128,6 +205,28 @@
         preview.src = URL.createObjectURL(file);
         preview.style.display = 'block';
         if (placeholder) placeholder.style.display = 'none';
+        const chooseBtn = document.getElementById('profilePictureChooseBtn');
+        if (chooseBtn) chooseBtn.textContent = 'Replace photo';
+    });
+
+    document.getElementById('profilePictureChooseBtn')?.addEventListener('click', function () {
+        document.getElementById('profile_picture')?.click();
+    });
+
+    document.getElementById('profilePictureRemoveBtn')?.addEventListener('click', function () {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Remove profile picture?',
+            text: 'Your photo will be removed from your account.',
+            showCancelButton: true,
+            confirmButtonText: 'Remove',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#dc2626'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('profilePictureRemoveForm')?.submit();
+            }
+        });
     });
 </script>
 @endsection

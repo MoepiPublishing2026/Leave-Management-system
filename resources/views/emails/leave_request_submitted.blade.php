@@ -61,7 +61,7 @@
         <li><b>Leave Type:</b> {{ $leaveRequest->leave_type }}</li>
         <li><b>Start Date:</b> {{ $leaveRequest->start_date }}</li>
         <li><b>End Date:</b> {{ $leaveRequest->end_date }}</li>
-        <li><b>Number of Days:</b> {{ !empty($leaveRequest->is_half_day) ? 'Half day' : $workingDays }}</li>
+        <li><b>Number of Days:</b> {{ \App\Support\LeaveDaysFormatter::format($workingDays) }}</li>
         <li><b>Comment:</b> {{ $leaveRequest->important_comment ?? 'N/A' }}</li>
     </ul>
 

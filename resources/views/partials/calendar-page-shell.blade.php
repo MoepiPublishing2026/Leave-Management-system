@@ -25,31 +25,33 @@
                 'interactive' => $interactive,
                 'showUserInModal' => $showUserInModal,
             ])
-        </div>
 
-        <div class="calendar-meta">
-            @if($daysWithLeave === 0)
-                <p class="calendar-summary">
-                    @if($showUserInModal ?? true)
-                        No approved leave scheduled this month.
-                    @else
-                        You have no approved leave scheduled this month.
-                    @endif
-                </p>
-            @else
-                <p class="calendar-summary">
-                    @if($showUserInModal ?? true)
-                        <strong>{{ $daysWithLeave }}</strong> working {{ Str::plural('day', $daysWithLeave) }} with approved leave
-                        @if(($summary['total_entries'] ?? 0) > $daysWithLeave)
-                            · <strong>{{ $summary['total_entries'] }}</strong> total entries
+            <div class="calendar-meta" role="region" aria-label="Calendar summary and legend">
+                <p class="calendar-meta-title">Showing days with approved leave</p>
+
+                @if($daysWithLeave === 0)
+                    <p class="calendar-summary">
+                        @if($showUserInModal ?? true)
+                            No approved leave scheduled this month.
+                        @else
+                            You have no approved leave scheduled this month.
                         @endif
-                    @else
-                        <strong>{{ $daysWithLeave }}</strong> working {{ Str::plural('day', $daysWithLeave) }} with your approved leave.
-                    @endif
-                </p>
-            @endif
+                    </p>
+                @else
+                    <p class="calendar-summary">
+                        @if($showUserInModal ?? true)
+                            <strong>{{ $daysWithLeave }}</strong> working {{ Str::plural('day', $daysWithLeave) }} with approved leave
+                            @if(($summary['total_entries'] ?? 0) > $daysWithLeave)
+                                · <strong>{{ $summary['total_entries'] }}</strong> total entries
+                            @endif
+                        @else
+                            <strong>{{ $daysWithLeave }}</strong> working {{ Str::plural('day', $daysWithLeave) }} with your approved leave.
+                        @endif
+                    </p>
+                @endif
 
-            @include('partials.calendar-legend', ['showUserInModal' => $showUserInModal])
+                @include('partials.calendar-legend', ['showUserInModal' => $showUserInModal])
+            </div>
         </div>
     </div>
 

@@ -74,7 +74,7 @@
                         'type' => (string) ($req->leave_type ?? ''),
                         'start' => $req->start_date ? \Carbon\Carbon::parse($req->start_date)->format('d M Y') : '',
                         'end' => $req->end_date ? \Carbon\Carbon::parse($req->end_date)->format('d M Y') : '',
-                        'days' => $req->days ?? '',
+                        'days' => \App\Support\LeaveDaysFormatter::format($req->days ?? ''),
                         'status' => $rowStatus,
                         'isOverdue' => $req->isOverdue(),
                         'comment' => (string) ($req->important_comment ?? ''),

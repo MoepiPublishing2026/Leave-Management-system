@@ -58,27 +58,6 @@
     box-sizing: border-box;
 }
 
-.card-onleave {
-    background: #87AFC7;
-    border-color: #87AFC7;
-    color: #fff;
-}
-.card-sixth {
-    background: #D2B55B;
-    border-color: #D2B55B;
-    color: #fff;
-}
-.card-onleave .card-title,
-.card-onleave .card-value,
-.card-sixth .card-title,
-.card-sixth .card-value {
-    color: #fff;
-}
-.card .card-title {
-    justify-content: center;
-    text-align: center;
-}
-
     .card:hover {
         box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     }
@@ -139,37 +118,44 @@
 
 <h1>Admin Dashboard</h1>
 <div class="admin-container">
-@include('partials.dashboard-period-filter', ['monthFilter' => $monthFilter ?? 'this_year'])
+@include('partials.dashboard-period-filter', [
+    'monthFilter' => $monthFilter ?? 'this_year',
+    'employeeFilter' => $employeeFilter ?? null,
+    'employees' => $employees ?? collect(),
+])
+@php
+    $cardFilters = $dashboardFilters ?? ['month' => $monthFilter ?? 'this_year'];
+@endphp
     <div class="cards" id="cardsContainer" role="list">
 
-        <a href="{{ route('admin.requests', ['status' => 'all', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="All leave requests" class="card card-all">
+        <a href="{{ route('admin.requests', array_merge(['status' => 'all'], $cardFilters)) }}" role="listitem" aria-label="All leave requests" class="card card-all">
             <div class="card-title">All Requests</div>
             <div class="card-value">{{ $allRequestsCount ?? 0 }}</div>
         </a>
 
-        <a href="{{ route('admin.requests', ['status' => 'pending', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="Pending leave requests" class="card card-pending">
+        <a href="{{ route('admin.requests', array_merge(['status' => 'pending'], $cardFilters)) }}" role="listitem" aria-label="Pending leave requests" class="card card-pending">
             <div class="card-title">Pending Requests</div>
             <div class="card-value">{{ $pendingRequestsCount }}</div>
         </a>
 
-        <a href="{{ route('admin.requests', ['status' => 'overdue', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="Overdue leave requests" class="card card-overdue">
+        <a href="{{ route('admin.requests', array_merge(['status' => 'overdue'], $cardFilters)) }}" role="listitem" aria-label="Overdue leave requests" class="card card-overdue">
             <div class="card-title">Overdue Requests</div>
             <div class="card-value">{{ $overduePendingCount ?? 0 }}</div>
         </a>
 
-        <a href="{{ route('admin.requests', ['status' => 'approved', 'month' => ($monthFilter ?? 'this_year')]) }}" role="listitem" aria-label="Approved leave requests" class="card card-approved">
+        <a href="{{ route('admin.requests', array_merge(['status' => 'approved'], $cardFilters)) }}" role="listitem" aria-label="Approved leave requests" class="card card-approved">
             <div class="card-title">Approved Requests</div>
             <div class="card-value">{{ $approvedRequestsCount ?? 0 }}</div>
+        </a>
+
+        <a href="{{ route('admin.requests', array_merge(['status' => 'rejected'], $cardFilters)) }}" role="listitem" aria-label="Rejected leave requests" class="card card-rejected">
+            <div class="card-title">Rejected Requests</div>
+            <div class="card-value">{{ $rejectedRequestsCount ?? 0 }}</div>
         </a>
 
         <a href="{{ route('admin.calendar') }}" role="listitem" aria-label="Employees on leave today" class="card card-onleave">
             <div class="card-title">On Leave Today</div>
             <div class="card-value">{{ $onLeaveTodayCount }}</div>
-        </a>
-
-        <a href="{{ route('admin.employees.index') }}" role="listitem" aria-label="Active employees count" class="card card-sixth">
-            <div class="card-title">Active Employees</div>
-            <div class="card-value">{{ $activeEmployeesCount }}</div>
         </a>
 
     </div>

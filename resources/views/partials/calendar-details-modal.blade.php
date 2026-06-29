@@ -1,36 +1,50 @@
 @php
-    $modalTitle = $modalTitle ?? 'Leave Details';
     $showUserInModal = $showUserInModal ?? true;
     $today = $today ?? now()->toDateString();
 @endphp
 
-<div class="modal fade" id="leaveModal" tabindex="-1" aria-labelledby="leaveModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="leaveModalLabel">{{ $modalTitle }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body calendar-modal-body" id="leaveDetails">
-                <p class="text-muted mb-0">Select a date to view leave details.</p>
-            </div>
-        </div>
-    </div>
-</div>
+@include('partials.request-details-modal-styles')
 
 @once
+<style>
+    .calendar-details-container.swal2-container {
+        z-index: 10150 !important;
+        padding: 16px 12px !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .calendar-details-container .swal2-popup.request-details-popup {
+        margin: 0 auto !important;
+    }
+</style>
 <script>
     window.calendarLeaveEvents = window.calendarLeaveEvents || @json($events ?? []);
 
-    window.showCalendarDetails = function (date) {
-        const events = window.calendarLeaveEvents || {};
-        const modalLabel = document.getElementById('leaveModalLabel');
-        const details = document.getElementById('leaveDetails');
-        const showUser = @json($showUserInModal);
+    function escapeCalendarHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
 
-        if (!details) {
+    function calendarSectionBlock(title, innerHtml, boxClass) {
+        const boxCls = boxClass ? ' rd-box--' + boxClass : '';
+        return '<div class="rd-section">'
+            + '<h4 class="rd-section-title">' + escapeCalendarHtml(title) + '</h4>'
+            + '<div class="rd-box' + boxCls + '">' + innerHtml + '</div>'
+            + '</div>';
+    }
+
+    window.showCalendarDetails = function (date) {
+        if (!window.Swal) {
             return;
         }
+
+        const events = window.calendarLeaveEvents || {};
+        const showUser = @json($showUserInModal);
+        const todayDate = @json($today);
 
         const formatted = new Date(date + 'T12:00:00').toLocaleDateString(undefined, {
             weekday: 'long',
@@ -39,19 +53,25 @@
             day: 'numeric',
         });
 
-        if (modalLabel) {
-            modalLabel.textContent = showUser
-                ? 'People on Leave — ' + formatted
-                : 'My Leave — ' + formatted;
+        const dayEvents = events[date] || [];
+        const hasLeave = dayEvents.length > 0;
+        const headerLabel = showUser ? 'People on Leave' : 'My Leave';
+        let badgeHtml = '';
+
+        if (hasLeave) {
+            const badgeText = showUser
+                ? (dayEvents.length === 1 ? '1 on leave' : dayEvents.length + ' on leave')
+                : 'On leave';
+            badgeHtml = '<span class="rd-badge rd-badge--approved">' + escapeCalendarHtml(badgeText) + '</span>';
         }
 
-        const todayDate = @json($today);
-        const dayEvents = events[date];
+        let bodyHtml = '';
 
-        if (!dayEvents || !dayEvents.length) {
-            details.innerHTML = date === todayDate
-                ? '<p class="mb-0">No leave today.</p>'
-                : '<p class="mb-0">No approved leave on this day.</p>';
+        if (!hasLeave) {
+            const emptyText = date === todayDate
+                ? 'No leave today.'
+                : 'No approved leave on this day.';
+            bodyHtml = '<div class="rd-box rd-box--muted">' + escapeCalendarHtml(emptyText) + '</div>';
         } else if (showUser) {
             const grouped = {};
             dayEvents.forEach(function (entry) {
@@ -63,44 +83,64 @@
             });
 
             const typeCount = Object.keys(grouped).length;
-            let html = '<p class="calendar-modal-summary"><strong>' + dayEvents.length + '</strong> '
-                + (dayEvents.length === 1 ? 'person' : 'people')
-                + ' on leave · <strong>' + typeCount + '</strong> '
-                + (typeCount === 1 ? 'type' : 'types') + '</p>';
-            html += '<div class="calendar-modal-groups">';
+            bodyHtml = '<div class="rd-stats" style="margin-bottom:14px;">'
+                + '<div class="rd-stat"><span class="rd-stat-label">People</span>'
+                + '<span class="rd-stat-value">' + dayEvents.length + '</span></div>'
+                + '<div class="rd-stat"><span class="rd-stat-label">Leave types</span>'
+                + '<span class="rd-stat-value rd-stat-value--type">' + typeCount + '</span></div>'
+                + '</div>';
+
             Object.keys(grouped).sort().forEach(function (type) {
-                html += '<div class="calendar-modal-group">';
-                html += '<h6 class="calendar-modal-type">' + escapeHtml(type) + ' Leave</h6>';
-                html += '<ul class="leave-details-list mb-0">';
-                grouped[type].forEach(function (name) {
-                    html += '<li>' + escapeHtml(name) + '</li>';
-                });
-                html += '</ul></div>';
+                const list = '<ul class="leave-details-list" style="margin:0;padding-left:1.25rem;">'
+                    + grouped[type].map(function (name) {
+                        return '<li>' + escapeCalendarHtml(name) + '</li>';
+                    }).join('')
+                    + '</ul>';
+                bodyHtml += calendarSectionBlock(type + ' leave', list);
             });
-            html += '</div>';
-            details.innerHTML = html;
         } else {
-            let html = '<ul class="leave-details-list mb-0">';
-            dayEvents.forEach(function (entry) {
-                html += '<li>' + escapeHtml(entry.type || 'Leave') + ' Leave</li>';
-            });
-            html += '</ul>';
-            details.innerHTML = html;
+            const list = '<ul class="leave-details-list" style="margin:0;padding-left:1.25rem;">'
+                + dayEvents.map(function (entry) {
+                    return '<li>' + escapeCalendarHtml(entry.type || 'Leave') + ' leave</li>';
+                }).join('')
+                + '</ul>';
+            bodyHtml = calendarSectionBlock('Approved leave', list);
         }
 
-        const modalEl = document.getElementById('leaveModal');
-        if (modalEl && window.bootstrap) {
-            bootstrap.Modal.getOrCreateInstance(modalEl).show();
-        }
+        const html = '<div class="rd-modal">'
+            + '<div class="rd-header">'
+            + '<div class="rd-header-id">' + escapeCalendarHtml(headerLabel) + ' <span>' + escapeCalendarHtml(formatted) + '</span></div>'
+            + badgeHtml
+            + '</div>'
+            + '<div class="rd-body">' + bodyHtml + '</div>'
+            + '</div>';
+
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        Swal.fire({
+            width: isMobile ? 'auto' : 640,
+            position: 'center',
+            showCloseButton: false,
+            showIcon: false,
+            customClass: {
+                popup: 'request-details-popup',
+                container: 'calendar-details-container',
+            },
+            html: html,
+            showConfirmButton: true,
+            confirmButtonText: 'Close',
+            focusConfirm: false,
+            didOpen: function (popup) {
+                const container = popup?.closest('.swal2-container');
+                if (container) {
+                    container.style.zIndex = '10150';
+                    container.scrollTop = 0;
+                }
+                const htmlContainer = Swal.getHtmlContainer();
+                if (htmlContainer) {
+                    htmlContainer.scrollTop = 0;
+                }
+            },
+        });
     };
-
-    function escapeHtml(value) {
-        return String(value ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
 </script>
 @endonce

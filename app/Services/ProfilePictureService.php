@@ -110,4 +110,13 @@ class ProfilePictureService
             max(1, (int) round($height * $ratio)),
         ];
     }
+
+    public function delete(?string $path): void
+    {
+        if (empty($path)) {
+            return;
+        }
+
+        Storage::disk('public')->delete($path);
+    }
 }

@@ -11,10 +11,9 @@
 
     <style>
         html, body {
-            margin: 0; padding: 0; height: 100%;
+            margin: 0; padding: 0;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background-color: white; color: #333;
-            overflow-x: hidden;
         }
 
         /* Navbar */
@@ -271,14 +270,13 @@
             background-color: #f0f2f7;
         }
 
-        /* Main Content */
-        main {
-            margin-top: 90px;
+        /* Main content below navbar — scroll offset handled by ui-consistency.css */
+        main,
+        main.content {
             padding: 40px;
             max-width: 1800px;
             margin-left: auto;
             margin-right: auto;
-            min-height: calc(100vh - 90px);
             background-color: #ffffff;
         }
 
@@ -303,9 +301,9 @@
             nav.menu { display: none; }
             .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
             .mobile-menu-btn { margin-right: auto; }
-            main {
+            main,
+            main.content {
                 padding: 18px;
-                margin-top: 90px;
             }
             .dropdown-menu.notifications-dropdown {
                 min-width: min(92vw, 440px);
@@ -348,8 +346,6 @@
         }
     </style>
 
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
-
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
@@ -377,6 +373,7 @@
     @stack('styles')
     @include('partials.dashboard-status-card-styles')
     @yield('head')
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
 </head>
 <body>
     <nav class="navbar" role="navigation" aria-label="Main Navigation">
@@ -440,7 +437,7 @@
                     @forelse($notifications as $notification)
                         <li>
                             @php
-                                $notificationRedirect = isset($notification->data['leave_request_id']) ? route('manager.requests.index') : route('notifications.index');
+                                $notificationRedirect = \App\Support\NotificationDestination::url($notification, $user);
                             @endphp
                             <a href="{{ route('notifications.open', ['notification' => $notification->id, 'redirect' => $notificationRedirect]) }}" class="dropdown-item d-flex justify-content-between align-items-center">
                                 <span>{{ $notification->data['message'] ?? 'Notification' }}</span>
@@ -521,7 +518,7 @@
         <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
     </aside>
 
-    <main role="main">
+    <main class="content" role="main">
         @yield('content')
     </main>
 
@@ -536,11 +533,19 @@
             if (open) {
                 sidebar.classList.add('open');
                 backdrop.style.display = 'block';
-                document.body.style.overflow = 'hidden';
+                if (typeof window.lockAppShellScroll === 'function') {
+                    window.lockAppShellScroll(true);
+                } else {
+                    document.body.style.overflow = 'hidden';
+                }
             } else {
                 sidebar.classList.remove('open');
                 backdrop.style.display = 'none';
-                document.body.style.overflow = '';
+                if (typeof window.lockAppShellScroll === 'function') {
+                    window.lockAppShellScroll(false);
+                } else {
+                    document.body.style.overflow = '';
+                }
             }
 
         }
@@ -552,5 +557,6 @@
     @include('partials.session-flash-swal')
 
     @stack('scripts')
+    @include('partials.layout-scroll')
 </body>
 </html>

@@ -89,7 +89,7 @@
                     <td>{{ $employeeName }}</td>
                     <td>{{ $leave->leave_type }}</td>
                     <td>{{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }} – {{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}</td>
-                    <td>{{ $leave->days }}</td>
+                    <td>{{ \App\Support\LeaveDaysFormatter::format($leave->days ?? '') }}</td>
                     <td>
                         @if ($statusText === 'overdue')
                             <span class="request-badge request-badge--overdue">Overdue</span>

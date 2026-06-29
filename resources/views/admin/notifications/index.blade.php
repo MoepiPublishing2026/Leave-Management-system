@@ -50,7 +50,7 @@
                 @endphp
                 <li class="notification-item {{ $isUnread ? 'is-unread' : '' }}">
                     <a class="notification-link"
-                       href="{{ route('notifications.open', ['notification' => $notification->id, 'redirect' => route('notifications.index')]) }}">
+                       href="{{ route('notifications.open', ['notification' => $notification->id, 'redirect' => \App\Support\NotificationDestination::url($notification, auth()->user())]) }}">
                         <span class="notification-dot" aria-hidden="true"></span>
                         <div class="notification-body">
                             <div class="notification-message">{{ $msg }}</div>

@@ -48,7 +48,7 @@
                 <td>{{ $leave->leave_type }}</td>
                 <td>{{ $leave->start_date }}</td>
                 <td>{{ $leave->end_date }}</td>
-                <td>{{ !empty($leave->is_half_day) ? 'Half day' : ($leave->days ?? '') }}</td>
+                <td>{{ \App\Support\LeaveDaysFormatter::format($leave->days ?? '') }}</td>
                 <td>{{ \Illuminate\Support\Str::ucfirst(strtolower(trim((string) $leave->status))) }}</td>
                 <td class="muted">{{ optional($leave->created_at)->timezone(config('app.timezone'))->format('Y-m-d H:i') }}</td>
             </tr>

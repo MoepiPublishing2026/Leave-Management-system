@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\NotificationDestination;
 use Illuminate\Http\Request;
 
 class NotificationsController extends Controller
@@ -31,31 +32,21 @@ class NotificationsController extends Controller
             $notificationModel->markAsRead();
         }
 
+        $destination = NotificationDestination::url($notificationModel, $user);
         $redirect = $request->query('redirect');
+
         if (is_string($redirect) && $redirect !== '') {
             $appUrl = rtrim(url('/'), '/');
-            if (str_starts_with($redirect, $appUrl) || str_starts_with($redirect, '/')) {
+            $notificationsIndex = route('notifications.index');
+            $isNotificationsIndex = $redirect === $notificationsIndex
+                || str_ends_with(rtrim($redirect, '/'), '/notifications');
+
+            if (! $isNotificationsIndex && (str_starts_with($redirect, $appUrl) || str_starts_with($redirect, '/'))) {
                 return redirect()->to($redirect);
             }
         }
 
-        if (($notificationModel->data['leave_request_id'] ?? null) && ($user->role ?? null) === 'manager') {
-            return redirect()->route('manager.requests.index');
-        }
-
-        if (($notificationModel->data['leave_request_id'] ?? null) && ($user->role ?? null) === 'employee') {
-            return redirect()->route('leave.myRequests');
-        }
-
-        if (($notificationModel->data['leave_request_id'] ?? null) && ($user->role ?? null) === 'admin') {
-            return redirect()->route('admin.requests', ['status' => 'overdue']);
-        }
-
-        if (($notificationModel->data['conversation_id'] ?? null) && in_array($user->role ?? null, ['admin', 'manager'], true)) {
-            return redirect()->route('messages.index', ['conversation' => $notificationModel->data['conversation_id']]);
-        }
-
-        return redirect()->route('notifications.index');
+        return redirect()->to($destination);
     }
 
     public function markAsRead(Request $request)

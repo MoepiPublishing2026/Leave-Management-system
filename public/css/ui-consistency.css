@@ -8,6 +8,7 @@
   --ui-muted: #a0aec0;
   --ui-divider: #e2e8f0;
   --ui-shadow-brand: 0 10px 25px rgba(178, 205, 22, 0.3);
+  --navbar-height: 90px;
 }
 
 html,
@@ -15,11 +16,103 @@ body {
   font-family: var(--ui-font-sans);
   background-color: #ffffff !important;
   background: #ffffff !important;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Scroll lives in main so the bar starts directly under the fixed navbar */
+main,
+main.content {
+  position: fixed;
+  top: var(--navbar-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  margin-top: 0 !important;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+  box-sizing: border-box;
+  min-height: 0 !important;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+main::-webkit-scrollbar,
+main.content::-webkit-scrollbar {
+  width: 12px;
+}
+
+main::-webkit-scrollbar-track,
+main.content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+main::-webkit-scrollbar-thumb,
+main.content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
+}
+
+main::-webkit-scrollbar-thumb:hover,
+main.content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Mobile navbar: logo left, menu button right */
+@media (max-width: 992px) {
+  :where(nav.navbar, header.navbar) {
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  :where(nav.navbar, header.navbar) :where(.navbar-logo, .logo) {
+    order: 1;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  :where(nav.navbar, header.navbar) .mobile-menu-btn {
+    order: 2;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+  }
+}
+
+/* Horizontal scroll areas should expose the start column */
+:where(.table-scroll-x) {
+  direction: ltr;
+  scroll-padding-inline-start: 0;
 }
 
 main,
 main.content {
   background-color: #ffffff;
+}
+
+.login-logo,
+.auth-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.login-logo img,
+.auth-logo img {
+  display: block;
+  max-width: min(280px, 100%);
+  width: auto;
+  height: auto;
+  max-height: 110px;
+  object-fit: contain;
 }
 
 /* Keep top navigation bars white across all roles/layouts */
@@ -28,6 +121,35 @@ header.navbar,
 .navbar {
   background-color: #ffffff !important;
   background: #ffffff !important;
+}
+
+/* Brand logo — visible on desktop and mobile across all layouts */
+:where(nav.navbar, header.navbar) :where(.navbar-logo, .logo) {
+  display: flex !important;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+:where(nav.navbar, header.navbar) :where(.navbar-logo a, .logo a) {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+:where(nav.navbar, header.navbar) :where(.navbar-logo img, .logo img) {
+  display: block;
+  height: 80px;
+  width: auto;
+  max-width: min(220px, 42vw);
+  object-fit: contain;
+}
+
+@media (max-width: 992px) {
+  :where(nav.navbar, header.navbar) :where(.navbar-logo img, .logo img) {
+    height: 44px;
+    max-width: min(160px, 48vw);
+  }
 }
 
 nav.menu a,

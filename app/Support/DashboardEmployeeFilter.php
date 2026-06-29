@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Support;
+
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+
+class DashboardEmployeeFilter
+{
+    public static function employees(): Collection
+    {
+        return User::query()
+            ->employees()
+            ->where('is_active', true)
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get(['id', 'first_name', 'last_name']);
+    }
+
+    public static function selectedId(mixed $value): ?int
+    {
+        if (! is_string($value) && ! is_int($value)) {
+            return null;
+        }
+
+        $id = (int) $value;
+
+        return $id > 0 ? $id : null;
+    }
+
+    public static function apply(Builder $query, ?int $employeeId, string $column = 'user_id'): void
+    {
+        if ($employeeId === null) {
+            return;
+        }
+
+        $query->where($column, $employeeId);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function queryParams(string $monthFilter, ?int $employeeId): array
+    {
+        $params = ['month' => $monthFilter];
+
+        if ($employeeId !== null) {
+            $params['employee'] = $employeeId;
+        }
+
+        return $params;
+    }
+}

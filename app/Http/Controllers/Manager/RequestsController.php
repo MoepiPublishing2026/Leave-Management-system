@@ -12,6 +12,8 @@ use App\Notifications\LeaveStatusNotification;
 use Illuminate\Support\Facades\Auth;
 use App\Support\LeaveProofRules;
 use App\Support\LeaveRequestSearch;
+use App\Support\LeaveRequestPeriodFilter;
+use App\Support\DashboardEmployeeFilter;
 use Illuminate\Support\Carbon;
 use App\Models\User;
 use App\Notifications\OverdueLeaveEscalatedNotification;
@@ -43,45 +45,31 @@ class RequestsController extends Controller
         $search = trim((string) $request->query('search', ''));
         $searchKey = strtolower($search);
         $monthFilter = $request->query('month');
+        $employeeFilter = DashboardEmployeeFilter::selectedId($request->query('employee'));
         $query = LeaveRequest::query()->byEmployeeApplicants()->with('user');
 
-        if (is_string($monthFilter) && $monthFilter !== '') {
-            $now = Carbon::now();
-            if (ctype_digit((string) $monthFilter)) {
-                $query->whereYear('start_date', (int) $monthFilter);
-            } elseif ($monthFilter === 'this_month') {
-                $query->whereYear('start_date', $now->year)
-                    ->whereMonth('start_date', $now->month);
-            } elseif ($monthFilter === 'this_quarter') {
-                $quarter = (int) ceil($now->month / 3);
-                $startMonth = ($quarter - 1) * 3 + 1;
-                $endMonth = $startMonth + 2;
-                $query->whereYear('start_date', $now->year)
-                    ->whereBetween(\DB::raw('MONTH(start_date)'), [$startMonth, $endMonth]);
-            } elseif ($monthFilter === 'this_year') {
-                $query->whereYear('start_date', $now->year);
-            }
-        }
+        LeaveRequestPeriodFilter::apply($query, is_string($monthFilter) ? $monthFilter : null, 'created_at');
+        DashboardEmployeeFilter::apply($query, $employeeFilter);
 
         if ($status === 'overdue') {
-            $query->whereRaw('LOWER(status) = ?', ['pending'])
+            $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
                 ->whereDate('start_date', '<', Carbon::today());
         } elseif ($status === 'pending') {
-            $query->whereRaw('LOWER(status) = ?', ['pending'])
+            $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
                 ->whereDate('start_date', '>=', Carbon::today());
         } elseif ($status !== 'all') {
-            $query->whereRaw('LOWER(status) = ?', [$status]);
+            $query->whereRaw('LOWER(TRIM(status)) = ?', [$status]);
         } else {
-            $query->whereRaw('LOWER(status) != ?', ['withdrawn']);
+            $query->whereRaw('LOWER(TRIM(status)) != ?', ['withdrawn']);
         }
 
         $effectiveSearch = $search;
         if ($status === 'all' && $searchKey === 'overdue') {
-            $query->whereRaw('LOWER(status) = ?', ['pending'])
+            $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
                 ->whereDate('start_date', '<', Carbon::today());
             $effectiveSearch = '';
         } elseif ($status === 'all' && $searchKey === 'pending') {
-            $query->whereRaw('LOWER(status) = ?', ['pending'])
+            $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
                 ->whereDate('start_date', '>=', Carbon::today());
             $effectiveSearch = '';
         }
@@ -91,7 +79,7 @@ class RequestsController extends Controller
         }
 
         $requests = $query->orderByDesc('created_at')->paginate(10)->withQueryString();
-        return view('manager.requests.index', compact('requests', 'status', 'search', 'monthFilter'));
+        return view('manager.requests.index', compact('requests', 'status', 'search', 'monthFilter', 'employeeFilter'));
     }
 
   

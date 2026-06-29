@@ -20,6 +20,10 @@
     if (!empty($monthFilter)) {
         $filterParams['month'] = $monthFilter;
     }
+    $employeeFilter = $employeeFilter ?? null;
+    if (!empty($employeeFilter)) {
+        $filterParams['employee'] = $employeeFilter;
+    }
     $activeSearch = trim((string) ($search ?? ''));
     if ($activeSearch !== '') {
         $filterParams['search'] = $activeSearch;
@@ -57,6 +61,9 @@
             <input type="hidden" name="status" value="{{ $status }}" />
             @if (!empty($monthFilter))
                 <input type="hidden" name="month" value="{{ $monthFilter }}" />
+            @endif
+            @if (!empty($employeeFilter))
+                <input type="hidden" name="employee" value="{{ $employeeFilter }}" />
             @endif
             <input type="text" name="search" placeholder="{{ $searchPlaceholder ?? 'Search requests...' }}" value="{{ $search ?? '' }}" aria-label="Search requests" />
             <button type="submit" class="requests-btn requests-btn--search">Search</button>

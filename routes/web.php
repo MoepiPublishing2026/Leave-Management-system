@@ -104,6 +104,7 @@ Route::get('/leave/balance', [LeaveController::class, 'leaveBalance'])->name('le
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [AuthController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [AuthController::class, 'update'])->name('profile.update');
+    Route::delete('/profile/picture', [AuthController::class, 'destroyProfilePicture'])->name('profile.picture.destroy');
     Route::get('/settings', fn () => redirect()->route('profile.edit'))->name('settings.edit');
     Route::post('/settings', [AuthController::class, 'update'])->name('settings.update');
 });

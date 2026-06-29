@@ -67,6 +67,13 @@
         border-color: {{ $statusCardColors['overdue'] ?? '#C154C1' }} !important;
         color: #fff !important;
     }
+    .card.card-onleave,
+    a.card.card-onleave,
+    .reports-page .card.card-onleave {
+        background: {{ $statusCardColors['on_leave'] ?? '#D2B55B' }} !important;
+        border-color: {{ $statusCardColors['on_leave'] ?? '#D2B55B' }} !important;
+        color: #fff !important;
+    }
     .card.card-all .card-title,
     .card.card-all .card-value,
     .card.card-pending .card-title,
@@ -79,6 +86,8 @@
     .card.card-withdrawn .card-value,
     .card.card-overdue .card-title,
     .card.card-overdue .card-value,
+    .card.card-onleave .card-title,
+    .card.card-onleave .card-value,
     .reports-page .card.card-all .card-title,
     .reports-page .card.card-all .card-value,
     .reports-page .card.card-pending .card-title,
@@ -90,7 +99,9 @@
     .reports-page .card.card-withdrawn .card-title,
     .reports-page .card.card-withdrawn .card-value,
     .reports-page .card.card-overdue .card-title,
-    .reports-page .card.card-overdue .card-value {
+    .reports-page .card.card-overdue .card-value,
+    .reports-page .card.card-onleave .card-title,
+    .reports-page .card.card-onleave .card-value {
         color: #fff !important;
     }
     .request-badge--pending,

@@ -253,6 +253,19 @@ class AuthController extends Controller
     return redirect()->route('profile.edit')->with('success', 'Profile updated successfully.');
 }
 
+public function destroyProfilePicture(Request $request)
+{
+    $user = auth()->user();
+
+    if (! empty($user->profile_picture)) {
+        app(ProfilePictureService::class)->delete($user->profile_picture);
+        $user->profile_picture = null;
+        $user->save();
+    }
+
+    return redirect()->route('profile.edit')->with('success', 'Profile picture removed.');
+}
+
 public function profilePicture(User $user)
 {
     if (empty($user->profile_picture)) {

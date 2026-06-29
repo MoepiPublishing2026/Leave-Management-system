@@ -1,5 +1,7 @@
 @php
     $monthFilter = $monthFilter ?? 'this_year';
+    $employeeFilter = $employeeFilter ?? null;
+    $employees = $employees ?? collect();
     $nowY = (int) \Illuminate\Support\Carbon::now()->year;
     $yearOptions = $yearOptions ?? range($nowY - 1, $nowY - 5);
 @endphp
@@ -8,6 +10,22 @@
 
 <div class="dashboard-period-filter">
     <form method="GET" class="dashboard-period-filter__form">
+        <label class="dashboard-period-filter__label" for="dashboardEmployeeSelect">Employee</label>
+        <select
+            id="dashboardEmployeeSelect"
+            name="employee"
+            class="dashboard-period-filter__select dashboard-period-filter__select--employee filter-select"
+            onchange="this.form.submit()"
+            aria-label="Filter dashboard by employee"
+        >
+            <option value="" {{ empty($employeeFilter) ? 'selected' : '' }}>All Employees</option>
+            @foreach ($employees as $employee)
+                <option value="{{ $employee->id }}" {{ (int) $employeeFilter === (int) $employee->id ? 'selected' : '' }}>
+                    {{ trim($employee->first_name . ' ' . $employee->last_name) }}
+                </option>
+            @endforeach
+        </select>
+
         <label class="dashboard-period-filter__label" for="dashboardPeriodSelect">Period</label>
         <select
             id="dashboardPeriodSelect"

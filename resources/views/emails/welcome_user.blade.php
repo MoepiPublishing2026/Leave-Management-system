@@ -17,19 +17,26 @@
             font-size: 16px;
             line-height: 1.5;
         }
-        ul {
+        .login-details {
             background-color: #f7fcef;
             border: 1px solid #b2d12f;
-            max-width: 320px;
-            padding: 15px 25px;
+            max-width: 100%;
+            width: 100%;
+            padding: 16px 20px;
             border-radius: 8px;
-            list-style-type: none;
             color: #4a7523;
             font-weight: 600;
+            box-sizing: border-box;
         }
-        ul li {
-            margin-bottom: 8px;
+        .login-details p {
+            margin: 0 0 10px;
             font-size: 16px;
+            line-height: 1.6;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+        .login-details p:last-child {
+            margin-bottom: 0;
         }
         a.login-button {
             display: inline-block;
@@ -41,7 +48,6 @@
             border-radius: 25px;
             text-decoration: none;
             font-size: 16px;
-            transition: background-color 0.3s ease;
         }
         a.login-button:hover {
             background-color: #87b20a;
@@ -55,10 +61,10 @@
     <p>Welcome to our system!</p>
 
     <p>Your login details are as follows:</p>
-    <ul>
-        <li><b>Email:</b> {{ $user->email }}</li>
-        <li><b>Password:</b> {{ $rawPassword }}</li>
-    </ul>
+    <div class="login-details">
+        <p><strong>Email:</strong> {{ $user->email }}</p>
+        <p><strong>Password:</strong> {{ $rawPassword }}</p>
+    </div>
 
     <a href="{{ url('/login') }}" class="login-button">Log In</a>
 

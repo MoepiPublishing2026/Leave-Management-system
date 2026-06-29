@@ -12,10 +12,9 @@
 
     <style>
         html, body {
-            margin: 0; padding: 0; height: 100%;
+            margin: 0; padding: 0;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background-color: white; color: #333;
-            overflow-x: hidden;
         }
 
         /* Top navigation bar (match App/Manager) */
@@ -228,15 +227,13 @@
             display: none;
         }
 
-        /* Main content below navbar */
+        /* Main content below navbar — scroll offset handled by ui-consistency.css */
         main.content {
-            margin-top: 90px;
             padding: 24px;
             max-width: 1500px;
             margin-left: auto;
             margin-right: auto;
             background-color: #ffffff;
-            min-height: calc(100vh - 90px);
         }
 
         @media (max-width: 992px) {
@@ -247,18 +244,15 @@
                 gap: 10px;
             }
             header.navbar .logo img {
-                height: 70px;
+                height: 44px;
             }
-            /* Mobile navbar: hamburger left, small logo right (profile hidden) */
+            /* Mobile navbar: hamburger left, logo right (profile hidden) */
             header.navbar .logo {
                 display: flex;
-                margin-left: auto;
             }
-            header.navbar .logo img { height: 44px; }
             .navbar-profile { display: none; }
             nav.menu { display: none; }
             .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
-            .mobile-menu-btn { margin-right: auto; }
             main.content {
                 padding: 18px;
                 max-width: 100%;
@@ -448,11 +442,19 @@
             if (open) {
                 sidebar.classList.add('open');
                 backdrop.style.display = 'block';
-                document.body.style.overflow = 'hidden';
+                if (typeof window.lockAppShellScroll === 'function') {
+                    window.lockAppShellScroll(true);
+                } else {
+                    document.body.style.overflow = 'hidden';
+                }
             } else {
                 sidebar.classList.remove('open');
                 backdrop.style.display = 'none';
-                document.body.style.overflow = '';
+                if (typeof window.lockAppShellScroll === 'function') {
+                    window.lockAppShellScroll(false);
+                } else {
+                    document.body.style.overflow = '';
+                }
             }
 
         }
@@ -460,5 +462,6 @@
             if (e.key === 'Escape') toggleMobileSidebar(false);
         });
     </script>
+    @include('partials.layout-scroll')
 </body>
 </html>

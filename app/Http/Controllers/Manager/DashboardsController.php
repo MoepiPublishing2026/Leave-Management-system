@@ -7,6 +7,8 @@ use App\Models\LeaveRequest;
 use App\Notifications\LeaveStatusNotification;
 use App\Support\MonthlyLeaveStatusBreakdown;
 use App\Support\PercentageDistribution;
+use App\Support\LeaveRequestPeriodFilter;
+use App\Support\DashboardEmployeeFilter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -32,35 +34,23 @@ class DashboardsController extends Controller
     public function index(Request $request)
     {
         $monthFilter = $request->query('month', 'this_year');
+        $employeeFilter = DashboardEmployeeFilter::selectedId($request->query('employee'));
+        $employees = DashboardEmployeeFilter::employees();
+        $dashboardFilters = DashboardEmployeeFilter::queryParams($monthFilter, $employeeFilter);
 
-        $baseQuery = LeaveRequest::query()->byEmployeeApplicants()->whereRaw('LOWER(status) != ?', ['withdrawn']);
-        if ($monthFilter) {
-            $now = Carbon::now();
-            if (ctype_digit((string) $monthFilter)) {
-                $baseQuery->whereYear('start_date', (int) $monthFilter);
-            } elseif ($monthFilter === 'this_month') {
-                $baseQuery->whereYear('start_date', $now->year)
-                    ->whereMonth('start_date', $now->month);
-            } elseif ($monthFilter === 'this_quarter') {
-                $quarter = (int) ceil($now->month / 3);
-                $startMonth = ($quarter - 1) * 3 + 1;
-                $endMonth = $startMonth + 2;
-                $baseQuery->whereYear('start_date', $now->year)
-                    ->whereBetween(DB::raw('MONTH(start_date)'), [$startMonth, $endMonth]);
-            } elseif ($monthFilter === 'this_year') {
-                $baseQuery->whereYear('start_date', $now->year);
-            }
-        }
+        $baseQuery = LeaveRequest::query()->byEmployeeApplicants()->whereRaw('LOWER(TRIM(status)) != ?', ['withdrawn']);
+        LeaveRequestPeriodFilter::apply($baseQuery, $monthFilter, 'created_at');
+        DashboardEmployeeFilter::apply($baseQuery, $employeeFilter);
 
         $allRequestsCount = (clone $baseQuery)->count();
 
-        $pendingTotalCount = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['pending'])->count();
-        $overduePendingCount = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['pending'])
+        $pendingTotalCount = (clone $baseQuery)->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])->count();
+        $overduePendingCount = (clone $baseQuery)->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
             ->whereDate('start_date', '<', Carbon::today())->count();
         $pendingRequestsCount = max(0, $pendingTotalCount - $overduePendingCount);
 
-        $approvedRequestsCount = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['approved'])->count();
-        $rejectedRequestsCount = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['rejected'])->count();
+        $approvedRequestsCount = (clone $baseQuery)->whereRaw('LOWER(TRIM(status)) = ?', ['approved'])->count();
+        $rejectedRequestsCount = (clone $baseQuery)->whereRaw('LOWER(TRIM(status)) = ?', ['rejected'])->count();
 
         $today = Carbon::today();
         $isTodayDisabled = $today->isWeekend();
@@ -75,7 +65,10 @@ class DashboardsController extends Controller
 
         $onLeaveTodayCount = 0;
         if (!$isTodayDisabled) {
-            $onLeaveTodayCount = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['approved'])
+            $onLeaveTodayCount = LeaveRequest::query()
+                ->byEmployeeApplicants()
+                ->when($employeeFilter, fn ($q) => $q->where('user_id', $employeeFilter))
+                ->whereRaw('LOWER(TRIM(status)) = ?', ['approved'])
                 ->whereDate('start_date', '<=', $today)
                 ->whereDate('end_date', '>=', $today)
                 ->distinct('user_id')
@@ -110,7 +103,8 @@ class DashboardsController extends Controller
         $monthlyApplicationsQuery = LeaveRequest::query()
             ->byEmployeeApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn'])
-            ->whereYear('created_at', $chartYear);
+            ->whereYear('leave_requests.created_at', $chartYear);
+        DashboardEmployeeFilter::apply($monthlyApplicationsQuery, $employeeFilter);
 
         $monthlyData = (clone $monthlyApplicationsQuery)
             ->select(DB::raw('MONTH(created_at) as month'), DB::raw('COUNT(*) as total'))
@@ -171,7 +165,8 @@ class DashboardsController extends Controller
             'overduePendingCount', 'onLeaveTodayCount',
             'leaveTypeCounts', 'leaveTypePercentages', 'statusCounts', 'statusPercentages',
             'barLabels', 'barData', 'chartYear', 'departmentLabels', 'departmentData', 'departmentPercentages',
-            'monthFilter', 'designationLabels', 'designationData',
+            'monthFilter', 'employeeFilter', 'employees', 'dashboardFilters',
+            'designationLabels', 'designationData',
             'monthlyApprovedData', 'monthlyPendingData', 'monthlyOverdueData', 'monthlyRejectedData'
         ));
     }

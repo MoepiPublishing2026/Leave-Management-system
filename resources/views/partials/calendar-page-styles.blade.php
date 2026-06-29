@@ -27,40 +27,56 @@
         padding: 14px;
     }
     .calendar-page .calendar-meta {
+        display: block;
+        visibility: visible;
         margin-top: 14px;
         padding: 14px 16px;
         border-radius: 12px;
-        background: #e2e8f0;
-        border: none;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    .calendar-page .calendar-meta-title {
+        margin: 0 0 8px;
+        padding: 0;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #334155;
+        line-height: 1.35;
     }
     .calendar-page .calendar-summary {
-        margin: 0 0 8px;
+        margin: 0 0 10px;
         padding: 0;
         border: none;
         background: transparent;
         color: #475569;
-        font-size: 0.84rem;
+        font-size: 0.86rem;
+        line-height: 1.45;
     }
     .calendar-page .calendar-summary strong {
         color: #138056;
     }
     .calendar-page .calendar-legend {
-        padding: 0;
+        display: block;
+        visibility: visible;
+        padding: 10px 0 0;
         border: none;
+        border-top: 1px solid #dbe3ef;
         background: transparent;
     }
     .calendar-page .calendar-legend-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px 12px;
+        gap: 8px 16px;
         align-items: center;
     }
     .calendar-page .calendar-legend-item {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        font-size: 0.76rem;
-        color: #64748b;
+        gap: 6px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: #475569;
         white-space: nowrap;
     }
     .calendar-page .calendar-legend-swatch {
@@ -81,9 +97,10 @@
         box-shadow: inset 0 0 0 2px #C154C1;
     }
     .calendar-page .calendar-legend-hint {
-        margin: 6px 0 0;
-        font-size: 0.74rem;
-        color: #94a3b8;
+        margin: 8px 0 0;
+        font-size: 0.8rem;
+        color: #64748b;
+        line-height: 1.45;
     }
     .calendar-page .calendar {
         display: grid;
@@ -306,7 +323,14 @@
             border-radius: 10px;
         }
         .calendar-page .calendar-meta {
-            padding: 8px 10px;
+            padding: 12px 12px;
+            margin-top: 10px;
+        }
+        .calendar-page .calendar-meta-title {
+            font-size: 0.86rem;
+        }
+        .calendar-page .calendar-legend-item {
+            font-size: 0.78rem;
         }
         .calendar-page .day-header {
             font-size: 0.58rem;

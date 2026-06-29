@@ -149,6 +149,36 @@ class MessagesController extends Controller
         return User::where('role', 'admin')->orderBy('id')->value('id');
     }
 
+    private function isManagerUserId(mixed $userId): bool
+    {
+        if ($userId === null || $userId === '') {
+            return false;
+        }
+
+        return User::whereKey((int) $userId)->where('role', 'manager')->exists();
+    }
+
+    private function resolveManagerIdForConversation(LeaveRequest $leaveRequest): ?int
+    {
+        $existingManagerId = LeaveRequestConversation::query()
+            ->where('leave_request_id', $leaveRequest->id)
+            ->value('manager_id');
+
+        if ($this->isManagerUserId($existingManagerId)) {
+            return (int) $existingManagerId;
+        }
+
+        foreach ([$leaveRequest->handled_by, $leaveRequest->overdue_escalated_by] as $candidateId) {
+            if ($this->isManagerUserId($candidateId)) {
+                return (int) $candidateId;
+            }
+        }
+
+        $managerId = User::where('role', 'manager')->orderBy('id')->value('id');
+
+        return $managerId ? (int) $managerId : null;
+    }
+
     public function index(Request $request)
     {
         $this->ensureChatTablesExist();
@@ -244,24 +274,19 @@ class MessagesController extends Controller
                 $conversation->save();
             }
         } else {
-            $managerId = $leaveRequest->handled_by
-                ?? $leaveRequest->overdue_escalated_by
-                ?? LeaveRequestConversation::where('leave_request_id', $leaveRequest->id)->value('manager_id')
-                ?? User::where('role', 'manager')->orderBy('id')->value('id');
+            $managerId = $this->resolveManagerIdForConversation($leaveRequest);
 
             if (!$managerId) {
-                return redirect()->route('messages.index')->with('error', 'No manager is linked to this request yet.');
+                return redirect()->route('messages.index')->with('error', 'No manager is available for this request yet.');
             }
 
-            $conversation = LeaveRequestConversation::where('leave_request_id', $leaveRequest->id)
+            $conversation = LeaveRequestConversation::query()
+                ->where('leave_request_id', $leaveRequest->id)
                 ->where('manager_id', $managerId)
-                ->where(function ($q) use ($user) {
-                    $q->where('admin_id', $user->id)->orWhereNull('admin_id');
-                })
                 ->first();
 
             if (!$conversation) {
-                $conversation = LeaveRequestConversation::firstOrCreate([
+                $conversation = LeaveRequestConversation::create([
                     'leave_request_id' => $leaveRequest->id,
                     'manager_id' => $managerId,
                 ]);
@@ -271,7 +296,9 @@ class MessagesController extends Controller
         }
 
         if (!$conversation || !$this->userCanAccessConversation($user, $conversation)) {
-            abort(403);
+            return redirect()
+                ->route('messages.index')
+                ->with('error', 'You do not have access to this conversation.');
         }
 
         return redirect()->route('messages.index', ['conversation' => $conversation->id]);

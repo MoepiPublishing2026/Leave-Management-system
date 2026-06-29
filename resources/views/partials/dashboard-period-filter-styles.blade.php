@@ -14,6 +14,7 @@
         border: 1px solid #e2e8f0;
         border-radius: 12px;
         box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+        flex-wrap: wrap;
     }
     .dashboard-period-filter__label {
         font-size: 0.78rem;
@@ -42,6 +43,10 @@
         cursor: pointer;
         min-width: 148px;
         transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .dashboard-period-filter__select--employee {
+        min-width: 190px;
+        max-width: 240px;
     }
     .dashboard-period-filter__select:hover {
         border-color: #94a3b8;

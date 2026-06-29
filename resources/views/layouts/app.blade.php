@@ -11,10 +11,9 @@
 
     <style>
         html, body {
-            margin: 0; padding: 0; height: 100%;
+            margin: 0; padding: 0;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background-color: white; color: #333;
-            overflow-x: hidden;
         }
 
         /* Navbar */
@@ -282,14 +281,12 @@
             background-color: #f0f2f7;
         }
 
-        /* Main Content */
+        /* Main Content — scroll offset handled by ui-consistency.css */
         main {
-            margin-top: 90px;
             padding: 40px;
             max-width: 1800px;
             margin-left: auto;
             margin-right: auto;
-            min-height: calc(100vh - 90px);
             background-color: #ffffff;
         }
 
@@ -438,7 +435,7 @@
                     @forelse($notifications as $notification)
                         <li>
                             @php
-                                $notificationRedirect = isset($notification->data['leave_request_id']) ? route('leave.myRequests') : route('notifications.index');
+                                $notificationRedirect = \App\Support\NotificationDestination::url($notification, $user);
                             @endphp
                             <a href="{{ route('notifications.open', ['notification' => $notification->id, 'redirect' => $notificationRedirect]) }}" class="dropdown-item d-flex justify-content-between align-items-center">
                                 <span>{{ $notification->data['message'] ?? 'Notification' }}</span>
@@ -529,11 +526,19 @@
             if (open) {
                 sidebar.classList.add('open');
                 backdrop.style.display = 'block';
-                document.body.style.overflow = 'hidden';
+                if (typeof window.lockAppShellScroll === 'function') {
+                    window.lockAppShellScroll(true);
+                } else {
+                    document.body.style.overflow = 'hidden';
+                }
             } else {
                 sidebar.classList.remove('open');
                 backdrop.style.display = 'none';
-                document.body.style.overflow = '';
+                if (typeof window.lockAppShellScroll === 'function') {
+                    window.lockAppShellScroll(false);
+                } else {
+                    document.body.style.overflow = '';
+                }
             }
 
         }
@@ -545,5 +550,6 @@
     @include('partials.session-flash-swal')
 
     @stack('scripts')
+    @include('partials.layout-scroll')
 </body>
 </html>

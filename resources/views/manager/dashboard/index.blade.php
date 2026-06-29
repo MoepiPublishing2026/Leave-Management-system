@@ -55,15 +55,6 @@
     .card:hover {
         box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     }
-    .card-sixth {
-        background: #D2B55B;
-        border-color: #D2B55B;
-        color: #fff;
-    }
-    .card-sixth .card-title,
-    .card-sixth .card-value {
-        color: #fff;
-    }
     .card .card-title svg,
     .card .card-title .icon {
         display: none;
@@ -141,35 +132,42 @@
   <h1>Manager Dashboard</h1>
 
 <div class="manager-container">
-@include('partials.dashboard-period-filter', ['monthFilter' => $monthFilter ?? 'this_year'])
+@include('partials.dashboard-period-filter', [
+    'monthFilter' => $monthFilter ?? 'this_year',
+    'employeeFilter' => $employeeFilter ?? null,
+    'employees' => $employees ?? collect(),
+])
+@php
+    $cardFilters = $dashboardFilters ?? ['month' => $monthFilter ?? 'this_year'];
+@endphp
     
     <div class="cards">
-    <a href="{{ route('manager.requests.index', ['status' => 'all', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-all">
+    <a href="{{ route('manager.requests.index', array_merge(['status' => 'all'], $cardFilters)) }}" class="card card-all">
         <div class="card-title">All Requests</div>
         <div class="card-value">{{ $allRequestsCount }}</div>
     </a>
 
-    <a href="{{ route('manager.requests.index', ['status' => 'pending', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-pending">
+    <a href="{{ route('manager.requests.index', array_merge(['status' => 'pending'], $cardFilters)) }}" class="card card-pending">
         <div class="card-title">Pending Requests</div>
         <div class="card-value">{{ $pendingRequestsCount }}</div>
     </a>
 
-    <a href="{{ route('manager.requests.index', ['status' => 'overdue', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-overdue">
+    <a href="{{ route('manager.requests.index', array_merge(['status' => 'overdue'], $cardFilters)) }}" class="card card-overdue">
         <div class="card-title">Overdue Requests</div>
         <div class="card-value">{{ $overduePendingCount ?? 0 }}</div>
     </a>
 
-    <a href="{{ route('manager.requests.index', ['status' => 'approved', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-approved">
+    <a href="{{ route('manager.requests.index', array_merge(['status' => 'approved'], $cardFilters)) }}" class="card card-approved">
         <div class="card-title">Approved Requests</div>
         <div class="card-value">{{ $approvedRequestsCount }}</div>
     </a>
 
-    <a href="{{ route('manager.requests.index', ['status' => 'rejected', 'month' => ($monthFilter ?? 'this_year')]) }}" class="card card-rejected">
+    <a href="{{ route('manager.requests.index', array_merge(['status' => 'rejected'], $cardFilters)) }}" class="card card-rejected">
         <div class="card-title">Rejected Requests</div>
         <div class="card-value">{{ $rejectedRequestsCount }}</div>
     </a>
 
-    <a href="{{ route('manager.calendar') }}" class="card card-sixth" aria-label="Employees on leave today">
+    <a href="{{ route('manager.calendar') }}" class="card card-onleave" aria-label="Employees on leave today">
         <div class="card-title">On Leave Today</div>
         <div class="card-value">{{ $onLeaveTodayCount ?? 0 }}</div>
     </a>

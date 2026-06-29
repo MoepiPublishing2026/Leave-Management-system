@@ -24,6 +24,7 @@
         'status' => $status,
         'search' => $search ?? '',
         'monthFilter' => $monthFilter ?? null,
+        'employeeFilter' => $employeeFilter ?? null,
         'searchPlaceholder' => 'Search name, type, status, dates...',
         'statusFilters' => [
             'all' => 'All',

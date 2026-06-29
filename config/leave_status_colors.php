@@ -13,6 +13,7 @@ return [
         'rejected' => '#87AFC7',
         'withdrawn' => '#D2B55B',
         'overdue' => '#C154C1',
+        'on_leave' => '#D2B55B',
     ],
 
     'pie_labels' => ['Pending', 'Overdue', 'Rejected', 'Approved'],
