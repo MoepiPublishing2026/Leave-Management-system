@@ -68,6 +68,8 @@
                     $proofDeadline = LeaveProofRules::proofDeadlineAt($req);
                     $proofStatusLabel = LeaveProofRules::employeeProofStatusLabel($req);
                     $doctorsLetterMissing = LeaveProofRules::isProofPastDeadline($req);
+                    $proofUploadPending = LeaveProofRules::isProofUploadWindowPending($req);
+                    $certificateNote = LeaveProofRules::managerCertificateNote($req);
 
                     $details = [
                         'id' => $req->id,
@@ -81,8 +83,11 @@
                         'files' => $fileLinks,
                         'proofDeferred' => LeaveProofRules::allowsDeferredProof($req->leave_type) && LeaveProofRules::requiresProof($req->leave_type),
                         'proofAttached' => LeaveProofRules::hasProofAttached($req),
+                        'proofOpensAt' => $proofWindowOpens ? $proofWindowOpens->format('d M Y') : '',
                         'proofDeadline' => $proofDeadline ? $proofDeadline->format('d M Y') : '',
                         'proofStatusLabel' => (string) ($proofStatusLabel ?? ''),
+                        'certificateNote' => (string) ($certificateNote ?? ''),
+                        'canUploadProofNow' => $canSubmitAttachment,
                         'doctorsLetterMissing' => $doctorsLetterMissing,
                         'lateReasonSent' => (bool) $req->overdue_escalated_at,
                         'lateReason' => (string) ($req->overdue_escalation_reason ?? ''),
@@ -127,14 +132,14 @@
                                         @endforeach
                                     </div>
                                 @endif
-                                @if ($canSubmitAttachment)
+                                @if ($canSubmitAttachment || $proofUploadPending)
                                 <form class="proof-upload-form" method="POST" action="{{ route('leave.uploadProof', $req) }}" enctype="multipart/form-data">
                                     @csrf
-                                    <input type="file" name="file_uploads[]" class="proof-upload-input" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple required>
+                                    <input type="file" name="file_uploads[]" class="proof-upload-input" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple {{ $canSubmitAttachment ? 'required' : '' }}>
                                     <button
                                         type="button"
                                         class="request-btn request-btn--approve proof-upload-btn"
-                                        data-can-upload="1"
+                                        data-can-upload="{{ $canSubmitAttachment ? '1' : '0' }}"
                                         data-is-replace="{{ count($fileLinks) > 0 ? '1' : '0' }}"
                                         data-opens-at="{{ $proofWindowOpens ? $proofWindowOpens->format('d M Y') : '' }}"
                                         data-deadline="{{ $proofDeadline ? $proofDeadline->format('d M Y') : '' }}"
@@ -169,7 +174,7 @@
         </table>
     </div>
 
-    <p class="requests-hint">Click any row to view full request details.</p>
+    <p class="requests-hint">Click any row to view full request details. For approved sick leave, upload your doctor's letter using <strong>Upload doctor's letter</strong> in the Actions column on your leave start date (by the next day at the latest).</p>
 
     <div class="requests-pagination">
         {{ $leaveRequests->links('pagination::bootstrap-5') }}

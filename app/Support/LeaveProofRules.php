@@ -66,6 +66,27 @@ class LeaveProofRules
         return Carbon::parse($request->start_date)->addDay()->endOfDay();
     }
 
+    /**
+     * Plain-language upload window, e.g. "on 02 Jul 2026, or by 03 Jul 2026 at the latest".
+     */
+    public static function proofUploadWindowDescription(LeaveRequest $request): ?string
+    {
+        $opens = self::proofWindowOpensAt($request);
+        $deadline = self::proofDeadlineAt($request);
+        if (! $opens || ! $deadline) {
+            return null;
+        }
+
+        return 'on '.$opens->format('d M Y').', or by '.$deadline->format('d M Y').' at the latest';
+    }
+
+    public static function proofUploadWindowSentence(LeaveRequest $request, string $prefix = 'You can upload'): ?string
+    {
+        $description = self::proofUploadWindowDescription($request);
+
+        return $description ? $prefix.' '.$description.'.' : null;
+    }
+
     private static function isActiveDeferredSickRequest(LeaveRequest $request): bool
     {
         if (! self::allowsDeferredProof($request->leave_type) || ! self::requiresProof($request->leave_type)) {
@@ -201,6 +222,12 @@ class LeaveProofRules
             return 'Doctor\'s letter missing';
         }
 
+        if (self::isProofUploadWindowPending($request)) {
+            $opens = self::proofWindowOpensAt($request);
+
+            return 'Doctor\'s letter required'.($opens ? ' (from '.$opens->format('d M Y').')' : '');
+        }
+
         return 'Doctor\'s letter required';
     }
 
@@ -237,7 +264,9 @@ class LeaveProofRules
                 $opens = self::proofWindowOpensAt($request);
                 $deadline = self::proofDeadlineAt($request);
                 if ($opens && $deadline) {
-                    return 'After approval, the employee must upload a doctor\'s letter from '.$opens->format('d M Y').' through '.$deadline->format('d M Y').' to confirm the hospital or doctor visit.';
+                    return 'After approval, the employee must upload a doctor\'s letter '
+                        .self::proofUploadWindowDescription($request)
+                        .' to confirm the hospital or doctor visit.';
                 }
             }
 
@@ -256,7 +285,9 @@ class LeaveProofRules
             return 'Approved sick leave requires a doctor\'s letter to confirm the hospital or doctor visit.';
         }
 
-        return 'Approved sick leave requires a doctor\'s letter from '.$opens->format('d M Y').' through '.$deadline->format('d M Y').' to confirm the hospital or doctor visit.';
+        return 'Approved sick leave requires a doctor\'s letter '
+            .self::proofUploadWindowDescription($request)
+            .' to confirm the hospital or doctor visit.';
     }
 
     public static function employeeProofStatusLabel(LeaveRequest $request): ?string

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 class LeaveRequestSearch
 {
     /**
-     * Apply text search including human-readable leave dates (e.g. "27 May 2025").
+     * Match any column, then sort by left-to-right column priority.
      */
     public static function apply(Builder $query, string $search, bool $includeUserFields = true): void
     {
@@ -17,13 +17,30 @@ class LeaveRequestSearch
             return;
         }
 
-        $query->where(function (Builder $q) use ($search, $includeUserFields) {
-            $q->where('leave_type', 'like', '%' . $search . '%')
-                ->orWhereRaw('LOWER(status) like ?', ['%' . strtolower($search) . '%'])
-                ->orWhere('important_comment', 'like', '%' . $search . '%');
+        $table = $query->getModel()->getTable();
 
-            self::applyDateColumnSearch($q, 'start_date', $search);
-            self::applyDateColumnSearch($q, 'end_date', $search);
+        $query->where(function (Builder $q) use ($search, $includeUserFields, $table) {
+            self::applyAnyColumnMatch($q, $search, $includeUserFields, $table);
+        });
+
+        [$prioritySql, $priorityBindings] = self::priorityOrderSql($search, $includeUserFields, $table);
+        $query->reorder()->orderByRaw($prioritySql, $priorityBindings)->orderByDesc("{$table}.created_at");
+    }
+
+    private static function applyAnyColumnMatch(
+        Builder $query,
+        string $search,
+        bool $includeUserFields,
+        string $table
+    ): void {
+        $query->where(function (Builder $q) use ($search, $includeUserFields, $table) {
+            $q->where("{$table}.leave_type", 'like', '%' . $search . '%')
+                ->orWhereRaw('LOWER(' . $table . '.status) like ?', ['%' . strtolower($search) . '%'])
+                ->orWhere("{$table}.important_comment", 'like', '%' . $search . '%');
+
+            self::applyDateColumnSearch($q, 'start_date', $search, $table);
+            self::applyDateColumnSearch($q, 'end_date', $search, $table);
+            self::applyDateColumnSearch($q, 'created_at', $search, $table);
 
             if ($includeUserFields) {
                 $q->orWhereHas('user', function (Builder $q2) use ($search) {
@@ -36,28 +53,103 @@ class LeaveRequestSearch
             }
 
             if (ctype_digit($search)) {
-                $q->orWhere('id', (int) $search);
+                $q->orWhere("{$table}.id", (int) $search);
             }
         });
     }
 
-    private static function applyDateColumnSearch(Builder $query, string $column, string $search): void
+    /**
+     * @return array{0: string, 1: list<mixed>}
+     */
+    private static function priorityOrderSql(string $search, bool $includeUserFields, string $table): array
     {
-        $query->orWhere($column, 'like', '%' . $search . '%');
-
         $like = '%' . $search . '%';
-        $query->orWhereRaw("DATE_FORMAT({$column}, '%e %M %Y') LIKE ?", [$like])
-            ->orWhereRaw("DATE_FORMAT({$column}, '%d %M %Y') LIKE ?", [$like])
-            ->orWhereRaw("DATE_FORMAT({$column}, '%e %b %Y') LIKE ?", [$like])
-            ->orWhereRaw("DATE_FORMAT({$column}, '%d %b %Y') LIKE ?", [$like])
-            ->orWhereRaw("DATE_FORMAT({$column}, '%M %Y') LIKE ?", [$like])
-            ->orWhereRaw("DATE_FORMAT({$column}, '%b %Y') LIKE ?", [$like])
-            ->orWhereRaw("DATE_FORMAT({$column}, '%d/%m/%Y') LIKE ?", [$like])
-            ->orWhereRaw("DATE_FORMAT({$column}, '%m/%d/%Y') LIKE ?", [$like]);
+        $likeLower = '%' . strtolower($search) . '%';
+        $bindings = [];
+        $parts = [];
+        $priority = 1;
+
+        if (ctype_digit($search)) {
+            $parts[] = "CASE WHEN {$table}.id = ? THEN {$priority} ELSE 99 END";
+            $bindings[] = (int) $search;
+            $priority++;
+        }
+
+        if ($includeUserFields) {
+            $parts[] = "CASE WHEN EXISTS (
+                SELECT 1 FROM users
+                WHERE users.id = {$table}.user_id
+                AND (
+                    users.first_name LIKE ?
+                    OR users.last_name LIKE ?
+                    OR users.email LIKE ?
+                    OR users.department LIKE ?
+                    OR users.designation LIKE ?
+                )
+            ) THEN {$priority} ELSE 99 END";
+            array_push($bindings, $like, $like, $like, $like, $like);
+            $priority++;
+        }
+
+        $parts[] = "CASE WHEN {$table}.leave_type LIKE ? THEN {$priority} ELSE 99 END";
+        $bindings[] = $like;
+        $priority++;
+
+        foreach (['start_date', 'end_date', 'created_at'] as $column) {
+            [$dateCond, $dateBindings] = self::dateColumnMatchCondition($table, $column, $search);
+            $parts[] = "CASE WHEN ({$dateCond}) THEN {$priority} ELSE 99 END";
+            array_push($bindings, ...$dateBindings);
+            $priority++;
+        }
+
+        $parts[] = "CASE WHEN LOWER({$table}.status) LIKE ? THEN {$priority} ELSE 99 END";
+        $bindings[] = $likeLower;
+        $priority++;
+
+        $parts[] = "CASE WHEN {$table}.important_comment LIKE ? THEN {$priority} ELSE 99 END";
+        $bindings[] = $like;
+
+        return ['LEAST(' . implode(', ', $parts) . ')', $bindings];
+    }
+
+    /**
+     * @return array{0: string, 1: list<mixed>}
+     */
+    private static function dateColumnMatchCondition(string $table, string $column, string $search): array
+    {
+        $like = '%' . $search . '%';
+        $bindings = [$like];
+        $conditions = ["{$table}.{$column} LIKE ?"];
+
+        $formats = [
+            '%e %M %Y',
+            '%d %M %Y',
+            '%e %b %Y',
+            '%d %b %Y',
+            '%M %Y',
+            '%b %Y',
+            '%d/%m/%Y',
+            '%m/%d/%Y',
+        ];
+
+        foreach ($formats as $format) {
+            $conditions[] = "DATE_FORMAT({$table}.{$column}, '{$format}') LIKE ?";
+            $bindings[] = $like;
+        }
 
         foreach (self::parseDates($search) as $ymd) {
-            $query->orWhereDate($column, $ymd);
+            $conditions[] = "DATE({$table}.{$column}) = ?";
+            $bindings[] = $ymd;
         }
+
+        return [implode(' OR ', $conditions), $bindings];
+    }
+
+    private static function applyDateColumnSearch(Builder $query, string $column, string $search, string $table): void
+    {
+        [$condition, $bindings] = self::dateColumnMatchCondition($table, $column, $search);
+
+        $query->orWhereRaw('(' . $condition . ')', $bindings);
     }
 
     /**

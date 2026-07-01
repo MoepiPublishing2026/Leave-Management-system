@@ -199,7 +199,7 @@ class AuthController extends Controller
         );
 
         if ($status === Password::PASSWORD_RESET) {
-            return redirect()->route('login')->with('status', __($status));
+            return response()->view('auth.password_reset_complete');
         }
 
         return back()->withErrors(['email' => __($status)]);

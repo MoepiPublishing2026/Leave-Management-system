@@ -219,7 +219,7 @@
             Swal.fire({
                 icon: 'success',
                 title: 'Reset Link',
-                html: '<a href=' + @json(session('reset_link')) + ' style="color:#234e52; font-weight:800; word-break:break-all;" target="_blank" rel="noopener">Open Reset Link</a>',
+                html: '<a href=' + @json(session('reset_link')) + ' style="color:#234e52; font-weight:800; word-break:break-all;">Open Reset Link</a>',
                 confirmButtonText: 'OK'
             });
         </script>

@@ -602,7 +602,7 @@ document.addEventListener('DOMContentLoaded', function () {
             fileUploadContainer.classList.remove('required');
             attachmentBadge.textContent = 'Optional now';
             attachmentBadge.className = 'attachment-badge attachment-badge--optional';
-            let hint = 'Submit without a doctor\'s letter. Once your manager approves, upload the letter from My Leave Requests on your sick leave start date through the following day.';
+            let hint = 'Submit without a doctor\'s letter. Once your manager approves, upload it from My Leave Requests on your leave start date, or by the following day at the latest.';
             if (startDate) {
                 const start = new Date(startDate + 'T00:00:00');
                 if (!isNaN(start.getTime())) {

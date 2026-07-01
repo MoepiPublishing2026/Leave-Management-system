@@ -10,7 +10,7 @@
             Up to {{ (int) $policy->max_carry_over }} unused day(s) may be carried over to the next year.
         @endif
     @elseif($type === 'Sick')
-        Sick leave is granted up to {{ (int) $policy->default_days }} days for illness or injury. Employees must notify their manager as early as possible. Your manager may approve sick leave before you visit the doctor. Once approved, you must upload your doctor's letter from My Leave Requests on your leave start date through the following day to confirm your hospital or doctor visit.
+        Sick leave is granted up to {{ (int) $policy->default_days }} days for illness or injury. Employees must notify their manager as early as possible. Your manager may approve sick leave before you visit the doctor. Once approved, you must upload your doctor's letter from My Leave Requests on your leave start date, or by the next day at the latest, to confirm your hospital or doctor visit.
     @elseif(in_array($type, ['Maternity', 'Paternity']))
         {{ $type }} leave of {{ (int) $policy->default_days }} days is provided according to applicable legislation. Proper documentation and notice are required.
     @elseif($type === 'Bereavement')

@@ -23,8 +23,31 @@
     .dashboard-container {
       padding: 14px 12px 22px;
     }
+    h1 {
+      font-size: 28px;
+      padding-left: 8px;
+      margin-bottom: 18px;
+    }
+    .leave-balance-card {
+      padding: 16px 14px;
+    }
+    .leave-balance-title {
+      font-size: 1.25rem;
+    }
     .leave-balance-list.open {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .leave-balance-item {
+      padding: 12px 10px;
+      font-size: 0.92rem;
+      min-height: 52px;
+    }
+    .leave-type {
+      white-space: normal;
+      word-break: break-word;
+      line-height: 1.3;
+      hyphens: auto;
     }
     .dash-charts-grid {
       grid-template-columns: 1fr;
@@ -35,6 +58,16 @@
     }
     .cards {
       padding-bottom: 12px;
+    }
+  }
+  @media (max-width: 420px) {
+    .leave-balance-list.open {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .leave-balance-item {
+      padding: 12px 14px;
+      font-size: 0.95rem;
     }
   }
   h1 {

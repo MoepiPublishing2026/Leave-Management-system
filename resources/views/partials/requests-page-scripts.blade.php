@@ -186,6 +186,9 @@
                 ? 'Doctor\'s letter uploaded'
                 : (details.certificateNote || details.proofStatusLabel || 'Doctor\'s letter required after approval');
             const proofBoxClass = details.doctorsLetterMissing ? 'warning' : (details.proofAttached ? '' : 'info');
+            const opensNote = details.proofOpensAt && !details.canUploadProofNow && !details.proofAttached
+                ? `<div class="rd-box rd-box--muted" style="margin-top:6px;">Upload from <strong>${escapeHtml(details.proofOpensAt)}</strong> using the Actions column on this page.</div>`
+                : '';
             const deadlineNote = details.proofDeadline
                 ? `<div class="rd-box rd-box--muted" style="margin-top:6px;">Upload deadline: ${escapeHtml(details.proofDeadline)}</div>`
                 : '';
@@ -193,6 +196,7 @@
                 <div class="rd-section">
                     <h4 class="rd-section-title">Doctor's letter</h4>
                     <div class="rd-box ${proofBoxClass}">${escapeHtml(proofStatus)}</div>
+                    ${opensNote}
                     ${deadlineNote}
                 </div>
             `;
@@ -335,7 +339,7 @@
                 Swal.fire({
                     title: 'Upload not yet available',
                     html: opensAt && deadline
-                        ? `<p class="proof-upload-modal-note">Upload or replace your document from <strong>${escapeHtml(opensAt)}</strong> through <strong>${escapeHtml(deadline)}</strong>.</p>`
+                        ? `<p class="proof-upload-modal-note">Upload is not open yet. You can upload on <strong>${escapeHtml(opensAt)}</strong>, or by <strong>${escapeHtml(deadline)}</strong> at the latest.</p>`
                         : '<p class="proof-upload-modal-note">Upload will be available when allowed for this request.</p>',
                     icon: 'info',
                     confirmButtonColor: '#65a30d',
@@ -348,7 +352,7 @@
                 ? '<p class="proof-upload-modal-note">This will replace your current file(s) with the new upload.</p>'
                 : '';
             const deadlineNote = deadline
-                ? `<p class="proof-upload-modal-note">Upload your document by <strong>${escapeHtml(deadline)}</strong> at the latest.</p>`
+                ? `<p class="proof-upload-modal-note">Upload by <strong>${escapeHtml(deadline)}</strong> at the latest${opensAt ? ` (you may upload on <strong>${escapeHtml(opensAt)}</strong>, your leave start date)` : ''}.</p>`
                 : '';
 
             Swal.fire({
@@ -410,5 +414,30 @@
         } catch (err) {
         }
     });
+
+    function openRequestFromQuery() {
+        const params = new URLSearchParams(window.location.search);
+        const requestId = params.get('request_id');
+        if (!requestId) return;
+
+        const rows = document.querySelectorAll('tr[data-details]');
+        for (const row of rows) {
+            try {
+                const details = JSON.parse(row.getAttribute('data-details') || '{}');
+                if (String(details.id) === String(requestId)) {
+                    openRequestDetails(details);
+                    row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                    break;
+                }
+            } catch (err) {
+            }
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', openRequestFromQuery);
+    } else {
+        openRequestFromQuery();
+    }
 })();
 </script>

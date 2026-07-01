@@ -6,9 +6,9 @@ document.addEventListener('DOMContentLoaded', function () {
         icon: 'success',
         title: 'Success',
         text: @json(session('success')),
-        timer: 3500,
-        timerProgressBar: true,
-        showConfirmButton: false
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#65a30d',
+        width: '36em'
     });
     @endif
     @if (session('error'))
@@ -24,9 +24,9 @@ document.addEventListener('DOMContentLoaded', function () {
         icon: 'success',
         title: 'Success',
         text: @json(session('status')),
-        timer: 3500,
-        timerProgressBar: true,
-        showConfirmButton: false
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#65a30d',
+        width: '36em'
     });
     @endif
     @if (session('saved'))
@@ -34,9 +34,8 @@ document.addEventListener('DOMContentLoaded', function () {
         icon: 'success',
         title: 'Saved',
         text: 'Changes saved successfully.',
-        timer: 2500,
-        timerProgressBar: true,
-        showConfirmButton: false
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#65a30d'
     });
     @endif
     @if ($errors->any())

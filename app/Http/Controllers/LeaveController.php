@@ -741,7 +741,7 @@ public function uploadProof(Request $request, $id)
     if (! LeaveProofRules::employeeCanSubmitAttachmentNow($leaveRequest)) {
         $deadline = LeaveProofRules::proofDeadlineAt($leaveRequest);
         $message = $deadline
-            ? 'Attachments can only be uploaded or replaced from your leave start date through '.$deadline->format('d M Y').'.'
+            ? (LeaveProofRules::proofUploadWindowSentence($leaveRequest, 'Attachments can only be uploaded or replaced') ?? 'Attachments cannot be uploaded for this request at this time.')
             : 'Attachments cannot be uploaded for this request at this time.';
 
         return redirect()->route('leave.myRequests')->with('error', $message);
@@ -817,6 +817,10 @@ public function myRequests(Request $request)
     $userId = Auth::id();
     $status = strtolower((string) $request->query('status', 'all'));
     $search = trim((string) $request->query('search', ''));
+    $highlightRequestId = (int) $request->query('request_id', 0);
+    if ($highlightRequestId > 0 && $search === '') {
+        $search = (string) $highlightRequestId;
+    }
     $searchKey = strtolower($search);
 
     $query = LeaveRequest::query()

@@ -43,6 +43,10 @@ class RequestsController extends Controller
     {
         $status = strtolower((string) $request->query('status', 'all'));
         $search = trim((string) $request->query('search', ''));
+        $highlightRequestId = (int) $request->query('request_id', 0);
+        if ($highlightRequestId > 0 && $search === '') {
+            $search = (string) $highlightRequestId;
+        }
         $searchKey = strtolower($search);
         $monthFilter = $request->query('month');
         $employeeFilter = DashboardEmployeeFilter::selectedId($request->query('employee'));

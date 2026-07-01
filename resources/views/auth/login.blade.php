@@ -349,6 +349,18 @@
             });
         </script>
     @endif
+
+    @if (request()->query('password_reset') === '1')
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Password updated',
+                text: 'Your password has been reset. Please sign in with your new password.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#b2cd16'
+            });
+        </script>
+    @endif
 </body>
 
 </html>

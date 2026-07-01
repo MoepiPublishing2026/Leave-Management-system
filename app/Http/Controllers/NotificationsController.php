@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\NotificationDestination;
+use App\Support\UserNotifications;
 use Illuminate\Http\Request;
 
 class NotificationsController extends Controller
@@ -10,7 +11,7 @@ class NotificationsController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $notifications = $user->notifications()->latest()->paginate(20);
+        $notifications = UserNotifications::latestForIndex($user, 20);
 
         // Render the correct layout per role (prevents Manager/Admin from seeing Employee layout)
         $view = match ($user->role ?? 'employee') {
@@ -27,6 +28,10 @@ class NotificationsController extends Controller
         $user = auth()->user();
 
         $notificationModel = $user->notifications()->whereKey($notification)->firstOrFail();
+
+        if (! UserNotifications::isVisibleTo($notificationModel, $user)) {
+            abort(404);
+        }
 
         if (is_null($notificationModel->read_at)) {
             $notificationModel->markAsRead();
@@ -52,7 +57,12 @@ class NotificationsController extends Controller
     public function markAsRead(Request $request)
     {
         $user = auth()->user();
-        $user->unreadNotifications->markAsRead();
+
+        $user->unreadNotifications->each(function ($notification) use ($user) {
+            if (\App\Support\UserNotifications::isVisibleTo($notification, $user)) {
+                $notification->markAsRead();
+            }
+        });
 
         return back()->with('success', 'Notifications marked as read.');
     }

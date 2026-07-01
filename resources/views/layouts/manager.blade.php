@@ -396,7 +396,7 @@
             }
             $notificationCount = 0;
             if (auth()->check()) {
-                $notificationCount = auth()->user()->unreadNotifications()->count();
+                $notificationCount = \App\Support\UserNotifications::unreadCount(auth()->user());
             }
         @endphp
 
@@ -417,7 +417,7 @@
             @auth
             @php
                 $user = auth()->user();
-                $notifications = $user->unreadNotifications()->take(10)->get();
+                $notifications = \App\Support\UserNotifications::unreadForDropdown($user, 10);
             @endphp
 
             <div class="nav-item dropdown">

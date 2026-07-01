@@ -402,8 +402,8 @@
         @auth
         @php
             $user = auth()->user();
-            $notifications = $user ? $user->unreadNotifications()->take(10)->get() : collect();
-            $notificationCount = $user ? $user->unreadNotifications()->count() : 0;
+            $notifications = $user ? \App\Support\UserNotifications::unreadForDropdown($user, 10) : collect();
+            $notificationCount = $user ? \App\Support\UserNotifications::unreadCount($user) : 0;
         @endphp
         @else
         @php

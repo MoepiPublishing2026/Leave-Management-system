@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\LeaveRequest;
 use App\Models\User;
 use Illuminate\Notifications\DatabaseNotification;
 
@@ -9,6 +10,10 @@ class NotificationDestination
 {
     public static function url(DatabaseNotification $notification, User $user): string
     {
+        if (! UserNotifications::isVisibleTo($notification, $user)) {
+            return route('notifications.index');
+        }
+
         $data = is_array($notification->data) ? $notification->data : [];
         $role = strtolower((string) ($user->role ?? 'employee'));
 
@@ -17,11 +22,40 @@ class NotificationDestination
         }
 
         if (! empty($data['leave_request_id'])) {
-            return match ($role) {
-                'manager' => route('manager.requests.index', ['status' => 'all']),
-                'admin' => route('admin.requests', ['status' => 'all']),
-                default => route('leave.myRequests'),
-            };
+            $requestId = (int) $data['leave_request_id'];
+
+            if ($role === 'employee') {
+                $ownsRequest = LeaveRequest::query()
+                    ->whereKey($requestId)
+                    ->where('user_id', $user->id)
+                    ->exists();
+
+                if (! $ownsRequest) {
+                    return route('notifications.index');
+                }
+
+                return route('leave.myRequests', [
+                    'status' => 'all',
+                    'search' => (string) $requestId,
+                    'request_id' => $requestId,
+                ]);
+            }
+
+            if ($role === 'manager') {
+                return route('manager.requests.index', [
+                    'status' => 'all',
+                    'search' => (string) $requestId,
+                    'request_id' => $requestId,
+                ]);
+            }
+
+            if ($role === 'admin') {
+                return route('admin.requests', [
+                    'status' => 'all',
+                    'search' => (string) $requestId,
+                    'request_id' => $requestId,
+                ]);
+            }
         }
 
         return route('notifications.index');
