@@ -14,6 +14,7 @@ use App\Support\LeaveProofRules;
 use App\Support\LeaveRequestSearch;
 use App\Support\LeaveRequestPeriodFilter;
 use App\Support\DashboardEmployeeFilter;
+use App\Support\OverdueLeaveEscalation;
 use Illuminate\Support\Carbon;
 use App\Models\User;
 use App\Notifications\OverdueLeaveEscalatedNotification;
@@ -83,7 +84,16 @@ class RequestsController extends Controller
         }
 
         $requests = $query->orderByDesc('created_at')->paginate(10)->withQueryString();
-        return view('manager.requests.index', compact('requests', 'status', 'search', 'monthFilter', 'employeeFilter'));
+        $overdueNeedingReason = OverdueLeaveEscalation::pendingReasonQueue();
+
+        return view('manager.requests.index', compact(
+            'requests',
+            'status',
+            'search',
+            'monthFilter',
+            'employeeFilter',
+            'overdueNeedingReason'
+        ));
     }
 
   
@@ -92,6 +102,10 @@ class RequestsController extends Controller
 public function approve($id)
 {
     $leave = LeaveRequest::findOrFail($id);
+
+    if ($leave->isManagerApplicant()) {
+        return redirect()->back()->with('error', 'Manager leave requests are approved by an administrator.');
+    }
 
     if (strtolower($leave->status) !== 'pending') {
         return redirect()->back()->with('error', 'Only pending requests can be approved.');
@@ -144,6 +158,10 @@ public function approve($id)
 public function reject(Request $r, $id)
 {
     $leave = LeaveRequest::findOrFail($id);
+
+    if ($leave->isManagerApplicant()) {
+        return redirect()->back()->with('error', 'Manager leave requests are handled by an administrator.');
+    }
 
     if (strtolower($leave->status) !== 'pending') {
         return redirect()->back()->with('error', 'Only pending requests can be rejected.');
@@ -237,6 +255,14 @@ public function escalate(Request $r, $id)
     }
     foreach ($admins as $admin) {
         $admin->notify(new OverdueLeaveEscalatedNotification($leave, $managerName));
+    }
+
+    if ($r->expectsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Late response reason sent to admin.',
+            'remaining' => OverdueLeaveEscalation::pendingReasonQueue()->count(),
+        ]);
     }
 
     return redirect()->back()->with('success', 'Late response reason sent to admin.');

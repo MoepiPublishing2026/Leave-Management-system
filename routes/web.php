@@ -30,6 +30,7 @@ use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\CalendarController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\ManagerLeaveRequestController;
 
 //Manager Controllers
 use App\Http\Controllers\Manager\DashboardsController;
@@ -121,6 +122,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     Route::get('/requests', [LeaveRequestController::class, 'index'])->name('requests');
     Route::delete('/requests/{leaveRequest}', [LeaveRequestController::class, 'destroy'])->name('requests.destroy');
+    Route::get('/manager-requests', [ManagerLeaveRequestController::class, 'index'])->name('manager-requests');
+    Route::patch('/manager-requests/{id}/approve', [ManagerLeaveRequestController::class, 'approve'])->name('manager-requests.approve');
+    Route::patch('/manager-requests/{id}/reject', [ManagerLeaveRequestController::class, 'reject'])->name('manager-requests.reject');
+    Route::get('/manager-requests/{id}/show-reason', [ManagerLeaveRequestController::class, 'showRejectionReason'])->name('manager-requests.show_reason');
    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
    Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
     Route::get('/settings', [\App\Http\Controllers\Admin\LeaveSettingsController::class, 'index'])->name('settings');
@@ -149,7 +154,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 //Manager Routes
 Route::prefix('manager')->name('manager.')->middleware('auth')->group(function () {
-    Route::get('/dashboard', [DashboardsController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardsController::class, 'team'])->name('dashboard');
+    Route::get('/my-leave-dashboard', [DashboardsController::class, 'personal'])->name('personal');
+    Route::get('/team', fn () => redirect()->route('manager.dashboard'))->name('team');
 
 Route::get('requests', [RequestsController::class, 'index'])->name('requests.index');
     Route::patch('requests/{id}/approve', [RequestsController::class, 'approve'])->name('requests.approve');
@@ -163,6 +170,10 @@ Route::get('requests', [RequestsController::class, 'index'])->name('requests.ind
     Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.export_pdf');
     Route::get('/analytics', [AnalyticController::class, 'index'])->name('analytics');
     Route::get('/calendar', [CalendarsController::class, 'index'])->name('calendar');
+    Route::get('/my-calendar', [CalendarsController::class, 'personal'])->name('myCalendar');
+    Route::get('/apply', [LeaveController::class, 'applyForm'])->name('apply');
+    Route::post('/apply', [LeaveController::class, 'submit'])->name('leave.submit');
+    Route::get('/my-leave', [LeaveController::class, 'myRequests'])->name('myLeave');
     Route::get('/request', function () {
         return redirect()->route('manager.requests.index', ['status' => 'all']);
     })->name('request');

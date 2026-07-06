@@ -1,10 +1,13 @@
 @php
     $pageClass = $pageClass ?? 'calendar-page';
     $daysWithLeave = (int) ($summary['days_with_leave'] ?? 0);
+    $hideTitle = !empty($hideTitle);
 @endphp
 
 <div class="{{ $pageClass }} calendar-page calendar-page--interactive">
+    @unless($hideTitle)
     <h1 id="calendar-heading">{{ $calendarTitle }}</h1>
+    @endunless
 
     <div class="calendar-shell mt-3">
         @include('partials.calendar-month-picker', [

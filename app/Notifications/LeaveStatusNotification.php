@@ -27,11 +27,12 @@ class LeaveStatusNotification extends Notification
     public function toMail($notifiable)
     {
         $status = ucfirst($this->leaveRequest->status);
+        $approver = $this->approverLabel();
 
         return (new MailMessage)
             ->subject("Leave Request $status")
             ->greeting("Hello {$notifiable->first_name},")
-            ->line("Your leave request has been $status by {$this->manager->first_name} {$this->manager->last_name}.")
+            ->line("Your leave request has been $status by {$approver}.")
             ->action('View Leave Requests', url('/leave/myRequests'))
             ->line('Thank you for using our system!');
     }
@@ -40,8 +41,20 @@ class LeaveStatusNotification extends Notification
     {
         return [
             'leave_request_id' => $this->leaveRequest->id,
-            'message' => "Your leave request has been {$this->leaveRequest->status} by {$this->manager->first_name} {$this->manager->last_name}.",
+            'message' => "Your leave request has been {$this->leaveRequest->status} by {$this->approverLabel()}.",
             'date' => now(),
         ];
+    }
+
+    private function approverLabel(): string
+    {
+        $role = strtolower((string) ($this->manager->role ?? ''));
+        if ($role === 'admin') {
+            return 'an administrator';
+        }
+
+        $name = trim(($this->manager->first_name ?? '') . ' ' . ($this->manager->last_name ?? ''));
+
+        return $name !== '' ? $name : 'your manager';
     }
 }

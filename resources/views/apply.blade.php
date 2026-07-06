@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends($layout ?? 'layouts.app')
 
 @section('title', 'Leave Application')
 
@@ -268,6 +268,12 @@
       color: #991b1b;
       font-size: 12px;
   }
+  .parental-leave-note {
+      margin: 8px 0 0;
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.45;
+  }
   form.leave-form .button-group {
       flex-basis: 100%;
       margin-top: 40px;
@@ -318,7 +324,7 @@
         </div>
     @endif
 
-    <form class="leave-form" method="POST" action="{{ route('leave.submit') }}" enctype="multipart/form-data" novalidate>
+    <form class="leave-form" method="POST" action="{{ route($submitRoute ?? 'leave.submit') }}" enctype="multipart/form-data" novalidate>
         @csrf
 
         <label class="section-title" style="flex-basis:100%;font-size:16px;margin-bottom:5px;">Leave Info</label>
@@ -326,12 +332,28 @@
             <label for="leave_type">Types of Leaves:</label>
             <select id="leave_type" name="leave_type" required>
                 <option value="">Select Leave Type</option>
-                @php $selectedLeaveType = old('leave_type', request('leave_type')); @endphp
+                @php
+                    $selectedLeaveType = old('leave_type', request('leave_type'));
+                    if (!empty($blockedParentalLeaveType) && strcasecmp((string) $selectedLeaveType, (string) $blockedParentalLeaveType) === 0) {
+                        $selectedLeaveType = '';
+                    }
+                @endphp
                 @foreach(\App\Models\LeavePolicy::where('leave_type', '!=', 'Urgent')->get() as $policy)
-                    <option value="{{ $policy->leave_type }}" {{ $selectedLeaveType == $policy->leave_type ? 'selected' : '' }}>
+                    @php
+                        $isBlockedParental = !empty($blockedParentalLeaveType)
+                            && strcasecmp((string) $policy->leave_type, (string) $blockedParentalLeaveType) === 0;
+                    @endphp
+                    <option value="{{ $policy->leave_type }}"
+                        @selected($selectedLeaveType == $policy->leave_type)
+                        @disabled($isBlockedParental)>
                     {{ $policy->leave_type }}</option>
                 @endforeach
             </select>
+            @if (!empty($usedParentalLeaveType) && !empty($blockedParentalLeaveType))
+                <p class="parental-leave-note" id="parental-leave-note">
+                    You already have a <strong>{{ $usedParentalLeaveType }}</strong> request on record, so <strong>{{ $blockedParentalLeaveType }}</strong> leave is not available.
+                </p>
+            @endif
         </div>
 
         <div class="input-group input-group--half">
@@ -394,6 +416,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const publicHolidays = @json($publicHolidays);
     const leaveBalancesByYear = @json($leaveBalancesByYear);
     const nowYear = @json($nowYear);
+    const blockedParentalLeaveType = @json($blockedParentalLeaveType ?? null);
     function countsAgainstAnnual(leaveType) {
         if (!leaveType) return false;
         const excluded = @json(\App\Support\AnnualLeaveRules::EXCLUDED_FROM_ANNUAL);
@@ -453,6 +476,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const startDateInput = document.getElementById('start_date');
     const requiresProofByType = @json(\App\Models\LeavePolicy::all()->keyBy('leave_type')->map->requires_proof);
     const allowHalfDaysByType = @json(\App\Models\LeavePolicy::all()->keyBy('leave_type')->map->allow_half_days);
+    const approverLabel = @json($approverLabel ?? 'your manager');
 
     const MAX_FILE_BYTES = 10 * 1024 * 1024;
     const ALLOWED_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
@@ -602,7 +626,7 @@ document.addEventListener('DOMContentLoaded', function () {
             fileUploadContainer.classList.remove('required');
             attachmentBadge.textContent = 'Optional now';
             attachmentBadge.className = 'attachment-badge attachment-badge--optional';
-            let hint = 'Submit without a doctor\'s letter. Once your manager approves, upload it from My Leave Requests on your leave start date, or by the following day at the latest.';
+            let hint = `Submit without a doctor's letter. Once ${approverLabel} approves, upload it from My Leave Requests on your leave start date, or by the following day at the latest.`;
             if (startDate) {
                 const start = new Date(startDate + 'T00:00:00');
                 if (!isNaN(start.getTime())) {
@@ -673,21 +697,36 @@ document.addEventListener('DOMContentLoaded', function () {
         const options = Array.from(leaveTypeSelect.options);
         options.forEach((opt) => {
             if (!opt.value) return;
+            let disabled = false;
             if (annualBalance <= 0 && countsAgainstAnnual(opt.value)) {
-                opt.disabled = true;
-            } else {
-                opt.disabled = false;
+                disabled = true;
             }
+            if (blockedParentalLeaveType && opt.value && opt.value.toLowerCase() === blockedParentalLeaveType.toLowerCase()) {
+                disabled = true;
+            }
+            opt.disabled = disabled;
         });
 
         if (leaveTypeSelect.value && leaveTypeSelect.options[leaveTypeSelect.selectedIndex]?.disabled) {
             leaveTypeSelect.value = '';
+        }
+
+        if (typeof window.syncFilterSelectOptions === 'function') {
+            window.syncFilterSelectOptions(leaveTypeSelect);
         }
     }
 
     startDateInput.addEventListener('change', updateAnnualEligibility);
     leaveTypeSelect.addEventListener('change', updateAnnualEligibility);
     updateAnnualEligibility();
+
+    if (blockedParentalLeaveType && leaveTypeSelect.value
+        && leaveTypeSelect.value.toLowerCase() === blockedParentalLeaveType.toLowerCase()) {
+        leaveTypeSelect.value = '';
+        if (typeof window.syncFilterSelectOptions === 'function') {
+            window.syncFilterSelectOptions(leaveTypeSelect);
+        }
+    }
 
     leaveForm.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -703,6 +742,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon: 'warning',
                 title: 'Missing Info',
                 text: 'Please select a type of leave.',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+        if (blockedParentalLeaveType && leaveType.toLowerCase() === blockedParentalLeaveType.toLowerCase()) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Leave Type Not Available',
+                text: `${blockedParentalLeaveType} leave is not available because you already have the other parental leave type on record.`,
                 confirmButtonText: 'OK'
             });
             return;

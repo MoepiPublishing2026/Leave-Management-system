@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends($layout ?? 'layouts.app')
 
 @section('title', 'My Leave Requests')
 
@@ -11,17 +11,37 @@
 @endphp
 
 <div class="requests-page">
-    <h1>My Leave Requests</h1>
-    <p class="requests-page-lead">
-        Showing <strong>{{ ucfirst($status) }}</strong>
-        @if ($leaveRequests->total() > 0)
-            · {{ $leaveRequests->total() }} {{ Str::plural('request', $leaveRequests->total()) }}
-        @endif
-    </p>
+    @if(($layout ?? '') === 'layouts.manager')
+        <div class="mgr-page-header">
+            <div class="mgr-page-header__main">
+                <h1>My Leave Requests</h1>
+                <p class="requests-page-lead">
+                    Showing <strong>{{ ucfirst($status) }}</strong>
+                    @if ($leaveRequests->total() > 0)
+                        · {{ $leaveRequests->total() }} {{ Str::plural('request', $leaveRequests->total()) }}
+                    @endif
+                </p>
+            </div>
+            @include('partials.manager-scope-switch', [
+                'scope' => 'personal',
+                'teamUrl' => route('manager.requests.index', ['status' => 'all']),
+                'teamLabel' => 'Requests',
+            ])
+        </div>
+    @else
+        <h1>My Leave Requests</h1>
+        <p class="requests-page-lead">
+            Showing <strong>{{ ucfirst($status) }}</strong>
+            @if ($leaveRequests->total() > 0)
+                · {{ $leaveRequests->total() }} {{ Str::plural('request', $leaveRequests->total()) }}
+            @endif
+        </p>
+    @endif
 
     @include('partials.requests-toolbar', [
-        'formRoute' => 'leave.myRequests',
-        'filterRoute' => 'leave.myRequests',
+        'formRoute' => $formRoute ?? 'leave.myRequests',
+        'filterRoute' => $filterRoute ?? 'leave.myRequests',
+        'newRequestRoute' => $newRequestRoute ?? 'apply',
         'status' => $status,
         'search' => $search ?? '',
         'showNewRequest' => true,
@@ -174,7 +194,7 @@
         </table>
     </div>
 
-    <p class="requests-hint">Click any row to view full request details. For approved sick leave, upload your doctor's letter using <strong>Upload doctor's letter</strong> in the Actions column on your leave start date (by the next day at the latest).</p>
+    <p class="requests-hint">Click any row to view full request details.@if(($layout ?? '') === 'layouts.manager') Pending requests are reviewed by an administrator.@endif For approved sick leave, upload your doctor's letter using <strong>Upload doctor's letter</strong> in the Actions column on your leave start date (by the next day at the latest).</p>
 
     <div class="requests-pagination">
         {{ $leaveRequests->links('pagination::bootstrap-5') }}

@@ -402,7 +402,8 @@
 
         <nav class="menu" aria-label="Primary Navigation">
             <a href="{{ route('manager.dashboard') }}" class="{{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">Dashboard</a>
-            <a href="{{ route('manager.requests.index', ['status' => 'all']) }}" class="{{ request()->routeIs('manager.requests.index') ? 'active' : '' }}">Requests</a>
+            <a href="{{ route('manager.requests.index', ['status' => 'all']) }}" class="{{ request()->routeIs('manager.requests.*') ? 'active' : '' }}">Requests</a>
+            <a href="{{ route('manager.apply') }}" class="{{ request()->routeIs('manager.apply') ? 'active' : '' }}">Apply</a>
             <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
                 Messages
                 @if($unreadMessageCount > 0)
@@ -498,7 +499,8 @@
             @endauth
         </div>
         <a href="{{ route('manager.dashboard') }}" class="{{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">Dashboard</a>
-        <a href="{{ route('manager.requests.index', ['status' => 'all']) }}" class="{{ request()->routeIs('manager.requests.index') ? 'active' : '' }}">Requests</a>
+        <a href="{{ route('manager.requests.index', ['status' => 'all']) }}" class="{{ request()->routeIs('manager.requests.*') ? 'active' : '' }}">Requests</a>
+        <a href="{{ route('manager.apply') }}" class="{{ request()->routeIs('manager.apply') ? 'active' : '' }}">Apply</a>
         <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
             Messages
             @if($unreadMessageCount > 0)

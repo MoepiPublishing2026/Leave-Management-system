@@ -18,11 +18,18 @@ use App\Support\AnnualLeaveRules;
 use App\Support\LeaveProofRules;
 use App\Support\LeaveRequestSearch;
 use App\Support\MonthlyLeaveStatusBreakdown;
-use App\Support\PercentageDistribution;
+use App\Support\LeaveApplicant;
+use App\Support\LeaveReminderService;
+use App\Support\ParentalLeaveRules;
+use App\Support\PersonalLeaveDashboardData;
 
 
 class LeaveController extends Controller
 {
+private function myRequestsRoute(): string
+{
+    return LeaveApplicant::myRequestsRoute(auth()->user());
+}
 
 private function yearWindow(int $year): array
 {
@@ -64,160 +71,19 @@ private function countWorkingDaysInYear(Carbon $start, Carbon $end, array $publi
    
 public function dashboard()
     {
-        $userId = auth()->id();
-
-        // Fetch counts by status (case-insensitive)
-        $rawStatusCounts = LeaveRequest::where('user_id', $userId)
-            ->selectRaw('LOWER(status) as status, COUNT(*) as total')
-            ->groupBy(\DB::raw('LOWER(status)'))
-            ->pluck('total', 'status')
-            ->toArray();
-
-        // Normalize keys to lowercase and fill missing with 0
-        $statusCounts = ['pending' => 0, 'approved' => 0, 'rejected' => 0, 'withdrawn' => 0];
-        foreach ($rawStatusCounts as $status => $count) {
-            $statusCounts[strtolower(trim((string) $status))] = $count;
+        $user = auth()->user();
+        if (LeaveApplicant::isManager($user)) {
+            return redirect()->route('manager.dashboard');
         }
 
-        $pendingTotalCount = $statusCounts['pending'];
-        $approvedCount = $statusCounts['approved'];
-        $rejectedCount = $statusCounts['rejected'];
-        $withdrawnCount = $statusCounts['withdrawn'];
+        LeaveReminderService::syncForUser($user);
 
-        $overduePendingCount = LeaveRequest::where('user_id', $userId)
-            ->whereRaw('LOWER(status) = ?', ['pending'])
-            ->whereDate('start_date', '<', Carbon::today())
-            ->count();
-        $pendingCount = max(0, $pendingTotalCount - $overduePendingCount);
-
-        $allRequestsCount = LeaveRequest::where('user_id', $userId)->count();
-
-        // Leave type counts
-        $leaveTypeCounts = LeaveRequest::where('user_id', $userId)
-            ->select('leave_type', \DB::raw('count(*) as total'))
-            ->groupBy('leave_type')
-            ->pluck('total', 'leave_type')
-            ->toArray();
-        arsort($leaveTypeCounts, SORT_NUMERIC);
-        $leaveTypePercentages = PercentageDistribution::oneDecimalPercents($leaveTypeCounts);
-
-        // Monthly chart: submissions in the current calendar year only (month-only filter would stack every October, etc.)
-        $dashboardYear = (int) Carbon::now()->year;
-        $barLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        $barData = [];
-        foreach ($barLabels as $month) {
-            $barData[] = LeaveRequest::where('user_id', $userId)
-                ->whereYear('created_at', $dashboardYear)
-                ->whereMonth('created_at', date('m', strtotime($month . ' 1')))
-                ->count();
-        }
-
-        $monthlyBreakdown = MonthlyLeaveStatusBreakdown::fromQuery(
-            LeaveRequest::where('user_id', $userId)->whereYear('created_at', $dashboardYear),
-            'created_at'
-        );
-        $monthlyApprovedData = $monthlyBreakdown['monthlyApprovedData'];
-        $monthlyPendingData = $monthlyBreakdown['monthlyPendingData'];
-        $monthlyOverdueData = $monthlyBreakdown['monthlyOverdueData'];
-        $monthlyRejectedData = $monthlyBreakdown['monthlyRejectedData'];
-        $monthlyWithdrawnData = $monthlyBreakdown['monthlyWithdrawnData'];
-
-        // Policies keyed by leave_type
-        $policies = LeavePolicy::all()->keyBy('leave_type');
-
-        $year = $dashboardYear;
-        [$startOfYear, $endOfYear] = $this->yearWindow($year);
-
-        // Fetch approved leaves intersecting the selected year
-        $leavesTakenRaw = LeaveRequest::where('user_id', $userId)
-            ->whereRaw('LOWER(status) = ?', ['approved'])
-            ->whereDate('end_date', '>=', $startOfYear->toDateString())
-            ->whereDate('start_date', '<=', $endOfYear->toDateString())
-            ->get();
-
-        $publicHolidays = $this->generateHolidaysRange($year, $year);
-
-        // Count working leave days excluding weekends and holidays by leave type
-        $leaveDaysCounted = [];
-        foreach ($leavesTakenRaw as $leave) {
-            $start = Carbon::parse($leave->start_date);
-            $end = Carbon::parse($leave->end_date);
-            $daysCount = $this->countWorkingDaysInYear($start, $end, $publicHolidays, $year);
-            if (!empty($leave->is_half_day) && $daysCount > 0) {
-                $daysCount = 0.5;
-            }
-            $leaveDaysCounted[$leave->leave_type] = ($leaveDaysCounted[$leave->leave_type] ?? 0) + $daysCount;
-        }
-
-        // Calculate leave balances by subtracting working leave days taken
-        $leaveBalances = [];
-        foreach ($policies as $type => $policy) {
-            $taken = $leaveDaysCounted[$type] ?? 0;
-            $leaveBalances[$type] = max(0, $policy->default_days - $taken);
-        }
-        $annualKey = $policies->has('Annual') ? 'Annual' : ($policies->has('Annual Leave') ? 'Annual Leave' : 'Annual');
-        if ($policies->has($annualKey)) {
-            $annualDefault = $policies[$annualKey]->default_days ?? 30;
-            $annualPoolUsed = AnnualLeaveRules::sumDaysAgainstAnnual($leaveDaysCounted);
-            $leaveBalances[$annualKey] = max(0, $annualDefault - $annualPoolUsed);
-        }
-
-        // Build utilization dataset (no hardcoded totals)
-        $leaveUtilization = [];
-        foreach ($policies as $type => $policy) {
-            $defaultDays = (float) ($policy->default_days ?? 0);
-            $takenDays = (float) ($leaveDaysCounted[$type] ?? 0);
-            $remainingDays = (float) max(0, $defaultDays - $takenDays);
-
-            $leaveUtilization[] = [
-                'type' => $type,
-                'total' => $defaultDays,
-                'used' => $takenDays,
-                'remaining' => $remainingDays,
-            ];
-        }
-        // Mirror Annual override in utilization too (annual pool excludes sick/maternity/paternity/bereavement/unpaid)
-        if ($policies->has($annualKey ?? 'Annual')) {
-            $annualKeyResolved = $annualKey ?? 'Annual';
-            $annualDefault = (float) ($policies[$annualKeyResolved]->default_days ?? 30);
-            $annualPoolUsed = AnnualLeaveRules::sumDaysAgainstAnnual($leaveDaysCounted);
-            // replace/insert annual record
-            $leaveUtilization = array_values(array_filter($leaveUtilization, fn ($it) => $it['type'] !== $annualKeyResolved));
-            $leaveUtilization[] = [
-                'type' => $annualKeyResolved,
-                'total' => $annualDefault,
-                'used' => $annualPoolUsed,
-                'remaining' => (float) max(0, $annualDefault - $annualPoolUsed),
-            ];
-        }
-
-        $statusPercentages = PercentageDistribution::oneDecimalPercents([
-            'Pending' => (int) $pendingCount,
-            'Overdue' => (int) $overduePendingCount,
-            'Rejected' => (int) $rejectedCount,
-            'Approved' => (int) $approvedCount,
-        ]);
-
-        return view('dashboard', compact(
-            'allRequestsCount',
-            'pendingCount',
-            'approvedCount',
-            'rejectedCount',
-            'withdrawnCount',
-            'overduePendingCount',
-            'statusPercentages',
-            'leaveTypeCounts',
-            'leaveTypePercentages',
-            'year',
-            'barLabels',
-            'barData',
-            'monthlyApprovedData',
-            'monthlyPendingData',
-            'monthlyOverdueData',
-            'monthlyRejectedData',
-            'monthlyWithdrawnData',
-            'leaveBalances',
-            'leaveUtilization'
+        return view('dashboard', array_merge(
+            PersonalLeaveDashboardData::build((int) $user->id),
+            [
+                'layout' => 'layouts.app',
+                'pageTitle' => 'Employee Dashboard',
+            ]
         ));
     }
 
@@ -290,6 +156,12 @@ public function leaveBalance(Request $request)
             }
             $selectedType = $matchedKey;
         }
+    }
+
+    if (! empty($selectedType) && ParentalLeaveRules::isBlockedForUser((int) $userId, (string) $selectedType)) {
+        return redirect()
+            ->route(LeaveApplicant::balanceRoute(), ['year' => $year])
+            ->with('error', ParentalLeaveRules::blockedMessage((int) $userId, $selectedType));
     }
 
     $approvedLeaves = $leavesTakenRaw;
@@ -381,7 +253,8 @@ public function leaveBalance(Request $request)
         $allocated = (float) ($info['default_days'] ?? 0);
         $taken = (float) ($info['taken_days'] ?? 0);
         $typeUsagePercent = $allocated > 0 ? min(100, (int) round(($taken / $allocated) * 100)) : 0;
-        $isTypeDisabled = $annualRemaining <= 0 && !in_array($selectedType, $notDisabledWhenAnnualExhausted, true);
+        $isTypeDisabled = ($annualRemaining <= 0 && !in_array($selectedType, $notDisabledWhenAnnualExhausted, true))
+            || ParentalLeaveRules::isBlockedForUser((int) $userId, (string) $selectedType);
         $countsAgainstAnnual = AnnualLeaveRules::countsAgainstAnnual((string) $selectedType);
 
         $focusedBalance = array_merge($info, [
@@ -395,11 +268,14 @@ public function leaveBalance(Request $request)
         $leaveTypeOptions[] = [
             'type' => $type,
             'remaining' => (float) ($info['remaining_days'] ?? 0),
-            'disabled' => $annualRemaining <= 0 && !in_array($type, $notDisabledWhenAnnualExhausted, true),
+            'disabled' => ($annualRemaining <= 0 && !in_array($type, $notDisabledWhenAnnualExhausted, true))
+                || ParentalLeaveRules::isBlockedForUser((int) $userId, (string) $type),
         ];
     }
 
-    return view('leave.balance', compact(
+    $user = auth()->user();
+
+    return view('leave.balance', array_merge(compact(
         'year',
         'currentYear',
         'yearOptions',
@@ -419,7 +295,13 @@ public function leaveBalance(Request $request)
         'typeUsagePercent',
         'countsAgainstAnnual',
         'notDisabledWhenAnnualExhausted'
-    ));
+    ), [
+        'layout' => LeaveApplicant::layout($user),
+        'dashboardRoute' => LeaveApplicant::personalDashboardRoute($user),
+        'myRequestsRoute' => LeaveApplicant::myRequestsRoute($user),
+        'applyRoute' => LeaveApplicant::applyRoute($user),
+        'balanceRoute' => LeaveApplicant::balanceRoute(),
+    ]));
 }
 
 
@@ -439,6 +321,21 @@ public function generateHolidaysRange($startYear, $endYear)
 
 public function applyForm()
 {
+    $user = auth()->user();
+    if (! LeaveApplicant::canApplyLeave($user)) {
+        abort(403);
+    }
+    if (LeaveApplicant::isManager($user) && ! request()->routeIs('manager.*')) {
+        return redirect()->route('manager.apply');
+    }
+
+    $blockedParentalLeaveType = ParentalLeaveRules::blockedLeaveTypeLabel((int) $user->id);
+    $requestedLeaveType = (string) request()->query('leave_type', '');
+    if ($blockedParentalLeaveType !== null && $requestedLeaveType !== ''
+        && strcasecmp($requestedLeaveType, $blockedParentalLeaveType) === 0) {
+        return redirect()->route(LeaveApplicant::applyRoute($user));
+    }
+
     $nowYear = date('Y');
     $futureYearLimit = $nowYear + 10;  // Change limit as needed
     $publicHolidays = $this->generateHolidaysRange($nowYear, $futureYearLimit);
@@ -514,12 +411,27 @@ public function applyForm()
         $leaveBalancesByYear[$year][$annualKey] = max(0, $annualDefault - $annualPoolUsed);
     }
 
-    return view('apply', compact('publicHolidays', 'leaveBalancesByYear', 'nowYear'));
+    return view('apply', [
+        'publicHolidays' => $publicHolidays,
+        'leaveBalancesByYear' => $leaveBalancesByYear,
+        'nowYear' => $nowYear,
+        'layout' => LeaveApplicant::layout($user),
+        'submitRoute' => LeaveApplicant::submitRoute($user),
+        'approverLabel' => LeaveApplicant::approverLabel($user),
+        'isManagerApplicant' => LeaveApplicant::isManager($user),
+        'usedParentalLeaveType' => ParentalLeaveRules::usedParentalLeaveType((int) $user->id),
+        'blockedParentalLeaveType' => ParentalLeaveRules::blockedLeaveTypeLabel((int) $user->id),
+    ]);
 }
 
 
  public function submit(Request $request)
 {
+    $user = Auth::user();
+    if (! LeaveApplicant::canApplyLeave($user)) {
+        abort(403);
+    }
+
     $userId = Auth::id();
 
     $leaveType = $request->input('leave_type');
@@ -557,6 +469,12 @@ public function applyForm()
     ];
 
     $validated = $request->validate($rules, $messages);
+
+    if (! ParentalLeaveRules::canApply((int) $userId, (string) $leaveType)) {
+        return redirect()->back()
+            ->withErrors(['leave_type' => ParentalLeaveRules::blockedMessage((int) $userId, (string) $leaveType)])
+            ->withInput();
+    }
 
     if ($policy && $policy->requires_proof && ! LeaveProofRules::allowsDeferredProof($leaveType) && ! $request->hasFile('file_uploads')) {
         return redirect()->back()
@@ -711,21 +629,40 @@ public function applyForm()
 
     $leaveRequest = LeaveRequest::create($validated);
 
-    // Notify managers by email and Laravel notifications
-    $managers = User::where('role', 'manager')->get()->unique('email')->values();
-
-    foreach ($managers as $manager) {
-        Mail::to($manager->email)->send(new LeaveRequestSubmittedMail($leaveRequest));
+    if (LeaveApplicant::isManager($user)) {
+        $admins = User::where('role', 'admin')->get()->unique('email')->values();
+        foreach ($admins as $admin) {
+            try {
+                Mail::to($admin->email)->send(new LeaveRequestSubmittedMail($leaveRequest));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+        if ($admins->isNotEmpty()) {
+            Notification::send($admins, new NewLeaveRequestNotification($leaveRequest));
+        }
+    } else {
+        $managers = User::where('role', 'manager')->get()->unique('email')->values();
+        foreach ($managers as $manager) {
+            try {
+                Mail::to($manager->email)->send(new LeaveRequestSubmittedMail($leaveRequest));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+        if ($managers->isNotEmpty()) {
+            Notification::send($managers, new NewLeaveRequestNotification($leaveRequest));
+        }
     }
-    Notification::send($managers, new NewLeaveRequestNotification($leaveRequest));
 
     $successMessage = 'Leave application submitted successfully!';
     if ($policy && $policy->requires_proof && LeaveProofRules::allowsDeferredProof($leaveType) && ! $request->hasFile('file_uploads')) {
         $proofDeadline = Carbon::parse($validated['start_date'])->addDay()->format('d M Y');
-        $successMessage = 'Sick leave submitted. Once your manager approves it, upload your doctor\'s letter from My Leave Requests on your leave start date, by '.$proofDeadline.' at the latest.';
+        $approverLabel = LeaveApplicant::approverLabel($user);
+        $successMessage = 'Sick leave submitted. Once '.$approverLabel.' approves it, upload your doctor\'s letter from My Leave Requests on your leave start date, by '.$proofDeadline.' at the latest.';
     }
 
-    return redirect()->route('apply')->with('success', $successMessage);
+    return redirect()->route(LeaveApplicant::applyRoute($user))->with('success', $successMessage);
 }
 
 public function uploadProof(Request $request, $id)
@@ -735,7 +672,7 @@ public function uploadProof(Request $request, $id)
         ->firstOrFail();
 
     if (! LeaveProofRules::employeeCanManageAttachments($leaveRequest)) {
-        return redirect()->route('leave.myRequests')->with('error', 'Attachments cannot be changed for this request.');
+        return redirect()->route($this->myRequestsRoute())->with('error', 'Attachments cannot be changed for this request.');
     }
 
     if (! LeaveProofRules::employeeCanSubmitAttachmentNow($leaveRequest)) {
@@ -744,7 +681,7 @@ public function uploadProof(Request $request, $id)
             ? (LeaveProofRules::proofUploadWindowSentence($leaveRequest, 'Attachments can only be uploaded or replaced') ?? 'Attachments cannot be uploaded for this request at this time.')
             : 'Attachments cannot be uploaded for this request at this time.';
 
-        return redirect()->route('leave.myRequests')->with('error', $message);
+        return redirect()->route($this->myRequestsRoute())->with('error', $message);
     }
 
     $validated = $request->validate([
@@ -776,7 +713,7 @@ public function uploadProof(Request $request, $id)
             ? 'Doctor\'s letter uploaded successfully.'
             : 'Attachment uploaded successfully.');
 
-    return redirect()->route('leave.myRequests')->with('success', $message);
+    return redirect()->route($this->myRequestsRoute())->with('success', $message);
 }
 
 
@@ -814,6 +751,15 @@ private function calculateWorkingDaysForLeave(LeaveRequest $leave): float
 
 public function myRequests(Request $request)
 {
+    $user = auth()->user();
+    if (! LeaveApplicant::canApplyLeave($user)) {
+        abort(403);
+    }
+    LeaveReminderService::syncForUser($user);
+    if (LeaveApplicant::isManager($user) && ! request()->routeIs('manager.*')) {
+        return redirect()->route('manager.myLeave', $request->query());
+    }
+
     $userId = Auth::id();
     $status = strtolower((string) $request->query('status', 'all'));
     $search = trim((string) $request->query('search', ''));
@@ -861,7 +807,15 @@ public function myRequests(Request $request)
         return $leave;
     });
 
-    return view('leave.my_requests', compact('leaveRequests', 'status', 'search'));
+    return view('leave.my_requests', [
+        'leaveRequests' => $leaveRequests,
+        'status' => $status,
+        'search' => $search,
+        'layout' => LeaveApplicant::layout($user),
+        'formRoute' => LeaveApplicant::myRequestsRoute($user),
+        'filterRoute' => LeaveApplicant::myRequestsRoute($user),
+        'newRequestRoute' => LeaveApplicant::applyRoute($user),
+    ]);
 }
 
 
@@ -873,7 +827,7 @@ public function destroy($id)
 
     if (! $leaveRequest->canBeDeletedByEmployee()) {
         return redirect()
-            ->route('leave.myRequests')
+            ->route($this->myRequestsRoute())
             ->with('error', 'This request cannot be deleted.');
     }
 
@@ -881,13 +835,13 @@ public function destroy($id)
         app(\App\Services\UserDeletionService::class)->deleteLeaveRequestRecord($leaveRequest);
 
         return redirect()
-            ->route('leave.myRequests')
+            ->route($this->myRequestsRoute())
             ->with('success', 'Leave request deleted permanently.');
     } catch (\Throwable $e) {
         report($e);
 
         return redirect()
-            ->route('leave.myRequests')
+            ->route($this->myRequestsRoute())
             ->with('error', 'Unable to delete this leave request. Please try again.');
     }
 }
@@ -899,34 +853,52 @@ public function withdraw($id)
         ->firstOrFail();
 
     if (! $leaveRequest->canBeWithdrawnByEmployee()) {
+        $user = Auth::user();
+        $contactLabel = LeaveApplicant::approverLabel($user);
         $message = $leaveRequest->isOverdue()
             ? ($leaveRequest->canBeDeletedByEmployee()
                 ? 'Overdue requests cannot be withdrawn. Please delete the request instead.'
-                : 'Overdue requests from this year cannot be withdrawn or deleted. Contact your manager if you need help.')
+                : 'Overdue requests from this year cannot be withdrawn or deleted. Contact '.$contactLabel.' if you need help.')
             : 'Only pending requests that have not started can be withdrawn.';
 
-        return redirect()->route('leave.myRequests')->with('error', $message);
+        return redirect()->route($this->myRequestsRoute())->with('error', $message);
     }
 
     $leaveRequest->status = 'withdrawn';
     $leaveRequest->save();
 
-    // Fetch all managers
-    $managers = \App\Models\User::where('role', 'manager')->get();
-
-    // Send withdrawal notification email to managers
-    foreach ($managers as $manager) {
-        \Illuminate\Support\Facades\Mail::to($manager->email)->send(new \App\Mail\LeaveWithdrawalMail($leaveRequest));
+    if ($leaveRequest->isManagerApplicant()) {
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            try {
+                Mail::to($admin->email)->send(new \App\Mail\LeaveWithdrawalMail($leaveRequest));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+        $notice = 'Leave request withdrawn and administrators notified.';
+    } else {
+        $managers = User::where('role', 'manager')->get();
+        foreach ($managers as $manager) {
+            try {
+                Mail::to($manager->email)->send(new \App\Mail\LeaveWithdrawalMail($leaveRequest));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+        $notice = 'Leave request withdrawn and managers notified.';
     }
 
-    return redirect()->route('leave.myRequests')->with('success', 'Leave request withdrawn and managers notified.');
+    return redirect()->route($this->myRequestsRoute())->with('success', $notice);
 }
 
 
 
 public function statusLeaves($status)
 {
-    return redirect()->route('leave.myRequests', ['status' => strtolower(trim((string) $status))]);
+    return redirect()->route(LeaveApplicant::myRequestsRoute(auth()->user()), [
+        'status' => strtolower(trim((string) $status)),
+    ]);
 }
 public function leavesByDate($date)
 {

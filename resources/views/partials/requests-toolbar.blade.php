@@ -43,7 +43,7 @@
 <div class="requests-toolbar">
     <div class="requests-toolbar-left">
         @if (!empty($showNewRequest))
-            <a href="{{ route('apply') }}" class="requests-btn requests-btn--primary">+ New Request</a>
+            <a href="{{ route($newRequestRoute ?? 'apply') }}" class="requests-btn requests-btn--primary">+ New Request</a>
         @endif
         @if ($monthLabel)
             <span class="requests-month-chip">

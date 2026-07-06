@@ -3,6 +3,7 @@
 @section('title', 'Manager Dashboard')
 
 @section('content')
+@include('partials.dashboard-status-card-styles')
 <style>
     body, html { margin: 0; padding: 0; }
     .manager-container {
@@ -20,7 +21,8 @@
         font-size: 36px;
         color: #0f172a;
         margin-bottom: 24px;
-        padding-left: 15px;
+        padding: 0;
+        border: none;
         letter-spacing: 0.04em;
     }
     .cards {
@@ -129,7 +131,17 @@
         .card { max-width: none; width: 100%; }
     }
 </style>
-  <h1>Manager Dashboard</h1>
+
+<div class="mgr-page-header">
+    <div class="mgr-page-header__main">
+        <h1>Manager Dashboard</h1>
+    </div>
+    @include('partials.manager-scope-switch', [
+        'scope' => 'team',
+        'personalUrl' => route('manager.personal'),
+        'personalLabel' => 'My leave dashboard',
+    ])
+</div>
 
 <div class="manager-container">
 @include('partials.dashboard-period-filter', [

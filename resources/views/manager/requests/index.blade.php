@@ -8,16 +8,52 @@
 @php
     use App\Support\LeaveProofRules;
     use App\Support\LeaveAttachmentLinks;
+    $overdueReasonCount = ($overdueNeedingReason ?? collect())->count();
 @endphp
 
-<div class="requests-page">
-    <h1>Leave Requests</h1>
-    <p class="requests-page-lead">
-        Showing <strong>{{ ucfirst($status) }}</strong>
-        @if ($requests->total() > 0)
-            · {{ $requests->total() }} {{ Str::plural('request', $requests->total()) }}
-        @endif
-    </p>
+@if($overdueReasonCount > 0)
+    <div id="overdueReasonLockOverlay" class="overdue-reason-lock-overlay" aria-hidden="true"></div>
+    <style>
+        body.overdue-reason-locked {
+            overflow: hidden;
+        }
+        body.overdue-reason-locked nav.navbar,
+        body.overdue-reason-locked main.content {
+            pointer-events: none;
+            user-select: none;
+        }
+        .overdue-reason-lock-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 19990;
+            background: rgba(15, 23, 42, 0.45);
+            pointer-events: auto;
+        }
+        body.overdue-reason-locked .overdue-reason-lock-overlay {
+            display: block;
+        }
+    </style>
+    <script>document.body.classList.add('overdue-reason-locked');</script>
+@endif
+
+<div class="requests-page" @if($overdueReasonCount > 0) data-overdue-reason-lock="1" @endif>
+    <div class="mgr-page-header">
+        <div class="mgr-page-header__main">
+            <h1>Leave Requests</h1>
+            <p class="requests-page-lead">
+                Showing <strong>{{ ucfirst($status) }}</strong>
+                @if ($requests->total() > 0)
+                    · {{ $requests->total() }} {{ Str::plural('request', $requests->total()) }}
+                @endif
+            </p>
+        </div>
+        @include('partials.manager-scope-switch', [
+            'scope' => 'team',
+            'personalUrl' => route('manager.myLeave', ['status' => 'all']),
+            'personalLabel' => 'My leave requests',
+        ])
+    </div>
 
     @include('partials.requests-toolbar', [
         'formRoute' => 'manager.requests.index',
@@ -35,6 +71,12 @@
             'overdue' => 'Overdue',
         ],
     ])
+
+    @if($overdueReasonCount > 0)
+        <div class="requests-flash requests-flash--error" id="overdueReasonBanner" role="alert">
+            You have {{ $overdueReasonCount }} overdue {{ Str::plural('request', $overdueReasonCount) }} without a late response reason. Submit the reason for each one before you can continue.
+        </div>
+    @endif
 
     <div class="requests-table-wrap">
         <table class="requests-table">
@@ -192,6 +234,177 @@
 <script>
 const rejectUrlTemplate = @json(url('/manager/requests/__ID__/reject'));
 const lateReasonUrlTemplate = @json(url('/manager/requests/__ID__/escalate'));
+let overdueReasonQueue = @json(($overdueNeedingReason ?? collect())->values());
+const overdueReasonTotal = @json($overdueReasonCount ?? 0);
+const csrfToken = document.querySelector('#late-reason-hidden-form input[name="_token"]')?.value || '';
+
+function lockOverdueReasonPage() {
+    document.body.classList.add('overdue-reason-locked');
+}
+
+function unlockOverdueReasonPage() {
+    document.body.classList.remove('overdue-reason-locked');
+}
+
+function updateOverdueReasonBanner() {
+    const banner = document.getElementById('overdueReasonBanner');
+    if (!banner) return;
+    const count = overdueReasonQueue.length;
+    if (count <= 0) {
+        banner.remove();
+        return;
+    }
+    const label = count === 1 ? 'request' : 'requests';
+    banner.textContent = `You have ${count} overdue ${label} without a late response reason. Submit the reason for each one before you can continue.`;
+}
+
+function openLateReasonPopup(requestId, options = {}) {
+    const forced = options.forced === true;
+    const meta = options.meta || {};
+    const queuePosition = options.queuePosition || null;
+    const queueTotal = options.queueTotal || null;
+    const queueLabel = queuePosition && queueTotal
+        ? `<p style="margin:0 0 10px;color:#64748b;font-size:0.9rem;">Overdue request ${queuePosition} of ${queueTotal}</p>`
+        : '';
+    const detailHtml = meta.employee
+        ? `<div style="text-align:left;margin:0 0 12px;padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;">
+                <strong>${meta.employee}</strong><br>
+                ${meta.type || 'Leave'} leave · ${meta.start || ''}${meta.end ? ' to ' + meta.end : ''}
+           </div>`
+        : '';
+
+    Swal.fire({
+        icon: 'warning',
+        title: forced ? 'Overdue request — reason required' : 'Late Response Reason',
+        html: forced
+            ? `${queueLabel}${detailHtml}<p style="margin:0;text-align:left;">This request is overdue. Explain why it was left unattended. You must complete all ${queueTotal} before continuing.</p>`
+            : undefined,
+        input: 'textarea',
+        inputLabel: 'Why was this request left unattended?',
+        inputPlaceholder: 'Type the reason...',
+        inputAttributes: { 'aria-label': 'Late response reason' },
+        showCancelButton: !forced,
+        showCloseButton: !forced,
+        confirmButtonText: 'Send to Admin',
+        cancelButtonText: 'Cancel',
+        allowOutsideClick: !forced,
+        allowEscapeKey: !forced,
+        preConfirm: (value) => {
+            const v = (value || '').trim();
+            if (!v) {
+                Swal.showValidationMessage('Reason is required.');
+                return false;
+            }
+            if (v.length > 1000) {
+                Swal.showValidationMessage('Reason must be 1000 characters or less.');
+                return false;
+            }
+            return v;
+        }
+    }).then((result) => {
+        if (!result.isConfirmed) {
+            if (forced) {
+                promptForcedOverdueReasons();
+            }
+            return;
+        }
+
+        if (forced) {
+            submitForcedOverdueReason(requestId, result.value);
+            return;
+        }
+
+        const form = document.getElementById('late-reason-hidden-form');
+        form.action = lateReasonUrlTemplate.replace('__ID__', String(requestId));
+        document.getElementById('late-reason-hidden-text').value = result.value;
+        form.submit();
+    });
+}
+
+async function submitForcedOverdueReason(requestId, reason) {
+    lockOverdueReasonPage();
+
+    Swal.fire({
+        title: 'Sending reason...',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => Swal.showLoading(),
+    });
+
+    try {
+        const response = await fetch(lateReasonUrlTemplate.replace('__ID__', String(requestId)), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({ overdue_escalation_reason: reason }),
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            const message = payload.message || payload.errors?.overdue_escalation_reason?.[0] || 'Unable to send reason. Please try again.';
+            throw new Error(message);
+        }
+
+        overdueReasonQueue = overdueReasonQueue.filter((item) => Number(item.id) !== Number(requestId));
+        updateOverdueReasonBanner();
+
+        if (overdueReasonQueue.length > 0) {
+            Swal.close();
+            promptForcedOverdueReasons();
+            return;
+        }
+
+        unlockOverdueReasonPage();
+        await Swal.fire({
+            icon: 'success',
+            title: 'All reasons submitted',
+            text: 'You can now continue reviewing requests.',
+            confirmButtonText: 'Continue',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+        });
+        window.location.reload();
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Could not send reason',
+            text: error.message || 'Please try again.',
+            confirmButtonText: 'Retry',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+        }).then(() => promptForcedOverdueReasons());
+    }
+}
+
+function promptForcedOverdueReasons() {
+    if (!Array.isArray(overdueReasonQueue) || overdueReasonQueue.length === 0) {
+        unlockOverdueReasonPage();
+        return;
+    }
+
+    lockOverdueReasonPage();
+    const first = overdueReasonQueue[0];
+    const queuePosition = Math.max(1, overdueReasonTotal - overdueReasonQueue.length + 1);
+
+    openLateReasonPopup(first.id, {
+        forced: true,
+        meta: first,
+        queuePosition,
+        queueTotal: overdueReasonTotal,
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (overdueReasonQueue.length > 0) {
+        lockOverdueReasonPage();
+        promptForcedOverdueReasons();
+    }
+});
 
 function openRejectPopup(requestId) {
     Swal.fire({
@@ -220,40 +433,8 @@ function openRejectPopup(requestId) {
     }).then((result) => {
         if (!result.isConfirmed) return;
         const form = document.getElementById('reject-hidden-form');
-        form.action = rejectUrlTemplate.replace('__ID__', requestId);
+        form.action = rejectUrlTemplate.replace('__ID__', String(requestId));
         document.getElementById('reject-hidden-reason').value = result.value;
-        form.submit();
-    });
-}
-
-function openLateReasonPopup(requestId) {
-    Swal.fire({
-        icon: 'info',
-        title: 'Late Response Reason',
-        input: 'textarea',
-        inputLabel: 'Why was this request left unattended?',
-        inputPlaceholder: 'Type the reason...',
-        inputAttributes: { 'aria-label': 'Late response reason' },
-        showCancelButton: true,
-        confirmButtonText: 'Send to Admin',
-        cancelButtonText: 'Cancel',
-        preConfirm: (value) => {
-            const v = (value || '').trim();
-            if (!v) {
-                Swal.showValidationMessage('Reason is required.');
-                return false;
-            }
-            if (v.length > 1000) {
-                Swal.showValidationMessage('Reason must be 1000 characters or less.');
-                return false;
-            }
-            return v;
-        }
-    }).then((result) => {
-        if (!result.isConfirmed) return;
-        const form = document.getElementById('late-reason-hidden-form');
-        form.action = lateReasonUrlTemplate.replace('__ID__', requestId);
-        document.getElementById('late-reason-hidden-text').value = result.value;
         form.submit();
     });
 }

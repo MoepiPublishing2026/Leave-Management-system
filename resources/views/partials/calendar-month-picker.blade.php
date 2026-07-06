@@ -7,6 +7,12 @@
     $monthName = \Carbon\Carbon::create()->month($month)->format('F');
     $todayMonth = (int) now()->month;
     $todayYear = (int) now()->year;
+    $monthParam = $monthParam ?? 'month';
+    $yearParam = $yearParam ?? 'year';
+    $routeParams = $routeParams ?? [];
+    $navParams = function (int $m, int $y) use ($monthParam, $yearParam, $routeParams) {
+        return array_merge($routeParams, [$monthParam => $m, $yearParam => $y]);
+    };
 @endphp
 
 @once
@@ -217,7 +223,7 @@
 @endonce
 
 <div class="calendar-nav-bar" id="{{ $pickerId }}" data-year-min="{{ $yearMin }}" data-year-max="{{ $yearMax }}">
-    <a href="{{ route($routeName, ['month' => $month === 1 ? 12 : $month - 1, 'year' => $month === 1 ? $year - 1 : $year]) }}"
+    <a href="{{ route($routeName, $navParams($month === 1 ? 12 : $month - 1, $month === 1 ? $year - 1 : $year)) }}"
        class="cal-nav-btn"
        aria-label="Previous month">&lsaquo;</a>
 
@@ -245,16 +251,16 @@
             <div class="cal-nav-month-grid">
                 @foreach (range(1, 12) as $m)
                     @php $short = \Carbon\Carbon::create()->month($m)->format('M'); @endphp
-                    <a href="{{ route($routeName, ['month' => $m, 'year' => $year]) }}"
+                    <a href="{{ route($routeName, $navParams($m, $year)) }}"
                        class="cal-nav-month {{ $month === $m ? 'is-active' : '' }}"
                        data-month="{{ $m }}">{{ $short }}</a>
                 @endforeach
             </div>
-            <a href="{{ route($routeName, ['month' => $todayMonth, 'year' => $todayYear]) }}" class="cal-nav-today">Jump to today</a>
+            <a href="{{ route($routeName, $navParams($todayMonth, $todayYear)) }}" class="cal-nav-today">Jump to today</a>
         </div>
     </div>
 
-    <a href="{{ route($routeName, ['month' => $month === 12 ? 1 : $month + 1, 'year' => $month === 12 ? $year + 1 : $year]) }}"
+    <a href="{{ route($routeName, $navParams($month === 12 ? 1 : $month + 1, $month === 12 ? $year + 1 : $year)) }}"
        class="cal-nav-btn"
        aria-label="Next month">&rsaquo;</a>
 </div>
@@ -288,8 +294,8 @@ document.addEventListener('DOMContentLoaded', () => {
             monthLinks.forEach((link) => {
                 const month = link.dataset.month;
                 const url = new URL(link.href, window.location.href);
-                url.searchParams.set('month', month);
-                url.searchParams.set('year', panelYear);
+                url.searchParams.set(@json($monthParam), month);
+                url.searchParams.set(@json($yearParam), panelYear);
                 link.href = url.pathname + url.search;
                 link.classList.toggle('is-active', panelYear === pageYear && parseInt(month, 10) === pageMonth);
             });

@@ -143,6 +143,12 @@
     .filter-select__option.is-selected:hover {
         background: #9eb812;
     }
+    .filter-select__option.is-disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        pointer-events: none;
+        color: #94a3b8;
+    }
     /* Leave apply form: open list flows below trigger instead of overlapping fields. */
     .leave-form .filter-select-wrap.is-open .filter-select__menu {
         position: static;
@@ -239,28 +245,54 @@
             Array.from(select.options).forEach((option) => {
                 const item = document.createElement('li');
                 item.className = 'filter-select__option' + (option.selected ? ' is-selected' : '');
+                if (option.disabled) {
+                    item.classList.add('is-disabled');
+                }
                 item.textContent = option.textContent;
                 item.dataset.value = option.value;
                 item.setAttribute('role', 'option');
                 item.setAttribute('aria-selected', option.selected ? 'true' : 'false');
-                item.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    select.value = option.value;
-                    menu.querySelectorAll('.filter-select__option').forEach((node) => {
-                        node.classList.remove('is-selected');
-                        node.setAttribute('aria-selected', 'false');
+                item.setAttribute('aria-disabled', option.disabled ? 'true' : 'false');
+                if (!option.disabled) {
+                    item.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        select.value = option.value;
+                        menu.querySelectorAll('.filter-select__option').forEach((node) => {
+                            node.classList.remove('is-selected');
+                            node.setAttribute('aria-selected', 'false');
+                        });
+                        item.classList.add('is-selected');
+                        item.setAttribute('aria-selected', 'true');
+                        const triggerLabel = select.closest('.filter-select-wrap')?.querySelector('.filter-select__label');
+                        if (triggerLabel) {
+                            triggerLabel.textContent = option.textContent;
+                        }
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                        closeAllFilterSelects();
                     });
-                    item.classList.add('is-selected');
-                    item.setAttribute('aria-selected', 'true');
-                    const triggerLabel = select.closest('.filter-select-wrap')?.querySelector('.filter-select__label');
-                    if (triggerLabel) {
-                        triggerLabel.textContent = option.textContent;
-                    }
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
-                    closeAllFilterSelects();
-                });
+                }
                 menu.appendChild(item);
             });
+        };
+
+        window.syncFilterSelectOptions = function syncFilterSelectOptions(select) {
+            if (!select || select.dataset.filterEnhanced !== '1') return;
+            const wrap = select.closest('.filter-select-wrap');
+            if (!wrap) return;
+            const menu = wrap.querySelector('.filter-select__menu');
+            const label = wrap.querySelector('.filter-select__label');
+            if (!menu) return;
+
+            const selected = select.options[select.selectedIndex];
+            if (selected?.disabled) {
+                select.value = '';
+            }
+
+            syncOptions(select, menu);
+            const active = select.options[select.selectedIndex];
+            if (label) {
+                label.textContent = active && active.value ? active.textContent : (select.options[0]?.textContent || '');
+            }
         };
 
         const enhanceSelect = (select) => {

@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\LeaveRequest;
 use App\Models\User;
+use App\Notifications\LeaveReminderNotification;
 use Illuminate\Notifications\DatabaseNotification;
 
 class NotificationDestination
@@ -24,6 +25,20 @@ class NotificationDestination
         if (! empty($data['leave_request_id'])) {
             $requestId = (int) $data['leave_request_id'];
 
+            if ($notification->type === LeaveReminderNotification::class) {
+                if ($role === 'employee') {
+                    return route('employee.calendar');
+                }
+
+                if ($role === 'manager') {
+                    $leaveRequest = LeaveRequest::query()->find($requestId);
+
+                    if ($leaveRequest && (int) $leaveRequest->user_id === (int) $user->id) {
+                        return route('manager.myCalendar');
+                    }
+                }
+            }
+
             if ($role === 'employee') {
                 $ownsRequest = LeaveRequest::query()
                     ->whereKey($requestId)
@@ -42,6 +57,16 @@ class NotificationDestination
             }
 
             if ($role === 'manager') {
+                $leaveRequest = LeaveRequest::query()->find($requestId);
+
+                if ($leaveRequest && (int) $leaveRequest->user_id === (int) $user->id) {
+                    return route('manager.myLeave', [
+                        'status' => 'all',
+                        'search' => (string) $requestId,
+                        'request_id' => $requestId,
+                    ]);
+                }
+
                 return route('manager.requests.index', [
                     'status' => 'all',
                     'search' => (string) $requestId,

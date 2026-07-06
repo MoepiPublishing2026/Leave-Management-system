@@ -1,8 +1,17 @@
-@extends('layouts.app')
+@extends($layout ?? 'layouts.app')
 
-@section('title', 'Employee Dashboard')
+@section('title', $pageTitle ?? 'Employee Dashboard')
 
 @section('content')
+@include('partials.dashboard-status-card-styles')
+@php
+    $user = auth()->user();
+    $balanceRoute = \App\Support\LeaveApplicant::balanceRoute();
+    $statusRoute = 'leave.status';
+    $myRequestsRoute = \App\Support\LeaveApplicant::myRequestsRoute($user);
+    $applyRoute = \App\Support\LeaveApplicant::applyRoute($user);
+    $calendarRoute = \App\Support\LeaveApplicant::personalCalendarRoute($user);
+@endphp
 <style>
   body, html {
     margin: 0;
@@ -148,6 +157,12 @@
   .leave-balance-item.disabled {
     opacity: 0.55;
     filter: grayscale(0.25);
+    cursor: not-allowed;
+  }
+  .leave-balance-item.disabled:hover {
+    cursor: not-allowed;
+    box-shadow: 0 0 10px rgba(167, 189, 141, 0.85);
+    transform: none;
   }
   .leave-type {
     text-align: center;
@@ -334,10 +349,47 @@
     height: 28px;
     flex-shrink: 0;
   }
+  .dashboard-top-bar {
+    max-width: 1200px;
+    margin: 0 auto 12px;
+    padding: 0 18px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .dashboard-top-bar h1 {
+    margin: 0;
+  }
 </style>
 
-<h1>Employee Dashboard</h1>
+@if(!empty($teamDashboardUrl))
+<div class="mgr-page-header">
+  <div class="mgr-page-header__main">
+    <h1>{{ $pageTitle ?? 'Employee Dashboard' }}</h1>
+  </div>
+  @include('partials.manager-scope-switch', [
+      'scope' => 'personal',
+      'teamUrl' => $teamDashboardUrl,
+      'teamLabel' => 'Dashboard',
+  ])
+</div>
+@else
+<div class="dashboard-top-bar">
+  <h1>{{ $pageTitle ?? 'Employee Dashboard' }}</h1>
+</div>
+@endif
 <div class="dashboard-container">
+
+  @if(\App\Support\LeaveApplicant::isManager($user))
+    <nav class="mgr-quick-links" aria-label="My leave pages">
+      <a href="{{ route($myRequestsRoute, ['status' => 'all']) }}" class="mgr-quick-link">My requests</a>
+      <a href="{{ route($calendarRoute) }}" class="mgr-quick-link">My calendar</a>
+      <a href="{{ route($applyRoute) }}" class="mgr-quick-link">Apply for leave</a>
+      <a href="{{ route($balanceRoute) }}" class="mgr-quick-link">Leave balances</a>
+    </nav>
+  @endif
 
   <div id="leaveBalanceCard" class="leave-balance-card" role="button" tabindex="0" aria-expanded="false" aria-controls="leaveBalanceList">
     <div class="leave-balance-title">
@@ -352,46 +404,50 @@
       @endphp
       @foreach ($leaveBalances as $type => $daysLeft)
         @php
-          $isDisabled = $annualBalance <= 0 && !in_array($type, $notDisabledWhenAnnualExhausted, true);
+          $isParentalBlocked = \App\Support\ParentalLeaveRules::isBlockedForUser((int) auth()->id(), (string) $type);
+          $isAnnualDisabled = $annualBalance <= 0 && !in_array($type, $notDisabledWhenAnnualExhausted, true);
+          $isDisabled = $isAnnualDisabled || $isParentalBlocked;
+          $disabledLabel = $isParentalBlocked ? ' (Unavailable)' : ($isDisabled ? ' (Disabled)' : '');
         @endphp
         <li class="leave-balance-item {{ $isDisabled ? 'disabled' : '' }}"
-            title="{{ $type }} Leave — {{ $daysLeft }} day{{ $daysLeft == 1 ? '' : 's' }} remaining{{ $isDisabled ? ' (Disabled)' : '' }}"
-            aria-label="{{ $type }} Leave, {{ $daysLeft }} days remaining{{ $isDisabled ? ', disabled' : '' }}"
-            onclick="{{ $isDisabled ? '' : 'event.stopPropagation(); window.location=\'' . route('leave.balance', ['type' => $type]) . '\'' }}"
-            style="{{ $isDisabled ? '' : 'cursor: pointer;' }}">
-          <span class="leave-type">{{ $type }} Leave{{ $isDisabled ? ' (Disabled)' : '' }}</span>
+            title="{{ $type }} Leave — {{ $daysLeft }} day{{ $daysLeft == 1 ? '' : 's' }} remaining{{ $disabledLabel }}"
+            aria-label="{{ $type }} Leave, {{ $daysLeft }} days remaining{{ $isDisabled ? ', unavailable' : '' }}"
+            @if($isDisabled) aria-disabled="true" @endif
+            onclick="{{ $isDisabled ? 'event.stopPropagation(); return false;' : 'event.stopPropagation(); window.location=\'' . route($balanceRoute, ['type' => $type]) . '\'' }}"
+            style="cursor: {{ $isDisabled ? 'not-allowed' : 'pointer' }};">
+          <span class="leave-type">{{ $type }} Leave{{ $disabledLabel }}</span>
         </li>
       @endforeach
     </ul>
   </div>
 
   <div class="cards" id="cardsContainer" role="list">
-    <a href="{{ route('leave.status', ['status' => 'all']) }}" role="listitem" aria-label="All leave requests" class="card card-all">
+    <a href="{{ route($statusRoute, ['status' => 'all']) }}" role="listitem" aria-label="All leave requests" class="card card-all">
       <div class="card-title">All Requests</div>
       <div class="card-value">{{ $allRequestsCount ?? 0 }}</div>
     </a>
 
-    <a href="{{ route('leave.status', ['status' => 'pending']) }}" role="listitem" aria-label="Pending Leaves count" class="card card-pending">
+    <a href="{{ route($statusRoute, ['status' => 'pending']) }}" role="listitem" aria-label="Pending Leaves count" class="card card-pending">
       <div class="card-title">Pending Leaves</div>
       <div class="card-value">{{ $pendingCount }}</div>
     </a>
 
-    <a href="{{ route('leave.status', ['status' => 'overdue']) }}" role="listitem" aria-label="Overdue Leaves count" class="card card-overdue">
+    <a href="{{ route($statusRoute, ['status' => 'overdue']) }}" role="listitem" aria-label="Overdue Leaves count" class="card card-overdue">
       <div class="card-title">Overdue Leaves</div>
       <div class="card-value">{{ $overduePendingCount ?? 0 }}</div>
     </a>
 
-    <a href="{{ route('leave.status', ['status' => 'approved']) }}" role="listitem" aria-label="Approved Leaves count" class="card card-approved">
+    <a href="{{ route($statusRoute, ['status' => 'approved']) }}" role="listitem" aria-label="Approved Leaves count" class="card card-approved">
       <div class="card-title">Approved Leaves</div>
       <div class="card-value">{{ $approvedCount }}</div>
     </a>
 
-    <a href="{{ route('leave.status', ['status' => 'rejected']) }}" role="listitem" aria-label="Rejected Leaves count" class="card card-rejected">
+    <a href="{{ route($statusRoute, ['status' => 'rejected']) }}" role="listitem" aria-label="Rejected Leaves count" class="card card-rejected">
       <div class="card-title">Rejected Leaves</div>
       <div class="card-value">{{ $rejectedCount }}</div>
     </a>
 
-    <a href="{{ route('leave.status', ['status' => 'withdrawn']) }}" role="listitem" aria-label="Withdrawn Leaves count" class="card card-withdrawn">
+    <a href="{{ route($statusRoute, ['status' => 'withdrawn']) }}" role="listitem" aria-label="Withdrawn Leaves count" class="card card-withdrawn">
       <div class="card-title">Withdrawn Leaves</div>
       <div class="card-value">{{ $withdrawnCount ?? 0 }}</div>
     </a>
@@ -710,7 +766,7 @@
       })
     });
 
-    const leaveBalances = @json($leaveBalances);
+    const leaveBalances = @json($chartLeaveBalances ?? $leaveBalances);
     const balanceEntries = Object.entries(leaveBalances).map(([type, days]) => ({
       type,
       days: Number(days) || 0

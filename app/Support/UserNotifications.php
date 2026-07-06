@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\LeaveRequest;
 use App\Models\User;
+use App\Notifications\LeaveReminderNotification;
 use App\Notifications\LeaveStatusNotification;
 use App\Notifications\MessageReceivedNotification;
 use App\Notifications\NewLeaveRequestNotification;
@@ -65,7 +66,7 @@ class UserNotifications
         $data = is_array($notification->data) ? $notification->data : [];
 
         if ($role === 'employee') {
-            if ($type !== LeaveStatusNotification::class) {
+            if (! in_array($type, [LeaveStatusNotification::class, LeaveReminderNotification::class], true)) {
                 return false;
             }
 
@@ -81,6 +82,18 @@ class UserNotifications
         }
 
         if ($role === 'manager') {
+            if (in_array($type, [LeaveStatusNotification::class, LeaveReminderNotification::class], true)) {
+                $leaveId = $data['leave_request_id'] ?? null;
+                if ($leaveId) {
+                    return LeaveRequest::query()
+                        ->whereKey($leaveId)
+                        ->where('user_id', $user->id)
+                        ->exists();
+                }
+
+                return false;
+            }
+
             return in_array($type, [
                 NewLeaveRequestNotification::class,
                 MessageReceivedNotification::class,
@@ -88,6 +101,15 @@ class UserNotifications
         }
 
         if ($role === 'admin') {
+            if ($type === NewLeaveRequestNotification::class) {
+                $leaveId = $data['leave_request_id'] ?? null;
+
+                return $leaveId && LeaveRequest::query()
+                    ->whereKey($leaveId)
+                    ->byManagerApplicants()
+                    ->exists();
+            }
+
             return in_array($type, [
                 MessageReceivedNotification::class,
                 OverdueLeaveEscalatedNotification::class,

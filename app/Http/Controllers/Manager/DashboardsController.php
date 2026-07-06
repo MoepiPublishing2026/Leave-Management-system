@@ -9,6 +9,8 @@ use App\Support\MonthlyLeaveStatusBreakdown;
 use App\Support\PercentageDistribution;
 use App\Support\LeaveRequestPeriodFilter;
 use App\Support\DashboardEmployeeFilter;
+use App\Support\PersonalLeaveDashboardData;
+use App\Support\LeaveReminderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -31,8 +33,24 @@ class DashboardsController extends Controller
         });
     }
 
-    public function index(Request $request)
+    public function personal(Request $request)
     {
+        LeaveReminderService::syncForUser(Auth::user());
+
+        return view('dashboard', array_merge(
+            PersonalLeaveDashboardData::build((int) Auth::id()),
+            [
+                'layout' => 'layouts.manager',
+                'pageTitle' => 'My Leave Dashboard',
+                'teamDashboardUrl' => route('manager.dashboard'),
+            ]
+        ));
+    }
+
+    public function team(Request $request)
+    {
+        LeaveReminderService::syncForUser(Auth::user());
+
         $monthFilter = $request->query('month', 'this_year');
         $employeeFilter = DashboardEmployeeFilter::selectedId($request->query('employee'));
         $employees = DashboardEmployeeFilter::employees();
@@ -160,15 +178,34 @@ class DashboardsController extends Controller
         $designationLabels = array_keys($designationCounts);
         $designationData = array_values($designationCounts);
 
-        return view('manager.dashboard.index', compact(
-            'allRequestsCount', 'pendingRequestsCount', 'approvedRequestsCount', 'rejectedRequestsCount',
-            'overduePendingCount', 'onLeaveTodayCount',
-            'leaveTypeCounts', 'leaveTypePercentages', 'statusCounts', 'statusPercentages',
-            'barLabels', 'barData', 'chartYear', 'departmentLabels', 'departmentData', 'departmentPercentages',
-            'monthFilter', 'employeeFilter', 'employees', 'dashboardFilters',
-            'designationLabels', 'designationData',
-            'monthlyApprovedData', 'monthlyPendingData', 'monthlyOverdueData', 'monthlyRejectedData'
-        ));
+        return view('manager.team-dashboard.index', [
+            'allRequestsCount' => $allRequestsCount,
+            'pendingRequestsCount' => $pendingRequestsCount,
+            'approvedRequestsCount' => $approvedRequestsCount,
+            'rejectedRequestsCount' => $rejectedRequestsCount,
+            'overduePendingCount' => $overduePendingCount,
+            'onLeaveTodayCount' => $onLeaveTodayCount,
+            'leaveTypeCounts' => $leaveTypeCounts,
+            'leaveTypePercentages' => $leaveTypePercentages,
+            'statusCounts' => $statusCounts,
+            'statusPercentages' => $statusPercentages,
+            'barLabels' => $barLabels,
+            'barData' => $barData,
+            'chartYear' => $chartYear,
+            'departmentLabels' => $departmentLabels,
+            'departmentData' => $departmentData,
+            'departmentPercentages' => $departmentPercentages,
+            'monthFilter' => $monthFilter,
+            'employeeFilter' => $employeeFilter,
+            'employees' => $employees,
+            'dashboardFilters' => $dashboardFilters,
+            'designationLabels' => $designationLabels,
+            'designationData' => $designationData,
+            'monthlyApprovedData' => $monthlyApprovedData,
+            'monthlyPendingData' => $monthlyPendingData,
+            'monthlyOverdueData' => $monthlyOverdueData,
+            'monthlyRejectedData' => $monthlyRejectedData,
+        ]);
     }
 
 

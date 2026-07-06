@@ -47,7 +47,7 @@
 
         nav.menu {
             display: flex;
-            gap: 18px;
+            gap: 12px;
             align-items: center;
             margin-left: auto;
         }
@@ -57,7 +57,7 @@
             font-weight: 700;
             font-size: 15px;
             text-decoration: none;
-            padding: 10px 15px;
+            padding: 10px 12px;
             border-radius: 8px;
             background-color: transparent;
             transition: background-color 0.3s ease, color 0.3s ease;
@@ -89,6 +89,77 @@
             font-size: 11px;
             font-weight: 800;
             margin-left: 6px;
+            line-height: 1;
+        }
+
+        .nav-item.dropdown {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .nav-item.dropdown > a {
+            font-weight: 700;
+            color: #5e920aff;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            background-color: transparent;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .nav-item.dropdown > a:hover,
+        .nav-item.dropdown > a:focus {
+            background-color: #eff106 !important;
+            color: #0a1347 !important;
+        }
+
+        .navbar-utilities {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+        .navbar-utilities .nav-item.dropdown > a {
+            position: relative;
+            padding: 10px 12px;
+        }
+        .navbar-utilities .nav-item.dropdown > a.dropdown-toggle::after {
+            display: none;
+        }
+        .navbar-utilities .nav-item.dropdown .badge-notification {
+            position: absolute;
+            top: 4px;
+            right: 2px;
+            margin-left: 0;
+            min-width: 17px;
+            height: 17px;
+            padding: 0 5px;
+            font-size: 10px;
+            pointer-events: none;
+        }
+        .navbar-utilities .navbar-profile {
+            margin-left: 12px;
+        }
+
+        .dropdown-menu.notifications-dropdown {
+            min-width: 420px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .dropdown-menu.notifications-dropdown .dropdown-header {
+            font-weight: 700;
+            text-align: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            background: #ffffff;
+        }
+        .dropdown-menu.notifications-dropdown .dropdown-item {
+            white-space: normal;
         }
         .mobile-menu-btn {
             display: none;
@@ -251,6 +322,7 @@
                 display: flex;
             }
             .navbar-profile { display: none; }
+            .navbar-utilities { display: none; }
             nav.menu { display: none; }
             .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
             main.content {
@@ -348,12 +420,16 @@
                     ->whereNull('m.read_at')
                     ->count();
             }
+            $notificationCount = 0;
+            if (auth()->check()) {
+                $notificationCount = \App\Support\UserNotifications::unreadCount(auth()->user());
+            }
         @endphp
 
         <nav class="menu" role="navigation" aria-label="Primary Navigation">
             <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
             <a href="{{ route('admin.employees.index') }}" class="{{ request()->routeIs('admin.employees.*') ? 'active' : '' }}">Employees</a>
-            <a href="{{ route('admin.requests') }}" class="{{ request()->routeIs('admin.requests') ? 'active' : '' }}">Requests</a>
+            <a href="{{ route('admin.requests', ['status' => 'all']) }}" class="{{ request()->routeIs(['admin.requests', 'admin.manager-requests*']) ? 'active' : '' }}">Requests</a>
             <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
                 Messages
                 @if($unreadMessageCount > 0)
@@ -366,8 +442,44 @@
             <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs(['profile.edit', 'settings.edit']) ? 'active' : '' }}">Profile</a>
             <a href="{{ route('admin.settings') }}" class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">Leave Policies</a>
         </nav>
+
         @auth
-            @php $user = auth()->user(); @endphp
+        @php
+            $user = auth()->user();
+            $notifications = \App\Support\UserNotifications::unreadForDropdown($user, 10);
+        @endphp
+        <div class="navbar-utilities">
+            <div class="nav-item dropdown">
+                <a href="#" id="notificationsDropdown" class="nav-link position-relative dropdown-toggle"
+                   role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="#5e920a" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 2C8.13401 2 5 5.13401 5 9V16L3.29289 17.7071C2.90237 18.0976 3.02331 18.7069 3.53033 18.8944C3.73765 18.9712 3.96214 19 4.18534 19H19.8147C20.0379 19 20.2624 18.9712 20.4697 18.8944C20.9767 18.7069 21.0976 18.0976 20.7071 17.7071L19 16V9C19 5.13401 15.866 2 12 2ZM7 9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V17H7V9ZM12 22C13.1046 22 14 21.1046 14 20H10C10 21.1046 10.8954 22 12 22Z"/>
+                    </svg>
+
+                    @if($notificationCount > 0)
+                        <span class="badge-notification">{{ $notificationCount }}</span>
+                    @endif
+                </a>
+
+                <ul class="dropdown-menu notifications-dropdown dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                    <li class="dropdown-header">Notifications</li>
+                    @forelse($notifications as $notification)
+                        <li>
+                            @php
+                                $notificationRedirect = \App\Support\NotificationDestination::url($notification, $user);
+                            @endphp
+                            <a href="{{ route('notifications.open', ['notification' => $notification->id, 'redirect' => $notificationRedirect]) }}" class="dropdown-item d-flex justify-content-between align-items-center">
+                                <span>{{ $notification->data['message'] ?? 'Notification' }}</span>
+                                <small class="text-muted ms-3" style="white-space: nowrap;">{{ $notification->created_at->diffForHumans() }}</small>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                    @empty
+                        <li class="dropdown-item text-center text-muted">No new notifications</li>
+                    @endforelse
+                </ul>
+            </div>
+
             <div class="navbar-profile" id="profileMenu" tabindex="0" aria-haspopup="true" aria-expanded="false" aria-label="User menu">
                 @if($user->profile_picture)
                     <img src="{{ route('users.profile_picture', ['user' => $user->id]) }}?v={{ optional($user->updated_at)->timestamp }}" alt="Profile Picture" class="profile-image" />
@@ -386,6 +498,7 @@
                     </form>
                 </div>
             </div>
+        </div>
         @endauth
     </header>
 
@@ -410,11 +523,17 @@
         </div>
         <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
         <a href="{{ route('admin.employees.index') }}" class="{{ request()->routeIs('admin.employees.*') ? 'active' : '' }}">Employees</a>
-        <a href="{{ route('admin.requests') }}" class="{{ request()->routeIs('admin.requests') ? 'active' : '' }}">Requests</a>
+        <a href="{{ route('admin.requests', ['status' => 'all']) }}" class="{{ request()->routeIs(['admin.requests', 'admin.manager-requests*']) ? 'active' : '' }}">Requests</a>
         <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
             Messages
             @if($unreadMessageCount > 0)
                 <span class="badge-notification">{{ $unreadMessageCount }}</span>
+            @endif
+        </a>
+        <a href="{{ route('notifications.index') }}" class="{{ request()->routeIs('notifications.*') ? 'active' : '' }}">
+            <span>Notifications</span>
+            @if($notificationCount > 0)
+                <span class="badge-notification">{{ $notificationCount }}</span>
             @endif
         </a>
         <a href="{{ route('admin.calendar') }}" class="{{ request()->routeIs('admin.calendar') ? 'active' : '' }}">Calendar</a>

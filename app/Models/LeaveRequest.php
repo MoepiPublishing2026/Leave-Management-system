@@ -38,13 +38,27 @@ class LeaveRequest extends Model
         return $this->belongsTo(User::class, 'handled_by');
     }
 
-    /** Leave requests submitted by employees only (managers/admins do not apply). */
+    /** Leave requests submitted by employees only. */
     public function scopeByEmployeeApplicants($query)
     {
         return $query->whereIn(
             'user_id',
             User::query()->employees()->select('id')
         );
+    }
+
+    /** Leave requests submitted by managers (approved by admin). */
+    public function scopeByManagerApplicants($query)
+    {
+        return $query->whereIn(
+            'user_id',
+            User::query()->where('role', 'manager')->select('id')
+        );
+    }
+
+    public function isManagerApplicant(): bool
+    {
+        return strtolower((string) ($this->user?->role ?? '')) === 'manager';
     }
 
     public function isOverdue(): bool
@@ -59,6 +73,19 @@ class LeaveRequest extends Model
         }
 
         return Carbon::parse($this->start_date)->lt(Carbon::today());
+    }
+
+    /** Pending overdue requests still awaiting a manager late-response reason. */
+    public function scopeNeedsOverdueEscalationReason($query)
+    {
+        return $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
+            ->whereDate('start_date', '<', Carbon::today())
+            ->whereNull('overdue_escalated_at');
+    }
+
+    public function needsOverdueEscalationReason(): bool
+    {
+        return $this->isOverdue() && empty($this->overdue_escalated_at);
     }
 
     public function canBeWithdrawnByEmployee(): bool

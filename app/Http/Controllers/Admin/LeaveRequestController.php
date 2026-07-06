@@ -26,7 +26,7 @@ class LeaveRequestController extends Controller
         $employeeFilter = DashboardEmployeeFilter::selectedId($request->query('employee'));
 
         $query = LeaveRequest::query()
-            ->byEmployeeApplicants()
+            ->whereHas('user', fn ($q) => $q->whereIn('role', ['employee', 'manager']))
             ->with(['user', 'overdueEscalatedBy', 'handledBy'])
             ->orderByDesc('created_at');
 

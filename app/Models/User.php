@@ -35,4 +35,9 @@ class User extends Authenticatable
     {
         return $query->where('role', 'employee');
     }
+
+    public function scopeManagers($query)
+    {
+        return $query->where('role', 'manager');
+    }
 }

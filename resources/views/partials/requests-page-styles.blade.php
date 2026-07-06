@@ -369,6 +369,16 @@
         color: #991b1b;
         border: 1px solid #fca5a5;
     }
+    .request-badge--manager {
+        background: #ede9fe;
+        color: #5b21b6;
+        border: 1px solid #c4b5fd;
+        font-size: 0.72rem;
+        vertical-align: middle;
+        min-width: 0;
+        margin-left: 6px;
+        padding: 3px 8px;
+    }
     .proof-upload-form {
         margin: 0;
     }

@@ -351,7 +351,12 @@
     }
     .balance-type-card.is-disabled {
         opacity: 0.55;
-        pointer-events: none;
+        cursor: not-allowed;
+    }
+    .balance-type-card.is-disabled:hover {
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
     }
     .balance-type-card .type-days {
         font-weight: 600;

@@ -1,18 +1,19 @@
 @extends('layouts.admin')
 
-@section('title', 'All Leave Requests')
+@section('title', 'Leave Requests')
 
 @section('content')
 @include('partials.requests-page-styles')
 
 @php
+    use App\Support\LeaveProofRules;
     use App\Support\LeaveAttachmentLinks;
 @endphp
 
 <div class="requests-page">
     <h1>Leave Requests</h1>
     <p class="requests-page-lead">
-        Showing <strong>{{ ucfirst($status) }}</strong>
+        Employee requests are reviewed by managers. Manager leave is approved or rejected here.
         @if ($requests->total() > 0)
             · {{ $requests->total() }} {{ Str::plural('request', $requests->total()) }}
         @endif
@@ -46,17 +47,18 @@
                 <th>End</th>
                 <th>Submitted</th>
                 <th>Status</th>
-                <th style="min-width: 140px;">Actions</th>
+                <th style="min-width: 200px;">Actions</th>
             </tr>
             </thead>
             <tbody>
             @forelse($requests as $index => $req)
                 @php
                     $fileLinks = LeaveAttachmentLinks::forRequest($req);
+                    $isManager = $req->isManagerApplicant();
 
-                    $employeeFirst = $req->user->first_name ?? '';
-                    $employeeLast = $req->user->last_name ?? '';
-                    $employeeFull = trim($employeeFirst . ' ' . $employeeLast) ?: 'User';
+                    $applicantFirst = $req->user->first_name ?? '';
+                    $applicantLast = $req->user->last_name ?? '';
+                    $applicantFull = trim($applicantFirst . ' ' . $applicantLast) ?: 'User';
 
                     $handledName = trim(($req->handledBy->first_name ?? '') . ' ' . ($req->handledBy->last_name ?? ''));
                     $lateReasonName = trim(($req->overdueEscalatedBy->first_name ?? '') . ' ' . ($req->overdueEscalatedBy->last_name ?? ''));
@@ -66,9 +68,14 @@
                     $isPreviousYear = $requestYear === ($currentYear - 1);
                     $canDelete = $isPreviousYear;
 
+                    $canApproveWithProof = $isManager ? LeaveProofRules::canApprove($req) : false;
+                    $proofBlockReason = $isManager ? LeaveProofRules::approvalBlockedReason($req) : null;
+                    $certificateStatusLabel = $isManager ? LeaveProofRules::doctorsLetterStatusLabel($req) : null;
+                    $doctorsLetterMissing = $isManager ? LeaveProofRules::isProofPastDeadline($req) : false;
+
                     $details = [
                         'id' => $req->id,
-                        'employee' => $employeeFull,
+                        'employee' => $applicantFull,
                         'email' => $req->user->email ?? '',
                         'department' => $req->user->department ?? '',
                         'designation' => $req->user->designation ?? '',
@@ -88,25 +95,59 @@
                         'handledAction' => (string) ($req->handled_action ?? ''),
                         'rejectionReason' => (string) ($req->rejection_reason ?? ''),
                     ];
+
+                    if ($isManager) {
+                        $details['proofDeferred'] = LeaveProofRules::allowsDeferredProof($req->leave_type) && LeaveProofRules::requiresProof($req->leave_type);
+                        $details['proofAttached'] = LeaveProofRules::hasProofAttached($req);
+                        $details['proofDeadline'] = LeaveProofRules::proofDeadlineAt($req) ? LeaveProofRules::proofDeadlineAt($req)->format('d M Y') : '';
+                        $details['certificateNote'] = (string) (LeaveProofRules::managerCertificateNote($req) ?? '');
+                        $details['proofStatusLabel'] = (string) ($certificateStatusLabel ?? '');
+                        $details['doctorsLetterMissing'] = $doctorsLetterMissing;
+                        $details['proofBlockReason'] = (string) ($proofBlockReason ?? '');
+                    }
                 @endphp
                 <tr class="row-click {{ $req->isOverdue() ? 'overdue-row' : '' }}" data-details='@json($details)'>
                     <td>{{ $requests->firstItem() + $index }}</td>
                     <td>{{ $req->leave_type }}</td>
-                    <td>{{ $employeeFull }}</td>
+                    <td>
+                        {{ $applicantFull }}
+                        @if ($isManager)
+                            <span class="request-badge request-badge--manager">Manager</span>
+                        @endif
+                    </td>
                     <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>
                     <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y H:i') : '—' }}</td>
-                    <td>
+                    <td class="request-status-cell">
                         @if ($req->isOverdue())
                             <span class="request-badge request-badge--overdue">Overdue</span>
                         @else
                             <span class="request-badge request-badge--{{ $rowStatus === 'withdrawn' ? 'withdrawn' : $rowStatus }}">{{ ucfirst($rowStatus) }}</span>
                         @endif
+                        @if ($certificateStatusLabel)
+                            <span class="request-badge {{ $doctorsLetterMissing ? 'request-badge--letter-missing' : 'request-badge--letter-required' }}">{{ $certificateStatusLabel }}</span>
+                        @endif
                     </td>
                     <td class="request-actions-cell" onclick="event.stopPropagation();">
                         <div class="request-actions">
+                            @if ($isManager && $rowStatus === 'pending' && ! $req->isOverdue())
+                                <div class="request-actions-inline">
+                                    @if ($canApproveWithProof)
+                                        <form action="{{ route('admin.manager-requests.approve', $req) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="request-btn request-btn--approve">Approve</button>
+                                        </form>
+                                    @else
+                                        <span class="request-actions-note" title="{{ $proofBlockReason }}">Awaiting proof</span>
+                                    @endif
+                                    <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Reject</button>
+                                </div>
+                            @elseif ($isManager && $rowStatus === 'rejected')
+                                <a href="{{ route('admin.manager-requests.show_reason', $req) }}" class="request-link">View Reason</a>
+                            @endif
                             <a href="{{ route('messages.leave', $req) }}" class="request-link">Messages</a>
-                            @if($canDelete)
+                            @if ($canDelete)
                                 <form class="delete-request-form" method="POST" action="{{ route('admin.requests.destroy', $req) }}">
                                     @csrf
                                     @method('DELETE')
@@ -132,10 +173,47 @@
     </div>
 </div>
 
+<form id="reject-hidden-form" method="POST" style="display:none;">
+    @csrf
+    @method('PATCH')
+    <input type="hidden" name="rejection_reason" id="reject-hidden-reason" />
+</form>
+
 @include('partials.requests-page-scripts', [
     'showEmployee' => true,
     'showDays' => false,
     'showHandledMeta' => true,
     'deleteWarning' => 'It will be permanently removed, including messages and attachments.',
 ])
+
+<script>
+const rejectUrlTemplate = @json(url('/admin/manager-requests/__ID__/reject'));
+
+function openRejectPopup(requestId) {
+    Swal.fire({
+        title: 'Reject leave request?',
+        input: 'textarea',
+        inputLabel: 'Reason for rejection',
+        inputPlaceholder: 'Enter the reason...',
+        inputAttributes: { maxlength: 500 },
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Reject',
+        inputValidator: (value) => {
+            if (!value || !String(value).trim()) {
+                return 'A rejection reason is required.';
+            }
+            return null;
+        },
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+        const form = document.getElementById('reject-hidden-form');
+        const reason = document.getElementById('reject-hidden-reason');
+        form.action = rejectUrlTemplate.replace('__ID__', String(requestId));
+        reason.value = String(result.value).trim();
+        form.submit();
+    });
+}
+</script>
 @endsection

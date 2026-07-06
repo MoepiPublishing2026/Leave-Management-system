@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends($layout ?? \App\Support\LeaveApplicant::layout(auth()->user()))
 
 @section('title', !empty($selectedType) ? $selectedType . ' Leave Balance' : 'Leave Balance')
 
@@ -29,7 +29,7 @@
         </p>
 
         <div class="balance-toolbar">
-            <form class="balance-year-form balance-toolbar-left" method="GET" action="{{ route('leave.balance') }}">
+            <form class="balance-year-form balance-toolbar-left" method="GET" action="{{ route($balanceRoute ?? \App\Support\LeaveApplicant::balanceRoute()) }}">
                 <label for="year">Year</label>
                 <select id="year" name="year">
                     @foreach($yearOptions as $optionYear)
@@ -41,8 +41,11 @@
                 <button type="submit" class="balance-btn balance-btn--primary">Update</button>
             </form>
             <div class="balance-toolbar-right">
-                <a href="{{ route('dashboard') }}" class="balance-btn balance-btn--secondary">Dashboard</a>
-                <a href="{{ route('leave.myRequests') }}" class="balance-btn balance-btn--secondary">My Requests</a>
+                <a href="{{ route($dashboardRoute ?? \App\Support\LeaveApplicant::personalDashboardRoute(auth()->user())) }}" class="balance-btn balance-btn--secondary">My dashboard</a>
+                @if(\App\Support\LeaveApplicant::isManager(auth()->user()))
+                    <a href="{{ route('manager.dashboard') }}" class="balance-btn balance-btn--secondary">Dashboard</a>
+                @endif
+                <a href="{{ route($myRequestsRoute ?? \App\Support\LeaveApplicant::myRequestsRoute(auth()->user())) }}" class="balance-btn balance-btn--secondary">My Requests</a>
             </div>
         </div>
 
@@ -68,11 +71,19 @@
         <ul class="balance-type-grid">
             @foreach($leaveTypeOptions as $option)
                 <li>
-                    <a href="{{ route('leave.balance', ['year' => $year, 'type' => $option['type']]) }}"
-                       class="balance-type-card {{ $option['disabled'] ? 'is-disabled' : '' }}">
-                        <span class="type-name">{{ $option['type'] }} Leave</span>
-                        <span class="type-days">{{ $fmtDays($option['remaining']) }} days</span>
-                    </a>
+                    @if($option['disabled'])
+                        <span class="balance-type-card is-disabled" aria-disabled="true"
+                              title="{{ $option['type'] }} leave is not available">
+                            <span class="type-name">{{ $option['type'] }} Leave (Unavailable)</span>
+                            <span class="type-days">{{ $fmtDays($option['remaining']) }} days</span>
+                        </span>
+                    @else
+                        <a href="{{ route($balanceRoute ?? \App\Support\LeaveApplicant::balanceRoute(), ['year' => $year, 'type' => $option['type']]) }}"
+                           class="balance-type-card">
+                            <span class="type-name">{{ $option['type'] }} Leave</span>
+                            <span class="type-days">{{ $fmtDays($option['remaining']) }} days</span>
+                        </a>
+                    @endif
                 </li>
             @endforeach
         </ul>
@@ -99,7 +110,7 @@
         </p>
 
         <div class="balance-toolbar">
-            <form class="balance-year-form balance-toolbar-left" method="GET" action="{{ route('leave.balance') }}">
+            <form class="balance-year-form balance-toolbar-left" method="GET" action="{{ route($balanceRoute ?? \App\Support\LeaveApplicant::balanceRoute()) }}">
                 <input type="hidden" name="type" value="{{ $selectedType }}" />
                 <label for="year-detail">Year</label>
                 <select id="year-detail" name="year">
@@ -113,10 +124,10 @@
             </form>
             <div class="balance-toolbar-right">
                 @if(!$isTypeDisabled)
-                    <a href="{{ route('apply', ['leave_type' => $selectedType]) }}" class="balance-btn balance-btn--apply">+ Apply for {{ $selectedType }}</a>
+                    <a href="{{ route($applyRoute ?? \App\Support\LeaveApplicant::applyRoute(auth()->user()), ['leave_type' => $selectedType]) }}" class="balance-btn balance-btn--apply">+ Apply for {{ $selectedType }}</a>
                 @endif
-                <a href="{{ route('leave.myRequests') }}" class="balance-btn balance-btn--secondary">My Requests</a>
-                <a href="{{ route('leave.balance', ['year' => $year]) }}" class="balance-btn balance-btn--secondary">Change type</a>
+                <a href="{{ route($myRequestsRoute ?? \App\Support\LeaveApplicant::myRequestsRoute(auth()->user())) }}" class="balance-btn balance-btn--secondary">My Requests</a>
+                <a href="{{ route($balanceRoute ?? \App\Support\LeaveApplicant::balanceRoute(), ['year' => $year]) }}" class="balance-btn balance-btn--secondary">Change type</a>
             </div>
         </div>
 
@@ -294,7 +305,7 @@
         </div>
 
         <div class="balance-back">
-            <a href="{{ route('leave.balance', ['year' => $year]) }}">← Choose another leave type</a>
+            <a href="{{ route($balanceRoute ?? \App\Support\LeaveApplicant::balanceRoute(), ['year' => $year]) }}">← Choose another leave type</a>
         </div>
     @endif
 </div>
