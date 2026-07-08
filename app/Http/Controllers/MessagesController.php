@@ -7,6 +7,7 @@ use App\Models\LeaveRequestConversation;
 use App\Models\LeaveRequestMessage;
 use App\Models\User;
 use App\Notifications\MessageReceivedNotification;
+use App\Support\LeaveRequestChat;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -107,28 +108,12 @@ class MessagesController extends Controller
 
     private function conversationsQueryFor(User $user): Builder
     {
-        $query = LeaveRequestConversation::query();
-
-        if (($user->role ?? null) === 'manager') {
-            $query->where('manager_id', $user->id);
-        } elseif (($user->role ?? null) === 'admin') {
-            $query->where('admin_id', $user->id);
-        }
-
-        return $query;
+        return LeaveRequestChat::conversationsQueryFor($user);
     }
 
     private function userCanAccessConversation(User $user, LeaveRequestConversation $conversation): bool
     {
-        if (($user->role ?? null) === 'manager') {
-            return (int) $conversation->manager_id === (int) $user->id;
-        }
-
-        if (($user->role ?? null) === 'admin') {
-            return (int) $conversation->admin_id === (int) $user->id;
-        }
-
-        return false;
+        return LeaveRequestChat::userCanAccessConversation($user, $conversation);
     }
 
     private function managerMayOpenLeaveChat(User $manager, LeaveRequest $leave): bool
@@ -369,14 +354,17 @@ class MessagesController extends Controller
 
         $conversation->touch();
 
+        $senderName = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) ?: 'User';
+
         $recipientId = ($user->role ?? null) === 'manager'
             ? $conversation->admin_id
             : $conversation->manager_id;
 
-        if ($recipientId) {
+        if (($user->role ?? null) === 'manager') {
+            LeaveRequestChat::notifyAdmins($conversation->id, $conversation->leave_request_id, $senderName);
+        } elseif ($recipientId) {
             $recipient = User::find($recipientId);
             if ($recipient) {
-                $senderName = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) ?: 'User';
                 $recipient->notify(new MessageReceivedNotification($conversation->id, $conversation->leave_request_id, $senderName));
             }
         }
@@ -490,15 +478,17 @@ class MessagesController extends Controller
 
         $targetConversation->touch();
 
-        $recipientId = ($user->role ?? null) === 'manager'
-            ? $targetConversation->admin_id
-            : $targetConversation->manager_id;
+        $senderName = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) ?: 'User';
 
-        if ($recipientId) {
-            $recipient = User::find($recipientId);
-            if ($recipient) {
-                $senderName = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) ?: 'User';
-                $recipient->notify(new MessageReceivedNotification($targetConversation->id, $targetConversation->leave_request_id, $senderName));
+        if (($user->role ?? null) === 'manager') {
+            LeaveRequestChat::notifyAdmins($targetConversation->id, $targetConversation->leave_request_id, $senderName);
+        } else {
+            $recipientId = $targetConversation->manager_id;
+            if ($recipientId) {
+                $recipient = User::find($recipientId);
+                if ($recipient) {
+                    $recipient->notify(new MessageReceivedNotification($targetConversation->id, $targetConversation->leave_request_id, $senderName));
+                }
             }
         }
 

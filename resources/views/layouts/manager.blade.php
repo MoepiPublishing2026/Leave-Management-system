@@ -384,16 +384,9 @@
         </a>
 
         @php
-            $unreadMessageCount = 0;
-            if (auth()->check() && \Illuminate\Support\Facades\Schema::hasTable('leave_request_messages') && \Illuminate\Support\Facades\Schema::hasTable('leave_request_conversations')) {
-                $meId = auth()->id();
-                $unreadMessageCount = \Illuminate\Support\Facades\DB::table('leave_request_messages as m')
-                    ->join('leave_request_conversations as c', 'c.id', '=', 'm.conversation_id')
-                    ->where('c.manager_id', $meId)
-                    ->where('m.sender_id', '!=', $meId)
-                    ->whereNull('m.read_at')
-                    ->count();
-            }
+            $unreadMessageCount = auth()->check()
+                ? \App\Support\LeaveRequestChat::unreadCountFor(auth()->user())
+                : 0;
             $notificationCount = 0;
             if (auth()->check()) {
                 $notificationCount = \App\Support\UserNotifications::unreadCount(auth()->user());
