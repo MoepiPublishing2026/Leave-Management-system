@@ -1,4 +1,8 @@
+    
 deployment:
   tasks:
     - export DEPLOYPATH=/home/teketibk/staging.leavemanagement.tekete.co.za
-    - /usr/bin/rsync -avH --delete /home/teketibk/repositories/StagingLeave-Management-system/ $DEPLOYPATH
+    - /bin/cp -R . $DEPLOYPATH
+  
+    
+
