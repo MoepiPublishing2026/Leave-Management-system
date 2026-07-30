@@ -33,8 +33,16 @@
         if (key === 'approved') return 'rd-badge--approved';
         if (key === 'rejected') return 'rd-badge--rejected';
         if (key === 'withdrawn') return 'rd-badge--withdrawn';
-        if (key === 'pending') return 'rd-badge--pending';
+        if (key === 'pending' || key === 'pending_senior') return 'rd-badge--pending';
         return 'rd-badge--pending';
+    }
+
+    function statusDisplayLabel(statusKey, isOverdue) {
+        if (isOverdue) return 'Overdue';
+        const key = String(statusKey || '').toLowerCase();
+        if (key === 'pending' || key === 'pending_senior') return 'Pending';
+        if (!key) return 'Unknown';
+        return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
     }
 
     function statCard(label, value, extraClass) {
@@ -135,9 +143,7 @@
     window.openRequestDetails = function (details) {
         const isOverdue = !!details.isOverdue;
         const statusKey = isOverdue ? 'overdue' : String(details.status || '').toLowerCase();
-        const statusLabel = isOverdue
-            ? 'Overdue'
-            : (details.status ? details.status.charAt(0).toUpperCase() + details.status.slice(1) : 'Unknown');
+        const statusLabel = statusDisplayLabel(details.status, isOverdue);
 
         let employeeHtml = '';
         if (pageConfig.showEmployee) {
@@ -214,6 +220,23 @@
             ? escapeHtml(details.rejectionReason)
             : '<span class="rd-box--muted">Not applicable</span>';
 
+        const recommendationInner = details.managerRecommendation
+            ? `<div><strong>${escapeHtml(details.managerRecommendation)}</strong></div>` +
+              (details.managerRecommendationComment
+                  ? `<div style="margin-top:6px;">${escapeHtml(details.managerRecommendationComment)}</div>`
+                  : '')
+            : '<span class="rd-box--muted">Not yet recommended</span>';
+
+        const conversionHtml = details.convertedToUnpaidAt
+            ? sectionBlock(
+                'Automatic unpaid conversion',
+                `<div><strong>${escapeHtml(details.originalLeaveType || 'Sick')} → Unpaid</strong></div>` +
+                `<div style="margin-top:6px;">Converted: ${escapeHtml(details.convertedToUnpaidAt)}</div>` +
+                `<div style="margin-top:6px;">${escapeHtml(details.conversionReason || 'Required supporting documents were not submitted by the agreed deadline.')}</div>`,
+                'rejection'
+            )
+            : '';
+
         const rejectionBoxClass = details.rejectionReason ? 'rejection' : '';
         const lateBoxClass = details.lateReasonSent && details.lateReason ? 'info' : '';
 
@@ -242,6 +265,8 @@
                         ${filesHtml}
                     </div>
                     ${proofHtml}
+                    ${conversionHtml}
+                    ${sectionBlock('Manager recommendation', recommendationInner, 'info')}
                     ${sectionBlock('Late response reason', lateInner, lateBoxClass)}
                     ${sectionBlock('Rejection reason', rejectionInner, rejectionBoxClass)}
                     ${messagesHtml}
@@ -305,9 +330,12 @@
             e.stopPropagation();
             const form = btn.closest('form');
             if (!form) return;
+            const approved = btn.getAttribute('data-approved') === '1';
             Swal.fire({
-                title: 'Withdraw leave request?',
-                text: 'Do you really want to withdraw this leave request?',
+                title: approved ? 'Withdraw approved leave?' : 'Withdraw leave request?',
+                text: approved
+                    ? 'Your manager and senior managers will be notified, and the approved days will return to your leave balance.'
+                    : 'Do you really want to withdraw this leave request?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#b45309',

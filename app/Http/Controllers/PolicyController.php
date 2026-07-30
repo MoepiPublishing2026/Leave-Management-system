@@ -11,7 +11,7 @@ class PolicyController extends Controller
     public function show()
     {
         $policies = LeavePolicy::all()->keyBy('leave_type');
-        $leaveTypes = ['Annual', 'Sick', 'Maternity', 'Paternity', 'Bereavement', 'Unpaid', 'Compassionate', 'Study'];
+        $leaveTypes = ['Annual', 'Sick', 'Maternity', 'Paternity', 'Bereavement', 'Unpaid', 'Family Responsibility', 'Study'];
 
         return view('policies', compact('policies', 'leaveTypes'));
     }
@@ -19,7 +19,7 @@ class PolicyController extends Controller
     public function downloadPdf()
     {
         $policies = LeavePolicy::all()->keyBy('leave_type');
-        $leaveTypes = ['Annual', 'Sick', 'Maternity', 'Paternity', 'Bereavement', 'Unpaid', 'Compassionate', 'Study'];
+        $leaveTypes = ['Annual', 'Sick', 'Maternity', 'Paternity', 'Bereavement', 'Unpaid', 'Family Responsibility', 'Study'];
 
         $pdf = Pdf::loadView('policies_pdf', compact('policies', 'leaveTypes'));
         return $pdf->download('company_leave_policies.pdf');

@@ -21,7 +21,7 @@ class AdminDashboardController extends Controller
         $employees = DashboardEmployeeFilter::employees();
         $dashboardFilters = DashboardEmployeeFilter::queryParams($monthFilter, $employeeFilter);
 
-        $baseQuery = LeaveRequest::query()->byEmployeeApplicants()->whereRaw('LOWER(TRIM(status)) != ?', ['withdrawn']);
+        $baseQuery = LeaveRequest::query()->byStaffApplicants()->whereRaw('LOWER(TRIM(status)) != ?', ['withdrawn']);
         LeaveRequestPeriodFilter::apply($baseQuery, $monthFilter, 'created_at');
         DashboardEmployeeFilter::apply($baseQuery, $employeeFilter);
 
@@ -33,8 +33,19 @@ class AdminDashboardController extends Controller
             ->toArray();
         arsort($leaveTypeCounts, SORT_NUMERIC);
         $leaveTypePercentages = PercentageDistribution::oneDecimalPercents($leaveTypeCounts);
+        $payStatusCounts = [
+            'Paid' => (clone $baseQuery)
+                ->whereRaw("LOWER(TRIM(COALESCE(leave_type, ''))) != ?", ['unpaid'])
+                ->count(),
+            'Unpaid' => (clone $baseQuery)
+                ->whereRaw('LOWER(TRIM(leave_type)) = ?', ['unpaid'])
+                ->count(),
+        ];
+        $payStatusPercentages = PercentageDistribution::oneDecimalPercents($payStatusCounts);
 
-        $pendingTotalCount = (clone $baseQuery)->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])->count();
+        $pendingTotalCount = (clone $baseQuery)
+            ->whereIn(DB::raw('LOWER(TRIM(status))'), ['pending', 'pending_senior'])
+            ->count();
 
         $overduePendingCount = (clone $baseQuery)->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
             ->whereDate('start_date', '<', Carbon::today())->count();
@@ -57,7 +68,7 @@ class AdminDashboardController extends Controller
         $onLeaveTodayCount = 0;
         if (!$isTodayDisabled) {
             $onLeaveTodayCount = LeaveRequest::query()
-                ->byEmployeeApplicants()
+                ->byStaffApplicants()
                 ->when($employeeFilter, fn ($q) => $q->where('user_id', $employeeFilter))
                 ->whereRaw('LOWER(TRIM(status)) = ?', ['approved'])
                 ->whereDate('start_date', '<=', $today)
@@ -72,7 +83,7 @@ class AdminDashboardController extends Controller
         $barData = array_fill(0, 12, 0);
 
         $monthlyApplicationsQuery = LeaveRequest::query()
-            ->byEmployeeApplicants()
+            ->byStaffApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn'])
             ->whereYear('leave_requests.created_at', $chartYear);
         DashboardEmployeeFilter::apply($monthlyApplicationsQuery, $employeeFilter);
@@ -101,7 +112,7 @@ class AdminDashboardController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status')
             ->toArray();
-        $statusCounts = ['pending' => 0, 'approved' => 0, 'rejected' => 0, 'withdrawn' => 0];
+        $statusCounts = ['pending' => 0, 'pending_senior' => 0, 'approved' => 0, 'rejected' => 0, 'withdrawn' => 0];
         foreach ($rawStatusCounts as $status => $count) {
             $statusCounts[strtolower(trim((string) $status))] = $count;
         }
@@ -121,13 +132,12 @@ class AdminDashboardController extends Controller
         ];
 
         $departmentCountsRaw = (clone $baseQuery)->join('users', 'leave_requests.user_id', '=', 'users.id')
-            ->where('users.role', 'employee')
             ->select(DB::raw("COALESCE(users.department, 'Unknown') as department"), DB::raw('count(*) as total'))
-            ->groupBy('department')
+            ->groupBy(DB::raw("COALESCE(users.department, 'Unknown')"))
             ->pluck('total', 'department')
             ->toArray();
 
-        // Polar chart: only departments with at least one request (no empty wedges)
+        // Department bar chart: only departments with at least one request.
         $departmentCounts = array_filter(
             array_map(static fn ($v) => (int) $v, $departmentCountsRaw),
             static fn (int $count) => $count > 0
@@ -135,29 +145,13 @@ class AdminDashboardController extends Controller
         arsort($departmentCounts, SORT_NUMERIC);
         $departmentLabels = array_keys($departmentCounts);
         $departmentData = array_values($departmentCounts);
-        $departmentPercentages = [];
-        if ($departmentLabels !== [] && count($departmentData) === count($departmentLabels)) {
-            $departmentPercentages = PercentageDistribution::oneDecimalPercents(
-                array_combine($departmentLabels, $departmentData)
-            );
-        }
-
-        // Requests by designation (for dashboard chart)
-        $designationCounts = (clone $baseQuery)
-            ->join('users', 'leave_requests.user_id', '=', 'users.id')
-            ->where('users.role', 'employee')
-            ->select(DB::raw("COALESCE(users.designation, 'Unknown') as designation"), DB::raw('COUNT(*) as total'))
-            ->groupBy('designation')
-            ->pluck('total', 'designation')
-            ->toArray();
-        arsort($designationCounts, SORT_NUMERIC);
-        $designationLabels = array_keys($designationCounts);
-        $designationData = array_values($designationCounts);
 
         return view('admin.dashboard', [
             'allRequestsCount' => $allRequestsCount,
             'leaveTypeCounts' => $leaveTypeCounts,
             'leaveTypePercentages' => $leaveTypePercentages,
+            'payStatusCounts' => $payStatusCounts,
+            'payStatusPercentages' => $payStatusPercentages,
             'pendingRequestsCount' => $pendingRequestsCount,
             'overduePendingCount' => $overduePendingCount,
             'approvedRequestsCount' => $approvedRequestsCount,
@@ -171,13 +165,10 @@ class AdminDashboardController extends Controller
             'statusPieCounts' => $statusPieCounts,
             'departmentLabels' => $departmentLabels,
             'departmentData' => $departmentData,
-            'departmentPercentages' => $departmentPercentages,
             'monthFilter' => $monthFilter,
             'employeeFilter' => $employeeFilter,
             'employees' => $employees,
             'dashboardFilters' => $dashboardFilters,
-            'designationLabels' => $designationLabels,
-            'designationData' => $designationData,
             'monthlyApprovedData' => $monthlyApprovedData,
             'monthlyPendingData' => $monthlyPendingData,
             'monthlyOverdueData' => $monthlyOverdueData,

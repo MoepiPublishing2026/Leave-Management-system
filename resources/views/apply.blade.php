@@ -337,16 +337,23 @@
                     if (!empty($blockedParentalLeaveType) && strcasecmp((string) $selectedLeaveType, (string) $blockedParentalLeaveType) === 0) {
                         $selectedLeaveType = '';
                     }
+                    $currentYearBalances = $leaveBalancesByYear[$nowYear] ?? [];
+                    $currentAnnualBalance = $currentYearBalances['Annual'] ?? $currentYearBalances['Annual Leave'] ?? 0;
                 @endphp
                 @foreach(\App\Models\LeavePolicy::where('leave_type', '!=', 'Urgent')->get() as $policy)
                     @php
                         $isBlockedParental = !empty($blockedParentalLeaveType)
                             && strcasecmp((string) $policy->leave_type, (string) $blockedParentalLeaveType) === 0;
+                        $remainingForType = (float) ($currentYearBalances[$policy->leave_type] ?? 0);
+                        $isTypeExhausted = $remainingForType <= 0;
+                        $isAnnualExhausted = (float) $currentAnnualBalance <= 0
+                            && \App\Support\AnnualLeaveRules::countsAgainstAnnual((string) $policy->leave_type);
+                        $isUnavailable = $isBlockedParental || $isTypeExhausted || $isAnnualExhausted;
                     @endphp
-                    <option value="{{ $policy->leave_type }}"
+                    <option value="{{ $policy->leave_type }}" data-label="{{ $policy->leave_type }}"
                         @selected($selectedLeaveType == $policy->leave_type)
-                        @disabled($isBlockedParental)>
-                    {{ $policy->leave_type }}</option>
+                        @disabled($isUnavailable)>
+                    {{ $policy->leave_type }}{{ $isTypeExhausted ? ' (No balance remaining)' : ($isAnnualExhausted ? ' (Annual pool exhausted)' : '') }}</option>
                 @endforeach
             </select>
             @if (!empty($usedParentalLeaveType) && !empty($blockedParentalLeaveType))
@@ -688,7 +695,7 @@ document.addEventListener('DOMContentLoaded', function () {
     leaveTypeSelect.addEventListener('change', updateHalfDayEligibility);
     updateHalfDayEligibility();
 
-    function updateAnnualEligibility() {
+    function updateLeaveTypeEligibility() {
         const startDate = startDateInput.value;
         const yearKey = startDate ? new Date(startDate).getFullYear() : nowYear;
         const leaveBalances = leaveBalancesByYear[yearKey] || {};
@@ -697,14 +704,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const options = Array.from(leaveTypeSelect.options);
         options.forEach((opt) => {
             if (!opt.value) return;
-            let disabled = false;
+            const typeBalance = Number(leaveBalances[opt.value] ?? 0);
+            let disabled = typeBalance <= 0;
+            let unavailableLabel = disabled ? ' (No balance remaining)' : '';
             if (annualBalance <= 0 && countsAgainstAnnual(opt.value)) {
                 disabled = true;
+                unavailableLabel = ' (Annual pool exhausted)';
             }
             if (blockedParentalLeaveType && opt.value && opt.value.toLowerCase() === blockedParentalLeaveType.toLowerCase()) {
                 disabled = true;
+                unavailableLabel = ' (Unavailable)';
             }
             opt.disabled = disabled;
+            opt.textContent = `${opt.dataset.label || opt.value}${unavailableLabel}`;
         });
 
         if (leaveTypeSelect.value && leaveTypeSelect.options[leaveTypeSelect.selectedIndex]?.disabled) {
@@ -716,9 +728,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    startDateInput.addEventListener('change', updateAnnualEligibility);
-    leaveTypeSelect.addEventListener('change', updateAnnualEligibility);
-    updateAnnualEligibility();
+    startDateInput.addEventListener('change', updateLeaveTypeEligibility);
+    leaveTypeSelect.addEventListener('change', updateLeaveTypeEligibility);
+    updateLeaveTypeEligibility();
 
     if (blockedParentalLeaveType && leaveTypeSelect.value
         && leaveTypeSelect.value.toLowerCase() === blockedParentalLeaveType.toLowerCase()) {
@@ -834,6 +846,28 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: 'Attachment Required',
                 text: attachmentError,
                 confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        const normalizedLeaveType = leaveType.trim().toLowerCase();
+        if (normalizedLeaveType === 'maternity' || normalizedLeaveType === 'paternity') {
+            const otherParentalLeave = normalizedLeaveType === 'maternity' ? 'Paternity' : 'Maternity';
+
+            Swal.fire({
+                icon: 'warning',
+                title: `Confirm ${leaveType} leave`,
+                html: `You selected <b>${leaveType}</b> leave.<br><br>After submitting, <b>${otherParentalLeave}</b> leave will be unavailable unless you withdraw this request. Is your selection correct?`,
+                showCancelButton: true,
+                confirmButtonText: `Yes, apply for ${leaveType}`,
+                cancelButtonText: 'No, change selection',
+                reverseButtons: true,
+                focusCancel: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('submit-btn').disabled = true;
+                    leaveForm.submit();
+                }
             });
             return;
         }

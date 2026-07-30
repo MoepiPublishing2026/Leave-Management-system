@@ -12,10 +12,12 @@ class LeaveWithdrawalMail extends Mailable
     use Queueable, SerializesModels;
 
     public $leaveRequest;
+    public $previousStatus;
 
-    public function __construct(LeaveRequest $leaveRequest)
+    public function __construct(LeaveRequest $leaveRequest, string $previousStatus = '')
     {
         $this->leaveRequest = $leaveRequest;
+        $this->previousStatus = $previousStatus;
     }
 
     public function build()

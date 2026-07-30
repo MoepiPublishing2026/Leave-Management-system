@@ -400,14 +400,16 @@
       @php
         $annualKey = array_key_exists('Annual', $leaveBalances) ? 'Annual' : (array_key_exists('Annual Leave', $leaveBalances) ? 'Annual Leave' : 'Annual');
         $annualBalance = $leaveBalances[$annualKey] ?? 0;
-        $notDisabledWhenAnnualExhausted = \App\Support\AnnualLeaveRules::notDisabledWhenAnnualExhaustedLabels();
       @endphp
       @foreach ($leaveBalances as $type => $daysLeft)
         @php
           $isParentalBlocked = \App\Support\ParentalLeaveRules::isBlockedForUser((int) auth()->id(), (string) $type);
-          $isAnnualDisabled = $annualBalance <= 0 && !in_array($type, $notDisabledWhenAnnualExhausted, true);
-          $isDisabled = $isAnnualDisabled || $isParentalBlocked;
-          $disabledLabel = $isParentalBlocked ? ' (Unavailable)' : ($isDisabled ? ' (Disabled)' : '');
+          $isTypeExhausted = (float) $daysLeft <= 0;
+          $isAnnualDisabled = $annualBalance <= 0 && \App\Support\AnnualLeaveRules::countsAgainstAnnual((string) $type);
+          $isDisabled = $isTypeExhausted || $isAnnualDisabled || $isParentalBlocked;
+          $disabledLabel = $isParentalBlocked
+              ? ' (Unavailable)'
+              : ($isTypeExhausted ? ' (No balance)' : ($isAnnualDisabled ? ' (Annual pool exhausted)' : ''));
         @endphp
         <li class="leave-balance-item {{ $isDisabled ? 'disabled' : '' }}"
             title="{{ $type }} Leave — {{ $daysLeft }} day{{ $daysLeft == 1 ? '' : 's' }} remaining{{ $disabledLabel }}"

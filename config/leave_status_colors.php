@@ -9,6 +9,7 @@ return [
     'colors' => [
         'all' => '#00C0A3',
         'pending' => '#C291A4',
+        'pending_senior' => '#9B7EBD',
         'approved' => '#E27A53',
         'rejected' => '#87AFC7',
         'withdrawn' => '#D2B55B',

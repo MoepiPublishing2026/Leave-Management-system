@@ -10,7 +10,7 @@ class LeaveSettingsController extends Controller
 {
     public function index()
     {
-        $leaveTypes = ['Annual','Sick','Maternity','Paternity','Bereavement','Unpaid','Compassionate','Study'];
+        $leaveTypes = ['Annual','Sick','Maternity','Paternity','Bereavement','Unpaid','Family Responsibility','Study'];
         $policies = LeavePolicy::all()->keyBy('leave_type');
         return view('admin.settings', compact('leaveTypes', 'policies'));
     }

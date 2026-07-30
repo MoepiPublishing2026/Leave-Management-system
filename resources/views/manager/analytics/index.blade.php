@@ -352,7 +352,7 @@
                     <h5>Active Employees</h5>
                     <div class="card-icon bg-green-100 text-green-600"><i class="fas fa-user-check"></i></div>
                 </div>
-                <h3>{{ $activeEmployees }}</h3>
+                <h3>{{ $employeesWhoApplied }}</h3>
                 <small class="text-muted">of {{ $totalEmployees }} total</small>
             </div>
         </div>
@@ -436,12 +436,12 @@
         <!-- Leaves by Designation Pie Chart -->
         <div class="chart-card">
             <div class="card">
-                <h5><i class="fas fa-chart-pie me-2 text-success"></i>Leaves by Designation</h5>
+                <h5><i class="fas fa-chart-pie me-2 text-success"></i>Leaves by Department</h5>
                 <hr>
                 <div class="chart-body chart-body--ring">
                     <canvas id="designationPieChart"></canvas>
                 </div>
-                <ul class="chart-html-legend" id="designationPieLegend" aria-label="Designation legend"></ul>
+                <ul class="chart-html-legend" id="designationPieLegend" aria-label="Department legend"></ul>
             </div>
         </div>
     </div>

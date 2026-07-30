@@ -1,6 +1,6 @@
 @extends('layouts.manager')
 
-@section('title', 'Leave Requests - ' . ucfirst($status))
+@section('title', 'Team Leave Requests - ' . ucfirst($status))
 
 @section('content')
 @include('partials.requests-page-styles')
@@ -40,7 +40,7 @@
 <div class="requests-page" @if($overdueReasonCount > 0) data-overdue-reason-lock="1" @endif>
     <div class="mgr-page-header">
         <div class="mgr-page-header__main">
-            <h1>Leave Requests</h1>
+            <h1>Team Leave Requests</h1>
             <p class="requests-page-lead">
                 Showing <strong>{{ ucfirst($status) }}</strong>
                 @if ($requests->total() > 0)
@@ -59,6 +59,7 @@
         'formRoute' => 'manager.requests.index',
         'filterRoute' => 'manager.requests.index',
         'status' => $status,
+        'payFilter' => $payFilter ?? 'all',
         'search' => $search ?? '',
         'monthFilter' => $monthFilter ?? null,
         'employeeFilter' => $employeeFilter ?? null,
@@ -66,6 +67,7 @@
         'statusFilters' => [
             'all' => 'All',
             'pending' => 'Pending',
+            'pending_senior' => 'Submitted',
             'approved' => 'Approved',
             'rejected' => 'Rejected',
             'overdue' => 'Overdue',
@@ -120,7 +122,7 @@
                         'employee' => $employeeFull,
                         'email' => $req->user->email ?? '',
                         'department' => $req->user->department ?? '',
-                        'designation' => $req->user->designation ?? '',
+                        'designation' => $req->user->department ?? ($req->user->designation ?? ''),
                         'type' => (string) ($req->leave_type ?? ''),
                         'start' => $req->start_date ? \Carbon\Carbon::parse($req->start_date)->format('d M Y') : '',
                         'end' => $req->end_date ? \Carbon\Carbon::parse($req->end_date)->format('d M Y') : '',
@@ -139,6 +141,15 @@
                         'lateReasonSent' => (bool) $req->overdue_escalated_at,
                         'lateReason' => (string) ($req->overdue_escalation_reason ?? ''),
                         'rejectionReason' => (string) ($req->rejection_reason ?? ''),
+                        'originalLeaveType' => (string) ($req->original_leave_type ?? ''),
+                        'convertedToUnpaidAt' => $req->converted_to_unpaid_at?->format('d M Y H:i') ?? '',
+                        'conversionReason' => (string) ($req->converted_to_unpaid_reason ?? ''),
+                        'managerRecommendation' => match (strtolower((string) ($req->manager_recommendation ?? ''))) {
+                            'approve' => 'Recommend Approve',
+                            'reject' => 'Recommend Reject',
+                            default => '',
+                        },
+                        'managerRecommendationComment' => (string) ($req->manager_recommendation_comment ?? ''),
                     ];
                 @endphp
                 <tr class="row-click {{ $req->isOverdue() ? 'overdue-row' : '' }}" data-details='@json($details)'>
@@ -149,11 +160,11 @@
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>
                     <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y H:i') : '—' }}</td>
                     <td class="request-status-cell">
-                        @if ($req->isOverdue())
-                            <span class="request-badge request-badge--overdue">Overdue</span>
-                        @else
-                            <span class="request-badge request-badge--{{ $rowStatus === 'withdrawn' ? 'withdrawn' : $rowStatus }}">{{ ucfirst($rowStatus) }}</span>
-                        @endif
+                        @php
+                            $statusLabel = \App\Support\LeaveStatusLabels::display($rowStatus, $req->isOverdue());
+                            $statusBadge = \App\Support\LeaveStatusLabels::badgeClass($rowStatus, $req->isOverdue());
+                        @endphp
+                        <span class="request-badge request-badge--{{ $statusBadge }}">{{ $statusLabel }}</span>
                         @if ($certificateStatusLabel)
                             <span class="request-badge {{ $doctorsLetterMissing ? 'request-badge--letter-missing' : 'request-badge--letter-required' }}">{{ $certificateStatusLabel }}</span>
                         @endif
@@ -170,17 +181,23 @@
                                 @else
                                     <div class="request-actions-inline">
                                         @if ($canApproveWithProof)
-                                            <form action="{{ route('manager.requests.approve', $req) }}" method="POST">
+                                            <form action="{{ route('manager.requests.recommend', $req) }}" method="POST">
                                                 @csrf
                                                 @method('PATCH')
-                                                <button type="submit" class="request-btn request-btn--approve">Approve</button>
+                                                <input type="hidden" name="recommendation" value="approve" />
+                                                <button type="submit" class="request-btn request-btn--approve">Recommend Approve</button>
                                             </form>
                                         @else
                                             <span class="request-actions-note" title="{{ $proofBlockReason }}">Awaiting proof</span>
                                         @endif
-                                        <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Reject</button>
+                                        <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Recommend Reject</button>
                                     </div>
                                 @endif
+                            @elseif ($rowStatus === 'pending_senior')
+                                <span class="request-actions-submitted" title="Recommendation sent to Senior Manager">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+                                    Submitted
+                                </span>
                             @elseif ($rowStatus === 'rejected')
                                 <a href="{{ route('manager.requests.show_reason', $req) }}" class="request-link">View Reason</a>
                             @endif
@@ -216,7 +233,8 @@
 <form id="reject-hidden-form" method="POST" style="display:none;">
     @csrf
     @method('PATCH')
-    <input type="hidden" name="rejection_reason" id="reject-hidden-reason" />
+    <input type="hidden" name="recommendation" value="reject" />
+    <input type="hidden" name="manager_recommendation_comment" id="reject-hidden-reason" />
 </form>
 
 <form id="late-reason-hidden-form" method="POST" style="display:none;">
@@ -232,7 +250,7 @@
 ])
 
 <script>
-const rejectUrlTemplate = @json(url('/manager/requests/__ID__/reject'));
+const rejectUrlTemplate = @json(url('/manager/requests/__ID__/recommend'));
 const lateReasonUrlTemplate = @json(url('/manager/requests/__ID__/escalate'));
 let overdueReasonQueue = @json(($overdueNeedingReason ?? collect())->values());
 const overdueReasonTotal = @json($overdueReasonCount ?? 0);
@@ -285,7 +303,7 @@ function openLateReasonPopup(requestId, options = {}) {
         inputAttributes: { 'aria-label': 'Late response reason' },
         showCancelButton: !forced,
         showCloseButton: !forced,
-        confirmButtonText: 'Send to Admin',
+        confirmButtonText: 'Send to Senior Manager',
         cancelButtonText: 'Cancel',
         allowOutsideClick: !forced,
         allowEscapeKey: !forced,
@@ -409,23 +427,19 @@ document.addEventListener('DOMContentLoaded', () => {
 function openRejectPopup(requestId) {
     Swal.fire({
         icon: 'warning',
-        title: 'Reject Request',
+        title: 'Recommend Reject',
         input: 'textarea',
-        inputLabel: 'Rejection reason',
-        inputPlaceholder: 'Type the rejection reason...',
-        inputAttributes: { 'aria-label': 'Rejection reason' },
+        inputLabel: 'Comments for Senior Manager (optional)',
+        inputPlaceholder: 'Add a short recommendation comment...',
+        inputAttributes: { 'aria-label': 'Recommendation comments' },
         showCancelButton: true,
-        confirmButtonText: 'Reject',
+        confirmButtonText: 'Send to Senior Manager',
         confirmButtonColor: '#dc2626',
         cancelButtonText: 'Cancel',
         preConfirm: (value) => {
             const v = (value || '').trim();
-            if (!v) {
-                Swal.showValidationMessage('Rejection reason is required.');
-                return false;
-            }
-            if (v.length > 500) {
-                Swal.showValidationMessage('Rejection reason must be 500 characters or less.');
+            if (v.length > 1000) {
+                Swal.showValidationMessage('Comments must be 1000 characters or less.');
                 return false;
             }
             return v;
@@ -434,7 +448,7 @@ function openRejectPopup(requestId) {
         if (!result.isConfirmed) return;
         const form = document.getElementById('reject-hidden-form');
         form.action = rejectUrlTemplate.replace('__ID__', String(requestId));
-        document.getElementById('reject-hidden-reason').value = result.value;
+        document.getElementById('reject-hidden-reason').value = result.value || '';
         form.submit();
     });
 }

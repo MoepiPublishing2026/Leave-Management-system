@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin Login - Leave Management</title>
+    <title>Senior Manager Login - Leave Management</title>
     <link rel="icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" sizes="32x32" />
     <link rel="shortcut icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" />
     <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}" sizes="180x180" />
@@ -121,12 +121,12 @@
             <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
         </div>
 
-        <h2>Admin Login</h2>
+        <h2>Senior Manager Login</h2>
 
         <form method="POST" action="{{ route('admin.login.post') }}">
             @csrf
             <div class="form-group">
-                <label for="admin_number">Admin Number</label>
+                <label for="admin_number">Senior Manager Number</label>
                 <input type="text" name="admin_number" id="admin_number" value="{{ old('admin_number') }}" required autofocus />
                 @error('admin_number')
                     <div class="error">{{ $message }}</div>

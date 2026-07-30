@@ -17,12 +17,13 @@ use App\Http\Controllers\Employee\CalendaController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\SignupController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LeaveEmailDecisionController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\MessagesController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\PolicyController;
 use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Manager\EmployeeController;
 use App\Http\Controllers\Admin\LeaveSettingsController;
 
 use App\Http\Controllers\Admin\LeaveRequestController;
@@ -54,6 +55,9 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 Route::get('/verify-2fa', [AuthController::class, 'show2faForm'])->name('login.verify');
 Route::post('/verify-2fa', [AuthController::class, 'verify2fa'])->name('login.verify.post');
+Route::post('/verify-2fa/resend', [AuthController::class, 'resend2fa'])
+    ->middleware('throttle:3,1')
+    ->name('login.verify.resend');
 
 Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
 Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
@@ -112,12 +116,24 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/leave/status/{status}', [LeaveController::class, 'statusLeaves'])->middleware('auth')->name('leave.status');
 
-Route::get('/reports/export', [ReportsController::class, 'exportCsv'])->name('admin.reports.export_csv');
+// Senior Manager email decisions (signed URLs — no login required)
+Route::get('/leave/email/{leaveRequest}/review', [LeaveEmailDecisionController::class, 'review'])
+    ->name('leave.email.review');
+Route::get('/leave/email/{leaveRequest}/attachment/{attachment}', [LeaveEmailDecisionController::class, 'attachment'])
+    ->whereNumber('attachment')
+    ->name('leave.email.attachment');
+Route::get('/leave/email/{leaveRequest}/approve', [LeaveEmailDecisionController::class, 'approve'])
+    ->name('leave.email.approve');
+Route::get('/leave/email/{leaveRequest}/reject', [LeaveEmailDecisionController::class, 'rejectForm'])
+    ->name('leave.email.reject.form');
+Route::post('/leave/email/{leaveRequest}/reject', [LeaveEmailDecisionController::class, 'rejectSubmit'])
+    ->name('leave.email.reject.submit');
 
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
    Route::get('/reports', [ReportsController::class, 'index'])->name('reports');
+   Route::get('/reports/export', [ReportsController::class, 'exportCsv'])->name('reports.export_csv');
    Route::get('/reports/export-pdf', [ReportsController::class, 'exportPdf'])->name('reports.export_pdf');
 
     Route::get('/requests', [LeaveRequestController::class, 'index'])->name('requests');
@@ -126,17 +142,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::patch('/manager-requests/{id}/approve', [ManagerLeaveRequestController::class, 'approve'])->name('manager-requests.approve');
     Route::patch('/manager-requests/{id}/reject', [ManagerLeaveRequestController::class, 'reject'])->name('manager-requests.reject');
     Route::get('/manager-requests/{id}/show-reason', [ManagerLeaveRequestController::class, 'showRejectionReason'])->name('manager-requests.show_reason');
+    Route::patch('/requests/{id}/approve', [ManagerLeaveRequestController::class, 'approve'])->name('requests.approve');
+    Route::patch('/requests/{id}/reject', [ManagerLeaveRequestController::class, 'reject'])->name('requests.reject');
    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
-   Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
     Route::get('/settings', [\App\Http\Controllers\Admin\LeaveSettingsController::class, 'index'])->name('settings');
     Route::post('/settings', [\App\Http\Controllers\Admin\LeaveSettingsController::class, 'save'])->name('settings.save');
 
- Route::get('employees/create', [EmployeeController::class, 'create'])->name('employees.create');
-    Route::post('employees', [EmployeeController::class, 'store'])->name('employees.store');
-    Route::get('employees/{id}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
-    Route::put('employees/{id}', [EmployeeController::class, 'update'])->name('employees.update');
-    Route::delete('employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
-   
      Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
 
  // route in web.php
@@ -159,8 +170,9 @@ Route::prefix('manager')->name('manager.')->middleware('auth')->group(function (
     Route::get('/team', fn () => redirect()->route('manager.dashboard'))->name('team');
 
 Route::get('requests', [RequestsController::class, 'index'])->name('requests.index');
-    Route::patch('requests/{id}/approve', [RequestsController::class, 'approve'])->name('requests.approve');
-    Route::patch('requests/{id}/reject', [RequestsController::class, 'reject'])->name('requests.reject');
+    Route::patch('requests/{id}/recommend', [RequestsController::class, 'recommend'])->name('requests.recommend');
+    Route::patch('requests/{id}/approve', [RequestsController::class, 'recommend'])->name('requests.approve'); // legacy alias
+    Route::patch('requests/{id}/reject', [RequestsController::class, 'recommendReject'])->name('requests.reject');
     Route::post('requests/{id}/escalate', [RequestsController::class, 'escalate'])->name('requests.escalate');
     Route::get('requests/{id}/show-reason', [RequestsController::class, 'showRejectionReason'])->name('requests.show_reason');
     Route::delete('requests/{leaveRequest}', [RequestsController::class, 'destroy'])->name('requests.destroy');
@@ -177,6 +189,13 @@ Route::get('requests', [RequestsController::class, 'index'])->name('requests.ind
     Route::get('/request', function () {
         return redirect()->route('manager.requests.index', ['status' => 'all']);
     })->name('request');
+
+    Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
+    Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
+    Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+    Route::get('/employees/{id}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
+    Route::put('/employees/{id}', [EmployeeController::class, 'update'])->name('employees.update');
+    Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
 });
 
 Route::middleware(['auth'])->group(function () {

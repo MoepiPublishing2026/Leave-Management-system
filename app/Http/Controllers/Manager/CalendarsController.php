@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use App\Services\CalendarService;
 use App\Support\LeaveReminderService;
+use App\Support\ManagerTeam;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -20,6 +21,7 @@ class CalendarsController extends Controller
 
         $leaves = LeaveRequest::query()
             ->byEmployeeApplicants()
+            ->tap(fn ($q) => ManagerTeam::scopeLeaveRequests($q))
             ->with('user')
             ->whereRaw('LOWER(status) = ?', ['approved'])
             ->where(function ($query) use ($context) {

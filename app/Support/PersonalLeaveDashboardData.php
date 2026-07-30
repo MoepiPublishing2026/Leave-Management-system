@@ -18,12 +18,12 @@ class PersonalLeaveDashboardData
             ->pluck('total', 'status')
             ->toArray();
 
-        $statusCounts = ['pending' => 0, 'approved' => 0, 'rejected' => 0, 'withdrawn' => 0];
+        $statusCounts = ['pending' => 0, 'pending_senior' => 0, 'approved' => 0, 'rejected' => 0, 'withdrawn' => 0];
         foreach ($rawStatusCounts as $status => $count) {
             $statusCounts[strtolower(trim((string) $status))] = $count;
         }
 
-        $pendingTotalCount = $statusCounts['pending'];
+        $pendingTotalCount = (int) ($statusCounts['pending'] ?? 0) + (int) ($statusCounts['pending_senior'] ?? 0);
         $approvedCount = $statusCounts['approved'];
         $rejectedCount = $statusCounts['rejected'];
         $withdrawnCount = $statusCounts['withdrawn'];

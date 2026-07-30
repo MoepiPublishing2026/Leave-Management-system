@@ -73,7 +73,7 @@
 
 <div class="app-page">
     <h1>Profile</h1>
-    <p class="app-page-lead">Update your password and profile picture. Name and email are managed by your administrator.</p>
+    <p class="app-page-lead">Update your password and profile picture. Name and email are managed by your senior manager or manager.</p>
 
     @if(session('success'))
         <div class="profile-flash">{{ session('success') }}</div>

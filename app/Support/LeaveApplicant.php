@@ -53,6 +53,6 @@ class LeaveApplicant
 
     public static function approverLabel(?User $user): string
     {
-        return self::isManager($user) ? 'an administrator' : 'your manager';
+        return self::isManager($user) ? 'a senior manager' : 'your manager';
     }
 }

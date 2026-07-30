@@ -162,14 +162,13 @@
             @enderror
 
             <label for="department">Department</label>
-            <input type="text" name="department" value="{{ old('department') }}" required />
+            <select name="department" required>
+                <option value="">Select department</option>
+                @foreach(config('departments', []) as $dept)
+                    <option value="{{ $dept }}" {{ old('department') === $dept ? 'selected' : '' }}>{{ $dept }}</option>
+                @endforeach
+            </select>
             @error('department')
-                <div class="error">{{ $message }}</div>
-            @enderror
-
-            <label for="designation">Designation</label>
-            <input type="text" name="designation" value="{{ old('designation') }}" required />
-            @error('designation')
                 <div class="error">{{ $message }}</div>
             @enderror
 

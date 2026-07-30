@@ -18,7 +18,7 @@ class AnalyticsController extends Controller
         $staff = $request->query('staff', 'all');
 
         $leaveQuery = LeaveRequest::query()
-            ->byEmployeeApplicants()
+            ->byStaffApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn']);
 
         if (ctype_digit((string) $staff)) {
@@ -51,14 +51,17 @@ class AnalyticsController extends Controller
 
         $totalLeaves = $leaveQuery->count();
 
-        $pendingTotal = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['pending'])->count();
+        $pendingTotal = (clone $leaveQuery)
+            ->whereIn(DB::raw('LOWER(TRIM(status))'), ['pending', 'pending_senior'])
+            ->count();
         $overduePending = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['pending'])
             ->whereDate('start_date', '<', Carbon::today())
             ->count();
         $pendingRequests = max(0, $pendingTotal - $overduePending);
 
-        $activeEmployees = User::employees()->where('is_active', 1)->count();
-        $totalEmployees = User::employees()->count();
+        $activeEmployees = User::whereIn('role', ['employee', 'manager'])->where('is_active', 1)->count();
+        $totalEmployees = User::whereIn('role', ['employee', 'manager'])->count();
+        $employeesWhoApplied = (clone $leaveQuery)->distinct('user_id')->count('user_id');
 
         $approvedCount = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['approved'])->count();
         $approvalRate = $totalLeaves > 0 ? round(($approvedCount / $totalLeaves) * 100, 1) : 0;
@@ -71,9 +74,8 @@ class AnalyticsController extends Controller
 
         $leavesByDesignation = (clone $leaveQuery)
             ->join('users', 'leave_requests.user_id', '=', 'users.id')
-            ->where('users.role', 'employee')
-            ->select(DB::raw("COALESCE(users.designation, 'Unknown') as designation"), DB::raw('COUNT(DISTINCT leave_requests.user_id) as total'))
-            ->groupBy('users.designation')
+            ->select(DB::raw("COALESCE(users.department, 'Unknown') as designation"), DB::raw('COUNT(DISTINCT leave_requests.user_id) as total'))
+            ->groupBy(DB::raw("COALESCE(users.department, 'Unknown')"))
             ->get();
 
         $designationLabels = $leavesByDesignation->pluck('designation')->toArray();
@@ -100,7 +102,9 @@ class AnalyticsController extends Controller
             }
         }
 
-        $months = LeaveRequest::selectRaw("DATE_FORMAT(start_date, '%Y-%m') as month")
+        $months = LeaveRequest::query()
+            ->byStaffApplicants()
+            ->selectRaw("DATE_FORMAT(start_date, '%Y-%m') as month")
             ->distinct()
             ->orderBy('month', 'desc')
             ->pluck('month');
@@ -108,10 +112,10 @@ class AnalyticsController extends Controller
         $nowYear = (int) Carbon::now()->year;
         $years = collect(range($nowYear - 1, $nowYear - 5));
 
-        $staffOptions = User::employees()
+        $staffOptions = User::whereIn('role', ['employee', 'manager'])
             ->orderBy('first_name')
             ->orderBy('last_name')
-            ->get(['id', 'first_name', 'last_name', 'email']);
+            ->get(['id', 'first_name', 'last_name', 'email', 'role']);
 
         if ($staffOptions->isNotEmpty()) {
             $staffOptions = $staffOptions->unique(function ($u) {
@@ -139,6 +143,7 @@ class AnalyticsController extends Controller
             'pendingRequests',
             'activeEmployees',
             'totalEmployees',
+            'employeesWhoApplied',
             'approvedCount',
             'approvalRate',
             'leavesByType',

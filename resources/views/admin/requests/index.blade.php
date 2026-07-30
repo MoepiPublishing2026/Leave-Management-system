@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Leave Requests')
+@section('title', 'All Leave Requests')
 
 @section('content')
 @include('partials.requests-page-styles')
@@ -11,9 +11,9 @@
 @endphp
 
 <div class="requests-page">
-    <h1>Leave Requests</h1>
+    <h1>All Leave Requests</h1>
     <p class="requests-page-lead">
-        Employee requests are reviewed by managers. Manager leave is approved or rejected here.
+        Review all employee and manager leave requests. Final Senior Manager decisions can be submitted here or securely from email.
         @if ($requests->total() > 0)
             · {{ $requests->total() }} {{ Str::plural('request', $requests->total()) }}
         @endif
@@ -23,13 +23,15 @@
         'formRoute' => 'admin.requests',
         'filterRoute' => 'admin.requests',
         'status' => $status,
+        'payFilter' => $payFilter ?? 'all',
         'search' => $search ?? '',
         'monthFilter' => $monthFilter ?? null,
         'employeeFilter' => $employeeFilter ?? null,
         'searchPlaceholder' => 'Search name, type, status, dates...',
         'statusFilters' => [
             'all' => 'All',
-            'pending' => 'Pending',
+            'pending' => 'Awaiting Decision',
+            'pending_manager' => 'With Manager',
             'approved' => 'Approved',
             'rejected' => 'Rejected',
             'overdue' => 'Overdue',
@@ -63,22 +65,31 @@
                     $handledName = trim(($req->handledBy->first_name ?? '') . ' ' . ($req->handledBy->last_name ?? ''));
                     $lateReasonName = trim(($req->overdueEscalatedBy->first_name ?? '') . ' ' . ($req->overdueEscalatedBy->last_name ?? ''));
                     $rowStatus = strtolower(trim((string) ($req->status ?? '')));
+                    $awaitingSenior = $rowStatus === 'pending_senior'
+                        || ($rowStatus === 'pending' && $isManager);
+                    $canDecide = $awaitingSenior;
+                    $canApproveWithProof = $canDecide ? LeaveProofRules::canApprove($req) : false;
+                    $proofBlockReason = $canDecide ? LeaveProofRules::approvalBlockedReason($req) : null;
+                    $certificateStatusLabel = LeaveProofRules::doctorsLetterStatusLabel($req);
+                    $doctorsLetterMissing = LeaveProofRules::isProofPastDeadline($req);
                     $currentYear = (int) now()->year;
                     $requestYear = $req->start_date ? (int) \Carbon\Carbon::parse($req->start_date)->year : $currentYear;
                     $isPreviousYear = $requestYear === ($currentYear - 1);
                     $canDelete = $isPreviousYear;
-
-                    $canApproveWithProof = $isManager ? LeaveProofRules::canApprove($req) : false;
-                    $proofBlockReason = $isManager ? LeaveProofRules::approvalBlockedReason($req) : null;
-                    $certificateStatusLabel = $isManager ? LeaveProofRules::doctorsLetterStatusLabel($req) : null;
-                    $doctorsLetterMissing = $isManager ? LeaveProofRules::isProofPastDeadline($req) : false;
+                    $statusLabel = \App\Support\LeaveStatusLabels::display($rowStatus, $req->isOverdue());
+                    $statusBadge = \App\Support\LeaveStatusLabels::badgeClass($rowStatus, $req->isOverdue());
+                    $recLabel = match (strtolower((string) ($req->manager_recommendation ?? ''))) {
+                        'approve' => 'Recommend Approve',
+                        'reject' => 'Recommend Reject',
+                        default => '',
+                    };
 
                     $details = [
                         'id' => $req->id,
                         'employee' => $applicantFull,
                         'email' => $req->user->email ?? '',
                         'department' => $req->user->department ?? '',
-                        'designation' => $req->user->designation ?? '',
+                        'designation' => $req->user->department ?? ($req->user->designation ?? ''),
                         'type' => (string) ($req->leave_type ?? ''),
                         'start' => $req->start_date ? \Carbon\Carbon::parse($req->start_date)->format('d M Y') : '',
                         'end' => $req->end_date ? \Carbon\Carbon::parse($req->end_date)->format('d M Y') : '',
@@ -94,9 +105,14 @@
                         'handledAt' => $req->handled_at ? \Carbon\Carbon::parse($req->handled_at)->format('d M Y H:i') : '',
                         'handledAction' => (string) ($req->handled_action ?? ''),
                         'rejectionReason' => (string) ($req->rejection_reason ?? ''),
+                        'originalLeaveType' => (string) ($req->original_leave_type ?? ''),
+                        'convertedToUnpaidAt' => $req->converted_to_unpaid_at?->format('d M Y H:i') ?? '',
+                        'conversionReason' => (string) ($req->converted_to_unpaid_reason ?? ''),
+                        'managerRecommendation' => $recLabel,
+                        'managerRecommendationComment' => (string) ($req->manager_recommendation_comment ?? ''),
                     ];
 
-                    if ($isManager) {
+                    if ($canDecide || LeaveProofRules::requiresProof($req->leave_type)) {
                         $details['proofDeferred'] = LeaveProofRules::allowsDeferredProof($req->leave_type) && LeaveProofRules::requiresProof($req->leave_type);
                         $details['proofAttached'] = LeaveProofRules::hasProofAttached($req);
                         $details['proofDeadline'] = LeaveProofRules::proofDeadlineAt($req) ? LeaveProofRules::proofDeadlineAt($req)->format('d M Y') : '';
@@ -119,10 +135,9 @@
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>
                     <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y H:i') : '—' }}</td>
                     <td class="request-status-cell">
-                        @if ($req->isOverdue())
-                            <span class="request-badge request-badge--overdue">Overdue</span>
-                        @else
-                            <span class="request-badge request-badge--{{ $rowStatus === 'withdrawn' ? 'withdrawn' : $rowStatus }}">{{ ucfirst($rowStatus) }}</span>
+                        <span class="request-badge request-badge--{{ $statusBadge }}">{{ $statusLabel }}</span>
+                        @if ($recLabel !== '')
+                            <span class="request-badge request-badge--pending" title="{{ $req->manager_recommendation_comment }}">{{ $recLabel }}</span>
                         @endif
                         @if ($certificateStatusLabel)
                             <span class="request-badge {{ $doctorsLetterMissing ? 'request-badge--letter-missing' : 'request-badge--letter-required' }}">{{ $certificateStatusLabel }}</span>
@@ -130,10 +145,10 @@
                     </td>
                     <td class="request-actions-cell" onclick="event.stopPropagation();">
                         <div class="request-actions">
-                            @if ($isManager && $rowStatus === 'pending' && ! $req->isOverdue())
+                            @if ($canDecide)
                                 <div class="request-actions-inline">
                                     @if ($canApproveWithProof)
-                                        <form action="{{ route('admin.manager-requests.approve', $req) }}" method="POST">
+                                        <form action="{{ route('admin.requests.approve', $req) }}" method="POST">
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit" class="request-btn request-btn--approve">Approve</button>
@@ -143,7 +158,7 @@
                                     @endif
                                     <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Reject</button>
                                 </div>
-                            @elseif ($isManager && $rowStatus === 'rejected')
+                            @elseif ($rowStatus === 'rejected')
                                 <a href="{{ route('admin.manager-requests.show_reason', $req) }}" class="request-link">View Reason</a>
                             @endif
                             <a href="{{ route('messages.leave', $req) }}" class="request-link">Messages</a>
@@ -187,7 +202,7 @@
 ])
 
 <script>
-const rejectUrlTemplate = @json(url('/admin/manager-requests/__ID__/reject'));
+const rejectUrlTemplate = @json(url('/admin/requests/__ID__/reject'));
 
 function openRejectPopup(requestId) {
     Swal.fire({

@@ -39,9 +39,20 @@ class LeaveStatusNotification extends Notification
 
     public function toDatabase($notifiable)
     {
+        $statusLabel = \App\Support\LeaveStatusLabels::display($this->leaveRequest->status);
+        $isApplicant = (int) ($notifiable->id ?? 0) === (int) ($this->leaveRequest->user_id ?? 0);
+
+        if ($isApplicant) {
+            $message = "Your leave request has been marked {$statusLabel} by {$this->approverLabel()}.";
+        } else {
+            $applicant = $this->leaveRequest->user;
+            $name = trim(($applicant->first_name ?? '').' '.($applicant->last_name ?? '')) ?: 'an employee';
+            $message = "Leave request #{$this->leaveRequest->id} for {$name} is now {$statusLabel}.";
+        }
+
         return [
             'leave_request_id' => $this->leaveRequest->id,
-            'message' => "Your leave request has been {$this->leaveRequest->status} by {$this->approverLabel()}.",
+            'message' => $message,
             'date' => now(),
         ];
     }
@@ -50,7 +61,7 @@ class LeaveStatusNotification extends Notification
     {
         $role = strtolower((string) ($this->manager->role ?? ''));
         if ($role === 'admin') {
-            return 'an administrator';
+            return 'a senior manager';
         }
 
         $name = trim(($this->manager->first_name ?? '') . ' ' . ($this->manager->last_name ?? ''));

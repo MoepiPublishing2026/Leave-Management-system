@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Support\PercentageDistribution;
+use App\Support\ManagerTeam;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -21,6 +22,7 @@ class AnalyticController extends Controller
 
         $leaveQuery = LeaveRequest::query()
             ->byEmployeeApplicants()
+            ->tap(fn ($q) => ManagerTeam::scopeLeaveRequests($q))
             ->whereRaw('LOWER(status) != ?', ['withdrawn']);  // Exclude withdrawn
 
         if (ctype_digit((string) $staff)) {
@@ -58,8 +60,9 @@ class AnalyticController extends Controller
             ->count();
         $pendingRequests = max(0, $pendingTotal - $overduePending);
 
-        $activeEmployees = User::employees()->where('is_active', 1)->count();
-        $totalEmployees = User::employees()->count();
+        $activeEmployees = User::employees()->where('is_active', 1)->whereIn('id', ManagerTeam::employeeIdsFor())->count();
+        $totalEmployees = User::employees()->whereIn('id', ManagerTeam::employeeIdsFor())->count();
+        $employeesWhoApplied = (clone $leaveQuery)->distinct('user_id')->count('user_id');
 
         $approvedCount = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['approved'])->count();
         $approvalRate = $totalLeaves > 0 ? round(($approvedCount / $totalLeaves) * 100, 1) : 0;
@@ -74,8 +77,8 @@ class AnalyticController extends Controller
         $leavesByDesignation = (clone $leaveQuery)
             ->join('users', 'leave_requests.user_id', '=', 'users.id')
             ->where('users.role', 'employee')
-            ->select(DB::raw("COALESCE(users.designation, 'Unknown') as designation"), DB::raw('COUNT(DISTINCT leave_requests.user_id) as total'))
-            ->groupBy('users.designation')
+            ->select(DB::raw("COALESCE(users.department, 'Unknown') as designation"), DB::raw('COUNT(DISTINCT leave_requests.user_id) as total'))
+            ->groupBy(DB::raw("COALESCE(users.department, 'Unknown')"))
             ->get();
 
         $designationLabels = $leavesByDesignation->pluck('designation')->toArray();
@@ -111,6 +114,7 @@ class AnalyticController extends Controller
         $years = collect(range($nowYear - 1, $nowYear - 5));
 
         $staffOptions = User::employees()
+            ->whereIn('id', ManagerTeam::employeeIdsFor())
             ->orderBy('first_name')
             ->orderBy('last_name')
             ->get(['id', 'first_name', 'last_name', 'email']);
@@ -141,6 +145,7 @@ class AnalyticController extends Controller
             'pendingRequests',
             'activeEmployees',
             'totalEmployees',
+            'employeesWhoApplied',
             'approvedCount',
             'approvalRate',
             'leavesByType',

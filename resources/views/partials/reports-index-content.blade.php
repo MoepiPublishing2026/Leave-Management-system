@@ -54,12 +54,13 @@
         </div>
     </div>
 
+    @php $reportsForSeniorManager = strtolower((string) (auth()->user()->role ?? '')) === 'admin'; @endphp
     <h2 class="reports-section-title">Recent Leave Requests</h2>
     <div class="reports-table-wrap">
         <table class="reports-table" role="table" aria-label="Recent leave requests">
             <thead>
             <tr>
-                <th>Employee</th>
+                <th>{{ $reportsForSeniorManager ? 'Applicant' : 'Employee' }}</th>
                 <th>Type</th>
                 <th>Duration</th>
                 <th>Days</th>
@@ -72,6 +73,9 @@
                 @php
                     $isOverdue = method_exists($leave, 'isOverdue') ? $leave->isOverdue() : false;
                     $statusText = $isOverdue ? 'overdue' : strtolower((string) $leave->status);
+                    if ($statusText === 'pending_senior') {
+                        $statusText = 'pending';
+                    }
                     $statusClass = match ($statusText) {
                         'pending' => 'request-badge--pending',
                         'overdue' => 'request-badge--overdue',
@@ -86,7 +90,12 @@
                     }
                 @endphp
                 <tr>
-                    <td>{{ $employeeName }}</td>
+                    <td>
+                        {{ $employeeName }}
+                        @if ($reportsForSeniorManager && ($leave->user->role ?? '') === 'manager')
+                            <span class="request-badge request-badge--pending">Manager</span>
+                        @endif
+                    </td>
                     <td>{{ $leave->leave_type }}</td>
                     <td>{{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }} – {{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}</td>
                     <td>{{ \App\Support\LeaveDaysFormatter::format($leave->days ?? '') }}</td>

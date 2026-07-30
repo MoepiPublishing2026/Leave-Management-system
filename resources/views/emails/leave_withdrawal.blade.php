@@ -16,11 +16,15 @@
                     </tr>
                     <tr>
                         <td style="padding: 30px; color: #333333; font-size: 16px; line-height: 1.5;">
-                            <p>Dear Manager,</p>
+                            <p>Dear Reviewer,</p>
 
-                            <p>The leave request titled <strong>{{ $leaveRequest->leave_type }}</strong> from employee <strong>{{ $leaveRequest->user->first_name }} {{ $leaveRequest->user->last_name }}</strong> has been <span style="color: #d32f2f; font-weight: bold;">withdrawn</span>.</p>
+                            <p>The {{ strtolower(trim((string) ($previousStatus ?? ''))) === 'approved' ? 'approved ' : '' }}leave request titled <strong>{{ $leaveRequest->leave_type }}</strong> from <strong>{{ $leaveRequest->user->first_name }} {{ $leaveRequest->user->last_name }}</strong> has been <span style="color: #d32f2f; font-weight: bold;">withdrawn</span>.</p>
 
                             <p>Leave period: <strong>{{ \Carbon\Carbon::parse($leaveRequest->start_date)->format('d M Y') }}</strong> to <strong>{{ \Carbon\Carbon::parse($leaveRequest->end_date)->format('d M Y') }}</strong>.</p>
+
+                            @if(strtolower(trim((string) ($previousStatus ?? ''))) === 'approved')
+                                <p>The leave balance previously used by this approval is now available to the applicant again.</p>
+                            @endif
 
                             <p>Regards,<br/>Moepi Publishing</p>
                         </td>

@@ -6,15 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use App\Services\UserDeletionService;
 use Illuminate\Http\Request;
-use App\Mail\LeaveResponseMail;
-use Illuminate\Support\Facades\Mail;
-use App\Notifications\LeaveStatusNotification;
 use Illuminate\Support\Facades\Auth;
 use App\Support\LeaveProofRules;
 use App\Support\LeaveRequestSearch;
 use App\Support\LeaveRequestPeriodFilter;
+use App\Support\LeavePayFilter;
 use App\Support\DashboardEmployeeFilter;
 use App\Support\OverdueLeaveEscalation;
+use App\Support\ManagerTeam;
+use App\Support\LeaveApprovalWorkflow;
 use Illuminate\Support\Carbon;
 use App\Models\User;
 use App\Notifications\OverdueLeaveEscalatedNotification;
@@ -43,6 +43,7 @@ class RequestsController extends Controller
     public function index(Request $request)
     {
         $status = strtolower((string) $request->query('status', 'all'));
+        $payFilter = LeavePayFilter::normalize($request->query('pay', 'all'));
         $search = trim((string) $request->query('search', ''));
         $highlightRequestId = (int) $request->query('request_id', 0);
         if ($highlightRequestId > 0 && $search === '') {
@@ -52,16 +53,25 @@ class RequestsController extends Controller
         $monthFilter = $request->query('month');
         $employeeFilter = DashboardEmployeeFilter::selectedId($request->query('employee'));
         $query = LeaveRequest::query()->byEmployeeApplicants()->with('user');
+        ManagerTeam::scopeLeaveRequests($query);
 
         LeaveRequestPeriodFilter::apply($query, is_string($monthFilter) ? $monthFilter : null, 'created_at');
         DashboardEmployeeFilter::apply($query, $employeeFilter);
+        LeavePayFilter::apply($query, $payFilter);
 
         if ($status === 'overdue') {
             $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
                 ->whereDate('start_date', '<', Carbon::today());
+        } elseif ($status === 'pending_senior') {
+            $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending_senior']);
         } elseif ($status === 'pending') {
-            $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
-                ->whereDate('start_date', '>=', Carbon::today());
+            // Manager "Pending" includes own review queue + items already sent to senior
+            $query->where(function ($q) {
+                $q->where(function ($inner) {
+                    $inner->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
+                        ->whereDate('start_date', '>=', Carbon::today());
+                })->orWhereRaw('LOWER(TRIM(status)) = ?', ['pending_senior']);
+            });
         } elseif ($status !== 'all') {
             $query->whereRaw('LOWER(TRIM(status)) = ?', [$status]);
         } else {
@@ -74,8 +84,12 @@ class RequestsController extends Controller
                 ->whereDate('start_date', '<', Carbon::today());
             $effectiveSearch = '';
         } elseif ($status === 'all' && $searchKey === 'pending') {
-            $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
-                ->whereDate('start_date', '>=', Carbon::today());
+            $query->where(function ($q) {
+                $q->where(function ($inner) {
+                    $inner->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
+                        ->whereDate('start_date', '>=', Carbon::today());
+                })->orWhereRaw('LOWER(TRIM(status)) = ?', ['pending_senior']);
+            });
             $effectiveSearch = '';
         }
 
@@ -89,6 +103,7 @@ class RequestsController extends Controller
         return view('manager.requests.index', compact(
             'requests',
             'status',
+            'payFilter',
             'search',
             'monthFilter',
             'employeeFilter',
@@ -99,115 +114,65 @@ class RequestsController extends Controller
   
 
 
-public function approve($id)
+public function recommend(Request $r, $id)
 {
-    $leave = LeaveRequest::findOrFail($id);
+    $leave = LeaveRequest::with('user')->findOrFail($id);
 
     if ($leave->isManagerApplicant()) {
-        return redirect()->back()->with('error', 'Manager leave requests are approved by an administrator.');
+        return redirect()->back()->with('error', 'Manager leave requests are decided by a senior manager.');
+    }
+
+    if (! ManagerTeam::employeeIdsFor()->contains((int) $leave->user_id)) {
+        return redirect()->back()->with('error', 'You can only manage leave for employees assigned to you.');
     }
 
     if (strtolower($leave->status) !== 'pending') {
-        return redirect()->back()->with('error', 'Only pending requests can be approved.');
+        return redirect()->back()->with('error', 'Only requests awaiting manager review can be recommended.');
     }
 
     if ($leave->isOverdue()) {
-        return redirect()->back()->with('error', 'Overdue requests cannot be approved. Submit a late response reason instead.');
+        return redirect()->back()->with('error', 'Overdue requests cannot be recommended. Submit a late response reason instead.');
     }
 
-    if (! LeaveProofRules::canApprove($leave)) {
-        return redirect()->back()->with('error', LeaveProofRules::approvalBlockedReason($leave) ?? 'Supporting proof is required before approval.');
+    $recommendation = strtolower((string) $r->input('recommendation', 'approve'));
+    if (! in_array($recommendation, ['approve', 'reject'], true)) {
+        $recommendation = 'approve';
     }
 
-    $this->ensureHandledColumnsExist();
-    $leave->status = 'approved';
-    $leave->handled_by = Auth::id();
-    $leave->handled_at = Carbon::now();
-    $leave->handled_action = 'approved';
-    $leave->save();
+    if ($recommendation === 'approve' && ! LeaveProofRules::canApprove($leave)) {
+        return redirect()->back()->with('error', LeaveProofRules::approvalBlockedReason($leave) ?? 'Supporting proof is required before recommending approval.');
+    }
 
-    $conversation = LeaveRequestConversation::firstOrCreate([
-        'leave_request_id' => $leave->id,
-        'manager_id' => Auth::id(),
-    ]);
-    LeaveRequestMessage::create([
-        'conversation_id' => $conversation->id,
-        'sender_id' => Auth::id(),
-        'body' => 'Decision: Approved.',
-    ]);
-    $conversation->touch();
+    if ($recommendation === 'reject') {
+        $r->validate([
+            'manager_recommendation_comment' => 'nullable|string|max:1000',
+            'rejection_reason' => 'nullable|string|max:1000',
+        ]);
+    } else {
+        $r->validate(['manager_recommendation_comment' => 'nullable|string|max:1000']);
+    }
 
-    // Notify user in-app (database)
-    $manager = Auth::user();
+    $comment = $r->input('manager_recommendation_comment');
+    if (($comment === null || trim((string) $comment) === '') && $r->filled('rejection_reason')) {
+        $comment = $r->input('rejection_reason');
+    }
+
     try {
-        $leave->user->notify(new LeaveStatusNotification($leave, $manager));
+        LeaveApprovalWorkflow::recommend($leave, Auth::user(), $recommendation, $comment);
     } catch (\Throwable $e) {
         report($e);
+
+        return redirect()->back()->with('error', 'Unable to submit recommendation. Please try again.');
     }
 
-    // Send email, but don't fail the approval if mail is misconfigured
-    try {
-        Mail::to($leave->user->email)->send(new LeaveResponseMail($leave));
-    } catch (\Throwable $e) {
-        report($e);
-    }
-
-    return redirect()->back()->with('success', 'Request approved and employee notified.');
+    return redirect()->back()->with('success', 'Recommendation sent to Senior Manager. They can approve or reject from email or the app.');
 }
 
-public function reject(Request $r, $id)
+public function recommendReject(Request $r, $id)
 {
-    $leave = LeaveRequest::findOrFail($id);
+    $r->merge(['recommendation' => 'reject']);
 
-    if ($leave->isManagerApplicant()) {
-        return redirect()->back()->with('error', 'Manager leave requests are handled by an administrator.');
-    }
-
-    if (strtolower($leave->status) !== 'pending') {
-        return redirect()->back()->with('error', 'Only pending requests can be rejected.');
-    }
-
-    if ($leave->isOverdue()) {
-        return redirect()->back()->with('error', 'Overdue requests cannot be rejected. Submit a late response reason instead.');
-    }
-
-    $r->validate(['rejection_reason' => 'required|string|max:500']);
-
-    $this->ensureHandledColumnsExist();
-    $leave->status = 'rejected';
-    $leave->rejection_reason = $r->input('rejection_reason');
-    $leave->handled_by = Auth::id();
-    $leave->handled_at = Carbon::now();
-    $leave->handled_action = 'rejected';
-    $leave->save();
-
-    $conversation = LeaveRequestConversation::firstOrCreate([
-        'leave_request_id' => $leave->id,
-        'manager_id' => Auth::id(),
-    ]);
-    LeaveRequestMessage::create([
-        'conversation_id' => $conversation->id,
-        'sender_id' => Auth::id(),
-        'body' => 'Decision: Rejected. Reason: ' . $leave->rejection_reason,
-    ]);
-    $conversation->touch();
-
-    // Notify user in-app (database)
-    $manager = Auth::user();
-    try {
-        $leave->user->notify(new LeaveStatusNotification($leave, $manager));
-    } catch (\Throwable $e) {
-        report($e);
-    }
-
-    // Send email, but don't fail the rejection if mail is misconfigured
-    try {
-        Mail::to($leave->user->email)->send(new LeaveResponseMail($leave));
-    } catch (\Throwable $e) {
-        report($e);
-    }
-
-    return redirect()->back()->with('success', 'Request rejected and employee notified.');
+    return $this->recommend($r, $id);
 }
 
 public function escalate(Request $r, $id)
@@ -216,6 +181,10 @@ public function escalate(Request $r, $id)
 
     if (!$leave->isOverdue()) {
         return redirect()->back()->with('error', 'Only overdue pending requests can be escalated.');
+    }
+
+    if (! ManagerTeam::employeeIdsFor()->contains((int) $leave->user_id)) {
+        return redirect()->back()->with('error', 'You can only manage leave for employees assigned to you.');
     }
 
     $r->validate(['overdue_escalation_reason' => 'required|string|max:1000']);
@@ -260,12 +229,12 @@ public function escalate(Request $r, $id)
     if ($r->expectsJson()) {
         return response()->json([
             'success' => true,
-            'message' => 'Late response reason sent to admin.',
+            'message' => 'Late response reason sent to senior manager.',
             'remaining' => OverdueLeaveEscalation::pendingReasonQueue()->count(),
         ]);
     }
 
-    return redirect()->back()->with('success', 'Late response reason sent to admin.');
+    return redirect()->back()->with('success', 'Late response reason sent to senior manager.');
 }
 
 

@@ -125,11 +125,67 @@
             box-shadow: 0 10px 25px rgba(178, 205, 22, 0.3);
         }
         button:active { transform: translateY(0); }
+        .resend-form {
+            margin: 0;
+        }
+        .resend-button {
+            width: auto;
+            margin: 0;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            color: #b2cd16;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0;
+            line-height: 1.4;
+            text-transform: none;
+            overflow: visible;
+        }
+        .resend-button:hover {
+            background: transparent;
+            color: #9ef755;
+            transform: none;
+            box-shadow: none;
+        }
+        .resend-button::before {
+            display: none;
+        }
+        .resend-button::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #b2cd16;
+            transition: width 0.3s ease;
+        }
+        .resend-button:hover::after {
+            width: 100%;
+        }
+        .status-message {
+            margin-bottom: 18px;
+            padding: 11px 14px;
+            border: 1px solid #86efac;
+            border-radius: 10px;
+            background: #ecfdf5;
+            color: #166534;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.4;
+            text-align: center;
+        }
         .links {
             margin-top: 18px;
             text-align: center;
             padding-top: 20px;
             border-top: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
         }
         .links a {
             color: #b2cd16;
@@ -174,6 +230,10 @@
         <h2 class="auth-title">Two-Factor Authentication</h2>
         <p>A verification code has been sent to your email. Please enter it below to continue.</p>
 
+        @if (session('status'))
+            <div class="status-message" role="status">{{ session('status') }}</div>
+        @endif
+
         <form method="POST" action="{{ route('login.verify.post') }}">
             @csrf
             <div class="form-group">
@@ -185,6 +245,10 @@
         </form>
 
         <div class="links">
+            <form method="POST" action="{{ route('login.verify.resend') }}" class="resend-form">
+                @csrf
+                <button type="submit" class="resend-button">Resend authentication code</button>
+            </form>
             <a href="{{ route('login') }}">Back to Login</a>
         </div>
         

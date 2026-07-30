@@ -109,6 +109,46 @@ class AuthController extends Controller
         }
     }
 
+    public function resend2fa(Request $request)
+    {
+        $userId = $request->session()->get('2fa_user_id');
+        if (! $userId) {
+            return redirect()->route('login');
+        }
+
+        $user = User::find($userId);
+        if (! $user) {
+            $request->session()->forget('2fa_user_id');
+
+            return redirect()->route('login')
+                ->withErrors(['login_error' => 'Your login session is no longer valid.']);
+        }
+
+        $previousCode = $user->two_factor_code;
+        $previousExpiry = $user->two_factor_expires_at;
+        $code = random_int(100000, 999999);
+
+        try {
+            $user->two_factor_code = $code;
+            $user->two_factor_expires_at = now()->addMinutes(10);
+            $user->save();
+
+            Mail::to($user->email)->send(new TwoFactorCodeMail($code));
+        } catch (\Throwable $e) {
+            report($e);
+
+            $user->two_factor_code = $previousCode;
+            $user->two_factor_expires_at = $previousExpiry;
+            $user->save();
+
+            return back()->withErrors([
+                'code' => 'The new authentication code could not be sent. Please try again.',
+            ]);
+        }
+
+        return back()->with('status', 'A new authentication code has been sent to your email.');
+    }
+
     public function showForgotPasswordForm()
     {
         return view('auth.forgot_password');

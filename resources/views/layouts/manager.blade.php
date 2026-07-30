@@ -25,7 +25,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 40px;
+            padding: 0 20px;
             box-shadow: 0 0 10px #bdb6b6ff;
             border-bottom: 3px solid #a5d817;
             z-index: 10000;
@@ -54,7 +54,7 @@
         /* Navigation links */
         nav.menu {
             display: flex;
-            gap: 18px;
+            gap: 6px;
             align-items: center;
             margin-left: auto;
         }
@@ -62,14 +62,14 @@
             font-weight: 700;
             color: #5e920aff;
             text-decoration: none;
-            padding: 10px 15px;
+            padding: 9px 10px;
             border-radius: 8px;
             background-color: transparent;
             transition: background-color 0.3s ease, color 0.3s ease;
-            font-size: 15px;
+            font-size: 13px;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
         nav.menu a.active, nav.menu a:hover {
             background-color: #eff106;
@@ -91,11 +91,11 @@
             font-weight: 700;
             color: #5e920aff;
             text-decoration: none;
-            padding: 10px 15px;
+            padding: 9px 10px;
             border-radius: 8px;
             background-color: transparent;
             transition: background-color 0.3s ease, color 0.3s ease;
-            font-size: 15px;
+            font-size: 13px;
             display: flex;
             align-items: center;
         }
@@ -146,6 +146,7 @@
             top: 0;
             left: 0;
             height: 100vh;
+            height: 100dvh;
             width: min(86vw, 320px);
             background: white;
             z-index: 10001;
@@ -153,9 +154,17 @@
             transition: transform 0.25s ease;
             box-shadow: 8px 0 22px rgba(0,0,0,0.18);
             padding: 18px 16px;
+            padding-bottom: calc(18px + env(safe-area-inset-bottom));
             display: flex;
             flex-direction: column;
             gap: 10px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+        .mobile-sidebar > a {
+            flex-shrink: 0;
         }
         .mobile-sidebar.open {
             transform: translateX(0);
@@ -395,7 +404,8 @@
 
         <nav class="menu" aria-label="Primary Navigation">
             <a href="{{ route('manager.dashboard') }}" class="{{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">Dashboard</a>
-            <a href="{{ route('manager.requests.index', ['status' => 'all']) }}" class="{{ request()->routeIs('manager.requests.*') ? 'active' : '' }}">Requests</a>
+            <a href="{{ route('manager.employees.index') }}" class="{{ request()->routeIs('manager.employees.*') ? 'active' : '' }}">Employees</a>
+            <a href="{{ route('manager.requests.index', ['status' => 'all']) }}" class="{{ request()->routeIs('manager.requests.*') ? 'active' : '' }}">Team Requests</a>
             <a href="{{ route('manager.apply') }}" class="{{ request()->routeIs('manager.apply') ? 'active' : '' }}">Apply</a>
             <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
                 Messages
@@ -492,7 +502,8 @@
             @endauth
         </div>
         <a href="{{ route('manager.dashboard') }}" class="{{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">Dashboard</a>
-        <a href="{{ route('manager.requests.index', ['status' => 'all']) }}" class="{{ request()->routeIs('manager.requests.*') ? 'active' : '' }}">Requests</a>
+        <a href="{{ route('manager.employees.index') }}" class="{{ request()->routeIs('manager.employees.*') ? 'active' : '' }}">Employees</a>
+        <a href="{{ route('manager.requests.index', ['status' => 'all']) }}" class="{{ request()->routeIs('manager.requests.*') ? 'active' : '' }}">Team Requests</a>
         <a href="{{ route('manager.apply') }}" class="{{ request()->routeIs('manager.apply') ? 'active' : '' }}">Apply</a>
         <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
             Messages

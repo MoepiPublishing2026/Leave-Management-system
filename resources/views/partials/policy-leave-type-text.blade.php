@@ -10,11 +10,13 @@
             Up to {{ (int) $policy->max_carry_over }} unused day(s) may be carried over to the next year.
         @endif
     @elseif($type === 'Sick')
-        Sick leave is granted up to {{ (int) $policy->default_days }} days for illness or injury. Employees must notify their manager as early as possible. Your manager may approve sick leave before you visit the doctor. Once approved, you must upload your doctor's letter from My Leave Requests on your leave start date, or by the next day at the latest, to confirm your hospital or doctor visit.
+        Sick leave is granted up to {{ (int) $policy->default_days }} days for illness or injury. Employees must notify their manager as early as possible. Your manager may approve sick leave before you visit the doctor. Once approved, you must upload your doctor's letter from My Leave Requests on your leave start date, or by the next day at the latest, to confirm your hospital or doctor visit. If the letter is not submitted by that deadline, the approved request will automatically be changed to unpaid leave.
     @elseif(in_array($type, ['Maternity', 'Paternity']))
         {{ $type }} leave of {{ (int) $policy->default_days }} days is provided according to applicable legislation. Proper documentation and notice are required.
     @elseif($type === 'Bereavement')
         Employees may take up to {{ (int) $policy->default_days }} days of paid bereavement leave for the death of immediate family members.
+    @elseif($type === 'Family Responsibility')
+        Family responsibility leave of up to {{ (int) $policy->default_days }} days may be requested when an employee needs to attend to urgent family matters. Approval is subject to operational requirements.
     @elseif($type === 'Unpaid')
         Unpaid leave does not reduce your annual leave balance. Employees may request unpaid leave for personal reasons. Approval is at the discretion of management and based on operational requirements.
     @elseif($type === 'Study')

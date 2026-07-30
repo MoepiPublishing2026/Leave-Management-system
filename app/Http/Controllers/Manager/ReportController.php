@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
+use App\Support\ManagerTeam;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Yasumi\Yasumi;
@@ -22,6 +23,7 @@ class ReportController extends Controller
         // Base leave query excluding withdrawn
         $leaveQuery = LeaveRequest::query()
             ->byEmployeeApplicants()
+            ->tap(fn ($q) => ManagerTeam::scopeLeaveRequests($q))
             ->whereRaw('LOWER(status) != ?', ['withdrawn']);
 
         // Filter by created_at if dates supplied
@@ -138,6 +140,7 @@ class ReportController extends Controller
         // Base query excluding withdrawn
         $query = LeaveRequest::query()
             ->byEmployeeApplicants()
+            ->tap(fn ($q) => ManagerTeam::scopeLeaveRequests($q))
             ->whereRaw('LOWER(status) != ?', ['withdrawn']);
 
         if ($startDate && $endDate) {
@@ -223,6 +226,7 @@ class ReportController extends Controller
 
         $query = LeaveRequest::query()
             ->byEmployeeApplicants()
+            ->tap(fn ($q) => ManagerTeam::scopeLeaveRequests($q))
             ->whereRaw('LOWER(status) != ?', ['withdrawn'])
             ->with('user')
             ->orderByDesc('created_at');

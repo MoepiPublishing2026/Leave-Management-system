@@ -19,6 +19,7 @@ class User extends Authenticatable
         'password',
         'role',  // 'admin', 'manager', 'employee'
         'is_active',
+        'manager_id',
     ];
 
     protected $casts = [
@@ -30,6 +31,16 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function manager()
+    {
+        return $this->belongsTo(self::class, 'manager_id');
+    }
+
+    public function directReports()
+    {
+        return $this->hasMany(self::class, 'manager_id');
+    }
+
     /** Users who can submit leave requests. */
     public function scopeEmployees($query)
     {
@@ -39,5 +50,10 @@ class User extends Authenticatable
     public function scopeManagers($query)
     {
         return $query->where('role', 'manager');
+    }
+
+    public function scopeAssignedToManager($query, int $managerId)
+    {
+        return $query->where('manager_id', $managerId);
     }
 }

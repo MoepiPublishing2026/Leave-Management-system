@@ -59,9 +59,9 @@
 
 <h2>Hello {{ $leaveRequest->user->first_name }},</h2>
 
-<p>Your leave request status has been updated to <strong>{{ ucfirst($leaveRequest->status) }}</strong>.</p>
+<p>Your leave request status has been updated to <strong>{{ \App\Support\LeaveStatusLabels::display($leaveRequest->status) }}</strong>.</p>
 
-@if($leaveRequest->status === 'rejected')
+@if(strtolower((string) $leaveRequest->status) === 'rejected')
     <p>Reason for rejection: {{ $leaveRequest->rejection_reason }}</p>
 @endif
 

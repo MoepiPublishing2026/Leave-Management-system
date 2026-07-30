@@ -43,6 +43,7 @@
         'filterRoute' => $filterRoute ?? 'leave.myRequests',
         'newRequestRoute' => $newRequestRoute ?? 'apply',
         'status' => $status,
+        'payFilter' => $payFilter ?? 'all',
         'search' => $search ?? '',
         'showNewRequest' => true,
         'searchPlaceholder' => 'Search type, status, dates, comment...',
@@ -116,6 +117,9 @@
                         'handledAt' => $req->handled_at ? \Carbon\Carbon::parse($req->handled_at)->format('d M Y H:i') : '',
                         'handledAction' => (string) ($req->handled_action ?? ''),
                         'rejectionReason' => (string) ($req->rejection_reason ?? ''),
+                        'originalLeaveType' => (string) ($req->original_leave_type ?? ''),
+                        'convertedToUnpaidAt' => $req->converted_to_unpaid_at?->format('d M Y H:i') ?? '',
+                        'conversionReason' => (string) ($req->converted_to_unpaid_reason ?? ''),
                     ];
                 @endphp
                 <tr class="row-click {{ $req->isOverdue() ? 'overdue-row' : '' }}" data-details='@json($details)'>
@@ -128,7 +132,7 @@
                         @if ($req->isOverdue())
                             <span class="request-badge request-badge--overdue">Overdue</span>
                         @else
-                            <span class="request-badge request-badge--{{ $rowStatus === 'withdrawn' ? 'withdrawn' : $rowStatus }}">{{ ucfirst($rowStatus) }}</span>
+                            <span class="request-badge request-badge--{{ \App\Support\LeaveStatusLabels::badgeClass($rowStatus, $req->isOverdue()) }}">{{ \App\Support\LeaveStatusLabels::display($rowStatus, $req->isOverdue()) }}</span>
                         @endif
                         @if ($proofStatusLabel)
                             <span class="request-badge {{ $doctorsLetterMissing ? 'request-badge--letter-missing' : 'request-badge--letter-required' }}">{{ $proofStatusLabel }}</span>
@@ -172,7 +176,11 @@
                                 <form class="withdraw-form" method="POST" action="{{ route('leave.withdraw', $req->id) }}">
                                     @csrf
                                     @method('PATCH')
-                                    <button type="button" class="request-btn request-btn--withdraw withdraw-request-btn">Withdraw</button>
+                                    <button
+                                        type="button"
+                                        class="request-btn request-btn--withdraw withdraw-request-btn"
+                                        data-approved="{{ $rowStatus === 'approved' ? '1' : '0' }}"
+                                    >Withdraw</button>
                                 </form>
                             @endif
                             @if ($canDelete)
@@ -194,7 +202,7 @@
         </table>
     </div>
 
-    <p class="requests-hint">Click any row to view full request details.@if(($layout ?? '') === 'layouts.manager') Pending requests are reviewed by an administrator.@endif For approved sick leave, upload your doctor's letter using <strong>Upload doctor's letter</strong> in the Actions column on your leave start date (by the next day at the latest).</p>
+    <p class="requests-hint">Click any row to view full request details.@if(($layout ?? '') === 'layouts.manager') Pending requests are reviewed by a senior manager.@endif Approved leave may be withdrawn until its final leave day; the balance is then restored. For approved sick leave, upload your doctor's letter using <strong>Upload doctor's letter</strong> in the Actions column on your leave start date (by the next day at the latest).</p>
 
     <div class="requests-pagination">
         {{ $leaveRequests->links('pagination::bootstrap-5') }}

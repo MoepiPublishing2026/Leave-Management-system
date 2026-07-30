@@ -21,10 +21,10 @@ return [
         'paternity' => '#6366f1',     // indigo
         'bereavement' => '#C19A68',
         'unpaid' => '#F08080',        // light coral
-        'compassionate' => '#22c55e', // green
+        'family responsibility' => '#22c55e', // green (was compassionate)
+        'compassionate' => '#22c55e', // legacy alias
         'study' => '#14b8a6',         // teal
-        'family responsibility' => '#0ea5e9', // sky
-        'family' => '#0ea5e9',
+        'family' => '#22c55e',
         'urgent' => '#ec4899',        // pink
     ],
 

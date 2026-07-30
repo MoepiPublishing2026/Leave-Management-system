@@ -211,17 +211,10 @@
             @if(empty($departmentLabels))
                 <p style="margin:0; color:#64748b; font-size:14px;">No leave requests by department for this period.</p>
             @else
-                <div class="chart-body chart-body--ring">
-                    <canvas id="departmentPolar"></canvas>
+                <div class="chart-body chart-body--plot">
+                    <canvas id="departmentBar"></canvas>
                 </div>
-                <ul class="chart-html-legend" id="departmentPolarLegend" aria-label="Departments legend"></ul>
             @endif
-        </div>
-        <div class="chart-card">
-            <h3>Requests by Designation</h3>
-            <div class="chart-body chart-body--plot">
-                <canvas id="designationBar"></canvas>
-            </div>
         </div>
         <div class="chart-card">
             <h3>Monthly Requests by Status ({{ $chartYear }})</h3>
@@ -229,6 +222,13 @@
                 <canvas id="monthlyStatusStackedBar"></canvas>
             </div>
             <ul class="chart-html-legend" id="monthlyStatusStackedBarLegend" aria-label="Monthly status legend"></ul>
+        </div>
+        <div class="chart-card">
+            <h3>Paid vs Unpaid Leave</h3>
+            <div class="chart-body chart-body--ring">
+                <canvas id="payStatusPolar"></canvas>
+            </div>
+            <ul class="chart-html-legend" id="payStatusPolarLegend" aria-label="Paid and unpaid leave legend"></ul>
         </div>
     </div>
 </div>
@@ -328,6 +328,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     renderChartHtmlLegend('leaveDoughnutLegend', leaveTypeLabels, leaveTypeColors, leaveTypePct);
 
+    const payStatusLabels = ['Paid', 'Unpaid'];
+    const payStatusData = @json(array_values($payStatusCounts ?? ['Paid' => 0, 'Unpaid' => 0]));
+    const payStatusPct = @json($payStatusPercentages ?? []);
+    const payStatusColors = [chartPalette.green, chartPalette.orange];
+
+    new Chart(document.getElementById('payStatusPolar'), {
+        type: 'polarArea',
+        data: {
+            labels: payStatusLabels,
+            datasets: [{
+                data: payStatusData,
+                backgroundColor: payStatusColors,
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: mergeChartOptions({
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const pct = (payStatusPct[ctx.label] ?? 0).toFixed(1);
+                            return `${ctx.label}: ${ctx.raw} (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        })
+    });
+    renderChartHtmlLegend('payStatusPolarLegend', payStatusLabels, payStatusColors, payStatusPct);
+
     const statusPct = @json($statusPercentages ?? []);
     const statusPieLabels = window.leaveStatusPieLabels;
     const statusPieColors = window.statusColorsForLabels(statusPieLabels);
@@ -405,61 +437,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     window.registerMonthAxisChart(monthlyLineChart);
 
-    const deptPolarCanvas = document.getElementById('departmentPolar');
-    if (deptPolarCanvas) {
+    const departmentBarCanvas = document.getElementById('departmentBar');
+    if (departmentBarCanvas) {
         const deptLabels = @json($departmentLabels);
         const deptData = @json($departmentData);
-        const deptPct = @json($departmentPercentages ?? []);
-        const polarLegendGen = Chart.overrides?.polarArea?.plugins?.legend?.labels?.generateLabels
-            || Chart.overrides?.doughnut?.plugins?.legend?.labels?.generateLabels;
-        const deptColors = deptLabels.map((d) => colorForGroupLabel(d));
-        new Chart(deptPolarCanvas, {
-            type: 'polarArea',
+        new Chart(departmentBarCanvas, {
+            type: 'bar',
             data: {
                 labels: deptLabels,
                 datasets: [{
+                    label: 'Requests',
                     data: deptData,
-                    backgroundColor: deptLabels.map((d) => hexToRgba(colorForGroupLabel(d), 0.65)),
-                    borderColor: '#fff',
-                    borderWidth: 2
+                    backgroundColor: deptLabels.map((label) => hexToRgba(colorForGroupLabel(label), 0.8)),
+                    borderColor: deptLabels.map((label) => colorForGroupLabel(label)),
+                    borderWidth: 2,
+                    borderRadius: 8
                 }]
             },
-            options: mergeChartOptions({
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => {
-                                const pct = (deptPct[ctx.label] ?? 0).toFixed(1);
-                                return `${ctx.label}: ${ctx.formattedValue} (${pct}%)`;
-                            }
-                        }
-                    }
-                },
-                scales: window.polarAreaChartScales,
-            })
+            options: window.categoryBarChartOptions({ precision: 0 }),
         });
-        renderChartHtmlLegend('departmentPolarLegend', deptLabels, deptColors, deptPct);
     }
-
-    const designationLabels = @json($designationLabels ?? []);
-    const designationData = @json($designationData ?? []);
-
-    new Chart(document.getElementById('designationBar'), {
-        type: 'bar',
-        data: {
-            labels: designationLabels,
-            datasets: [{
-                label: 'Requests',
-                data: designationData,
-                backgroundColor: designationLabels.map((l) => hexToRgba(colorForGroupLabel(l), 0.8)),
-                borderColor: designationLabels.map((l) => colorForGroupLabel(l)),
-                borderWidth: 2,
-                borderRadius: 8
-            }]
-        },
-        options: window.categoryBarChartOptions({ precision: 0 }),
-    });
 
     const monthlyStatusDatasets = [
                 {

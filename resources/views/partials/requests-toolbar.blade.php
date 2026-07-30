@@ -24,6 +24,11 @@
     if (!empty($employeeFilter)) {
         $filterParams['employee'] = $employeeFilter;
     }
+    $requestedPayFilter = $payFilter ?? 'all';
+    $payFilter = in_array($requestedPayFilter, ['paid', 'unpaid'], true) ? $requestedPayFilter : 'all';
+    if ($payFilter !== 'all') {
+        $filterParams['pay'] = $payFilter;
+    }
     $activeSearch = trim((string) ($search ?? ''));
     if ($activeSearch !== '') {
         $filterParams['search'] = $activeSearch;
@@ -32,13 +37,6 @@
     unset($clearSearchParams['search']);
     $resultTotal = $resultTotal ?? null;
 @endphp
-
-@if (session('success'))
-    <div class="requests-flash requests-flash--success" role="status">{{ session('success') }}</div>
-@endif
-@if (session('error'))
-    <div class="requests-flash requests-flash--error" role="alert">{{ session('error') }}</div>
-@endif
 
 <div class="requests-toolbar">
     <div class="requests-toolbar-left">
@@ -65,6 +63,9 @@
             @if (!empty($employeeFilter))
                 <input type="hidden" name="employee" value="{{ $employeeFilter }}" />
             @endif
+            @if ($payFilter !== 'all')
+                <input type="hidden" name="pay" value="{{ $payFilter }}" />
+            @endif
             <input type="text" name="search" placeholder="{{ $searchPlaceholder ?? 'Search requests...' }}" value="{{ $search ?? '' }}" aria-label="Search requests" />
             <button type="submit" class="requests-btn requests-btn--search">Search</button>
             <a href="{{ route($filterRoute, $clearSearchParams) }}" class="requests-btn requests-btn--secondary">Clear</a>
@@ -72,6 +73,7 @@
     </div>
 </div>
 
+<div class="requests-filter-bar">
 <div class="requests-filters" role="tablist" aria-label="Filter by status">
     @foreach ($statusFilters as $filterKey => $filterLabel)
         @php
@@ -84,4 +86,24 @@
             {{ $filterLabel }}
         </a>
     @endforeach
+</div>
+
+<form method="GET" action="{{ route($filterRoute) }}" class="requests-pay-filter">
+    <input type="hidden" name="status" value="{{ $status }}" />
+    @if (!empty($monthFilter))
+        <input type="hidden" name="month" value="{{ $monthFilter }}" />
+    @endif
+    @if (!empty($employeeFilter))
+        <input type="hidden" name="employee" value="{{ $employeeFilter }}" />
+    @endif
+    @if ($activeSearch !== '')
+        <input type="hidden" name="search" value="{{ $activeSearch }}" />
+    @endif
+    <label for="requestsPayFilter">Payment</label>
+    <select id="requestsPayFilter" name="pay" onchange="this.form.submit()">
+        <option value="all" {{ $payFilter === 'all' ? 'selected' : '' }}>All Leave</option>
+        <option value="paid" {{ $payFilter === 'paid' ? 'selected' : '' }}>Paid Leave</option>
+        <option value="unpaid" {{ $payFilter === 'unpaid' ? 'selected' : '' }}>Unpaid Leave</option>
+    </select>
+</form>
 </div>

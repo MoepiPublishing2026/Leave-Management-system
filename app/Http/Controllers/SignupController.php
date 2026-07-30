@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class SignupController extends Controller
 {
@@ -19,10 +20,11 @@ class SignupController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'department' => 'required|string|max:255',
-            'designation' => 'required|string|max:255',
+            'department' => ['required', 'string', Rule::in(config('departments', []))],
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
+        ], [
+            'department.in' => 'Please select a valid company department.',
         ]);
 
         if ($validator->fails()) {
@@ -33,12 +35,11 @@ class SignupController extends Controller
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'department' => $request->department,
-            'designation' => $request->designation,
+            'designation' => $request->department,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        // Redirect to login or dashboard after signup
         return redirect()->route('login')->with('success', 'Signup successful. Please login.');
     }
 }

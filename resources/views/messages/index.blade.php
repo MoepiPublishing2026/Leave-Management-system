@@ -425,7 +425,12 @@
         position: fixed;
         inset: 0;
         z-index: 10040;
-        background: rgba(10, 19, 71, 0.45);
+        background: rgba(2, 10, 14, 0.88);
+        border: 3px solid #b2cd16;
+        box-shadow: inset 0 0 0 2px #0f766e;
+        box-sizing: border-box;
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -436,7 +441,9 @@
         background: #fff;
         border-radius: 12px;
         padding: 20px;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        border: none;
+        outline: none;
+        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.58);
     }
     .forward-modal h4 {
         margin: 0 0 12px;
@@ -646,7 +653,7 @@
             @forelse($conversations as $c)
                 @php
                     $otherUser = $isAdmin ? $c->manager : $c->admin;
-                    $otherName = trim(($otherUser->first_name ?? '') . ' ' . ($otherUser->last_name ?? '')) ?: ($isAdmin ? 'Manager' : 'Admin');
+                    $otherName = trim(($otherUser->first_name ?? '') . ' ' . ($otherUser->last_name ?? '')) ?: ($isAdmin ? 'Manager' : 'Senior Manager');
                     $lastMessage = $c->messages->first();
                     if ($lastMessage) {
                         if ($lastMessage->deleted_for_everyone_at) {
@@ -697,7 +704,7 @@
                 $employee = $activeConversation->leaveRequest?->user;
                 $employeeName = trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? '')) ?: 'Employee';
                 $otherUser = $isAdmin ? $activeConversation->manager : $activeConversation->admin;
-                $otherName = trim(($otherUser->first_name ?? '') . ' ' . ($otherUser->last_name ?? '')) ?: ($isAdmin ? 'Manager' : 'Admin');
+                $otherName = trim(($otherUser->first_name ?? '') . ' ' . ($otherUser->last_name ?? '')) ?: ($isAdmin ? 'Manager' : 'Senior Manager');
                 $leave = $activeConversation->leaveRequest;
             @endphp
             <header class="messages-header">
@@ -855,7 +862,7 @@
                     @foreach($forwardConversations as $fc)
                         @php
                             $fcOther = $isAdmin ? $fc->manager : $fc->admin;
-                            $fcOtherName = trim(($fcOther->first_name ?? '') . ' ' . ($fcOther->last_name ?? '')) ?: ($isAdmin ? 'Manager' : 'Admin');
+                            $fcOtherName = trim(($fcOther->first_name ?? '') . ' ' . ($fcOther->last_name ?? '')) ?: ($isAdmin ? 'Manager' : 'Senior Manager');
                             $fcEmployee = $fc->leaveRequest?->user;
                             $fcEmployeeName = trim(($fcEmployee->first_name ?? '') . ' ' . ($fcEmployee->last_name ?? '')) ?: 'Employee';
                         @endphp

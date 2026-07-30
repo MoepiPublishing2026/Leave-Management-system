@@ -6,6 +6,9 @@ use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Notifications\LeaveReminderNotification;
 use App\Notifications\LeaveStatusNotification;
+use App\Notifications\LeaveConvertedToUnpaidNotification;
+use App\Notifications\LeaveRequestOverdueNotification;
+use App\Notifications\LeaveWithdrawnNotification;
 use App\Notifications\MessageReceivedNotification;
 use App\Notifications\NewLeaveRequestNotification;
 use App\Notifications\OverdueLeaveEscalatedNotification;
@@ -66,7 +69,12 @@ class UserNotifications
         $data = is_array($notification->data) ? $notification->data : [];
 
         if ($role === 'employee') {
-            if (! in_array($type, [LeaveStatusNotification::class, LeaveReminderNotification::class], true)) {
+            if (! in_array($type, [
+                LeaveStatusNotification::class,
+                LeaveReminderNotification::class,
+                LeaveConvertedToUnpaidNotification::class,
+                LeaveRequestOverdueNotification::class,
+            ], true)) {
                 return false;
             }
 
@@ -82,12 +90,24 @@ class UserNotifications
         }
 
         if ($role === 'manager') {
-            if (in_array($type, [LeaveStatusNotification::class, LeaveReminderNotification::class], true)) {
+            if (in_array($type, [
+                LeaveStatusNotification::class,
+                LeaveReminderNotification::class,
+                LeaveConvertedToUnpaidNotification::class,
+                LeaveRequestOverdueNotification::class,
+            ], true)) {
                 $leaveId = $data['leave_request_id'] ?? null;
                 if ($leaveId) {
+                    $teamIds = ManagerTeam::employeeIdsFor($user);
+
                     return LeaveRequest::query()
                         ->whereKey($leaveId)
-                        ->where('user_id', $user->id)
+                        ->where(function ($q) use ($user, $teamIds) {
+                            $q->where('user_id', $user->id);
+                            if ($teamIds->isNotEmpty()) {
+                                $q->orWhereIn('user_id', $teamIds);
+                            }
+                        })
                         ->exists();
                 }
 
@@ -97,6 +117,7 @@ class UserNotifications
             return in_array($type, [
                 NewLeaveRequestNotification::class,
                 MessageReceivedNotification::class,
+                LeaveWithdrawnNotification::class,
             ], true);
         }
 
@@ -104,15 +125,16 @@ class UserNotifications
             if ($type === NewLeaveRequestNotification::class) {
                 $leaveId = $data['leave_request_id'] ?? null;
 
-                return $leaveId && LeaveRequest::query()
-                    ->whereKey($leaveId)
-                    ->byManagerApplicants()
-                    ->exists();
+                return (bool) $leaveId && LeaveRequest::query()->whereKey($leaveId)->exists();
             }
 
             return in_array($type, [
                 MessageReceivedNotification::class,
                 OverdueLeaveEscalatedNotification::class,
+                LeaveStatusNotification::class,
+                LeaveConvertedToUnpaidNotification::class,
+                LeaveRequestOverdueNotification::class,
+                LeaveWithdrawnNotification::class,
             ], true);
         }
 

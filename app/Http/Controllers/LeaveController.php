@@ -12,11 +12,13 @@ use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewLeaveRequestNotification;
+use App\Notifications\LeaveWithdrawnNotification;
  use Yasumi\Yasumi;
 use Illuminate\Support\Facades\Storage;
 use App\Support\AnnualLeaveRules;
 use App\Support\LeaveProofRules;
 use App\Support\LeaveRequestSearch;
+use App\Support\LeavePayFilter;
 use App\Support\MonthlyLeaveStatusBreakdown;
 use App\Support\LeaveApplicant;
 use App\Support\LeaveReminderService;
@@ -66,6 +68,20 @@ private function countWorkingDaysInYear(Carbon $start, Carbon $end, array $publi
         $current->addDay();
     }
     return $daysCount;
+}
+
+private function isLeaveTypeUnavailable(
+    string $leaveType,
+    float $remaining,
+    float $annualRemaining,
+    int $userId
+): bool {
+    $typeExhausted = $remaining <= 0;
+    $annualPoolExhausted = AnnualLeaveRules::countsAgainstAnnual($leaveType) && $annualRemaining <= 0;
+
+    return $typeExhausted
+        || $annualPoolExhausted
+        || ParentalLeaveRules::isBlockedForUser($userId, $leaveType);
 }
 
    
@@ -172,7 +188,10 @@ public function leaveBalance(Request $request)
     }
 
     $pendingLeaves = LeaveRequest::where('user_id', $userId)
-        ->whereRaw('LOWER(status) = ?', ['pending'])
+        ->where(function ($q) {
+            $q->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
+                ->orWhereRaw('LOWER(TRIM(status)) = ?', ['pending_senior']);
+        })
         ->whereDate('end_date', '>=', $startOfYear->toDateString())
         ->whereDate('start_date', '<=', $endOfYear->toDateString())
         ->orderBy('start_date')
@@ -209,6 +228,8 @@ public function leaveBalance(Request $request)
         $statusKey = strtolower(trim((string) $req->status));
         if ($statusKey === 'pending' && Carbon::parse($req->start_date)->lt(Carbon::today())) {
             $requestCounts['overdue']++;
+        } elseif ($statusKey === 'pending_senior') {
+            $requestCounts['pending']++;
         } elseif (array_key_exists($statusKey, $requestCounts)) {
             $requestCounts[$statusKey]++;
         }
@@ -221,8 +242,6 @@ public function leaveBalance(Request $request)
     $annualUsagePercent = $annualAllocated > 0
         ? min(100, round(($annualTaken / $annualAllocated) * 100))
         : 0;
-
-    $notDisabledWhenAnnualExhausted = AnnualLeaveRules::notDisabledWhenAnnualExhaustedLabels();
 
     $pendingLeavesDisplay = $pendingLeaves;
     if (!empty($selectedType)) {
@@ -245,6 +264,7 @@ public function leaveBalance(Request $request)
 
     $focusedBalance = null;
     $isTypeDisabled = false;
+    $typeExhausted = false;
     $typeUsagePercent = 0;
     $countsAgainstAnnual = false;
 
@@ -252,9 +272,15 @@ public function leaveBalance(Request $request)
         $info = $leaveBalances[$selectedType];
         $allocated = (float) ($info['default_days'] ?? 0);
         $taken = (float) ($info['taken_days'] ?? 0);
+        $remaining = (float) ($info['remaining_days'] ?? 0);
         $typeUsagePercent = $allocated > 0 ? min(100, (int) round(($taken / $allocated) * 100)) : 0;
-        $isTypeDisabled = ($annualRemaining <= 0 && !in_array($selectedType, $notDisabledWhenAnnualExhausted, true))
-            || ParentalLeaveRules::isBlockedForUser((int) $userId, (string) $selectedType);
+        $typeExhausted = $remaining <= 0;
+        $isTypeDisabled = $this->isLeaveTypeUnavailable(
+            (string) $selectedType,
+            $remaining,
+            $annualRemaining,
+            (int) $userId
+        );
         $countsAgainstAnnual = AnnualLeaveRules::countsAgainstAnnual((string) $selectedType);
 
         $focusedBalance = array_merge($info, [
@@ -265,11 +291,25 @@ public function leaveBalance(Request $request)
 
     $leaveTypeOptions = [];
     foreach ($leaveBalances as $type => $info) {
+        $remaining = (float) ($info['remaining_days'] ?? 0);
+        $parentalBlocked = ParentalLeaveRules::isBlockedForUser((int) $userId, (string) $type);
+        $typeIsExhausted = $remaining <= 0;
+        $annualPoolExhausted = AnnualLeaveRules::countsAgainstAnnual((string) $type) && $annualRemaining <= 0;
+
         $leaveTypeOptions[] = [
             'type' => $type,
-            'remaining' => (float) ($info['remaining_days'] ?? 0),
-            'disabled' => ($annualRemaining <= 0 && !in_array($type, $notDisabledWhenAnnualExhausted, true))
-                || ParentalLeaveRules::isBlockedForUser((int) $userId, (string) $type),
+            'remaining' => $remaining,
+            'disabled' => $this->isLeaveTypeUnavailable(
+                (string) $type,
+                $remaining,
+                $annualRemaining,
+                (int) $userId
+            ),
+            'disabled_reason' => $parentalBlocked
+                ? 'This parental leave option is unavailable'
+                : ($typeIsExhausted
+                    ? 'No balance remaining'
+                    : ($annualPoolExhausted ? 'Annual leave pool exhausted' : null)),
         ];
     }
 
@@ -292,9 +332,9 @@ public function leaveBalance(Request $request)
         'upcomingLeaves',
         'focusedBalance',
         'isTypeDisabled',
+        'typeExhausted',
         'typeUsagePercent',
-        'countsAgainstAnnual',
-        'notDisabledWhenAnnualExhausted'
+        'countsAgainstAnnual'
     ), [
         'layout' => LeaveApplicant::layout($user),
         'dashboardRoute' => LeaveApplicant::personalDashboardRoute($user),
@@ -623,26 +663,26 @@ public function applyForm()
     }
 
     $validated['user_id'] = $userId;
-    $validated['status'] = 'pending';
+    $validated['status'] = LeaveApplicant::isManager($user) ? 'pending_senior' : 'pending';
     unset($validated['half_day']);
     $validated['is_half_day'] = $halfDay;
 
     $leaveRequest = LeaveRequest::create($validated);
 
     if (LeaveApplicant::isManager($user)) {
-        $admins = User::where('role', 'admin')->get()->unique('email')->values();
-        foreach ($admins as $admin) {
-            try {
-                Mail::to($admin->email)->send(new LeaveRequestSubmittedMail($leaveRequest));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-        }
-        if ($admins->isNotEmpty()) {
-            Notification::send($admins, new NewLeaveRequestNotification($leaveRequest));
+        try {
+            \App\Support\LeaveApprovalWorkflow::notifySeniorsForDecision($leaveRequest->load('user'));
+        } catch (\Throwable $e) {
+            report($e);
         }
     } else {
-        $managers = User::where('role', 'manager')->get()->unique('email')->values();
+        $assignedManager = $user->manager_id
+            ? User::query()->managers()->whereKey($user->manager_id)->first()
+            : null;
+        $managers = $assignedManager
+            ? collect([$assignedManager])
+            : User::where('role', 'manager')->get()->unique('email')->values();
+
         foreach ($managers as $manager) {
             try {
                 Mail::to($manager->email)->send(new LeaveRequestSubmittedMail($leaveRequest));
@@ -762,6 +802,7 @@ public function myRequests(Request $request)
 
     $userId = Auth::id();
     $status = strtolower((string) $request->query('status', 'all'));
+    $payFilter = LeavePayFilter::normalize($request->query('pay', 'all'));
     $search = trim((string) $request->query('search', ''));
     $highlightRequestId = (int) $request->query('request_id', 0);
     if ($highlightRequestId > 0 && $search === '') {
@@ -773,25 +814,35 @@ public function myRequests(Request $request)
         ->with(['overdueEscalatedBy', 'handledBy'])
         ->where('user_id', $userId)
         ->orderByDesc('created_at');
+    LeavePayFilter::apply($query, $payFilter);
 
     if ($status === 'overdue') {
-        $query->whereRaw('LOWER(status) = ?', ['pending'])
+        $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
             ->whereDate('start_date', '<', Carbon::today());
     } elseif ($status === 'pending') {
-        $query->whereRaw('LOWER(status) = ?', ['pending'])
-            ->whereDate('start_date', '>=', Carbon::today());
+        // Still "pending" from employee view while with manager or senior manager
+        $query->where(function ($q) {
+            $q->where(function ($inner) {
+                $inner->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
+                    ->whereDate('start_date', '>=', Carbon::today());
+            })->orWhereRaw('LOWER(TRIM(status)) = ?', ['pending_senior']);
+        });
     } elseif ($status !== 'all') {
-        $query->whereRaw('LOWER(status) = ?', [$status]);
+        $query->whereRaw('LOWER(TRIM(status)) = ?', [$status]);
     }
 
     $effectiveSearch = $search;
     if ($status === 'all' && $searchKey === 'overdue') {
-        $query->whereRaw('LOWER(status) = ?', ['pending'])
+        $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
             ->whereDate('start_date', '<', Carbon::today());
         $effectiveSearch = '';
     } elseif ($status === 'all' && $searchKey === 'pending') {
-        $query->whereRaw('LOWER(status) = ?', ['pending'])
-            ->whereDate('start_date', '>=', Carbon::today());
+        $query->where(function ($q) {
+            $q->where(function ($inner) {
+                $inner->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
+                    ->whereDate('start_date', '>=', Carbon::today());
+            })->orWhereRaw('LOWER(TRIM(status)) = ?', ['pending_senior']);
+        });
         $effectiveSearch = '';
     }
 
@@ -810,6 +861,7 @@ public function myRequests(Request $request)
     return view('leave.my_requests', [
         'leaveRequests' => $leaveRequests,
         'status' => $status,
+        'payFilter' => $payFilter,
         'search' => $search,
         'layout' => LeaveApplicant::layout($user),
         'formRoute' => LeaveApplicant::myRequestsRoute($user),
@@ -850,44 +902,70 @@ public function withdraw($id)
 {
     $leaveRequest = LeaveRequest::where('id', $id)
         ->where('user_id', Auth::id())
+        ->with('user')
         ->firstOrFail();
 
     if (! $leaveRequest->canBeWithdrawnByEmployee()) {
-        $user = Auth::user();
-        $contactLabel = LeaveApplicant::approverLabel($user);
-        $message = $leaveRequest->isOverdue()
-            ? ($leaveRequest->canBeDeletedByEmployee()
-                ? 'Overdue requests cannot be withdrawn. Please delete the request instead.'
-                : 'Overdue requests from this year cannot be withdrawn or deleted. Contact '.$contactLabel.' if you need help.')
-            : 'Only pending requests that have not started can be withdrawn.';
+        $leavePeriodPassed = $leaveRequest->end_date
+            && Carbon::parse($leaveRequest->end_date)->startOfDay()->lt(Carbon::today());
+        $message = $leavePeriodPassed
+            ? 'This leave can no longer be withdrawn because all of its leave days have passed.'
+            : 'Only pending or approved leave can be withdrawn.';
 
         return redirect()->route($this->myRequestsRoute())->with('error', $message);
     }
 
+    $previousStatus = strtolower(trim((string) $leaveRequest->status));
     $leaveRequest->status = 'withdrawn';
     $leaveRequest->save();
 
-    if ($leaveRequest->isManagerApplicant()) {
-        $admins = User::where('role', 'admin')->get();
-        foreach ($admins as $admin) {
-            try {
-                Mail::to($admin->email)->send(new \App\Mail\LeaveWithdrawalMail($leaveRequest));
-            } catch (\Throwable $e) {
-                report($e);
-            }
+    $recipients = collect();
+    $applicant = $leaveRequest->user;
+
+    if (! $leaveRequest->isManagerApplicant()) {
+        $managerId = $leaveRequest->recommended_by ?: ($applicant->manager_id ?? null);
+        $assignedManager = $managerId
+            ? User::query()->managers()->whereKey($managerId)->where('is_active', true)->first()
+            : null;
+
+        if ($assignedManager) {
+            $recipients->push($assignedManager);
+        } else {
+            $recipients = $recipients->merge(
+                User::query()->managers()->where('is_active', true)->get()
+            );
         }
-        $notice = 'Leave request withdrawn and administrators notified.';
-    } else {
-        $managers = User::where('role', 'manager')->get();
-        foreach ($managers as $manager) {
-            try {
-                Mail::to($manager->email)->send(new \App\Mail\LeaveWithdrawalMail($leaveRequest));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-        }
-        $notice = 'Leave request withdrawn and managers notified.';
     }
+
+    if ($previousStatus === 'approved' || $leaveRequest->isManagerApplicant()) {
+        $recipients = $recipients->merge(
+            User::query()->where('role', 'admin')->where('is_active', true)->get()
+        );
+    }
+
+    foreach ($recipients->unique('id')->values() as $recipient) {
+        try {
+            $recipient->notify(new LeaveWithdrawnNotification($leaveRequest, $previousStatus));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        if (! empty($recipient->email)) {
+            try {
+                Mail::to($recipient->email)->send(
+                    new \App\Mail\LeaveWithdrawalMail($leaveRequest, $previousStatus)
+                );
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+    }
+
+    $notice = $previousStatus === 'approved'
+        ? 'Approved leave withdrawn. Your manager and senior managers were notified, and your leave balance was restored.'
+        : ($leaveRequest->isManagerApplicant()
+            ? 'Leave request withdrawn and senior managers notified.'
+            : 'Leave request withdrawn and your manager notified.');
 
     return redirect()->route($this->myRequestsRoute())->with('success', $notice);
 }

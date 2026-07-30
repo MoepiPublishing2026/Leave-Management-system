@@ -73,7 +73,7 @@
                 <li>
                     @if($option['disabled'])
                         <span class="balance-type-card is-disabled" aria-disabled="true"
-                              title="{{ $option['type'] }} leave is not available">
+                              title="{{ $option['disabled_reason'] ?? ($option['type'] . ' leave is not available') }}">
                             <span class="type-name">{{ $option['type'] }} Leave (Unavailable)</span>
                             <span class="type-days">{{ $fmtDays($option['remaining']) }} days</span>
                         </span>
@@ -170,7 +170,11 @@
 
         @if($isTypeDisabled)
             <div class="balance-alert balance-alert--danger">
-                Applications for {{ $selectedType }} leave are disabled because your annual balance is exhausted.
+                @if($typeExhausted)
+                    Applications for {{ $selectedType }} leave are disabled because no balance remains for this leave type.
+                @else
+                    Applications for {{ $selectedType }} leave are currently unavailable.
+                @endif
             </div>
         @elseif($countsAgainstAnnual && $annualRemaining <= 5)
             <div class="balance-alert balance-alert--warn">

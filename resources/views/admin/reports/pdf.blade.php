@@ -32,7 +32,7 @@
     <table class="data">
         <thead>
             <tr>
-                <th style="width: 16%;">Employee</th>
+                <th style="width: 16%;">Applicant</th>
                 <th style="width: 12%;">Type</th>
                 <th style="width: 18%;">Start</th>
                 <th style="width: 18%;">End</th>
@@ -44,12 +44,15 @@
         <tbody>
         @forelse(($leaves ?? []) as $leave)
             <tr>
-                <td>{{ trim(($leave->user->first_name ?? '') . ' ' . ($leave->user->last_name ?? '')) ?: ($leave->user->email ?? 'Unknown') }}</td>
+                <td>
+                    {{ trim(($leave->user->first_name ?? '') . ' ' . ($leave->user->last_name ?? '')) ?: ($leave->user->email ?? 'Unknown') }}
+                    @if (($leave->user->role ?? '') === 'manager') (Manager) @endif
+                </td>
                 <td>{{ $leave->leave_type }}</td>
                 <td>{{ $leave->start_date }}</td>
                 <td>{{ $leave->end_date }}</td>
                 <td>{{ \App\Support\LeaveDaysFormatter::format($leave->days ?? '') }}</td>
-                <td>{{ \Illuminate\Support\Str::ucfirst(strtolower(trim((string) $leave->status))) }}</td>
+                <td>{{ \App\Support\LeaveStatusLabels::display($leave->status) }}</td>
                 <td class="muted">{{ optional($leave->created_at)->timezone(config('app.timezone'))->format('Y-m-d H:i') }}</td>
             </tr>
         @empty

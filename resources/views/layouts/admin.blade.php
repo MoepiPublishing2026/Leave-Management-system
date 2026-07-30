@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@yield('title', 'Admin Panel')</title>
+    <title>@yield('title', 'Senior Manager Panel')</title>
     <link rel="icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" sizes="32x32" />
     <link rel="shortcut icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" />
     <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}" sizes="180x180" />
@@ -26,7 +26,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 30px;
+            padding: 0 20px;
             z-index: 9999;
             border-bottom: 3px solid #a5d817;
             box-shadow: 0 0 10px #bdb6b6ff;
@@ -47,7 +47,7 @@
 
         nav.menu {
             display: flex;
-            gap: 12px;
+            gap: 6px;
             align-items: center;
             margin-left: auto;
         }
@@ -55,15 +55,15 @@
         nav.menu a {
             color: #5e920aff;
             font-weight: 700;
-            font-size: 15px;
+            font-size: 13px;
             text-decoration: none;
-            padding: 10px 12px;
+            padding: 9px 10px;
             border-radius: 8px;
             background-color: transparent;
             transition: background-color 0.3s ease, color 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
 
         nav.menu a:hover,
@@ -101,11 +101,11 @@
             font-weight: 700;
             color: #5e920aff;
             text-decoration: none;
-            padding: 10px 15px;
+            padding: 9px 10px;
             border-radius: 8px;
             background-color: transparent;
             transition: background-color 0.3s ease, color 0.3s ease;
-            font-size: 15px;
+            font-size: 13px;
             display: flex;
             align-items: center;
         }
@@ -187,6 +187,7 @@
             top: 0;
             left: 0;
             height: 100vh;
+            height: 100dvh;
             width: min(86vw, 320px);
             background: white;
             z-index: 10001;
@@ -194,9 +195,17 @@
             transition: transform 0.25s ease;
             box-shadow: 8px 0 22px rgba(0,0,0,0.18);
             padding: 18px 16px;
+            padding-bottom: calc(18px + env(safe-area-inset-bottom));
             display: flex;
             flex-direction: column;
             gap: 10px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+        .mobile-sidebar > a {
+            flex-shrink: 0;
         }
         .mobile-sidebar.open {
             transform: translateX(0);
@@ -421,8 +430,7 @@
 
         <nav class="menu" role="navigation" aria-label="Primary Navigation">
             <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
-            <a href="{{ route('admin.employees.index') }}" class="{{ request()->routeIs('admin.employees.*') ? 'active' : '' }}">Employees</a>
-            <a href="{{ route('admin.requests', ['status' => 'all']) }}" class="{{ request()->routeIs(['admin.requests', 'admin.manager-requests*']) ? 'active' : '' }}">Requests</a>
+            <a href="{{ route('admin.requests', ['status' => 'all']) }}" class="{{ request()->routeIs(['admin.requests', 'admin.manager-requests*']) ? 'active' : '' }}">All Leave Requests</a>
             <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
                 Messages
                 @if($unreadMessageCount > 0)
@@ -498,7 +506,7 @@
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
     <aside id="mobileSidebar" class="mobile-sidebar" aria-label="Mobile Navigation">
         <div class="mobile-sidebar-header">
-            <a class="mobile-sidebar-brand" href="{{ route('admin.dashboard') }}" aria-label="Moepi Publishing admin dashboard">
+            <a class="mobile-sidebar-brand" href="{{ route('admin.dashboard') }}" aria-label="Moepi Publishing senior manager dashboard">
                 <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
             </a>
             @auth
@@ -515,8 +523,7 @@
             @endauth
         </div>
         <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
-        <a href="{{ route('admin.employees.index') }}" class="{{ request()->routeIs('admin.employees.*') ? 'active' : '' }}">Employees</a>
-        <a href="{{ route('admin.requests', ['status' => 'all']) }}" class="{{ request()->routeIs(['admin.requests', 'admin.manager-requests*']) ? 'active' : '' }}">Requests</a>
+        <a href="{{ route('admin.requests', ['status' => 'all']) }}" class="{{ request()->routeIs(['admin.requests', 'admin.manager-requests*']) ? 'active' : '' }}">All Leave Requests</a>
         <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
             Messages
             @if($unreadMessageCount > 0)

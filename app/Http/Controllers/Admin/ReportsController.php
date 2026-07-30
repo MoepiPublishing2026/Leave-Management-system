@@ -20,7 +20,7 @@ class ReportsController extends Controller
         $years = range($nowYear - 1, $nowYear - 5);
 
         $leaveQuery = LeaveRequest::query()
-            ->byEmployeeApplicants()
+            ->byStaffApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn']);
         if ($startDate && $endDate) {
             $leaveQuery->whereDate('created_at', '>=', $startDate)
@@ -44,7 +44,9 @@ class ReportsController extends Controller
         }
 
         $totalRequests = (clone $leaveQuery)->count();
-        $pendingTotal = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['pending'])->count();
+        $pendingTotal = (clone $leaveQuery)
+            ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(TRIM(status))'), ['pending', 'pending_senior'])
+            ->count();
         $overdueRequests = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['pending'])
             ->whereDate('start_date', '<', Carbon::today())
             ->count();
@@ -127,7 +129,7 @@ class ReportsController extends Controller
         $monthFilter = $request->query('month', 'this_year');
 
         $query = LeaveRequest::query()
-            ->byEmployeeApplicants()
+            ->byStaffApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn']);
 
         if ($startDate && $endDate) {
@@ -154,7 +156,7 @@ class ReportsController extends Controller
         $leaves = $query->with('user')->get();
 
         $csvHeaders = [
-            'Employee Name', 'Leave Type', 'Start Date', 'End Date', 'Days', 'Status', 'Requested At'
+            'Applicant Name', 'Role', 'Leave Type', 'Start Date', 'End Date', 'Days', 'Status', 'Requested At'
         ];
 
         $callback = function() use ($leaves, $csvHeaders) {
@@ -174,7 +176,8 @@ class ReportsController extends Controller
                         $status = 'Overdue';
                     }
                     fputcsv($file, [
-                        $leave->user->first_name ?? 'Unknown',
+                        trim(($leave->user->first_name ?? '').' '.($leave->user->last_name ?? '')) ?: 'Unknown',
+                        \App\Support\RoleLabels::display($leave->user->role ?? null),
                         $leave->leave_type,
                         $leave->start_date,
                         $leave->end_date,
@@ -203,7 +206,7 @@ class ReportsController extends Controller
         $monthFilter = $request->query('month', 'this_year');
 
         $query = LeaveRequest::query()
-            ->byEmployeeApplicants()
+            ->byStaffApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn'])
             ->with('user')
             ->orderByDesc('created_at');
@@ -232,7 +235,9 @@ class ReportsController extends Controller
         $leaves = $query->get();
 
         $totalRequests = $leaves->count();
-        $pendingTotal = $leaves->filter(fn ($l) => strtolower((string) $l->status) === 'pending')->count();
+        $pendingTotal = $leaves->filter(
+            fn ($l) => in_array(strtolower(trim((string) $l->status)), ['pending', 'pending_senior'], true)
+        )->count();
         $overdueRequests = $leaves->filter(function ($l) {
             return strtolower((string) $l->status) === 'pending'
                 && $l->start_date

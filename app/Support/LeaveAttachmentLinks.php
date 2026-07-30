@@ -52,6 +52,45 @@ class LeaveAttachmentLinks
         return $links;
     }
 
+    /**
+     * Signed attachment links for Senior Manager emails (no login required).
+     *
+     * @return list<array{label: string, viewUrl: string, downloadUrl: string, extension: string, name: string, previewable: bool}>
+     */
+    public static function forEmailRequest(LeaveRequest $request, int $daysValid = 7): array
+    {
+        $links = [];
+        $expires = now()->addDays($daysValid);
+
+        foreach (self::paths($request) as $index => $path) {
+            $attachment = $index + 1;
+            $name = basename($path) ?: ('attachment_'.$attachment);
+            $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+
+            $viewUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                'leave.email.attachment',
+                $expires,
+                ['leaveRequest' => $request->id, 'attachment' => $attachment]
+            );
+            $downloadUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                'leave.email.attachment',
+                $expires,
+                ['leaveRequest' => $request->id, 'attachment' => $attachment, 'download' => 1]
+            );
+
+            $links[] = [
+                'label' => 'File '.$attachment,
+                'viewUrl' => $viewUrl,
+                'downloadUrl' => $downloadUrl,
+                'extension' => $extension,
+                'name' => $name,
+                'previewable' => self::isPreviewableExtension($extension),
+            ];
+        }
+
+        return $links;
+    }
+
     public static function isPreviewableExtension(string $extension): bool
     {
         return in_array(strtolower($extension), ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp'], true);

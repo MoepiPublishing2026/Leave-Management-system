@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.manager')
 
 @section('title', 'Employees List')
 
@@ -109,7 +109,7 @@
 
 <div class="employees-header" style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom: 20px;">
     <h1 style="margin-bottom: 0;">Employees List</h1>
-    <a href="{{ route('admin.employees.create') }}" class="add-employee-button">+ Add Employee</a>
+    <a href="{{ route('manager.employees.create') }}" class="add-employee-button">+ Add Employee</a>
 </div>
 
 @if(session('success'))
@@ -126,7 +126,7 @@
             <th>Last Name</th>
             <th>Email</th>
             <th>Department</th>
-            <th>Designation</th>
+            <th>Assigned to</th>
             <th>Role</th>
             <th>Status</th>
             <th>Actions</th>
@@ -139,13 +139,19 @@
                 <td>{{ $employee->last_name }}</td>
                 <td>{{ $employee->email }}</td>
                 <td>{{ $employee->department }}</td>
-                <td>{{ $employee->designation }}</td>
-                <td>{{ ucfirst($employee->role) }}</td>
+                <td>
+                    @if($employee->manager)
+                        {{ trim(($employee->manager->first_name ?? '').' '.($employee->manager->last_name ?? '')) ?: '—' }}
+                    @else
+                        —
+                    @endif
+                </td>
+                <td>{{ \App\Support\RoleLabels::display($employee->role) }}</td>
                 <td>{{ $employee->is_active ? 'Active' : 'Inactive' }}</td>
                 <td>
                     <div class="employee-actions">
-                        <a href="{{ route('admin.employees.edit', $employee->id) }}" class="edit-button">Edit</a>
-                        <form id="delete-form-{{ $employee->id }}" action="{{ route('admin.employees.destroy', $employee->id) }}" method="POST" style="display:none;">
+                        <a href="{{ route('manager.employees.edit', $employee->id) }}" class="edit-button">Edit</a>
+                        <form id="delete-form-{{ $employee->id }}" action="{{ route('manager.employees.destroy', $employee->id) }}" method="POST" style="display:none;">
                             @csrf
                             @method('DELETE')
                         </form>

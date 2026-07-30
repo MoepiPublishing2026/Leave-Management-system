@@ -12,6 +12,7 @@ class OverdueLeaveEscalation
     {
         return LeaveRequest::query()
             ->byEmployeeApplicants()
+            ->tap(fn ($q) => ManagerTeam::scopeLeaveRequests($q))
             ->needsOverdueEscalationReason()
             ->with('user')
             ->orderBy('start_date')

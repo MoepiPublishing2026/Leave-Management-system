@@ -25,7 +25,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
+            padding: 0 20px;
             box-shadow: 0 0 10px #bdb6b6ff;
             border-bottom: 3px solid #a5d817;
             z-index: 10000;
@@ -55,7 +55,7 @@
         /* Navigation Menu */
         nav.menu {
             display: flex;
-            gap: 18px;
+            gap: 6px;
             align-items: center;
             margin-left: auto;
         }
@@ -64,11 +64,11 @@
             font-weight: 700;
             color: #5e920aff;
             text-decoration: none;
-            padding: 10px 15px;
+            padding: 9px 10px;
             border-radius: 8px;
             background-color: transparent;
             transition: background-color 0.3s ease, color 0.3s ease;
-            font-size: 15px;
+            font-size: 13px;
             display: flex;
             align-items: center;
             position: relative;
@@ -88,7 +88,8 @@
         .menu .nav-link {
             font-weight: 700;
             color: #5e920aff;
-            padding: 10px 15px;
+            padding: 9px 10px;
+            font-size: 13px;
             border-radius: 8px;
             text-decoration: none;
             display: flex;
@@ -167,6 +168,7 @@
             top: 0;
             left: 0;
             height: 100vh;
+            height: 100dvh;
             width: min(86vw, 320px);
             background: white;
             z-index: 10001;
@@ -174,9 +176,17 @@
             transition: transform 0.25s ease;
             box-shadow: 8px 0 22px rgba(0,0,0,0.18);
             padding: 18px 16px;
+            padding-bottom: calc(18px + env(safe-area-inset-bottom));
             display: flex;
             flex-direction: column;
             gap: 10px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+        .mobile-sidebar > a {
+            flex-shrink: 0;
         }
         .mobile-sidebar.open {
             transform: translateX(0);
@@ -415,7 +425,7 @@
         <nav class="menu" aria-label="Primary Navigation">
             <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
             <a href="{{ route('apply') }}" class="{{ request()->routeIs('apply') ? 'active' : '' }}">Apply</a>
-            <a href="{{ route('leave.myRequests') }}" class="{{ request()->routeIs('leave.myRequests') ? 'active' : '' }}">Requests</a>
+            <a href="{{ route('leave.myRequests') }}" class="{{ request()->routeIs('leave.myRequests') ? 'active' : '' }}">My Requests</a>
             <a href="{{ route('employee.calendar') }}" class="{{ request()->routeIs('employee.calendar') ? 'active' : '' }}">Calendar</a>
             <a href="{{ route('policies') }}" class="{{ request()->routeIs('policies') ? 'active' : '' }}">Policies</a>
             <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs(['profile.edit', 'settings.edit']) ? 'active' : '' }}">Profile</a>
@@ -498,7 +508,7 @@
         </div>
         <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
         <a href="{{ route('apply') }}" class="{{ request()->routeIs('apply') ? 'active' : '' }}">Apply</a>
-        <a href="{{ route('leave.myRequests') }}" class="{{ request()->routeIs('leave.myRequests') ? 'active' : '' }}">Requests</a>
+        <a href="{{ route('leave.myRequests') }}" class="{{ request()->routeIs('leave.myRequests') ? 'active' : '' }}">My Requests</a>
         <a href="{{ route('employee.calendar') }}" class="{{ request()->routeIs('employee.calendar') ? 'active' : '' }}">Calendar</a>
         <a href="{{ route('policies') }}" class="{{ request()->routeIs('policies') ? 'active' : '' }}">Policies</a>
         <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs(['profile.edit', 'settings.edit']) ? 'active' : '' }}">Profile</a>

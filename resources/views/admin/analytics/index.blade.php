@@ -320,10 +320,11 @@
                 @endforeach
             </select>
             <select name="staff" class="filter-select" onchange="document.getElementById('monthFilterForm').submit()">
-                <option value="all" {{ (string) ($staff ?? 'all') === 'all' ? 'selected' : '' }}>All Employees</option>
+                <option value="all" {{ (string) ($staff ?? 'all') === 'all' ? 'selected' : '' }}>All Staff</option>
                 @foreach(($staffOptions ?? []) as $u)
                     <option value="{{ $u->id }}" {{ (string) ($staff ?? 'all') === (string) $u->id ? 'selected' : '' }}>
                         {{ trim(($u->first_name ?? '') . ' ' . ($u->last_name ?? '')) ?: ('User #' . $u->id) }}
+                        @if (($u->role ?? '') === 'manager') (Manager) @endif
                     </option>
                 @endforeach
             </select>
@@ -355,10 +356,10 @@
         <div class="metrics-col">
             <div class="card">
                 <div class="card-header">
-                    <h5>Active Employees</h5>
+                    <h5>Active Staff</h5>
                     <div class="card-icon bg-green-100 text-green-600"><i class="fas fa-user-check"></i></div>
                 </div>
-                <h3>{{ $activeEmployees }}</h3>
+                <h3>{{ $employeesWhoApplied }}</h3>
                 <small class="text-muted">of {{ $totalEmployees }} total</small>
             </div>
         </div>
@@ -436,12 +437,12 @@
         </div>
         <div class="chart-card">
             <div class="card">
-                <h5><i class="fas fa-chart-pie me-2 text-success"></i>Leaves by Designation</h5>
+                <h5><i class="fas fa-chart-pie me-2 text-success"></i>Leaves by Department</h5>
                 <hr>
                 <div class="chart-body chart-body--ring">
                     <canvas id="designationPieChart"></canvas>
                 </div>
-                <ul class="chart-html-legend" id="designationPieLegend" aria-label="Designation legend"></ul>
+                <ul class="chart-html-legend" id="designationPieLegend" aria-label="Department legend"></ul>
             </div>
         </div>
     </div>
@@ -456,7 +457,7 @@
                     <thead>
                         <tr>
                             <th>Rank</th>
-                            <th>Employee</th>
+                            <th>Staff Member</th>
                             <th>Total Leaves</th>
                             <th>Percentage</th>
                         </tr>
@@ -469,7 +470,10 @@
                             @endphp
                             <tr style="background-color: #f9fafb; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: background-color 0.3s, box-shadow 0.3s;">
                                 <td style="font-weight: 600; color: #64748b;">#{{ $index + 1 }}</td>
-                                <td style="font-weight: 600; color: #334155;">{{ $taker->user->first_name ?? 'Unknown' }}</td>
+                                <td style="font-weight: 600; color: #334155;">
+                                    {{ trim(($taker->user->first_name ?? '').' '.($taker->user->last_name ?? '')) ?: 'Unknown' }}
+                                    @if (($taker->user->role ?? '') === 'manager') (Manager) @endif
+                                </td>
                                 <td style="font-weight: 600; color: #334155;">{{ $taker->total }} leaves</td>
                                 <td>
                                     <div class="progress" style="height: 12px; border-radius: 12px; margin-bottom: 6px;">

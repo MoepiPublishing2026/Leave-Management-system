@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Support\LeaveRequestSearch;
 use App\Support\LeaveRequestPeriodFilter;
 use App\Support\DashboardEmployeeFilter;
+use App\Support\LeavePayFilter;
 use Illuminate\Support\Carbon;
 
 class LeaveRequestController extends Controller
@@ -16,6 +17,7 @@ class LeaveRequestController extends Controller
     public function index(Request $request)
     {
         $status = strtolower((string) $request->query('status', 'all'));
+        $payFilter = LeavePayFilter::normalize($request->query('pay', 'all'));
         $search = trim((string) $request->query('search', ''));
         $highlightRequestId = (int) $request->query('request_id', 0);
         if ($highlightRequestId > 0 && $search === '') {
@@ -32,13 +34,26 @@ class LeaveRequestController extends Controller
 
         LeaveRequestPeriodFilter::apply($query, is_string($monthFilter) ? $monthFilter : null, 'created_at');
         DashboardEmployeeFilter::apply($query, $employeeFilter);
+        LeavePayFilter::apply($query, $payFilter);
 
         if ($status === 'overdue') {
             $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
                 ->whereDate('start_date', '<', Carbon::today());
         } elseif ($status === 'pending') {
+            // Awaiting Senior Manager decision
+            $query->where(function ($q) {
+                $q->whereRaw('LOWER(TRIM(status)) = ?', ['pending_senior'])
+                    ->orWhere(function ($inner) {
+                        $inner->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
+                            ->whereHas('user', fn ($u) => $u->where('role', 'manager'));
+                    });
+            });
+        } elseif ($status === 'pending_manager') {
             $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
+                ->whereHas('user', fn ($u) => $u->where('role', 'employee'))
                 ->whereDate('start_date', '>=', Carbon::today());
+        } elseif ($status === 'pending_senior') {
+            $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending_senior']);
         } elseif ($status !== 'all') {
             $query->whereRaw('LOWER(TRIM(status)) = ?', [$status]);
         } else {
@@ -51,8 +66,13 @@ class LeaveRequestController extends Controller
                 ->whereDate('start_date', '<', Carbon::today());
             $effectiveSearch = '';
         } elseif ($status === 'all' && $searchKey === 'pending') {
-            $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
-                ->whereDate('start_date', '>=', Carbon::today());
+            $query->where(function ($pendingQuery) {
+                $pendingQuery->whereRaw('LOWER(TRIM(status)) = ?', ['pending_senior'])
+                    ->orWhere(function ($managerReviewQuery) {
+                        $managerReviewQuery->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
+                            ->whereDate('start_date', '>=', Carbon::today());
+                    });
+            });
             $effectiveSearch = '';
         }
 
@@ -62,7 +82,14 @@ class LeaveRequestController extends Controller
 
         $requests = $query->paginate(10)->withQueryString();
 
-        return view('admin.requests.index', compact('requests', 'status', 'search', 'monthFilter', 'employeeFilter'));
+        return view('admin.requests.index', compact(
+            'requests',
+            'status',
+            'payFilter',
+            'search',
+            'monthFilter',
+            'employeeFilter'
+        ));
     }
 
     public function destroy(LeaveRequest $leaveRequest)

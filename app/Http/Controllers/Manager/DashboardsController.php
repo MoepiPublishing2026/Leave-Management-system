@@ -11,6 +11,7 @@ use App\Support\LeaveRequestPeriodFilter;
 use App\Support\DashboardEmployeeFilter;
 use App\Support\PersonalLeaveDashboardData;
 use App\Support\LeaveReminderService;
+use App\Support\ManagerTeam;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -57,6 +58,7 @@ class DashboardsController extends Controller
         $dashboardFilters = DashboardEmployeeFilter::queryParams($monthFilter, $employeeFilter);
 
         $baseQuery = LeaveRequest::query()->byEmployeeApplicants()->whereRaw('LOWER(TRIM(status)) != ?', ['withdrawn']);
+        ManagerTeam::scopeLeaveRequests($baseQuery);
         LeaveRequestPeriodFilter::apply($baseQuery, $monthFilter, 'created_at');
         DashboardEmployeeFilter::apply($baseQuery, $employeeFilter);
 
@@ -85,6 +87,7 @@ class DashboardsController extends Controller
         if (!$isTodayDisabled) {
             $onLeaveTodayCount = LeaveRequest::query()
                 ->byEmployeeApplicants()
+                ->tap(fn ($q) => ManagerTeam::scopeLeaveRequests($q))
                 ->when($employeeFilter, fn ($q) => $q->where('user_id', $employeeFilter))
                 ->whereRaw('LOWER(TRIM(status)) = ?', ['approved'])
                 ->whereDate('start_date', '<=', $today)
@@ -99,6 +102,15 @@ class DashboardsController extends Controller
             ->pluck('total', 'leave_type')
             ->sortDesc();
         $leaveTypePercentages = PercentageDistribution::oneDecimalPercents($leaveTypeCounts->toArray());
+        $payStatusCounts = [
+            'Paid' => (clone $baseQuery)
+                ->whereRaw("LOWER(TRIM(COALESCE(leave_type, ''))) != ?", ['unpaid'])
+                ->count(),
+            'Unpaid' => (clone $baseQuery)
+                ->whereRaw('LOWER(TRIM(leave_type)) = ?', ['unpaid'])
+                ->count(),
+        ];
+        $payStatusPercentages = PercentageDistribution::oneDecimalPercents($payStatusCounts);
 
         $statusCounts = [
             'Pending' => $pendingRequestsCount,
@@ -120,6 +132,7 @@ class DashboardsController extends Controller
 
         $monthlyApplicationsQuery = LeaveRequest::query()
             ->byEmployeeApplicants()
+            ->tap(fn ($q) => ManagerTeam::scopeLeaveRequests($q))
             ->whereRaw('LOWER(status) != ?', ['withdrawn'])
             ->whereYear('leave_requests.created_at', $chartYear);
         DashboardEmployeeFilter::apply($monthlyApplicationsQuery, $employeeFilter);
@@ -148,10 +161,10 @@ class DashboardsController extends Controller
             ->join('users', 'leave_requests.user_id', '=', 'users.id')
             ->where('users.role', 'employee')
             ->select(DB::raw("COALESCE(users.department, 'Unknown') as department"), DB::raw('count(leave_requests.id) as total'))
-            ->groupBy('department')
+            ->groupBy(DB::raw("COALESCE(users.department, 'Unknown')"))
             ->pluck('total', 'department');
 
-        // Polar chart: only departments with at least one request (no empty wedges)
+        // Department bar chart: only departments with at least one request.
         $departmentCounts = $departmentCountsRaw
             ->map(static fn ($v) => (int) $v)
             ->filter(static fn (int $count) => $count > 0)
@@ -159,24 +172,6 @@ class DashboardsController extends Controller
 
         $departmentLabels = $departmentCounts->keys()->toArray();
         $departmentData = $departmentCounts->values()->toArray();
-        $departmentPercentages = [];
-        if ($departmentLabels !== [] && count($departmentData) === count($departmentLabels)) {
-            $departmentPercentages = PercentageDistribution::oneDecimalPercents(
-                array_combine($departmentLabels, $departmentData)
-            );
-        }
-
-        // Requests by designation (for dashboard chart)
-        $designationCounts = (clone $baseQuery)
-            ->join('users', 'leave_requests.user_id', '=', 'users.id')
-            ->where('users.role', 'employee')
-            ->select(DB::raw("COALESCE(users.designation, 'Unknown') as designation"), DB::raw('COUNT(leave_requests.id) as total'))
-            ->groupBy('designation')
-            ->pluck('total', 'designation')
-            ->toArray();
-        arsort($designationCounts, SORT_NUMERIC);
-        $designationLabels = array_keys($designationCounts);
-        $designationData = array_values($designationCounts);
 
         return view('manager.team-dashboard.index', [
             'allRequestsCount' => $allRequestsCount,
@@ -187,6 +182,8 @@ class DashboardsController extends Controller
             'onLeaveTodayCount' => $onLeaveTodayCount,
             'leaveTypeCounts' => $leaveTypeCounts,
             'leaveTypePercentages' => $leaveTypePercentages,
+            'payStatusCounts' => $payStatusCounts,
+            'payStatusPercentages' => $payStatusPercentages,
             'statusCounts' => $statusCounts,
             'statusPercentages' => $statusPercentages,
             'barLabels' => $barLabels,
@@ -194,13 +191,10 @@ class DashboardsController extends Controller
             'chartYear' => $chartYear,
             'departmentLabels' => $departmentLabels,
             'departmentData' => $departmentData,
-            'departmentPercentages' => $departmentPercentages,
             'monthFilter' => $monthFilter,
             'employeeFilter' => $employeeFilter,
             'employees' => $employees,
             'dashboardFilters' => $dashboardFilters,
-            'designationLabels' => $designationLabels,
-            'designationData' => $designationData,
             'monthlyApprovedData' => $monthlyApprovedData,
             'monthlyPendingData' => $monthlyPendingData,
             'monthlyOverdueData' => $monthlyOverdueData,

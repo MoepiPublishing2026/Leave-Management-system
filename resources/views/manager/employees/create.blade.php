@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.manager')
 
 @section('title', 'Add Employee')
 
@@ -171,7 +171,7 @@
     <p style="margin:0 0 18px; color:#64748b; font-size:0.92rem;">Create a new user account and send their login details by email.</p>
 
     <div class="signup-container">
-    <form method="POST" action="{{ route('admin.employees.store') }}">
+    <form method="POST" action="{{ route('manager.employees.store') }}">
         @csrf
 
         <label for="first_name">First Name</label>
@@ -187,14 +187,27 @@
         @enderror
 
         <label for="department">Department</label>
-        <input type="text" name="department" value="{{ old('department') }}" required />
+        <select name="department" id="department" required>
+            <option value="">Select department</option>
+            @foreach(($departments ?? []) as $dept)
+                <option value="{{ $dept }}" {{ old('department') === $dept ? 'selected' : '' }}>{{ $dept }}</option>
+            @endforeach
+        </select>
         @error('department')
             <div class="error">{{ $message }}</div>
         @enderror
 
-        <label for="designation">Designation</label>
-        <input type="text" name="designation" value="{{ old('designation') }}" required />
-        @error('designation')
+        <label for="manager_id">Assign to</label>
+        <select name="manager_id" id="manager_id" data-selected="{{ old('manager_id', auth()->id()) }}">
+            <option value="">Select manager</option>
+            @foreach(($managers ?? []) as $mgr)
+                <option value="{{ $mgr->id }}" @selected((string) old('manager_id', auth()->id()) === (string) $mgr->id)>
+                    {{ trim(($mgr->first_name ?? '').' '.($mgr->last_name ?? '')) ?: 'Manager #'.$mgr->id }}
+                </option>
+            @endforeach
+        </select>
+        <p id="assign-hint" class="field-hint" style="text-align:left;margin-top:6px;color:#64748b;font-size:0.85rem;">Required for employees. This manager will only see leave for people assigned to them.</p>
+        @error('manager_id')
             <div class="error">{{ $message }}</div>
         @enderror
 
@@ -245,7 +258,7 @@
         <select name="role" required>
             <option value="employee" {{ old('role') == 'employee' ? 'selected' : '' }}>Employee</option>
             <option value="manager" {{ old('role') == 'manager' ? 'selected' : '' }}>Manager</option>
-            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Senior Manager</option>
         </select>
         @error('role')
             <div class="error">{{ $message }}</div>
@@ -253,7 +266,7 @@
 
         <div class="button-group">
             <button type="submit" class="btn-form-action">Add Employee</button>
-            <a href="{{ route('admin.employees.index') }}" class="btn-form-action">Back to List</a>
+            <a href="{{ route('manager.employees.index') }}" class="btn-form-action">Back to List</a>
         </div>
     </form>
 
@@ -292,6 +305,77 @@
 
         setupPasswordToggle(document.getElementById('togglePasswordAdd'), 'password', 'eyeOpenAdd', 'eyeClosedAdd');
         setupPasswordToggle(document.getElementById('togglePasswordAddConfirm'), 'password_confirmation', 'eyeOpenAddConfirm', 'eyeClosedAddConfirm');
+
+        const roleSelect = document.querySelector('select[name="role"]');
+        const managerSelect = document.getElementById('manager_id');
+        const assignHint = document.getElementById('assign-hint');
+        const managers = @json(($managers ?? collect())->map(fn ($m) => [
+            'id' => $m->id,
+            'name' => trim(($m->first_name ?? '').' '.($m->last_name ?? '')),
+        ])->values()->all());
+        const seniors = @json(($seniorManagers ?? collect())->map(fn ($m) => [
+            'id' => $m->id,
+            'name' => trim(($m->first_name ?? '').' '.($m->last_name ?? '')),
+        ])->values()->all());
+
+        function fillOptions(list, placeholder, selectedId) {
+            managerSelect.innerHTML = '';
+            const blank = document.createElement('option');
+            blank.value = '';
+            blank.textContent = placeholder;
+            managerSelect.appendChild(blank);
+            list.forEach((item) => {
+                const opt = document.createElement('option');
+                opt.value = String(item.id);
+                opt.textContent = item.name || ('User #' + item.id);
+                if (selectedId && String(selectedId) === String(item.id)) {
+                    opt.selected = true;
+                }
+                managerSelect.appendChild(opt);
+            });
+        }
+
+        function syncAssignTo() {
+            if (!roleSelect || !managerSelect) return;
+            const role = roleSelect.value;
+            const preferred = managerSelect.getAttribute('data-selected');
+
+            if (role === 'employee') {
+                managerSelect.disabled = false;
+                managerSelect.required = true;
+                fillOptions(managers, 'Select manager', preferred);
+                if (assignHint) {
+                    assignHint.textContent = 'Required for employees. This manager will only see leave for people assigned to them.';
+                }
+            } else if (role === 'manager') {
+                managerSelect.disabled = false;
+                managerSelect.required = false;
+                const autoId = seniors.length ? seniors[0].id : '';
+                fillOptions(seniors, 'Select senior manager', autoId);
+                managerSelect.disabled = true;
+                // Disabled fields are not submitted — hidden mirror keeps display value for UX only
+                let hidden = document.getElementById('manager_id_auto');
+                if (!hidden) {
+                    hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.id = 'manager_id_auto';
+                    managerSelect.parentNode.insertBefore(hidden, managerSelect.nextSibling);
+                }
+                hidden.name = ''; // server auto-assigns; no need to post
+                if (assignHint) {
+                    assignHint.textContent = 'Managers are automatically assigned to a Senior Manager.';
+                }
+            } else {
+                managerSelect.disabled = true;
+                managerSelect.required = false;
+                fillOptions([], 'Not applicable', '');
+                if (assignHint) {
+                    assignHint.textContent = 'Senior Managers are not assigned to anyone.';
+                }
+            }
+        }
+        roleSelect?.addEventListener('change', syncAssignTo);
+        syncAssignTo();
     });
 </script>
 @endsection

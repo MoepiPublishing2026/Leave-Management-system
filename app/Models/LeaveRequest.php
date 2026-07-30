@@ -11,12 +11,20 @@ class LeaveRequest extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 
-        'leave_type', 'start_date', 'end_date', 'is_half_day', 'status', 'file_uploads', 'important_comment'
+        'user_id',
+        'leave_type', 'start_date', 'end_date', 'is_half_day', 'status', 'file_uploads', 'important_comment',
+        'original_leave_type', 'converted_to_unpaid_at', 'converted_to_unpaid_reason',
+        'manager_recommendation', 'manager_recommendation_comment', 'recommended_by', 'recommended_at',
+        'pending_review_reminder_stage', 'last_pending_review_reminder_at',
+        'overdue_notified_at',
     ];
 
     protected $casts = [
         'is_half_day' => 'boolean',
+        'recommended_at' => 'datetime',
+        'last_pending_review_reminder_at' => 'datetime',
+        'converted_to_unpaid_at' => 'datetime',
+        'overdue_notified_at' => 'datetime',
     ];
 
     public function user() {
@@ -56,19 +64,34 @@ class LeaveRequest extends Model
         );
     }
 
+    /** Leave requests submitted by staff who participate in the approval workflow. */
+    public function scopeByStaffApplicants($query)
+    {
+        return $query->whereIn(
+            'user_id',
+            User::query()->whereIn('role', ['employee', 'manager'])->select('id')
+        );
+    }
+
     public function isManagerApplicant(): bool
     {
         return strtolower((string) ($this->user?->role ?? '')) === 'manager';
     }
 
+    public function recommendedBy()
+    {
+        return $this->belongsTo(User::class, 'recommended_by');
+    }
+
     public function isOverdue(): bool
     {
         $status = strtolower(trim((string) ($this->status ?? '')));
+        // Overdue applies while waiting on manager review (or legacy pending manager leave).
         if ($status !== 'pending') {
             return false;
         }
 
-        if (!$this->start_date) {
+        if (! $this->start_date) {
             return false;
         }
 
@@ -92,7 +115,15 @@ class LeaveRequest extends Model
     {
         $status = strtolower(trim((string) ($this->status ?? '')));
 
-        return $status === 'pending' && ! $this->isOverdue();
+        if (! in_array($status, ['pending', 'pending_senior', 'approved'], true)) {
+            return false;
+        }
+
+        if (! $this->end_date) {
+            return false;
+        }
+
+        return Carbon::parse($this->end_date)->startOfDay()->gte(Carbon::today());
     }
 
     public function canBeDeletedByEmployee(): bool

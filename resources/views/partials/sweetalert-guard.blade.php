@@ -4,6 +4,21 @@
     .swal2-container {
         z-index: 20000 !important;
     }
+    .swal2-container.swal2-backdrop-show,
+    .swal2-container.swal2-noanimation {
+        background: rgba(2, 10, 14, 0.88) !important;
+        border: 3px solid #b2cd16 !important;
+        box-shadow: inset 0 0 0 2px #0f766e !important;
+        box-sizing: border-box;
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+    }
+    .swal2-container .swal2-popup,
+    .swal2-container .swal2-popup.request-details-popup {
+        border: none !important;
+        outline: none !important;
+        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.58) !important;
+    }
     /* Never show custom filter dropdown UI inside alert popups */
     .swal2-container .filter-select-wrap {
         display: none !important;
