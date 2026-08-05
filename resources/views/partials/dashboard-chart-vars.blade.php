@@ -140,6 +140,7 @@
             ticks: {
                 display: false,
                 backdropColor: 'transparent',
+                showLabelBackdrop: false,
             },
             grid: {
                 color: 'rgba(148, 163, 184, 0.35)',
@@ -154,6 +155,36 @@
                 font: { ...window.chartBoldFontSpec },
             },
         },
+    };
+
+    // Polar area gives each label equal angle. Drop zero values so 100% fills the full circle.
+    window.buildPolarAreaSegments = (labels, data, colors) => {
+        const chartLabels = [];
+        const chartData = [];
+        const chartColors = [];
+
+        (labels || []).forEach((label, index) => {
+            const value = Number(data?.[index] ?? 0);
+            if (value > 0) {
+                chartLabels.push(label);
+                chartData.push(value);
+                chartColors.push(colors?.[index]);
+            }
+        });
+
+        if (!chartData.length) {
+            return {
+                labels: labels || [],
+                data: (data || []).map((value) => Number(value) || 0),
+                colors: colors || [],
+            };
+        }
+
+        return {
+            labels: chartLabels,
+            data: chartData,
+            colors: chartColors,
+        };
     };
 
     window.deepMergeChartOptions = (target, source) => {
@@ -214,8 +245,13 @@
                 if (!scale || typeof scale !== 'object') return;
 
                 scale.ticks = scale.ticks || {};
-                scale.ticks.color = window.chartTextColor;
-                scale.ticks.font = { ...(scale.ticks.font || {}), ...boldFont };
+                if (scale.ticks.display !== false) {
+                    scale.ticks.color = window.chartTextColor;
+                    scale.ticks.font = { ...(scale.ticks.font || {}), ...boldFont };
+                } else {
+                    scale.ticks.display = false;
+                    scale.ticks.backdropColor = 'transparent';
+                }
 
                 if (scale.pointLabels) {
                     scale.pointLabels.color = window.chartTextColor;

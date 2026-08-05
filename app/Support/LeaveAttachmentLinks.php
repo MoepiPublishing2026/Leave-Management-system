@@ -93,12 +93,41 @@ class LeaveAttachmentLinks
 
     public static function isPreviewableExtension(string $extension): bool
     {
-        return in_array(strtolower($extension), ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp'], true);
+        return in_array(strtolower($extension), [
+            'pdf',
+            'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp',
+            'doc', 'docx',
+            'txt',
+        ], true);
+    }
+
+    public static function mimeForExtension(string $extension): ?string
+    {
+        return match (strtolower($extension)) {
+            'pdf' => 'application/pdf',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'bmp' => 'image/bmp',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'txt' => 'text/plain',
+            default => null,
+        };
     }
 
     public static function isPreviewablePath(string $path): bool
     {
         return self::isPreviewableExtension(strtolower(pathinfo($path, PATHINFO_EXTENSION)));
+    }
+
+    public static function ensureStorageReady(): void
+    {
+        $disk = \Illuminate\Support\Facades\Storage::disk('public');
+        if (! $disk->exists('leave_files')) {
+            $disk->makeDirectory('leave_files');
+        }
     }
 
     public static function deleteStoredFiles(LeaveRequest $request): void

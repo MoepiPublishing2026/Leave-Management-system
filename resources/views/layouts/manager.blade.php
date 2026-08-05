@@ -416,6 +416,7 @@
             <a href="{{ route('manager.calendar') }}" class="{{ request()->routeIs('manager.calendar') ? 'active' : '' }}">Calendar</a>
             <a href="{{ route('manager.analytics') }}" class="{{ request()->routeIs('manager.analytics') ? 'active' : '' }}">Analytics</a>
             <a href="{{ route('manager.reports') }}" class="{{ request()->routeIs('manager.reports') ? 'active' : '' }}">Reports</a>
+            <a href="{{ route('manager.settings') }}" class="{{ request()->routeIs('manager.settings') ? 'active' : '' }}">Leave Policies</a>
             <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs(['profile.edit', 'settings.edit']) ? 'active' : '' }}">Profile</a>
 
             @auth
@@ -520,6 +521,7 @@
         <a href="{{ route('manager.calendar') }}" class="{{ request()->routeIs('manager.calendar') ? 'active' : '' }}">Calendar</a>
         <a href="{{ route('manager.analytics') }}" class="{{ request()->routeIs('manager.analytics') ? 'active' : '' }}">Analytics</a>
         <a href="{{ route('manager.reports') }}" class="{{ request()->routeIs('manager.reports') ? 'active' : '' }}">Reports</a>
+        <a href="{{ route('manager.settings') }}" class="{{ request()->routeIs('manager.settings') ? 'active' : '' }}">Leave Policies</a>
         <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs(['profile.edit', 'settings.edit']) ? 'active' : '' }}">Profile</a>
         <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
     </aside>

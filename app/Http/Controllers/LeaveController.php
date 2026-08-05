@@ -653,6 +653,7 @@ public function applyForm()
 
     // Handle uploaded file
     if ($request->hasFile('file_uploads')) {
+        \App\Support\LeaveAttachmentLinks::ensureStorageReady();
         $paths = [];
         foreach ($request->file('file_uploads') as $file) {
             $paths[] = $file->store('leave_files', 'public');
@@ -697,9 +698,10 @@ public function applyForm()
 
     $successMessage = 'Leave application submitted successfully!';
     if ($policy && $policy->requires_proof && LeaveProofRules::allowsDeferredProof($leaveType) && ! $request->hasFile('file_uploads')) {
-        $proofDeadline = Carbon::parse($validated['start_date'])->addDay()->format('d M Y');
+        $proofDeadlineAnchor = $validated['end_date'] ?? $validated['start_date'];
+        $proofDeadline = Carbon::parse($proofDeadlineAnchor)->addDay()->format('d M Y');
         $approverLabel = LeaveApplicant::approverLabel($user);
-        $successMessage = 'Sick leave submitted. Once '.$approverLabel.' approves it, upload your doctor\'s letter from My Leave Requests on your leave start date, by '.$proofDeadline.' at the latest.';
+        $successMessage = 'Sick leave submitted. Once '.$approverLabel.' approves it, upload your doctor\'s letter from My Leave Requests by '.$proofDeadline.' at the latest (the day after your leave ends).';
     }
 
     return redirect()->route(LeaveApplicant::applyRoute($user))->with('success', $successMessage);
@@ -739,6 +741,7 @@ public function uploadProof(Request $request, $id)
         \App\Support\LeaveAttachmentLinks::deleteStoredFiles($leaveRequest);
     }
 
+    \App\Support\LeaveAttachmentLinks::ensureStorageReady();
     $paths = [];
     foreach ($request->file('file_uploads') as $file) {
         $paths[] = $file->store('leave_files', 'public');
@@ -1014,17 +1017,23 @@ public function showAttachment(\Illuminate\Http\Request $request, LeaveRequest $
 
     $fullPath = $disk->path($path);
     $downloadName = basename($path) ?: ('attachment_' . ($idx + 1));
-    $mime = $disk->mimeType($path) ?: 'application/octet-stream';
+    $extension = strtolower(pathinfo($downloadName, PATHINFO_EXTENSION));
+    $mime = $disk->mimeType($path) ?: null;
+    if (! is_string($mime) || $mime === '' || $mime === 'application/octet-stream') {
+        $mime = \App\Support\LeaveAttachmentLinks::mimeForExtension($extension) ?: 'application/octet-stream';
+    }
     $previewable = \App\Support\LeaveAttachmentLinks::isPreviewablePath($path);
     $forceDownload = $request->boolean('download');
 
-    if ($forceDownload || !$previewable) {
+    if ($forceDownload || ! $previewable) {
         return response()->download($fullPath, $downloadName, ['Content-Type' => $mime]);
     }
 
     return response()->file($fullPath, [
         'Content-Type' => $mime,
-        'Content-Disposition' => 'inline; filename="' . str_replace('"', '', $downloadName) . '"',
+        'Content-Disposition' => 'inline; filename="'.str_replace('"', '', $downloadName).'"',
+        'X-Content-Type-Options' => 'nosniff',
+        'Cache-Control' => 'private, max-age=60',
     ]);
 }
 

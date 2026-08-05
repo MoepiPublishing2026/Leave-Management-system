@@ -723,7 +723,6 @@ class ComposerStaticInit8ed361ec1a3f1f4742f450143d1104a9
         'App\\Console\\Commands\\NotifyOverdueLeaveRequestsCommand' => __DIR__ . '/../..' . '/app/Console/Commands/NotifyOverdueLeaveRequestsCommand.php',
         'App\\Console\\Commands\\SendLeaveRemindersCommand' => __DIR__ . '/../..' . '/app/Console/Commands/SendLeaveRemindersCommand.php',
         'App\\Console\\Commands\\SendPendingReviewRemindersCommand' => __DIR__ . '/../..' . '/app/Console/Commands/SendPendingReviewRemindersCommand.php',
-        'App\\Http\\Controllers\\API\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/AuthController.php',
         'App\\Http\\Controllers\\Admin\\AdminAuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/AdminAuthController.php',
         'App\\Http\\Controllers\\Admin\\AdminDashboardController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/AdminDashboardController.php',
         'App\\Http\\Controllers\\Admin\\AnalyticsController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/AnalyticsController.php',

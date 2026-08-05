@@ -122,7 +122,9 @@ Route::get('/leave/email/{leaveRequest}/review', [LeaveEmailDecisionController::
 Route::get('/leave/email/{leaveRequest}/attachment/{attachment}', [LeaveEmailDecisionController::class, 'attachment'])
     ->whereNumber('attachment')
     ->name('leave.email.attachment');
-Route::get('/leave/email/{leaveRequest}/approve', [LeaveEmailDecisionController::class, 'approve'])
+Route::get('/leave/email/{leaveRequest}/approve', [LeaveEmailDecisionController::class, 'approveGet'])
+    ->name('leave.email.approve.get');
+Route::post('/leave/email/{leaveRequest}/approve', [LeaveEmailDecisionController::class, 'approve'])
     ->name('leave.email.approve');
 Route::get('/leave/email/{leaveRequest}/reject', [LeaveEmailDecisionController::class, 'rejectForm'])
     ->name('leave.email.reject.form');
@@ -196,6 +198,9 @@ Route::get('requests', [RequestsController::class, 'index'])->name('requests.ind
     Route::get('/employees/{id}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
     Route::put('/employees/{id}', [EmployeeController::class, 'update'])->name('employees.update');
     Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+
+    Route::get('/settings', [\App\Http\Controllers\Admin\LeaveSettingsController::class, 'index'])->name('settings');
+    Route::post('/settings', [\App\Http\Controllers\Admin\LeaveSettingsController::class, 'save'])->name('settings.save');
 });
 
 Route::middleware(['auth'])->group(function () {

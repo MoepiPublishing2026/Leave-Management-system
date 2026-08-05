@@ -125,8 +125,9 @@
                                     data-preview-url="{{ $fileLink['url'] }}"
                                     data-download-url="{{ $fileLink['downloadUrl'] }}"
                                     data-extension="{{ $fileLink['extension'] }}"
-                                    data-label="{{ $fileLink['name'] }}"
-                                    data-previewable="{{ $fileLink['previewable'] ? '1' : '0' }}"
+                                    data-label="{{ $fileLink['label'] }}"
+                                    data-filename="{{ $fileLink['name'] }}"
+                                    data-previewable="1"
                                     style="margin-right:6px;padding:4px 10px;border:1px solid #86efac;background:#ecfdf5;border-radius:8px;font-weight:700;color:#047857;cursor:pointer;"
                                 >Preview {{ $fileLink['label'] }}</button>
                             @endforeach
