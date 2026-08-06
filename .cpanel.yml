@@ -2,7 +2,8 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/teketibk/leavemanagement.tekete.co.za
-    - /bin/cp -R . $DEPLOYPATH
+    - cd $DEPLOYPATH && git fetch origin && git reset --hard origin/main
+    
   
     
 
