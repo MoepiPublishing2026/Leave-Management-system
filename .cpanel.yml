@@ -1,7 +1,7 @@
     
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/teketibk/leavemanagement.tekete.co.za
+    - export DEPLOYPATH=/home/teketibk/staging.leavemanagement.tekete.co.za
     - cd $DEPLOYPATH && git fetch origin && git reset --hard origin/main
     
   
