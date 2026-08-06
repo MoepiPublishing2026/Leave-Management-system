@@ -17,7 +17,7 @@
             display:inline-block; margin:0 8px 8px 0; padding:8px 12px; border-radius:8px;
             background:#eef2ff; color:#1e3a8a; font-weight:700; text-decoration:none; font-size:0.9rem;
         }
-        .actions { margin-top:22px; display:flex; flex-wrap:wrap; gap:10px; }
+        .actions { margin-top:22px; display:flex; flex-wrap:wrap; gap:10px; align-items:flex-start; }
         .btn {
             display:inline-flex; align-items:center; justify-content:center; padding:12px 18px;
             border-radius:10px; font-weight:700; text-decoration:none; border:0; cursor:pointer; font-size:1rem;
@@ -28,6 +28,20 @@
         .pill { display:inline-block; padding:4px 10px; border-radius:999px; background:#fce7f3; color:#9d174d; font-weight:700; font-size:0.85rem; }
         .pill-ok { background:#dcfce7; color:#166534; }
         .note { color:#9a3412; font-weight:600; margin-top:8px; }
+        .flash {
+            margin:0 0 18px; padding:12px 14px; border-radius:10px; font-weight:600; line-height:1.45;
+        }
+        .flash-ok { background:#dcfce7; color:#166534; border:1px solid #86efac; }
+        .flash-err { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
+        .reject-box {
+            margin-top:18px; padding:16px; border-radius:10px; border:1px solid #fecaca; background:#fff7f7;
+        }
+        .reject-box label { display:block; font-weight:700; margin:0 0 8px; font-size:0.9rem; }
+        .reject-box textarea {
+            width:100%; min-height:96px; padding:12px; border-radius:8px; border:1px solid #cbd5e1;
+            box-sizing:border-box; font:inherit;
+        }
+        .reject-box .btn { margin-top:12px; }
         @media (max-width:640px) { .grid { grid-template-columns:1fr; } }
     </style>
 </head>
@@ -36,6 +50,8 @@
     $user = $leaveRequest->user;
     $name = trim(($user->first_name ?? '').' '.($user->last_name ?? '')) ?: 'Staff member';
     $isManagerApplicant = $leaveRequest->isManagerApplicant();
+    $flashSuccess = $flashSuccess ?? null;
+    $flashError = $flashError ?? null;
 @endphp
     <div class="card">
         <h1>Leave request #{{ $leaveRequest->id }}</h1>
@@ -43,6 +59,13 @@
             Status:
             <span class="pill {{ $awaiting ? '' : 'pill-ok' }}">{{ $statusLabel }}</span>
         </p>
+
+        @if ($flashSuccess)
+            <div class="flash flash-ok">{{ $flashSuccess }}</div>
+        @endif
+        @if ($flashError)
+            <div class="flash flash-err">{{ $flashError }}</div>
+        @endif
 
         <div class="grid">
             <div class="item"><label>Applicant</label><div>{{ $name }}</div></div>
@@ -83,14 +106,27 @@
             @endif
             <div class="actions">
                 @if ($canApproveWithProof)
-                    <a class="btn btn-approve" href="{{ $approveUrl }}">Approve</a>
+                    <form method="POST" action="{{ $approveUrl }}">
+                        @csrf
+                        <button type="submit" class="btn btn-approve">Approve</button>
+                    </form>
                 @else
                     <span class="btn btn-disabled">Approve (proof required)</span>
                 @endif
-                <a class="btn btn-reject" href="{{ $rejectUrl }}">Reject</a>
+            </div>
+            <div class="reject-box">
+                <form method="POST" action="{{ $rejectUrl }}">
+                    @csrf
+                    <label for="rejection_reason">Reject with reason</label>
+                    <textarea id="rejection_reason" name="rejection_reason" required maxlength="500" placeholder="Enter rejection reason…">{{ old('rejection_reason') }}</textarea>
+                    @error('rejection_reason')
+                        <p class="note">{{ $message }}</p>
+                    @enderror
+                    <button type="submit" class="btn btn-reject">Reject</button>
+                </form>
             </div>
         @else
-            <p class="note" style="color:#166534;">This decision has already been submitted. No further action is needed.</p>
+            <p class="note" style="color:#166534;">This decision has already been submitted. Approve and Reject are no longer available.</p>
         @endif
     </div>
 </body>

@@ -59,15 +59,17 @@ class LeaveProofRules
 
     public static function proofDeadlineAt(LeaveRequest $request): ?Carbon
     {
-        if (! $request->start_date) {
+        // Deadline is the day after leave ends (not after it starts), so multi-day sick leave is fair.
+        $anchor = $request->end_date ?: $request->start_date;
+        if (! $anchor) {
             return null;
         }
 
-        return Carbon::parse($request->start_date)->addDay()->endOfDay();
+        return Carbon::parse($anchor)->addDay()->endOfDay();
     }
 
     /**
-     * Plain-language upload window, e.g. "on 02 Jul 2026, or by 03 Jul 2026 at the latest".
+     * Plain-language upload window, e.g. "from 02 Jul 2026, by 04 Jul 2026 at the latest".
      */
     public static function proofUploadWindowDescription(LeaveRequest $request): ?string
     {
@@ -77,7 +79,7 @@ class LeaveProofRules
             return null;
         }
 
-        return 'on '.$opens->format('d M Y').', or by '.$deadline->format('d M Y').' at the latest';
+        return 'from '.$opens->format('d M Y').', by '.$deadline->format('d M Y').' at the latest';
     }
 
     public static function proofUploadWindowSentence(LeaveRequest $request, string $prefix = 'You can upload'): ?string

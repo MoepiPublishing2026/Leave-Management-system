@@ -441,8 +441,6 @@ document.addEventListener('DOMContentLoaded', function () {
         minDate: 'today',
     };
 
-    flatpickr('#end_date', fpOptions);
-
     function calculateWorkingDays(startDate, endDate) {
         if (!startDate || !endDate) return 0;
         const start = new Date(startDate);
@@ -633,14 +631,17 @@ document.addEventListener('DOMContentLoaded', function () {
             fileUploadContainer.classList.remove('required');
             attachmentBadge.textContent = 'Optional now';
             attachmentBadge.className = 'attachment-badge attachment-badge--optional';
-            let hint = `Submit without a doctor's letter. Once ${approverLabel} approves, upload it from My Leave Requests on your leave start date, or by the following day at the latest.`;
-            if (startDate) {
-                const start = new Date(startDate + 'T00:00:00');
-                if (!isNaN(start.getTime())) {
-                    const deadline = new Date(start);
+            let hint = `Submit without a doctor's letter. Once ${approverLabel} approves, upload it from My Leave Requests by the day after your leave ends.`;
+            const endDateInput = document.getElementById('end_date');
+            const endDate = endDateInput ? endDateInput.value : '';
+            const deadlineSource = endDate || startDate;
+            if (deadlineSource) {
+                const anchor = new Date(deadlineSource + 'T00:00:00');
+                if (!isNaN(anchor.getTime())) {
+                    const deadline = new Date(anchor);
                     deadline.setDate(deadline.getDate() + 1);
                     const deadlineLabel = deadline.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-                    hint = `Submit without a doctor\'s letter. After approval, upload it from My Leave Requests by ${deadlineLabel} at the latest. You may attach it now if you already have it.`;
+                    hint = `Submit without a doctor's letter. After approval, upload it from My Leave Requests by ${deadlineLabel} at the latest (the day after your leave ends). You may attach it now if you already have it.`;
                 }
             }
             fileUploadHint.textContent = hint;
@@ -673,7 +674,17 @@ document.addEventListener('DOMContentLoaded', function () {
     if (startDateInput) {
         startDateInput.addEventListener('change', updateFileUploadRequirement);
     }
+    const endDateInputForProof = document.getElementById('end_date');
+    if (endDateInputForProof) {
+        endDateInputForProof.addEventListener('change', updateFileUploadRequirement);
+    }
     flatpickr('#start_date', {
+        ...fpOptions,
+        onChange: function () {
+            updateFileUploadRequirement();
+        },
+    });
+    flatpickr('#end_date', {
         ...fpOptions,
         onChange: function () {
             updateFileUploadRequirement();

@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends($layout ?? 'layouts.admin')
 
 @section('title', 'Leave Policies Settings')
 
@@ -50,13 +50,26 @@
         justify-content: flex-end;
         margin-top: 8px;
     }
+    .settings-flash {
+        margin-bottom: 16px;
+        padding: 12px 16px;
+        border-radius: 10px;
+        background: #ecfdf5;
+        border: 1px solid #86efac;
+        color: #065f46;
+        font-weight: 600;
+    }
 </style>
 
 <div class="app-page">
     <h1>Leave Policies</h1>
     <p class="app-page-lead">Configure default days, carry-over limits, and rules for each leave type. Changes apply to new requests immediately.</p>
 
-    <form action="{{ route('admin.settings.save') }}" method="POST" novalidate>
+    @if (session('saved'))
+        <div class="settings-flash" role="status">Leave policies saved successfully.</div>
+    @endif
+
+    <form action="{{ route($formRoute ?? 'admin.settings.save') }}" method="POST" novalidate>
         @csrf
 
         @foreach($leaveTypes as $type)

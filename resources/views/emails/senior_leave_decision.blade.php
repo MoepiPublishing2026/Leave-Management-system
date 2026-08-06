@@ -21,11 +21,8 @@
             display:inline-block; padding:12px 22px; margin:0 8px 10px 0; border-radius:25px;
             font-weight:700; text-decoration:none; font-size:15px; color:#fff !important;
         }
-        a.btn-approve { background:#16a34a; }
-        a.btn-reject { background:#dc2626; }
         a.btn-review { background:#0f766e; }
         a.btn-view { background:#a2d109; color:#0a1347 !important; }
-        a.btn-disabled { background:#94a3b8; pointer-events:none; }
         .muted { font-size:12px; color:#7b7b7b; margin-top:28px; }
         .note { color:#9a3412; font-size:14px; font-weight:600; }
     </style>
@@ -42,7 +39,7 @@
 @endphp
 
     <h2>Leave request awaiting your decision</h2>
-    <p>Review the details and attachments below, then approve or reject without logging in. Links expire in 7 days.</p>
+    <p>Open the secure review page to approve or reject without logging in. After you decide, the action buttons are removed. Links expire in 7 days.</p>
 
     <ul>
         <li><b>Request #:</b> {{ $req->id }}</li>
@@ -82,13 +79,7 @@
     @endif
 
     <div class="actions">
-        @if (!empty($canApproveWithProof))
-            <a href="{{ $approveUrl }}" class="btn btn-approve">Approve</a>
-        @else
-            <span class="btn btn-disabled">Approve (proof required)</span>
-        @endif
-        <a href="{{ $rejectUrl }}" class="btn btn-reject">Reject</a>
-        <a href="{{ $reviewUrl }}" class="btn btn-review">Open full review</a>
+        <a href="{{ $reviewUrl }}" class="btn btn-review">Review &amp; decide</a>
         <a href="{{ $viewUrl }}" class="btn btn-view">Open in app</a>
     </div>
 

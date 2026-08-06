@@ -150,8 +150,9 @@
                                                 data-preview-url="{{ $fileLink['url'] }}"
                                                 data-download-url="{{ $fileLink['downloadUrl'] }}"
                                                 data-extension="{{ $fileLink['extension'] }}"
-                                                data-label="{{ $fileLink['name'] }}"
-                                                data-previewable="{{ $fileLink['previewable'] ? '1' : '0' }}"
+                                                data-label="{{ $fileLink['label'] }}"
+                                                data-filename="{{ $fileLink['name'] }}"
+                                                data-previewable="1"
                                             >View {{ $fileLink['label'] }}</button>
                                         @endforeach
                                     </div>
@@ -202,7 +203,7 @@
         </table>
     </div>
 
-    <p class="requests-hint">Click any row to view full request details.@if(($layout ?? '') === 'layouts.manager') Pending requests are reviewed by a senior manager.@endif Approved leave may be withdrawn until its final leave day; the balance is then restored. For approved sick leave, upload your doctor's letter using <strong>Upload doctor's letter</strong> in the Actions column on your leave start date (by the next day at the latest).</p>
+    <p class="requests-hint">Click any row to view full request details.@if(($layout ?? '') === 'layouts.manager') Pending requests are reviewed by a senior manager.@endif Approved leave may be withdrawn until its final leave day; the balance is then restored. For approved sick leave, upload your doctor's letter using <strong>Upload doctor's letter</strong> in the Actions column by the day after your leave ends at the latest.</p>
 
     <div class="requests-pagination">
         {{ $leaveRequests->links('pagination::bootstrap-5') }}

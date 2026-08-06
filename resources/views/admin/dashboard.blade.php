@@ -335,19 +335,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const payStatusData = @json(array_values($payStatusCounts ?? ['Paid' => 0, 'Unpaid' => 0]));
     const payStatusPct = @json($payStatusPercentages ?? []);
     const payStatusColors = [chartPalette.green, chartPalette.orange];
+    const payStatusSegments = buildPolarAreaSegments(payStatusLabels, payStatusData, payStatusColors);
 
     new Chart(document.getElementById('payStatusPolar'), {
         type: 'polarArea',
         data: {
-            labels: payStatusLabels,
+            labels: payStatusSegments.labels,
             datasets: [{
-                data: payStatusData,
-                backgroundColor: payStatusColors,
+                data: payStatusSegments.data,
+                backgroundColor: payStatusSegments.colors,
                 borderColor: '#fff',
                 borderWidth: 2
             }]
         },
         options: mergeChartOptions({
+            scales: window.polarAreaChartScales,
             plugins: {
                 legend: { display: false },
                 tooltip: {

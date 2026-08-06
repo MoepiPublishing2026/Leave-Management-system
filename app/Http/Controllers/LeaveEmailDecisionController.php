@@ -14,6 +14,7 @@ use App\Support\PersonalLeaveDashboardData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Validator;
 
 class LeaveEmailDecisionController extends Controller
 {
@@ -44,28 +45,24 @@ class LeaveEmailDecisionController extends Controller
             || ($status === 'pending' && $leave->isManagerApplicant());
     }
 
-    private function alreadySubmittedResponse(LeaveRequest $leave)
+    private function signedReviewUrl(LeaveRequest $leave): string
     {
-        $status = LeaveStatusLabels::display($leave->status);
-        $decision = strtolower(trim((string) ($leave->status ?? '')));
+        return URL::temporarySignedRoute(
+            'leave.email.review',
+            now()->addDays(7),
+            ['leaveRequest' => $leave->id]
+        );
+    }
 
-        if (in_array($decision, ['approved', 'rejected'], true)) {
-            return response()->view('emails.leave_email_decision_result', [
-                'title' => 'Decision already submitted',
-                'message' => 'Request #'.$leave->id.' was already marked as '.$status.'. No further action is needed.',
-                'ok' => true,
-                'submitted' => true,
-                'finalStatus' => $status,
-            ]);
+    private function redirectToReview(LeaveRequest $leave, ?string $flashKey = null, ?string $flashMessage = null)
+    {
+        $redirect = redirect()->to($this->signedReviewUrl($leave));
+
+        if ($flashKey && $flashMessage) {
+            $redirect->with($flashKey, $flashMessage);
         }
 
-        return response()->view('emails.leave_email_decision_result', [
-            'title' => 'Decision already submitted',
-            'message' => 'This leave request is no longer awaiting a Senior Manager decision (current status: '.$status.').',
-            'ok' => true,
-            'submitted' => true,
-            'finalStatus' => $status,
-        ]);
+        return $redirect;
     }
 
     private function remainingBalanceLabel(LeaveRequest $leave): string
@@ -122,7 +119,7 @@ class LeaveEmailDecisionController extends Controller
                 ['leaveRequest' => $leaveRequest->id]
             );
             $rejectUrl = URL::temporarySignedRoute(
-                'leave.email.reject.form',
+                'leave.email.reject.submit',
                 now()->addDays(7),
                 ['leaveRequest' => $leaveRequest->id]
             );
@@ -148,6 +145,8 @@ class LeaveEmailDecisionController extends Controller
             'canApproveWithProof' => LeaveProofRules::canApprove($leaveRequest),
             'proofBlockReason' => LeaveProofRules::approvalBlockedReason($leaveRequest),
             'statusLabel' => LeaveStatusLabels::display($leaveRequest->status),
+            'flashSuccess' => session('decision_success'),
+            'flashError' => session('decision_error'),
         ]);
     }
 
@@ -172,7 +171,11 @@ class LeaveEmailDecisionController extends Controller
 
         $fullPath = $disk->path($path);
         $downloadName = basename($path) ?: ('attachment_'.($idx + 1));
-        $mime = $disk->mimeType($path) ?: 'application/octet-stream';
+        $extension = strtolower(pathinfo($downloadName, PATHINFO_EXTENSION));
+        $mime = $disk->mimeType($path) ?: null;
+        if (! is_string($mime) || $mime === '' || $mime === 'application/octet-stream') {
+            $mime = LeaveAttachmentLinks::mimeForExtension($extension) ?: 'application/octet-stream';
+        }
         $previewable = LeaveAttachmentLinks::isPreviewablePath($path);
         $forceDownload = $request->boolean('download');
 
@@ -183,7 +186,22 @@ class LeaveEmailDecisionController extends Controller
         return response()->file($fullPath, [
             'Content-Type' => $mime,
             'Content-Disposition' => 'inline; filename="'.str_replace('"', '', $downloadName).'"',
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'private, max-age=60',
         ]);
+    }
+
+    /**
+     * Legacy GET approve links from older emails: send the manager to the live review page
+     * instead of deciding in a separate tab.
+     */
+    public function approveGet(Request $request, LeaveRequest $leaveRequest)
+    {
+        if (! $request->hasValidSignature()) {
+            abort(403, 'This approval link is invalid or has expired.');
+        }
+
+        return $this->redirectToReview($leaveRequest);
     }
 
     public function approve(Request $request, LeaveRequest $leaveRequest)
@@ -195,16 +213,19 @@ class LeaveEmailDecisionController extends Controller
         $leaveRequest->load('user');
 
         if (! $this->isAwaitingSenior($leaveRequest)) {
-            return $this->alreadySubmittedResponse($leaveRequest);
+            return $this->redirectToReview(
+                $leaveRequest,
+                'decision_success',
+                'This decision was already submitted. No further action is needed.'
+            );
         }
 
         if (! LeaveProofRules::canApprove($leaveRequest)) {
-            return response()->view('emails.leave_email_decision_result', [
-                'title' => 'Cannot approve yet',
-                'message' => LeaveProofRules::approvalBlockedReason($leaveRequest) ?? 'Supporting proof is required before approval.',
-                'ok' => false,
-                'submitted' => false,
-            ], 422);
+            return $this->redirectToReview(
+                $leaveRequest,
+                'decision_error',
+                LeaveProofRules::approvalBlockedReason($leaveRequest) ?? 'Supporting proof is required before approval.'
+            );
         }
 
         try {
@@ -214,54 +235,33 @@ class LeaveEmailDecisionController extends Controller
 
             $leaveRequest->refresh();
             if (! $this->isAwaitingSenior($leaveRequest)) {
-                return $this->alreadySubmittedResponse($leaveRequest);
+                return $this->redirectToReview(
+                    $leaveRequest,
+                    'decision_success',
+                    'This decision was already submitted. No further action is needed.'
+                );
             }
 
-            return response()->view('emails.leave_email_decision_result', [
-                'title' => 'Unable to approve',
-                'message' => $e->getMessage(),
-                'ok' => false,
-                'submitted' => false,
-            ], 422);
+            return $this->redirectToReview($leaveRequest, 'decision_error', $e->getMessage());
         }
 
-        return response()->view('emails.leave_email_decision_result', [
-            'title' => 'Decision submitted',
-            'message' => 'Request #'.$leaveRequest->id.' has been approved. The employee and manager have been notified.',
-            'ok' => true,
-            'submitted' => true,
-            'finalStatus' => 'Approved',
-        ]);
+        return $this->redirectToReview(
+            $leaveRequest,
+            'decision_success',
+            'Request #'.$leaveRequest->id.' has been approved. The employee and manager have been notified.'
+        );
     }
 
+    /**
+     * Legacy GET reject links from older emails: open the live review page (reject is inline there).
+     */
     public function rejectForm(Request $request, LeaveRequest $leaveRequest)
     {
         if (! $request->hasValidSignature()) {
             abort(403, 'This rejection link is invalid or has expired.');
         }
 
-        $leaveRequest->load('user');
-
-        if (! $this->isAwaitingSenior($leaveRequest)) {
-            return $this->alreadySubmittedResponse($leaveRequest);
-        }
-
-        $submitUrl = URL::temporarySignedRoute(
-            'leave.email.reject.submit',
-            now()->addDays(7),
-            ['leaveRequest' => $leaveRequest->id]
-        );
-
-        $attachments = LeaveAttachmentLinks::forEmailRequest($leaveRequest);
-
-        return view('emails.leave_email_reject_form', [
-            'leaveRequest' => $leaveRequest,
-            'submitUrl' => $submitUrl,
-            'attachments' => $attachments,
-            'workingDays' => LeaveWorkingDays::count($leaveRequest),
-            'remainingBalance' => $this->remainingBalanceLabel($leaveRequest),
-            'recommenderName' => $this->recommenderName($leaveRequest),
-        ]);
+        return $this->redirectToReview($leaveRequest);
     }
 
     public function rejectSubmit(Request $request, LeaveRequest $leaveRequest)
@@ -273,12 +273,24 @@ class LeaveEmailDecisionController extends Controller
         $leaveRequest->load('user');
 
         if (! $this->isAwaitingSenior($leaveRequest)) {
-            return $this->alreadySubmittedResponse($leaveRequest);
+            return $this->redirectToReview(
+                $leaveRequest,
+                'decision_success',
+                'This decision was already submitted. No further action is needed.'
+            );
         }
 
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'rejection_reason' => 'required|string|max:500',
         ]);
+
+        if ($validator->fails()) {
+            return $this->redirectToReview($leaveRequest)
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $validated = $validator->validated();
 
         try {
             LeaveApprovalWorkflow::finalize(
@@ -292,23 +304,20 @@ class LeaveEmailDecisionController extends Controller
 
             $leaveRequest->refresh();
             if (! $this->isAwaitingSenior($leaveRequest)) {
-                return $this->alreadySubmittedResponse($leaveRequest);
+                return $this->redirectToReview(
+                    $leaveRequest,
+                    'decision_success',
+                    'This decision was already submitted. No further action is needed.'
+                );
             }
 
-            return response()->view('emails.leave_email_decision_result', [
-                'title' => 'Unable to reject',
-                'message' => $e->getMessage(),
-                'ok' => false,
-                'submitted' => false,
-            ], 422);
+            return $this->redirectToReview($leaveRequest, 'decision_error', $e->getMessage());
         }
 
-        return response()->view('emails.leave_email_decision_result', [
-            'title' => 'Decision submitted',
-            'message' => 'Request #'.$leaveRequest->id.' has been rejected. The employee and manager have been notified.',
-            'ok' => true,
-            'submitted' => true,
-            'finalStatus' => 'Rejected',
-        ]);
+        return $this->redirectToReview(
+            $leaveRequest,
+            'decision_success',
+            'Request #'.$leaveRequest->id.' has been rejected. The employee and manager have been notified.'
+        );
     }
 }

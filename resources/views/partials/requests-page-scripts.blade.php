@@ -28,13 +28,13 @@
     }
 
     function statusBadgeClass(statusKey, isOverdue) {
-        if (isOverdue) return 'rd-badge--overdue';
+        if (isOverdue) return 'request-badge--overdue';
         const key = String(statusKey || '').toLowerCase();
-        if (key === 'approved') return 'rd-badge--approved';
-        if (key === 'rejected') return 'rd-badge--rejected';
-        if (key === 'withdrawn') return 'rd-badge--withdrawn';
-        if (key === 'pending' || key === 'pending_senior') return 'rd-badge--pending';
-        return 'rd-badge--pending';
+        if (key === 'approved') return 'request-badge--approved';
+        if (key === 'rejected') return 'request-badge--rejected';
+        if (key === 'withdrawn') return 'request-badge--withdrawn';
+        if (key === 'pending' || key === 'pending_senior') return 'request-badge--pending';
+        return 'request-badge--pending';
     }
 
     function statusDisplayLabel(statusKey, isOverdue) {
@@ -45,19 +45,8 @@
         return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
     }
 
-    function statCard(label, value, extraClass) {
-        return `<div class="rd-stat">
-            <span class="rd-stat-label">${escapeHtml(label)}</span>
-            <span class="rd-stat-value${extraClass ? ' ' + extraClass : ''}">${value}</span>
-        </div>`;
-    }
-
-    function sectionBlock(title, innerHtml, boxClass) {
-        const boxCls = boxClass ? ' rd-box--' + boxClass : '';
-        return `<div class="rd-section">
-            <h4 class="rd-section-title">${escapeHtml(title)}</h4>
-            <div class="rd-box${boxCls}">${innerHtml}</div>
-        </div>`;
+    function hasText(value) {
+        return String(value ?? '').trim() !== '';
     }
 
     function renderFileActions(file) {
@@ -66,63 +55,126 @@
         const previewUrl = escapeHtml(file.url || '');
         const downloadUrl = escapeHtml(file.downloadUrl || file.url || '');
         const extension = escapeHtml(file.extension || '');
-        const previewable = file.previewable === true || file.previewable === 1 || file.previewable === '1';
 
         return `<li class="rd-file-item">
             <span class="rd-file-name">${fileIconSvg}${label}</span>
             <span class="rd-file-actions">
-                ${previewable
-                    ? `<button type="button" class="rd-file-btn rd-file-btn--preview attachment-preview-btn" data-preview-url="${previewUrl}" data-download-url="${downloadUrl}" data-extension="${extension}" data-label="${name}" data-previewable="1">Preview</button>`
-                    : `<button type="button" class="rd-file-btn rd-file-btn--preview attachment-preview-btn" data-preview-url="${previewUrl}" data-download-url="${downloadUrl}" data-extension="${extension}" data-label="${name}" data-previewable="0">View info</button>`
-                }
+                <button type="button" class="rd-file-btn rd-file-btn--preview attachment-preview-btn" data-preview-url="${previewUrl}" data-download-url="${downloadUrl}" data-extension="${extension}" data-label="${label}" data-filename="${name}" data-previewable="1">Preview</button>
                 <a class="rd-file-btn rd-file-btn--download" href="${downloadUrl}">Download</a>
             </span>
         </li>`;
     }
 
-    window.openAttachmentPreview = function (file) {
+    function loadMammoth() {
+        if (window.mammoth) {
+            return Promise.resolve(window.mammoth);
+        }
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js';
+            script.async = true;
+            script.onload = () => resolve(window.mammoth);
+            script.onerror = () => reject(new Error('Could not load Word preview library.'));
+            document.head.appendChild(script);
+        });
+    }
+
+    window.openAttachmentPreview = async function (file) {
         const previewUrl = file.previewUrl || file.url || '';
         const downloadUrl = file.downloadUrl || previewUrl;
         const extension = String(file.extension || '').toLowerCase();
         const label = file.label || 'Attachment';
-        const previewable = file.previewable === true || file.previewable === 1 || file.previewable === '1';
-
-        let bodyHtml = '';
-        if (previewable && extension === 'pdf') {
-            bodyHtml = `<iframe class="attachment-preview-frame" src="${escapeHtml(previewUrl)}" title="${escapeHtml(label)} preview"></iframe>`;
-        } else if (previewable && ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) {
-            bodyHtml = `<img class="attachment-preview-image" src="${escapeHtml(previewUrl)}" alt="${escapeHtml(label)} preview">`;
-        } else {
-            bodyHtml = `<p class="attachment-preview-note">Preview is not available for this file type in the browser. Download the file to open it.</p>`;
-        }
-
+        const filename = file.filename || file.name || label;
         const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+        const loadingHtml = `
+            <div class="attachment-preview-shell">
+                <div class="attachment-preview-meta">${escapeHtml(filename)}</div>
+                <div class="attachment-preview-wrap">
+                    <p class="attachment-preview-note">Loading preview…</p>
+                </div>
+            </div>
+        `;
+
         Swal.fire({
             title: escapeHtml(label),
-            width: isMobile ? 'auto' : 900,
-            html: `<div class="attachment-preview-wrap">${bodyHtml}</div>`,
+            width: isMobile ? 'auto' : 920,
+            html: loadingHtml,
             showCloseButton: true,
             showConfirmButton: true,
             confirmButtonText: 'Download',
-            showDenyButton: previewable,
+            showDenyButton: true,
             denyButtonText: 'Open in tab',
             customClass: {
                 popup: 'attachment-preview-popup',
                 container: 'attachment-preview-container',
+                confirmButton: 'attachment-preview-btn-download',
+                denyButton: 'attachment-preview-btn-open',
             },
             didOpen: (popup) => {
                 const container = popup?.closest('.swal2-container');
-                if (container) {
-                    container.style.zIndex = '10200';
-                }
+                if (container) container.style.zIndex = '10200';
             },
         }).then((result) => {
             if (result.isConfirmed) {
                 window.open(downloadUrl, '_blank', 'noopener');
-            } else if (result.isDenied && previewable) {
+            } else if (result.isDenied) {
                 window.open(previewUrl, '_blank', 'noopener');
             }
         });
+
+        const wrap = document.querySelector('.attachment-preview-popup .attachment-preview-wrap');
+        if (!wrap || !previewUrl) {
+            if (wrap) {
+                wrap.innerHTML = `<p class="attachment-preview-note attachment-preview-note--error">Preview link is missing. Use Download instead.</p>`;
+            }
+            return;
+        }
+
+        try {
+            const response = await fetch(previewUrl, {
+                credentials: 'same-origin',
+                headers: { 'Accept': '*/*' },
+            });
+
+            if (!response.ok) {
+                const missing = response.status === 404;
+                wrap.innerHTML = `<p class="attachment-preview-note attachment-preview-note--error">${
+                    missing
+                        ? 'This file is no longer on the server (it may have been deleted or never saved). Ask the employee to upload it again, or use Download if available.'
+                        : 'Could not load this file for preview (error ' + response.status + '). Try Download or Open in tab.'
+                }</p>`;
+                return;
+            }
+
+            const blob = await response.blob();
+            const objectUrl = URL.createObjectURL(blob);
+
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(extension)) {
+                wrap.innerHTML = `<img class="attachment-preview-image" src="${objectUrl}" alt="${escapeHtml(label)} preview">`;
+            } else if (extension === 'pdf') {
+                wrap.innerHTML = `<iframe class="attachment-preview-frame" src="${objectUrl}" title="${escapeHtml(label)} preview"></iframe>`;
+            } else if (extension === 'txt') {
+                const text = await blob.text();
+                wrap.innerHTML = `<pre class="attachment-preview-text">${escapeHtml(text)}</pre>`;
+            } else if (extension === 'docx') {
+                wrap.innerHTML = `<p class="attachment-preview-note">Preparing Word preview…</p>`;
+                try {
+                    const mammoth = await loadMammoth();
+                    const arrayBuffer = await blob.arrayBuffer();
+                    const result = await mammoth.convertToHtml({ arrayBuffer });
+                    wrap.innerHTML = `<div class="attachment-preview-doc">${result.value || '<p class="attachment-preview-note">No readable content found in this document.</p>'}</div>`;
+                } catch (err) {
+                    wrap.innerHTML = `<p class="attachment-preview-note attachment-preview-note--error">Word preview failed. Use Download or Open in tab.</p>`;
+                }
+            } else if (extension === 'doc') {
+                wrap.innerHTML = `<p class="attachment-preview-note">Legacy <strong>.doc</strong> files cannot be previewed in the browser. Please Download the file, or re-upload as <strong>.docx</strong> or <strong>PDF</strong>.</p>`;
+            } else {
+                wrap.innerHTML = `<p class="attachment-preview-note">Preview is not available for <strong>.${escapeHtml(extension || 'this')}</strong> files. Use Download or Open in tab.</p>`;
+            }
+        } catch (err) {
+            wrap.innerHTML = `<p class="attachment-preview-note attachment-preview-note--error">Preview failed to load. Check your connection, then try Download.</p>`;
+        }
     };
 
     // Capture phase: action cells call stopPropagation on bubble, which blocked preview clicks.
@@ -136,7 +188,8 @@
             downloadUrl: previewBtn.getAttribute('data-download-url') || '',
             extension: previewBtn.getAttribute('data-extension') || '',
             label: previewBtn.getAttribute('data-label') || 'Attachment',
-            previewable: previewBtn.getAttribute('data-previewable') === '1',
+            filename: previewBtn.getAttribute('data-filename') || '',
+            previewable: true,
         });
     }, true);
 
@@ -145,130 +198,107 @@
         const statusKey = isOverdue ? 'overdue' : String(details.status || '').toLowerCase();
         const statusLabel = statusDisplayLabel(details.status, isOverdue);
 
+        function row(label, valueHtml) {
+            if (!valueHtml) return '';
+            return `<div class="rd-row">
+                <div class="rd-row-label">${escapeHtml(label)}</div>
+                <div class="rd-row-value">${valueHtml}</div>
+            </div>`;
+        }
+
         let employeeHtml = '';
         if (pageConfig.showEmployee) {
-            const employeeLine = [details.employee, details.designation, details.department].filter(Boolean).join(' · ');
+            const employeeLine = [details.department, details.email].filter(Boolean).join(' · ');
             employeeHtml = `
                 <div class="rd-employee">
                     <p class="rd-employee-name">${escapeHtml(details.employee || 'Employee')}</p>
-                    <p class="rd-employee-meta">${escapeHtml(employeeLine || 'N/A')}${details.email ? ' · ' + escapeHtml(details.email) : ''}</p>
+                    <p class="rd-employee-meta">${escapeHtml(employeeLine || 'N/A')}</p>
                 </div>
             `;
         }
 
-        const stats = [
-            statCard('Leave type', escapeHtml(details.type || 'N/A'), 'rd-stat-value--type'),
-            statCard('Start date', escapeHtml(details.start || 'N/A')),
-            statCard('End date', escapeHtml(details.end || 'N/A')),
-        ];
-
-        if (pageConfig.showDays) {
-            const daysVal = details.days !== '' && details.days !== null && details.days !== undefined
-                ? escapeHtml(String(details.days))
-                : 'N/A';
-            stats.push(statCard('Working days', daysVal));
+        const rows = [];
+        rows.push(row('Leave type', `<span class="rd-row-value--type">${escapeHtml(details.type || 'N/A')}</span>`));
+        rows.push(row('Start date', escapeHtml(details.start || 'N/A')));
+        rows.push(row('End date', escapeHtml(details.end || 'N/A')));
+        if (pageConfig.showDays && details.days !== '' && details.days !== null && details.days !== undefined) {
+            rows.push(row('Working days', escapeHtml(String(details.days))));
         }
 
-        let handledHtml = '';
         if (pageConfig.showHandledMeta) {
-            handledHtml = `
-                <div class="rd-handled">
-                    <div class="rd-handled-item"><strong>Handled by</strong>${details.handledBy ? escapeHtml(details.handledBy) : '—'}</div>
-                    <div class="rd-handled-item"><strong>Handled at</strong>${details.handledAt ? escapeHtml(details.handledAt) : '—'}</div>
-                    <div class="rd-handled-item"><strong>Action</strong>${details.handledAction ? escapeHtml(details.handledAction) : '—'}</div>
-                    <div class="rd-handled-item"><strong>Late reason by</strong>${details.lateReasonBy ? escapeHtml(details.lateReasonBy) : '—'}</div>
-                </div>
-            `;
+            if (hasText(details.handledBy)) rows.push(row('Handled by', escapeHtml(details.handledBy)));
+            if (hasText(details.handledAt)) rows.push(row('Handled at', escapeHtml(details.handledAt)));
+            if (hasText(details.handledAction)) rows.push(row('Action', escapeHtml(details.handledAction)));
+            if (hasText(details.lateReasonBy)) rows.push(row('Late reason by', escapeHtml(details.lateReasonBy)));
+        }
+
+        if (hasText(details.comment)) {
+            rows.push(row('Comment', `<span class="rd-row-value--block">${escapeHtml(details.comment)}</span>`));
         }
 
         const files = Array.isArray(details.files) ? details.files : [];
-        const filesHtml = files.length
-            ? `<ul class="rd-files">${files.map(renderFileActions).join('')}</ul>`
-            : '<span class="rd-box rd-box--muted" style="display:block;border:none;padding:0;background:transparent;">No attachments</span>';
+        rows.push(row(
+            'Attachments',
+            files.length
+                ? `<ul class="rd-files">${files.map(renderFileActions).join('')}</ul>`
+                : '<span class="rd-row-value--muted">None</span>'
+        ));
 
-        let proofHtml = '';
         if (details.proofDeferred) {
             const proofStatus = details.proofAttached
                 ? 'Doctor\'s letter uploaded'
                 : (details.certificateNote || details.proofStatusLabel || 'Doctor\'s letter required after approval');
-            const proofBoxClass = details.doctorsLetterMissing ? 'warning' : (details.proofAttached ? '' : 'info');
-            const opensNote = details.proofOpensAt && !details.canUploadProofNow && !details.proofAttached
-                ? `<div class="rd-box rd-box--muted" style="margin-top:6px;">Upload from <strong>${escapeHtml(details.proofOpensAt)}</strong> using the Actions column on this page.</div>`
-                : '';
-            const deadlineNote = details.proofDeadline
-                ? `<div class="rd-box rd-box--muted" style="margin-top:6px;">Upload deadline: ${escapeHtml(details.proofDeadline)}</div>`
-                : '';
-            proofHtml = `
-                <div class="rd-section">
-                    <h4 class="rd-section-title">Doctor's letter</h4>
-                    <div class="rd-box ${proofBoxClass}">${escapeHtml(proofStatus)}</div>
-                    ${opensNote}
-                    ${deadlineNote}
-                </div>
-            `;
+            let extra = escapeHtml(proofStatus);
+            if (details.proofOpensAt && !details.canUploadProofNow && !details.proofAttached) {
+                extra += `<div class="rd-row-note">Upload from ${escapeHtml(details.proofOpensAt)} via Actions.</div>`;
+            }
+            if (details.proofDeadline) {
+                extra += `<div class="rd-row-note">Deadline: ${escapeHtml(details.proofDeadline)}</div>`;
+            }
+            rows.push(row('Doctor\'s letter', extra));
         }
 
-        const commentInner = details.comment
-            ? escapeHtml(details.comment)
-            : '<span class="rd-box--muted">No comment provided</span>';
+        if (details.convertedToUnpaidAt) {
+            rows.push(row(
+                'Converted',
+                `<strong>${escapeHtml(details.originalLeaveType || 'Sick')} → Unpaid</strong>` +
+                `<div class="rd-row-note">${escapeHtml(details.convertedToUnpaidAt)}</div>` +
+                `<div class="rd-row-note">${escapeHtml(details.conversionReason || 'Required documents were not submitted by the deadline.')}</div>`
+            ));
+        }
 
-        const lateInner = details.lateReasonSent && details.lateReason
-            ? escapeHtml(details.lateReason)
-            : '<span class="rd-box--muted">Not applicable</span>';
+        if (hasText(details.managerRecommendation)) {
+            rows.push(row(
+                'Recommendation',
+                `<strong>${escapeHtml(details.managerRecommendation)}</strong>` +
+                (hasText(details.managerRecommendationComment)
+                    ? `<div class="rd-row-note">${escapeHtml(details.managerRecommendationComment)}</div>`
+                    : '')
+            ));
+        }
 
-        const rejectionInner = details.rejectionReason
-            ? escapeHtml(details.rejectionReason)
-            : '<span class="rd-box--muted">Not applicable</span>';
+        if (details.lateReasonSent && hasText(details.lateReason)) {
+            rows.push(row('Late reason', `<span class="rd-row-value--block">${escapeHtml(details.lateReason)}</span>`));
+        }
 
-        const recommendationInner = details.managerRecommendation
-            ? `<div><strong>${escapeHtml(details.managerRecommendation)}</strong></div>` +
-              (details.managerRecommendationComment
-                  ? `<div style="margin-top:6px;">${escapeHtml(details.managerRecommendationComment)}</div>`
-                  : '')
-            : '<span class="rd-box--muted">Not yet recommended</span>';
-
-        const conversionHtml = details.convertedToUnpaidAt
-            ? sectionBlock(
-                'Automatic unpaid conversion',
-                `<div><strong>${escapeHtml(details.originalLeaveType || 'Sick')} → Unpaid</strong></div>` +
-                `<div style="margin-top:6px;">Converted: ${escapeHtml(details.convertedToUnpaidAt)}</div>` +
-                `<div style="margin-top:6px;">${escapeHtml(details.conversionReason || 'Required supporting documents were not submitted by the agreed deadline.')}</div>`,
-                'rejection'
-            )
-            : '';
-
-        const rejectionBoxClass = details.rejectionReason ? 'rejection' : '';
-        const lateBoxClass = details.lateReasonSent && details.lateReason ? 'info' : '';
+        if (hasText(details.rejectionReason)) {
+            rows.push(row('Rejection', `<span class="rd-row-value--block">${escapeHtml(details.rejectionReason)}</span>`));
+        }
 
         let messagesHtml = '';
         if (details.messagesUrl) {
-            messagesHtml = `
-                <div class="rd-section" style="margin-bottom:8px;">
-                    <a href="${escapeHtml(details.messagesUrl)}" class="rd-footer-link">Open messages</a>
-                </div>
-            `;
+            messagesHtml = `<div class="rd-messages"><a href="${escapeHtml(details.messagesUrl)}">Open messages</a></div>`;
         }
 
         const html = `
             <div class="rd-modal">
                 <div class="rd-header">
                     <div class="rd-header-id">Request <span>#${escapeHtml(details.id)}</span></div>
-                    <span class="rd-badge ${statusBadgeClass(statusKey, isOverdue)}">${escapeHtml(statusLabel)}</span>
+                    <span class="request-badge ${statusBadgeClass(statusKey, isOverdue)}">${escapeHtml(statusLabel)}</span>
                 </div>
                 ${employeeHtml}
                 <div class="rd-body">
-                    <div class="rd-stats">${stats.join('')}</div>
-                    ${handledHtml}
-                    ${sectionBlock('Important comment', commentInner)}
-                    <div class="rd-section">
-                        <h4 class="rd-section-title">Attachments</h4>
-                        ${filesHtml}
-                    </div>
-                    ${proofHtml}
-                    ${conversionHtml}
-                    ${sectionBlock('Manager recommendation', recommendationInner, 'info')}
-                    ${sectionBlock('Late response reason', lateInner, lateBoxClass)}
-                    ${sectionBlock('Rejection reason', rejectionInner, rejectionBoxClass)}
+                    ${rows.join('')}
                     ${messagesHtml}
                 </div>
             </div>
@@ -276,8 +306,8 @@
 
         const isMobile = window.matchMedia('(max-width: 768px)').matches;
         Swal.fire({
-            width: isMobile ? 'auto' : 640,
-            position: 'top',
+            width: isMobile ? 'auto' : 620,
+            position: 'center',
             showCloseButton: false,
             showIcon: false,
             customClass: {
@@ -288,17 +318,6 @@
             showConfirmButton: true,
             confirmButtonText: 'Close',
             focusConfirm: false,
-            didOpen: (popup) => {
-                const container = popup?.closest('.swal2-container');
-                if (container) {
-                    container.style.zIndex = '10150';
-                    container.scrollTop = 0;
-                }
-                const htmlContainer = Swal.getHtmlContainer();
-                if (htmlContainer) {
-                    htmlContainer.scrollTop = 0;
-                }
-            },
         });
     };
 
@@ -367,7 +386,7 @@
                 Swal.fire({
                     title: 'Upload not yet available',
                     html: opensAt && deadline
-                        ? `<p class="proof-upload-modal-note">Upload is not open yet. You can upload on <strong>${escapeHtml(opensAt)}</strong>, or by <strong>${escapeHtml(deadline)}</strong> at the latest.</p>`
+                        ? `<p class="proof-upload-modal-note">Upload is not open yet. You can upload from <strong>${escapeHtml(opensAt)}</strong>, by <strong>${escapeHtml(deadline)}</strong> at the latest.</p>`
                         : '<p class="proof-upload-modal-note">Upload will be available when allowed for this request.</p>',
                     icon: 'info',
                     confirmButtonColor: '#65a30d',
@@ -380,7 +399,7 @@
                 ? '<p class="proof-upload-modal-note">This will replace your current file(s) with the new upload.</p>'
                 : '';
             const deadlineNote = deadline
-                ? `<p class="proof-upload-modal-note">Upload by <strong>${escapeHtml(deadline)}</strong> at the latest${opensAt ? ` (you may upload on <strong>${escapeHtml(opensAt)}</strong>, your leave start date)` : ''}.</p>`
+                ? `<p class="proof-upload-modal-note">Upload by <strong>${escapeHtml(deadline)}</strong> at the latest${opensAt ? ` (window opens on <strong>${escapeHtml(opensAt)}</strong>, your leave start date)` : ''}.</p>`
                 : '';
 
             Swal.fire({

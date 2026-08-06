@@ -22,10 +22,6 @@ class SeniorLeaveDecisionMail extends Mailable
 
     public float $workingDays;
 
-    public string $approveUrl;
-
-    public string $rejectUrl;
-
     public string $reviewUrl;
 
     public string $viewUrl;
@@ -40,16 +36,8 @@ class SeniorLeaveDecisionMail extends Mailable
         $this->documentLinks = LeaveAttachmentLinks::forEmailRequest($this->leaveRequest);
 
         $expires = now()->addDays(7);
-        $this->approveUrl = URL::temporarySignedRoute(
-            'leave.email.approve',
-            $expires,
-            ['leaveRequest' => $this->leaveRequest->id]
-        );
-        $this->rejectUrl = URL::temporarySignedRoute(
-            'leave.email.reject.form',
-            $expires,
-            ['leaveRequest' => $this->leaveRequest->id]
-        );
+        // Decisions happen on the live review page so Approve/Reject can be hidden after submit.
+        // (Static inbox HTML cannot update after a decision.)
         $this->reviewUrl = URL::temporarySignedRoute(
             'leave.email.review',
             $expires,

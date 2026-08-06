@@ -10,7 +10,6 @@ return array(
     'App\\Console\\Commands\\NotifyOverdueLeaveRequestsCommand' => $baseDir . '/app/Console/Commands/NotifyOverdueLeaveRequestsCommand.php',
     'App\\Console\\Commands\\SendLeaveRemindersCommand' => $baseDir . '/app/Console/Commands/SendLeaveRemindersCommand.php',
     'App\\Console\\Commands\\SendPendingReviewRemindersCommand' => $baseDir . '/app/Console/Commands/SendPendingReviewRemindersCommand.php',
-    'App\\Http\\Controllers\\API\\AuthController' => $baseDir . '/app/Http/Controllers/API/AuthController.php',
     'App\\Http\\Controllers\\Admin\\AdminAuthController' => $baseDir . '/app/Http/Controllers/Admin/AdminAuthController.php',
     'App\\Http\\Controllers\\Admin\\AdminDashboardController' => $baseDir . '/app/Http/Controllers/Admin/AdminDashboardController.php',
     'App\\Http\\Controllers\\Admin\\AnalyticsController' => $baseDir . '/app/Http/Controllers/Admin/AnalyticsController.php',
