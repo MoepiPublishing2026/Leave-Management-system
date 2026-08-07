@@ -1,0 +1,13 @@
+1 step 
+   install passport
+   composer require laravel/passport
+   php artisan install:api --passport
+
+2 step 
+     php artisan passport:install
+3 step 
+  add to the user model 
+    use laravel\Passport\HashAPITokens 
+
+    AuthService
+    use laravel\Passport\Passport
