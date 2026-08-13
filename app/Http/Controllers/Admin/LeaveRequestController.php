@@ -10,12 +10,15 @@ use App\Support\LeaveRequestSearch;
 use App\Support\LeaveRequestPeriodFilter;
 use App\Support\DashboardEmployeeFilter;
 use App\Support\LeavePayFilter;
+use App\Support\MissingProofUnpaidConverter;
 use Illuminate\Support\Carbon;
 
 class LeaveRequestController extends Controller
 {
     public function index(Request $request)
     {
+        MissingProofUnpaidConverter::convertDue();
+
         $status = strtolower((string) $request->query('status', 'all'));
         $payFilter = LeavePayFilter::normalize($request->query('pay', 'all'));
         $search = trim((string) $request->query('search', ''));

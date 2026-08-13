@@ -193,6 +193,80 @@
         });
     }, true);
 
+    function checkIcon(ok) {
+        if (ok) {
+            return '<span class="rd-check-mark rd-check-mark--ok" aria-hidden="true">✓</span>';
+        }
+        return '<span class="rd-check-mark rd-check-mark--warn" aria-hidden="true">!</span>';
+    }
+
+    function renderReviewChecklist(review) {
+        if (!review || typeof review !== 'object') {
+            return '';
+        }
+
+        const remainingLine = `Allocated ${escapeHtml(review.allocated || '0')} · Taken ${escapeHtml(review.taken || '0')} · Remaining ${escapeHtml(review.remaining || '0')}`;
+        const requestLine = `This request: ${escapeHtml(review.requested || '0')} working day(s)` +
+            (review.fitsBalance ? '' : ' — more than remaining balance');
+        const annualLine = review.countsAgainstAnnual && review.annualRemaining !== ''
+            ? `<div class="rd-check-note">Also counts against Annual (remaining ${escapeHtml(review.annualRemaining)} days).</div>`
+            : '';
+
+        let documentsBody;
+        if (review.proofAttached) {
+            documentsBody = 'Supporting document is attached. Preview it in Attachments below.';
+        } else if (review.proofDeferred) {
+            documentsBody = 'Doctor\'s letter is not attached yet. Sick leave may be recommended before the doctor visit.';
+            if (review.proofDeadline) {
+                documentsBody += ` Upload deadline: ${escapeHtml(review.proofDeadline)}.`;
+            }
+        } else if (review.proofRequired) {
+            documentsBody = 'Supporting documentation is required and is not attached.';
+        } else {
+            documentsBody = 'No supporting document is required for this leave type.';
+        }
+
+        const unpaidHtml = review.willConvertToUnpaid && review.unpaidNote
+            ? `<div class="rd-check-alert">${escapeHtml(review.unpaidNote)}</div>`
+            : '';
+
+        const policyBits = [];
+        if (review.policyDefaultDays) policyBits.push(`${escapeHtml(review.policyDefaultDays)} days per year`);
+        policyBits.push(review.proofRequired ? 'proof required' : 'proof not required');
+        policyBits.push(review.allowHalfDays ? 'half days allowed' : 'half days not allowed');
+
+        return `
+            <div class="rd-review">
+                <div class="rd-review-title">Manager review</div>
+                <div class="rd-check ${review.fitsBalance ? 'rd-check--ok' : 'rd-check--warn'}">
+                    ${checkIcon(!!review.fitsBalance)}
+                    <div>
+                        <div class="rd-check-label">Verify leave balance</div>
+                        <div class="rd-check-body">${escapeHtml(remainingLine)}</div>
+                        <div class="rd-check-body">${escapeHtml(requestLine)}</div>
+                        ${annualLine}
+                    </div>
+                </div>
+                <div class="rd-check ${review.documentsOk ? 'rd-check--ok' : 'rd-check--warn'}">
+                    ${checkIcon(!!review.documentsOk)}
+                    <div>
+                        <div class="rd-check-label">Verify supporting documents</div>
+                        <div class="rd-check-body">${escapeHtml(documentsBody)}</div>
+                        ${unpaidHtml}
+                    </div>
+                </div>
+                <div class="rd-check rd-check--ok">
+                    ${checkIcon(true)}
+                    <div>
+                        <div class="rd-check-label">Check leave policy</div>
+                        <div class="rd-check-body">${policyBits.join(' · ')}</div>
+                        ${review.policyText ? `<div class="rd-check-note">${escapeHtml(review.policyText)}</div>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     window.openRequestDetails = function (details) {
         const isOverdue = !!details.isOverdue;
         const statusKey = isOverdue ? 'overdue' : String(details.status || '').toLowerCase();
@@ -222,7 +296,8 @@
         rows.push(row('Start date', escapeHtml(details.start || 'N/A')));
         rows.push(row('End date', escapeHtml(details.end || 'N/A')));
         if (pageConfig.showDays && details.days !== '' && details.days !== null && details.days !== undefined) {
-            rows.push(row('Working days', escapeHtml(String(details.days))));
+            const daysLabel = details.isHalfDay ? `${escapeHtml(String(details.days))} (half day)` : escapeHtml(String(details.days));
+            rows.push(row('Working days', daysLabel));
         }
 
         if (pageConfig.showHandledMeta) {
@@ -290,6 +365,8 @@
             messagesHtml = `<div class="rd-messages"><a href="${escapeHtml(details.messagesUrl)}">Open messages</a></div>`;
         }
 
+        const reviewHtml = renderReviewChecklist(details.review);
+
         const html = `
             <div class="rd-modal">
                 <div class="rd-header">
@@ -297,6 +374,7 @@
                     <span class="request-badge ${statusBadgeClass(statusKey, isOverdue)}">${escapeHtml(statusLabel)}</span>
                 </div>
                 ${employeeHtml}
+                ${reviewHtml}
                 <div class="rd-body">
                     ${rows.join('')}
                     ${messagesHtml}
@@ -306,7 +384,7 @@
 
         const isMobile = window.matchMedia('(max-width: 768px)').matches;
         Swal.fire({
-            width: isMobile ? 'auto' : 620,
+            width: isMobile ? 'auto' : (reviewHtml ? 680 : 620),
             position: 'center',
             showCloseButton: false,
             showIcon: false,
@@ -480,6 +558,56 @@
             }
         }
     }
+
+    function bindDecisionConfirms() {
+        document.querySelectorAll('.recommend-approve-form, .senior-approve-form').forEach((form) => {
+            form.addEventListener('submit', function (e) {
+                if (form.dataset.confirmed === '1') {
+                    return;
+                }
+
+                const row = form.closest('tr');
+                let details = {};
+                try {
+                    details = JSON.parse(row?.getAttribute('data-details') || '{}');
+                } catch (err) {
+                    return;
+                }
+
+                const review = details.review || {};
+                const warnings = [];
+                if (review.willConvertToUnpaid && review.unpaidNote) {
+                    warnings.push(review.unpaidNote);
+                }
+                if (review.fitsBalance === false) {
+                    warnings.push('This request is more working days than the remaining balance for this leave type.');
+                }
+                if (!warnings.length) {
+                    return;
+                }
+
+                e.preventDefault();
+                const isSenior = form.classList.contains('senior-approve-form');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Please confirm before continuing',
+                    html: warnings.map((warning) => `<p style="text-align:left;margin:0 0 10px;">${escapeHtml(warning)}</p>`).join(''),
+                    showCancelButton: true,
+                    confirmButtonText: isSenior ? 'Approve' : 'Recommend Approve',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#15803d',
+                    cancelButtonColor: '#64748b',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.dataset.confirmed = '1';
+                        form.submit();
+                    }
+                });
+            });
+        });
+    }
+
+    bindDecisionConfirms();
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', openRequestFromQuery);

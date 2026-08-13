@@ -186,30 +186,84 @@
             <div class="error">{{ $message }}</div>
         @enderror
 
-        <label for="department">Department</label>
-        <select name="department" id="department" required>
-            <option value="">Select department</option>
-            @foreach(($departments ?? []) as $dept)
-                <option value="{{ $dept }}" {{ old('department') === $dept ? 'selected' : '' }}>{{ $dept }}</option>
-            @endforeach
+        <label for="role">Role</label>
+        <select name="role" id="role" required>
+            <option value="employee" {{ old('role') == 'employee' ? 'selected' : '' }}>Employee</option>
+            <option value="manager" {{ old('role') == 'manager' ? 'selected' : '' }}>Manager</option>
+            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Senior Manager</option>
         </select>
-        @error('department')
+        @error('role')
             <div class="error">{{ $message }}</div>
         @enderror
 
-        <label for="manager_id">Assign to</label>
-        <select name="manager_id" id="manager_id" data-selected="{{ old('manager_id', auth()->id()) }}">
-            <option value="">Select manager</option>
-            @foreach(($managers ?? []) as $mgr)
-                <option value="{{ $mgr->id }}" @selected((string) old('manager_id', auth()->id()) === (string) $mgr->id)>
-                    {{ trim(($mgr->first_name ?? '').' '.($mgr->last_name ?? '')) ?: 'Manager #'.$mgr->id }}
-                </option>
-            @endforeach
-        </select>
-        <p id="assign-hint" class="field-hint" style="text-align:left;margin-top:6px;color:#64748b;font-size:0.85rem;">Required for employees. This manager will only see leave for people assigned to them.</p>
-        @error('manager_id')
-            <div class="error">{{ $message }}</div>
-        @enderror
+        @php
+            $currentRole = old('role', 'employee');
+            $selectedManaged = old('managed_departments', []);
+            if (! is_array($selectedManaged)) {
+                $selectedManaged = [];
+            }
+            $deptManagers = ($departmentManagers ?? collect())->toArray();
+        @endphp
+
+        <div id="employee-department-block" @style(['display: none' => $currentRole === 'manager'])>
+            <label for="department">Department</label>
+            <select name="department" id="department" @required($currentRole !== 'manager' && $currentRole !== 'admin') @disabled($currentRole === 'manager')>
+                <option value="">Select department</option>
+                @foreach(($departments ?? []) as $dept)
+                    <option value="{{ $dept }}" {{ old('department') === $dept ? 'selected' : '' }}>{{ $dept }}</option>
+                @endforeach
+            </select>
+            <p id="department-auto-hint" class="field-hint" style="text-align:left;margin-top:6px;color:#64748b;font-size:0.85rem;">
+                Employees are automatically assigned to the manager responsible for this department.
+            </p>
+            @error('department')
+                <div class="error">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div id="managed-departments-block" @style(['display: none' => $currentRole !== 'manager'])>
+            <label>Departments responsible for</label>
+            <div class="managed-dept-list" style="text-align:left;margin-top:8px;display:grid;gap:8px;">
+                @foreach(($departments ?? []) as $dept)
+                    @php
+                        $owner = $deptManagers[$dept]['manager_name'] ?? null;
+                    @endphp
+                    <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:normal;font-size:15px;font-weight:600;color:#334155;margin:0;">
+                        <input type="checkbox" name="managed_departments[]" value="{{ $dept }}" class="managed-dept-checkbox"
+                               {{ in_array($dept, $selectedManaged, true) ? 'checked' : '' }}
+                               style="width:18px;height:18px;accent-color:#138056;">
+                        <span>{{ $dept }}@if($owner)<span style="color:#64748b;font-weight:500;"> — currently {{ $owner }}</span>@endif</span>
+                    </label>
+                @endforeach
+            </div>
+            <p class="field-hint" style="text-align:left;margin-top:6px;color:#64748b;font-size:0.85rem;">
+                Select one or more departments. Employees registered in these departments will be assigned to this manager automatically.
+            </p>
+            @error('managed_departments')
+                <div class="error">{{ $message }}</div>
+            @enderror
+            @error('managed_departments.*')
+                <div class="error">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div id="assign-block" @style(['display: none' => $currentRole !== 'manager'])>
+            <label for="manager_id">Assign to senior manager</label>
+            <select name="manager_id" id="manager_id" data-selected="{{ old('manager_id') }}" @disabled($currentRole !== 'manager') @required($currentRole === 'manager')>
+                <option value="">Select senior manager</option>
+                @foreach(($seniorManagers ?? []) as $senior)
+                    <option value="{{ $senior->id }}" @selected((string) old('manager_id') === (string) $senior->id)>
+                        {{ trim(($senior->first_name ?? '').' '.($senior->last_name ?? '')) ?: 'Senior Manager #'.$senior->id }}
+                    </option>
+                @endforeach
+            </select>
+            <p id="assign-hint" class="field-hint" style="text-align:left;margin-top:6px;color:#64748b;font-size:0.85rem;">
+                Required for managers. Choose which senior manager this manager reports to.
+            </p>
+            @error('manager_id')
+                <div class="error">{{ $message }}</div>
+            @enderror
+        </div>
 
         <label for="email">Username (Email)</label>
         <input type="email" name="email" value="{{ old('email') }}" required />
@@ -254,16 +308,6 @@
             </span>
         </div>
 
-        <label for="role">Role</label>
-        <select name="role" required>
-            <option value="employee" {{ old('role') == 'employee' ? 'selected' : '' }}>Employee</option>
-            <option value="manager" {{ old('role') == 'manager' ? 'selected' : '' }}>Manager</option>
-            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Senior Manager</option>
-        </select>
-        @error('role')
-            <div class="error">{{ $message }}</div>
-        @enderror
-
         <div class="button-group">
             <button type="submit" class="btn-form-action">Add Employee</button>
             <a href="{{ route('manager.employees.index') }}" class="btn-form-action">Back to List</a>
@@ -306,76 +350,71 @@
         setupPasswordToggle(document.getElementById('togglePasswordAdd'), 'password', 'eyeOpenAdd', 'eyeClosedAdd');
         setupPasswordToggle(document.getElementById('togglePasswordAddConfirm'), 'password_confirmation', 'eyeOpenAddConfirm', 'eyeClosedAddConfirm');
 
-        const roleSelect = document.querySelector('select[name="role"]');
+        const roleSelect = document.getElementById('role');
+        const departmentSelect = document.getElementById('department');
+        const departmentBlock = document.getElementById('employee-department-block');
+        const managedBlock = document.getElementById('managed-departments-block');
+        const assignBlock = document.getElementById('assign-block');
         const managerSelect = document.getElementById('manager_id');
-        const assignHint = document.getElementById('assign-hint');
-        const managers = @json(($managers ?? collect())->map(fn ($m) => [
-            'id' => $m->id,
-            'name' => trim(($m->first_name ?? '').' '.($m->last_name ?? '')),
-        ])->values()->all());
-        const seniors = @json(($seniorManagers ?? collect())->map(fn ($m) => [
-            'id' => $m->id,
-            'name' => trim(($m->first_name ?? '').' '.($m->last_name ?? '')),
-        ])->values()->all());
+        const departmentHint = document.getElementById('department-auto-hint');
+        const deptManagers = @json(($departmentManagers ?? collect())->toArray());
 
-        function fillOptions(list, placeholder, selectedId) {
-            managerSelect.innerHTML = '';
-            const blank = document.createElement('option');
-            blank.value = '';
-            blank.textContent = placeholder;
-            managerSelect.appendChild(blank);
-            list.forEach((item) => {
-                const opt = document.createElement('option');
-                opt.value = String(item.id);
-                opt.textContent = item.name || ('User #' + item.id);
-                if (selectedId && String(selectedId) === String(item.id)) {
-                    opt.selected = true;
-                }
-                managerSelect.appendChild(opt);
-            });
-        }
-
-        function syncAssignTo() {
-            if (!roleSelect || !managerSelect) return;
-            const role = roleSelect.value;
-            const preferred = managerSelect.getAttribute('data-selected');
-
-            if (role === 'employee') {
-                managerSelect.disabled = false;
-                managerSelect.required = true;
-                fillOptions(managers, 'Select manager', preferred);
-                if (assignHint) {
-                    assignHint.textContent = 'Required for employees. This manager will only see leave for people assigned to them.';
-                }
-            } else if (role === 'manager') {
-                managerSelect.disabled = false;
-                managerSelect.required = false;
-                const autoId = seniors.length ? seniors[0].id : '';
-                fillOptions(seniors, 'Select senior manager', autoId);
-                managerSelect.disabled = true;
-                // Disabled fields are not submitted — hidden mirror keeps display value for UX only
-                let hidden = document.getElementById('manager_id_auto');
-                if (!hidden) {
-                    hidden = document.createElement('input');
-                    hidden.type = 'hidden';
-                    hidden.id = 'manager_id_auto';
-                    managerSelect.parentNode.insertBefore(hidden, managerSelect.nextSibling);
-                }
-                hidden.name = ''; // server auto-assigns; no need to post
-                if (assignHint) {
-                    assignHint.textContent = 'Managers are automatically assigned to a Senior Manager.';
-                }
+        function updateDepartmentHint() {
+            if (!departmentHint || !departmentSelect) return;
+            const dept = departmentSelect.value;
+            const owner = deptManagers[dept];
+            if (!dept) {
+                departmentHint.textContent = 'Employees are automatically assigned to the manager responsible for this department.';
+                return;
+            }
+            if (owner && owner.manager_name) {
+                departmentHint.textContent = 'This employee will be assigned to ' + owner.manager_name + ' (responsible for ' + dept + ').';
             } else {
-                managerSelect.disabled = true;
-                managerSelect.required = false;
-                fillOptions([], 'Not applicable', '');
-                if (assignHint) {
-                    assignHint.textContent = 'Senior Managers are not assigned to anyone.';
-                }
+                departmentHint.textContent = 'No manager is responsible for ' + dept + ' yet. Assign that department to a manager first.';
             }
         }
-        roleSelect?.addEventListener('change', syncAssignTo);
-        syncAssignTo();
+
+        function syncRoleFields() {
+            if (!roleSelect) return;
+            const role = roleSelect.value;
+            const isEmployee = role === 'employee';
+            const isManager = role === 'manager';
+            const isAdmin = role === 'admin';
+
+            if (departmentBlock) departmentBlock.style.display = isManager ? 'none' : 'block';
+            if (managedBlock) managedBlock.style.display = isManager ? 'block' : 'none';
+            if (assignBlock) assignBlock.style.display = isManager ? 'block' : 'none';
+
+            if (departmentSelect) {
+                departmentSelect.disabled = isManager;
+                departmentSelect.required = isEmployee;
+                if (isManager) {
+                    departmentSelect.removeAttribute('name');
+                } else {
+                    departmentSelect.name = 'department';
+                }
+            }
+
+            document.querySelectorAll('.managed-dept-checkbox').forEach((box) => {
+                box.disabled = !isManager;
+            });
+
+            if (managerSelect) {
+                managerSelect.disabled = !isManager;
+                managerSelect.required = isManager;
+                if (isManager) {
+                    managerSelect.name = 'manager_id';
+                } else {
+                    managerSelect.removeAttribute('name');
+                }
+            }
+
+            updateDepartmentHint();
+        }
+
+        departmentSelect?.addEventListener('change', updateDepartmentHint);
+        roleSelect?.addEventListener('change', syncRoleFields);
+        syncRoleFields();
     });
 </script>
 @endsection

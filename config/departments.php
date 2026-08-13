@@ -1,13 +1,10 @@
 <?php
 
 return [
+    'Support',
+    'UI / UX',
     'Development',
     'Data Science',
-    'Support',
-    'Multi Media',
-    'Business Development',
+    'BDM & Training',
     'Testing',
-    'Project Management',
-    'Database Administration',
-    'Training Development',
 ];

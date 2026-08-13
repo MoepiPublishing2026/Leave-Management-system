@@ -25,30 +25,10 @@ class ConvertMissingProofLeaveToUnpaidCommand extends Command
             return self::SUCCESS;
         }
 
-        $converted = 0;
-        $failed = 0;
-
-        MissingProofUnpaidConverter::candidates()
-            ->with('user')
-            ->orderBy('id')
-            ->chunkById(100, function ($requests) use (&$converted, &$failed): void {
-                foreach ($requests as $leaveRequest) {
-                    try {
-                        if (MissingProofUnpaidConverter::convert($leaveRequest)) {
-                            $converted++;
-                        }
-                    } catch (\Throwable $e) {
-                        $failed++;
-                        report($e);
-                    }
-                }
-            });
+        $converted = MissingProofUnpaidConverter::convertDue();
 
         $this->info("Converted {$converted} leave request(s) to Unpaid.");
-        if ($failed > 0) {
-            $this->error("Failed to process {$failed} leave request(s).");
-        }
 
-        return $failed === 0 ? self::SUCCESS : self::FAILURE;
+        return self::SUCCESS;
     }
 }

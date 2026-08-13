@@ -7,12 +7,13 @@ use App\Models\LeaveRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LeavePolicy;
 use Carbon\Carbon;
-use App\Mail\LeaveRequestSubmittedMail;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewLeaveRequestNotification;
 use App\Notifications\LeaveWithdrawnNotification;
+use App\Notifications\LeaveSubmittedNotification;
+use App\Notifications\ProofUploadedNotification;
  use Yasumi\Yasumi;
 use Illuminate\Support\Facades\Storage;
 use App\Support\AnnualLeaveRules;
@@ -22,6 +23,7 @@ use App\Support\LeavePayFilter;
 use App\Support\MonthlyLeaveStatusBreakdown;
 use App\Support\LeaveApplicant;
 use App\Support\LeaveReminderService;
+use App\Support\MissingProofUnpaidConverter;
 use App\Support\ParentalLeaveRules;
 use App\Support\PersonalLeaveDashboardData;
 
@@ -670,6 +672,12 @@ public function applyForm()
 
     $leaveRequest = LeaveRequest::create($validated);
 
+    try {
+        $user->notify(new LeaveSubmittedNotification($leaveRequest));
+    } catch (\Throwable $e) {
+        report($e);
+    }
+
     if (LeaveApplicant::isManager($user)) {
         try {
             \App\Support\LeaveApprovalWorkflow::notifySeniorsForDecision($leaveRequest->load('user'));
@@ -684,15 +692,12 @@ public function applyForm()
             ? collect([$assignedManager])
             : User::where('role', 'manager')->get()->unique('email')->values();
 
-        foreach ($managers as $manager) {
+        if ($managers->isNotEmpty()) {
             try {
-                Mail::to($manager->email)->send(new LeaveRequestSubmittedMail($leaveRequest));
+                Notification::send($managers, new NewLeaveRequestNotification($leaveRequest));
             } catch (\Throwable $e) {
                 report($e);
             }
-        }
-        if ($managers->isNotEmpty()) {
-            Notification::send($managers, new NewLeaveRequestNotification($leaveRequest));
         }
     }
 
@@ -750,6 +755,29 @@ public function uploadProof(Request $request, $id)
     $leaveRequest->file_uploads = json_encode($paths);
     $leaveRequest->save();
 
+    $leaveRequest->load('user');
+    $recipients = collect();
+    $applicant = $leaveRequest->user;
+    if ($applicant && $applicant->manager_id) {
+        $manager = User::query()->managers()->whereKey($applicant->manager_id)->first();
+        if ($manager && (int) $manager->id !== (int) Auth::id()) {
+            $recipients->push($manager);
+        }
+    }
+    $recipients = $recipients
+        ->concat(User::query()->where('role', 'admin')->where('is_active', true)->get())
+        ->unique('id')
+        ->reject(fn (User $recipient) => (int) $recipient->id === (int) Auth::id())
+        ->values();
+
+    if ($recipients->isNotEmpty()) {
+        try {
+            Notification::send($recipients, new ProofUploadedNotification($leaveRequest));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
     $message = $replacing
         ? 'Attachment replaced successfully.'
         : (LeaveProofRules::allowsDeferredProof($leaveRequest->leave_type)
@@ -799,6 +827,7 @@ public function myRequests(Request $request)
         abort(403);
     }
     LeaveReminderService::syncForUser($user);
+    MissingProofUnpaidConverter::convertDue();
     if (LeaveApplicant::isManager($user) && ! request()->routeIs('manager.*')) {
         return redirect()->route('manager.myLeave', $request->query());
     }

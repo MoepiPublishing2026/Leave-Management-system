@@ -66,6 +66,28 @@ class MissingProofUnpaidConverter
         return true;
     }
 
+    public static function convertDue(): int
+    {
+        $converted = 0;
+
+        self::candidates()
+            ->with('user')
+            ->orderBy('id')
+            ->chunkById(100, function ($requests) use (&$converted): void {
+                foreach ($requests as $leaveRequest) {
+                    try {
+                        if (self::convert($leaveRequest)) {
+                            $converted++;
+                        }
+                    } catch (\Throwable $e) {
+                        report($e);
+                    }
+                }
+            });
+
+        return $converted;
+    }
+
     private static function notifyRecipients(LeaveRequest $leaveRequest): void
     {
         $applicant = $leaveRequest->user;

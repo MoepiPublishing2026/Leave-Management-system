@@ -16,6 +16,14 @@ class LeaveReminderMessage
         $start = Carbon::parse($leave->start_date)->startOfDay();
         $today = $referenceDate->copy()->startOfDay();
 
+        if (in_array($kind, ['team_today', 'team_tomorrow'], true)) {
+            $employee = trim(($leave->user->first_name ?? '').' '.($leave->user->last_name ?? ''));
+            $employee = $employee !== '' ? $employee : 'A team member';
+            $when = $kind === 'team_today' ? 'today' : 'tomorrow';
+
+            return "{$greeting}, {$employee} is on {$type} leave {$when}.";
+        }
+
         if ($kind === 'today') {
             if ($start->isSameDay($today)) {
                 return "{$greeting}, today is your leave day ({$type}).";

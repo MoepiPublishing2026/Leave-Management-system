@@ -264,7 +264,7 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            min-width: 140px;
+            min-width: 200px;
             display: none;
             flex-direction: column;
             z-index: 1000;
@@ -475,6 +475,7 @@
             @endif
 
             <div class="profile-dropdown" id="profileDropdown">
+                @include('partials.external-app-links')
                 <a href="{{ route('logout') }}"
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                    Logout
@@ -518,6 +519,7 @@
                 <span class="badge-notification">{{ $notificationCount }}</span>
             @endif
         </a>
+        @include('partials.external-app-links')
         <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
     </aside>
 

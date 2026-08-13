@@ -2,12 +2,14 @@
 
 namespace App\Notifications;
 
+use App\Support\NotifiesByMail;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class MessageReceivedNotification extends Notification
 {
-    use Queueable;
+    use Queueable, NotifiesByMail;
 
     private int $conversationId;
     private int $leaveRequestId;
@@ -22,7 +24,16 @@ class MessageReceivedNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return $this->channelsFor($notifiable);
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('New message from '.$this->senderName)
+            ->greeting('Hello '.trim((string) ($notifiable->first_name ?? '')).',')
+            ->line('You have a new message from '.$this->senderName.' about leave request #'.$this->leaveRequestId.'.')
+            ->action('Open messages', route('messages.index', ['conversation' => $this->conversationId]));
     }
 
     public function toArray(object $notifiable): array

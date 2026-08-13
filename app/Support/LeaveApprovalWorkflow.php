@@ -2,15 +2,16 @@
 
 namespace App\Support;
 
-use App\Mail\LeaveResponseMail;
 use App\Mail\SeniorLeaveDecisionMail;
 use App\Models\LeaveRequest;
 use App\Models\LeaveRequestConversation;
 use App\Models\LeaveRequestMessage;
 use App\Models\User;
+use App\Notifications\LeaveRecommendationNotification;
 use App\Notifications\LeaveStatusNotification;
 use App\Notifications\NewLeaveRequestNotification;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
@@ -73,11 +74,69 @@ class LeaveApprovalWorkflow
         $conversation->touch();
 
         self::notifySeniorsForDecision($leave->fresh(['user']));
+
+        $applicant = $leave->user;
+        if ($applicant) {
+            try {
+                $applicant->notify(new LeaveRecommendationNotification($leave->fresh(['user'])));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+    }
+
+    /** Prefer the assigned senior manager; fall back to all active admins. */
+    public static function seniorsForLeave(LeaveRequest $leave): Collection
+    {
+        $leave->loadMissing('user');
+        $seniors = collect();
+
+        $pushSenior = function (?int $userId) use (&$seniors): void {
+            if (! $userId) {
+                return;
+            }
+            $senior = User::query()
+                ->where('role', 'admin')
+                ->where('is_active', true)
+                ->whereKey($userId)
+                ->first();
+            if ($senior) {
+                $seniors->push($senior);
+            }
+        };
+
+        // Manager applicant → their assigned senior (manager_id).
+        if ($leave->isManagerApplicant()) {
+            $pushSenior((int) ($leave->user?->manager_id ?? 0));
+        }
+
+        // After manager recommendation → recommender's assigned senior.
+        if ($leave->recommended_by) {
+            $recommender = User::query()->find($leave->recommended_by);
+            $pushSenior((int) ($recommender?->manager_id ?? 0));
+        }
+
+        // Employee request before/without recommendation → employee's manager's senior.
+        if ($seniors->isEmpty() && $leave->user?->manager_id) {
+            $manager = User::query()->managers()->whereKey($leave->user->manager_id)->first();
+            $pushSenior((int) ($manager?->manager_id ?? 0));
+        }
+
+        if ($seniors->isEmpty()) {
+            return User::query()
+                ->where('role', 'admin')
+                ->where('is_active', true)
+                ->get()
+                ->unique('id')
+                ->values();
+        }
+
+        return $seniors->unique('id')->values();
     }
 
     public static function notifySeniorsForDecision(LeaveRequest $leave): void
     {
-        $admins = User::query()->where('role', 'admin')->where('is_active', true)->get()->unique('email')->values();
+        $admins = self::seniorsForLeave($leave);
         foreach ($admins as $admin) {
             try {
                 Mail::to($admin->email)->send(new SeniorLeaveDecisionMail($leave));
@@ -162,11 +221,6 @@ class LeaveApprovalWorkflow
             } catch (\Throwable $e) {
                 report($e);
             }
-            try {
-                Mail::to($applicant->email)->send(new LeaveResponseMail($leave));
-            } catch (\Throwable $e) {
-                report($e);
-            }
         }
 
         // Notify the recommending / assigned manager (not the applicant).
@@ -184,12 +238,13 @@ class LeaveApprovalWorkflow
                 } catch (\Throwable $e) {
                     report($e);
                 }
-                try {
-                    Mail::to($manager->email)->send(new LeaveResponseMail($leave));
-                } catch (\Throwable $e) {
-                    report($e);
-                }
             }
+        }
+
+        if ($applicant && strtolower(trim((string) $leave->status)) === 'approved') {
+            $opens = LeaveProofRules::proofWindowOpensAt($leave);
+            $windowAlreadyOpen = $opens && ! $opens->copy()->startOfDay()->gt(Carbon::today()->startOfDay());
+            ProofUploadReminderService::notifyIfNeeded($leave, 'approved', null, $windowAlreadyOpen);
         }
     }
 }

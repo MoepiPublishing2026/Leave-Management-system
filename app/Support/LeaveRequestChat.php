@@ -64,7 +64,11 @@ class LeaveRequestChat
         $admins = User::query()->where('role', 'admin')->get();
 
         foreach ($admins as $admin) {
-            $admin->notify(new MessageReceivedNotification($conversationId, $leaveRequestId, $senderName));
+            try {
+                $admin->notify(new MessageReceivedNotification($conversationId, $leaveRequestId, $senderName));
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
     }
 }

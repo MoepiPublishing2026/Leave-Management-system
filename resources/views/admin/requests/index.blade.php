@@ -110,6 +110,7 @@
                         'managerRecommendation' => $recLabel,
                         'managerRecommendationComment' => (string) ($req->manager_recommendation_comment ?? ''),
                     ];
+                    $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req));
 
                     if ($canDecide || LeaveProofRules::requiresProof($req->leave_type)) {
                         $details['proofDeferred'] = LeaveProofRules::allowsDeferredProof($req->leave_type) && LeaveProofRules::requiresProof($req->leave_type);
@@ -147,7 +148,7 @@
                             @if ($canDecide)
                                 <div class="request-actions-inline">
                                     @if ($canApproveWithProof)
-                                        <form action="{{ route('admin.requests.approve', $req) }}" method="POST">
+                                        <form class="senior-approve-form" action="{{ route('admin.requests.approve', $req) }}" method="POST">
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit" class="request-btn request-btn--approve">Approve</button>
@@ -180,7 +181,7 @@
         </table>
     </div>
 
-    <p class="requests-hint">Click any row to view full request details.</p>
+    <p class="requests-hint">Click any row to review the request, leave balance, supporting documents, and policy. Approved sick leave without a doctor's letter by the deadline is changed to unpaid automatically.</p>
 
     <div class="requests-pagination">
         {{ $requests->links('pagination::bootstrap-5') }}
@@ -195,7 +196,7 @@
 
 @include('partials.requests-page-scripts', [
     'showEmployee' => true,
-    'showDays' => false,
+    'showDays' => true,
     'showHandledMeta' => true,
     'deleteWarning' => 'It will be permanently removed, including messages and attachments.',
 ])
