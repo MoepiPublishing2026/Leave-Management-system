@@ -10,7 +10,6 @@ use App\Notifications\LeaveConvertedToUnpaidNotification;
 use App\Notifications\LeaveRequestOverdueNotification;
 use App\Notifications\LeaveWithdrawnNotification;
 use App\Notifications\LeaveSubmittedNotification;
-use App\Notifications\LeaveRecommendationNotification;
 use App\Notifications\ProofUploadReminderNotification;
 use App\Notifications\ProofUploadedNotification;
 use App\Notifications\MessageReceivedNotification;
@@ -81,7 +80,6 @@ class UserNotifications
                 LeaveConvertedToUnpaidNotification::class,
                 LeaveRequestOverdueNotification::class,
                 LeaveSubmittedNotification::class,
-                LeaveRecommendationNotification::class,
                 ProofUploadReminderNotification::class,
             ], true)) {
                 return false;
@@ -105,7 +103,6 @@ class UserNotifications
                 LeaveConvertedToUnpaidNotification::class,
                 LeaveRequestOverdueNotification::class,
                 LeaveSubmittedNotification::class,
-                LeaveRecommendationNotification::class,
                 ProofUploadReminderNotification::class,
                 ProofUploadedNotification::class,
             ], true)) {

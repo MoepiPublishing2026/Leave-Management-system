@@ -7,7 +7,6 @@ use App\Models\LeaveRequest;
 use App\Models\LeaveRequestConversation;
 use App\Models\LeaveRequestMessage;
 use App\Models\User;
-use App\Notifications\LeaveRecommendationNotification;
 use App\Notifications\LeaveStatusNotification;
 use App\Notifications\NewLeaveRequestNotification;
 use Illuminate\Support\Carbon;
@@ -74,15 +73,6 @@ class LeaveApprovalWorkflow
         $conversation->touch();
 
         self::notifySeniorsForDecision($leave->fresh(['user']));
-
-        $applicant = $leave->user;
-        if ($applicant) {
-            try {
-                $applicant->notify(new LeaveRecommendationNotification($leave->fresh(['user'])));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-        }
     }
 
     /** Prefer the assigned senior manager; fall back to all active admins. */
