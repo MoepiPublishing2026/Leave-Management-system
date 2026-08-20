@@ -220,3 +220,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/leave-requests/{leaveRequest}/attachments/{attachment}', [LeaveController::class, 'showAttachment'])
         ->name('leave.attachments.show');
 });
+
+
+
+
+use Illuminate\Support\Facades\Auth;
+
+Route::get('/test-auth', function () {
+    return response()->json([
+        'authenticated' => Auth::check(),
+        'user' => Auth::user(),
+    ]);
+});
+

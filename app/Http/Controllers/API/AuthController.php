@@ -77,8 +77,34 @@ class AuthController extends Controller
             'message' => 'User unauthentication',
             'data'    => null,
         ], 201);
+    }
+     #check API health status and database connectivity
+    public function check(Request $request)
+    {
+        try {
+            // Basic DB connectivity check
+            DB::connection()->getPdo();
 
+            return response()->json([
+                'status'  => 1,
+                'message' => 'API is healthy',
+                'details' => [
+                    'app'       => config('app.name'),
+                    'env'       => config('app.env'),
+                    'db_status' => 'connected',
+                    'time'      => now()->toDateTimeString(),
+                ],
+            ], 200);
 
-
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'API unhealthy',
+                'details' => [
+                    'error' => $e->getMessage(),
+                    'time'  => now()->toDateTimeString(),
+                ],
+            ], 500);
+        }
     }
 }
