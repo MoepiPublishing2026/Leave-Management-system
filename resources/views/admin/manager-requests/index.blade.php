@@ -81,6 +81,7 @@
                         'messagesUrl' => route('messages.leave', $req),
                         'rejectionReason' => (string) ($req->rejection_reason ?? ''),
                     ];
+                    $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req));
                 @endphp
                 <tr class="row-click {{ $req->isOverdue() ? 'overdue-row' : '' }}" data-details='@json($details)'>
                     <td>{{ $requests->firstItem() + $index }}</td>
@@ -104,7 +105,7 @@
                             @if ($rowStatus === 'pending' && ! $req->isOverdue())
                                 <div class="request-actions-inline">
                                     @if ($canApproveWithProof)
-                                        <form action="{{ route('admin.manager-requests.approve', $req) }}" method="POST">
+                                        <form class="senior-approve-form" action="{{ route('admin.manager-requests.approve', $req) }}" method="POST">
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit" class="request-btn request-btn--approve">Approve</button>
@@ -145,7 +146,7 @@
 
 @include('partials.requests-page-scripts', [
     'showEmployee' => true,
-    'showDays' => false,
+    'showDays' => true,
     'showHandledMeta' => true,
 ])
 

@@ -31,6 +31,8 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function (Schedule $schedule): void {
         $schedule->command('leave:send-reminders')->dailyAt('08:00');
+        $schedule->command('leave:send-proof-reminders')->dailyAt('08:00');
+        $schedule->command('leave:send-manager-daily-summary')->dailyAt('08:15');
         $schedule->command('leave:send-pending-review-reminders')->hourly();
         $schedule->command('leave:notify-overdue')->hourly();
         $schedule->command('leave:convert-missing-proof-to-unpaid')->hourly();

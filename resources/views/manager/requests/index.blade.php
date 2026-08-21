@@ -150,6 +150,7 @@
                         },
                         'managerRecommendationComment' => (string) ($req->manager_recommendation_comment ?? ''),
                     ];
+                    $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req));
                 @endphp
                 <tr class="row-click {{ $req->isOverdue() ? 'overdue-row' : '' }}" data-details='@json($details)'>
                     <td>{{ $requests->firstItem() + $index }}</td>
@@ -180,7 +181,7 @@
                                 @else
                                     <div class="request-actions-inline">
                                         @if ($canApproveWithProof)
-                                            <form action="{{ route('manager.requests.recommend', $req) }}" method="POST">
+                                            <form class="recommend-approve-form" action="{{ route('manager.requests.recommend', $req) }}" method="POST">
                                                 @csrf
                                                 @method('PATCH')
                                                 <input type="hidden" name="recommendation" value="approve" />
@@ -222,7 +223,7 @@
         </table>
     </div>
 
-    <p class="requests-hint">Click any row to view full request details.</p>
+    <p class="requests-hint">Click any row to review the request, leave balance, supporting documents, and policy. Approved sick leave without a doctor's letter by the deadline is changed to unpaid automatically.</p>
 
     <div class="requests-pagination">
         {{ $requests->links('pagination::bootstrap-5') }}
@@ -243,7 +244,7 @@
 
 @include('partials.requests-page-scripts', [
     'showEmployee' => true,
-    'showDays' => false,
+    'showDays' => true,
     'showHandledMeta' => false,
     'deleteWarning' => 'It will be permanently removed, including messages and attachments.',
 ])

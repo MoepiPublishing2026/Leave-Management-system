@@ -18,7 +18,7 @@
             0 22px 48px rgba(15, 61, 46, 0.16),
             0 2px 8px rgba(15, 23, 42, 0.06) !important;
         overflow: hidden !important;
-        max-width: 620px !important;
+        max-width: 680px !important;
         width: 100%;
         background: #fff !important;
         position: relative !important;
@@ -110,6 +110,83 @@
         margin: 0;
         font-size: 0.84rem;
         color: #5f857a;
+    }
+    .rd-review {
+        margin: 14px 22px 4px;
+        border: 1px solid #c5d9d1;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f7fbf9;
+    }
+    .rd-review-title {
+        padding: 10px 14px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #1b4d42;
+        background: #e7f4ef;
+        border-bottom: 1px solid #c5d9d1;
+    }
+    .rd-check {
+        display: grid;
+        grid-template-columns: 22px minmax(0, 1fr);
+        gap: 10px;
+        padding: 10px 14px;
+        border-top: 1px solid #e6efeb;
+        align-items: start;
+    }
+    .rd-check:first-of-type {
+        border-top: 0;
+    }
+    .rd-check-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        font-size: 0.75rem;
+        font-weight: 800;
+        margin-top: 1px;
+    }
+    .rd-check-mark--ok {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .rd-check-mark--warn {
+        background: #ffedd5;
+        color: #9a3412;
+    }
+    .rd-check-label {
+        font-size: 0.86rem;
+        font-weight: 750;
+        color: #1b4d42;
+        margin-bottom: 2px;
+    }
+    .rd-check-body {
+        font-size: 0.84rem;
+        font-weight: 500;
+        color: #334155;
+        line-height: 1.4;
+    }
+    .rd-check-note {
+        margin-top: 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #5f857a;
+        line-height: 1.4;
+    }
+    .rd-check-alert {
+        margin-top: 8px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #9a3412;
+        font-size: 0.82rem;
+        font-weight: 650;
+        line-height: 1.4;
     }
     .rd-body {
         padding: 10px 0 12px;

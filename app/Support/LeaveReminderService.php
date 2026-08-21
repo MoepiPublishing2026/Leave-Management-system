@@ -61,7 +61,19 @@ class LeaveReminderService
             }
         }
 
+        $request->setRelation('user', $user);
         self::send($user, $request, $kind, $today);
+
+        if (! in_array($kind, ['today', 'tomorrow'], true) || ! $user->manager_id) {
+            return;
+        }
+
+        $manager = User::query()->managers()->whereKey($user->manager_id)->first();
+        if (! $manager || (int) $manager->id === (int) $user->id) {
+            return;
+        }
+
+        self::send($manager, $request, $kind === 'today' ? 'team_today' : 'team_tomorrow', $today);
     }
 
     private static function maybeNotifyUpcoming(User $user, LeaveRequest $request, Carbon $today, int $daysBeforeStart): void
@@ -86,7 +98,11 @@ class LeaveReminderService
             return;
         }
 
-        $user->notify($notification);
+        try {
+            $user->notify($notification);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     private static function alreadySent(User $user, string $reminderKey): bool

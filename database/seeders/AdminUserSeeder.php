@@ -18,8 +18,8 @@ class AdminUserSeeder extends Seeder
         'email' => 'admin@moepi.com',
         'password' => Hash::make('admin123'),
         'role' => 'admin',
-        'department' => 'Administration', // example value
-        'designation' => 'Administrator', // example value
+        'department' => 'Support',
+        'designation' => 'Support',
     ]
 );
 

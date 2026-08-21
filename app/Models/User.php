@@ -42,6 +42,22 @@ class User extends Authenticatable
         return $this->hasMany(self::class, 'manager_id');
     }
 
+    public function managedDepartments()
+    {
+        return $this->hasMany(ManagerDepartment::class, 'user_id');
+    }
+
+    /** @return list<string> */
+    public function managedDepartmentNames(): array
+    {
+        return $this->managedDepartments()
+            ->orderBy('department')
+            ->pluck('department')
+            ->map(fn ($d) => (string) $d)
+            ->values()
+            ->all();
+    }
+
     /** Users who can submit leave requests. */
     public function scopeEmployees($query)
     {

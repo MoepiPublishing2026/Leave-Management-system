@@ -65,7 +65,12 @@
     <p>Reason for rejection: {{ $leaveRequest->rejection_reason }}</p>
 @endif
 
-<p>Please check your leave status in your <a href="{{ url('/login') }}" class="button">Account Dashboard</a>.</p>
+@if(strtolower((string) $leaveRequest->status) === 'approved' && \App\Support\LeaveProofRules::requiresDoctorsLetter($leaveRequest))
+    @php $proofDeadline = \App\Support\LeaveProofRules::proofDeadlineAt($leaveRequest); @endphp
+    <p>A doctor's letter is required for this sick leave. Please upload it from My Leave Requests by <strong>{{ $proofDeadline?->format('d M Y') ?? 'the deadline' }}</strong> at the latest (the day after the leave ends). If it is not uploaded in time, the leave will be changed to unpaid.</p>
+@endif
+
+<p>Please check your leave status in your <a href="{{ \App\Support\LeavePortalLinks::myRequestsUrl($leaveRequest->user, $leaveRequest->id) }}" class="button">Account Dashboard</a>.</p>
 
 <p>Thank you for using Moepi Publishing!</p>
 

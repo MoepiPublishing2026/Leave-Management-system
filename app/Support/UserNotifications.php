@@ -9,9 +9,14 @@ use App\Notifications\LeaveStatusNotification;
 use App\Notifications\LeaveConvertedToUnpaidNotification;
 use App\Notifications\LeaveRequestOverdueNotification;
 use App\Notifications\LeaveWithdrawnNotification;
+use App\Notifications\LeaveSubmittedNotification;
+use App\Notifications\ProofUploadReminderNotification;
+use App\Notifications\ProofUploadedNotification;
 use App\Notifications\MessageReceivedNotification;
 use App\Notifications\NewLeaveRequestNotification;
 use App\Notifications\OverdueLeaveEscalatedNotification;
+use App\Notifications\PendingReviewReminderNotification;
+use App\Notifications\ManagerDailySummaryNotification;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Collection;
 
@@ -74,6 +79,8 @@ class UserNotifications
                 LeaveReminderNotification::class,
                 LeaveConvertedToUnpaidNotification::class,
                 LeaveRequestOverdueNotification::class,
+                LeaveSubmittedNotification::class,
+                ProofUploadReminderNotification::class,
             ], true)) {
                 return false;
             }
@@ -95,6 +102,9 @@ class UserNotifications
                 LeaveReminderNotification::class,
                 LeaveConvertedToUnpaidNotification::class,
                 LeaveRequestOverdueNotification::class,
+                LeaveSubmittedNotification::class,
+                ProofUploadReminderNotification::class,
+                ProofUploadedNotification::class,
             ], true)) {
                 $leaveId = $data['leave_request_id'] ?? null;
                 if ($leaveId) {
@@ -118,6 +128,8 @@ class UserNotifications
                 NewLeaveRequestNotification::class,
                 MessageReceivedNotification::class,
                 LeaveWithdrawnNotification::class,
+                PendingReviewReminderNotification::class,
+                ManagerDailySummaryNotification::class,
             ], true);
         }
 
@@ -135,6 +147,8 @@ class UserNotifications
                 LeaveConvertedToUnpaidNotification::class,
                 LeaveRequestOverdueNotification::class,
                 LeaveWithdrawnNotification::class,
+                ProofUploadedNotification::class,
+                PendingReviewReminderNotification::class,
             ], true);
         }
 

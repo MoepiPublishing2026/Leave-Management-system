@@ -256,7 +256,7 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            min-width: 140px;
+            min-width: 200px;
             display: none;
             flex-direction: column;
             z-index: 1000;
@@ -471,6 +471,7 @@
             @endif
 
             <div class="profile-dropdown" id="profileDropdown" role="menu" aria-hidden="true">
+                @include('partials.external-app-links')
                 <a href="{{ route('logout') }}"
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                    Logout
@@ -523,6 +524,7 @@
         <a href="{{ route('manager.reports') }}" class="{{ request()->routeIs('manager.reports') ? 'active' : '' }}">Reports</a>
         <a href="{{ route('manager.settings') }}" class="{{ request()->routeIs('manager.settings') ? 'active' : '' }}">Leave Policies</a>
         <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs(['profile.edit', 'settings.edit']) ? 'active' : '' }}">Profile</a>
+        @include('partials.external-app-links')
         <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
     </aside>
 

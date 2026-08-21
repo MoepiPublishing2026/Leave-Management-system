@@ -365,7 +365,11 @@ class MessagesController extends Controller
         } elseif ($recipientId) {
             $recipient = User::find($recipientId);
             if ($recipient) {
-                $recipient->notify(new MessageReceivedNotification($conversation->id, $conversation->leave_request_id, $senderName));
+                try {
+                    $recipient->notify(new MessageReceivedNotification($conversation->id, $conversation->leave_request_id, $senderName));
+                } catch (\Throwable $e) {
+                    report($e);
+                }
             }
         }
 
@@ -487,7 +491,11 @@ class MessagesController extends Controller
             if ($recipientId) {
                 $recipient = User::find($recipientId);
                 if ($recipient) {
-                    $recipient->notify(new MessageReceivedNotification($targetConversation->id, $targetConversation->leave_request_id, $senderName));
+                    try {
+                        $recipient->notify(new MessageReceivedNotification($targetConversation->id, $targetConversation->leave_request_id, $senderName));
+                    } catch (\Throwable $e) {
+                        report($e);
+                    }
                 }
             }
         }

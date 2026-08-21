@@ -2,13 +2,16 @@
 
 namespace App\Notifications;
 
+use App\Support\LeavePortalLinks;
+use App\Support\LeaveStatusLabels;
+use App\Support\NotifiesByMail;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 class LeaveStatusNotification extends Notification
 {
-    use Queueable;
+    use Queueable, NotifiesByMail;
 
     protected $leaveRequest;
     protected $manager;
@@ -19,27 +22,42 @@ class LeaveStatusNotification extends Notification
         $this->manager = $manager;
     }
 
-    public function via($notifiable)
+    public function via(object $notifiable): array
     {
-        return ['database'];
+        return $this->channelsFor($notifiable);
     }
 
-    public function toMail($notifiable)
+    public function toMail(object $notifiable): MailMessage
     {
-        $status = ucfirst($this->leaveRequest->status);
-        $approver = $this->approverLabel();
+        $statusLabel = LeaveStatusLabels::display($this->leaveRequest->status);
+        $isApplicant = (int) ($notifiable->id ?? 0) === (int) ($this->leaveRequest->user_id ?? 0);
+        $type = $this->leaveRequest->leave_type ?: 'leave';
 
-        return (new MailMessage)
-            ->subject("Leave Request $status")
-            ->greeting("Hello {$notifiable->first_name},")
-            ->line("Your leave request has been $status by {$approver}.")
-            ->action('View Leave Requests', url('/leave/myRequests'))
-            ->line('Thank you for using our system!');
+        $mail = (new MailMessage)
+            ->subject($isApplicant
+                ? "Your leave request was {$statusLabel}"
+                : "Leave request #{$this->leaveRequest->id} was {$statusLabel}")
+            ->greeting('Hello '.trim((string) ($notifiable->first_name ?? '')).',');
+
+        if ($isApplicant) {
+            $mail->line("Your {$type} leave request #{$this->leaveRequest->id} has been marked {$statusLabel} by {$this->approverLabel()}.");
+            if (strtolower((string) $this->leaveRequest->status) === 'rejected' && filled($this->leaveRequest->rejection_reason)) {
+                $mail->line('Reason: '.$this->leaveRequest->rejection_reason);
+            }
+            $mail->action('View my requests', LeavePortalLinks::myRequestsUrl($notifiable, $this->leaveRequest->id));
+        } else {
+            $applicant = $this->leaveRequest->user;
+            $name = trim(($applicant->first_name ?? '').' '.($applicant->last_name ?? '')) ?: 'an employee';
+            $mail->line("Leave request #{$this->leaveRequest->id} for {$name} is now {$statusLabel}.");
+            $mail->action('Open team requests', LeavePortalLinks::teamRequestsUrl($this->leaveRequest->id));
+        }
+
+        return $mail;
     }
 
-    public function toDatabase($notifiable)
+    public function toDatabase(object $notifiable): array
     {
-        $statusLabel = \App\Support\LeaveStatusLabels::display($this->leaveRequest->status);
+        $statusLabel = LeaveStatusLabels::display($this->leaveRequest->status);
         $isApplicant = (int) ($notifiable->id ?? 0) === (int) ($this->leaveRequest->user_id ?? 0);
 
         if ($isApplicant) {
@@ -64,7 +82,7 @@ class LeaveStatusNotification extends Notification
             return 'a senior manager';
         }
 
-        $name = trim(($this->manager->first_name ?? '') . ' ' . ($this->manager->last_name ?? ''));
+        $name = trim(($this->manager->first_name ?? '').' '.($this->manager->last_name ?? ''));
 
         return $name !== '' ? $name : 'your manager';
     }

@@ -126,7 +126,7 @@
             <th>Last Name</th>
             <th>Email</th>
             <th>Department</th>
-            <th>Assigned to</th>
+            <th>Assigned to / Manages</th>
             <th>Role</th>
             <th>Status</th>
             <th>Actions</th>
@@ -140,7 +140,14 @@
                 <td>{{ $employee->email }}</td>
                 <td>{{ $employee->department }}</td>
                 <td>
-                    @if($employee->manager)
+                    @if(strtolower((string) ($employee->role ?? '')) === 'manager')
+                        @php $managed = $employee->managedDepartments->pluck('department')->filter()->values(); @endphp
+                        @if($managed->isNotEmpty())
+                            {{ $managed->implode(', ') }}
+                        @else
+                            —
+                        @endif
+                    @elseif($employee->manager)
                         {{ trim(($employee->manager->first_name ?? '').' '.($employee->manager->last_name ?? '')) ?: '—' }}
                     @else
                         —

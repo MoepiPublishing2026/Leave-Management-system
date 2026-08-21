@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Support\DepartmentManagers;
 
 class SignupController extends Controller
 {
@@ -31,6 +32,8 @@ class SignupController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        $managerId = DepartmentManagers::managerIdForDepartment($request->department);
+
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -38,6 +41,8 @@ class SignupController extends Controller
             'designation' => $request->department,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'employee',
+            'manager_id' => $managerId,
         ]);
 
         return redirect()->route('login')->with('success', 'Signup successful. Please login.');

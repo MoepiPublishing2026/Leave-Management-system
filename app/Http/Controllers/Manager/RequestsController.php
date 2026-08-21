@@ -15,6 +15,7 @@ use App\Support\DashboardEmployeeFilter;
 use App\Support\OverdueLeaveEscalation;
 use App\Support\ManagerTeam;
 use App\Support\LeaveApprovalWorkflow;
+use App\Support\MissingProofUnpaidConverter;
 use Illuminate\Support\Carbon;
 use App\Models\User;
 use App\Notifications\OverdueLeaveEscalatedNotification;
@@ -42,6 +43,8 @@ class RequestsController extends Controller
 
     public function index(Request $request)
     {
+        MissingProofUnpaidConverter::convertDue();
+
         $status = strtolower((string) $request->query('status', 'all'));
         $payFilter = LeavePayFilter::normalize($request->query('pay', 'all'));
         $search = trim((string) $request->query('search', ''));
@@ -223,7 +226,11 @@ public function escalate(Request $r, $id)
         $managerName = 'Manager';
     }
     foreach ($admins as $admin) {
-        $admin->notify(new OverdueLeaveEscalatedNotification($leave, $managerName));
+        try {
+            $admin->notify(new OverdueLeaveEscalatedNotification($leave, $managerName));
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     if ($r->expectsJson()) {

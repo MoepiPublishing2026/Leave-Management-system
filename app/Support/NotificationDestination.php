@@ -26,6 +26,14 @@ class NotificationDestination
             $requestId = (int) $data['leave_request_id'];
 
             if ($notification->type === LeaveReminderNotification::class) {
+                $kind = (string) ($data['kind'] ?? '');
+
+                if (str_starts_with($kind, 'team_')) {
+                    return $role === 'admin'
+                        ? route('admin.calendar')
+                        : route('manager.calendar');
+                }
+
                 if ($role === 'employee') {
                     return route('employee.calendar');
                 }
