@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Password Updated - Leave Management</title>
-    <link rel="icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" sizes="32x32" />
+    <link rel="icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" sizes="192x192" />
+    <link rel="icon" href="{{ asset('images/favicon-48.png') }}?v=3" type="image/png" sizes="48x48" />
     <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
     <style>
         html, body {
@@ -19,7 +20,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 520px;
+            max-width: 600px;
             width: 100%;
             background: white;
             padding: 40px;
@@ -43,7 +44,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container auth-card">
         <h2>Password updated</h2>
         <p>Your password has been reset successfully. You can now sign in with your new password.</p>
         <p id="redirect-note">Returning you to the login page…</p>

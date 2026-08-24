@@ -5,27 +5,40 @@ namespace App\Support;
 class AnnualLeaveRules
 {
     /** @var list<string> */
+    public const ANNUAL_TYPES = [
+        'annual',
+        'annual leave',
+    ];
+
+    /** @var list<string> */
     public const EXCLUDED_FROM_ANNUAL = [
         'sick',
         'maternity',
         'paternity',
         'bereavement',
         'unpaid',
+        'family responsibility',
+        'study',
     ];
+
+    public static function isAnnualType(string $leaveType): bool
+    {
+        return in_array(strtolower(trim($leaveType)), self::ANNUAL_TYPES, true);
+    }
 
     public static function isExcludedFromAnnual(string $leaveType): bool
     {
-        return in_array(strtolower(trim($leaveType)), self::EXCLUDED_FROM_ANNUAL, true);
+        return ! self::isAnnualType($leaveType);
     }
 
     public static function countsAgainstAnnual(string $leaveType): bool
     {
-        return !self::isExcludedFromAnnual($leaveType);
+        return self::isAnnualType($leaveType);
     }
 
-  /**
-   * @param array<string|int, float|int> $leaveDaysCounted
-   */
+    /**
+     * @param  array<string|int, float|int>  $leaveDaysCounted
+     */
     public static function sumDaysAgainstAnnual(array $leaveDaysCounted): float
     {
         $sum = 0.0;
@@ -41,23 +54,16 @@ class AnnualLeaveRules
     /** @return list<string> */
     public static function notDisabledWhenAnnualExhaustedLabels(): array
     {
-        return ['Annual', 'Annual Leave', 'Sick', 'Bereavement', 'Maternity', 'Paternity', 'Unpaid'];
+        return ['Annual', 'Annual Leave', 'Sick', 'Bereavement', 'Maternity', 'Paternity', 'Unpaid', 'Family Responsibility', 'Study'];
     }
 
     public static function isAllowedWhenAnnualExhausted(string $leaveType): bool
     {
-        $lower = strtolower(trim($leaveType));
-        foreach (self::notDisabledWhenAnnualExhaustedLabels() as $label) {
-            if (strtolower($label) === $lower) {
-                return true;
-            }
-        }
-
-        return false;
+        return self::isExcludedFromAnnual($leaveType) || self::isAnnualType($leaveType);
     }
 
     public static function exhaustedAnnualMessage(): string
     {
-        return 'You have exhausted your annual leave limit. You may still request Sick, Bereavement (with proof), Maternity (with proof), Paternity (with proof), or Unpaid leave.';
+        return 'You have exhausted your annual leave. Other leave types use their own balances and can still be requested.';
     }
 }

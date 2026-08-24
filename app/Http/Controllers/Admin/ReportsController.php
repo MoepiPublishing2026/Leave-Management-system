@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
+use App\Support\DashboardEmployeeFilter;
+use App\Support\PdfDocuments;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Yasumi\Yasumi;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportsController extends Controller
 {
@@ -22,6 +23,7 @@ class ReportsController extends Controller
         $leaveQuery = LeaveRequest::query()
             ->byStaffApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn']);
+        DashboardEmployeeFilter::apply($leaveQuery, null);
         if ($startDate && $endDate) {
             $leaveQuery->whereDate('created_at', '>=', $startDate)
                        ->whereDate('created_at', '<=', $endDate);
@@ -131,6 +133,7 @@ class ReportsController extends Controller
         $query = LeaveRequest::query()
             ->byStaffApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn']);
+        DashboardEmployeeFilter::apply($query, null);
 
         if ($startDate && $endDate) {
             $query->whereDate('created_at', '>=', $startDate)
@@ -210,6 +213,7 @@ class ReportsController extends Controller
             ->whereRaw('LOWER(status) != ?', ['withdrawn'])
             ->with('user')
             ->orderByDesc('created_at');
+        DashboardEmployeeFilter::apply($query, null);
 
         if ($startDate && $endDate) {
             $query->whereDate('created_at', '>=', $startDate)
@@ -281,12 +285,12 @@ class ReportsController extends Controller
             return $leave;
         });
 
-        $title = 'Leave Requests Report (Admin)';
+        $title = 'Leave Requests Report (Senior Manager)';
         $subtitle = $startDate && $endDate
             ? "From $startDate to $endDate"
             : "Period: $monthFilter";
 
-        $pdf = Pdf::loadView('admin.reports.pdf', [
+        $pdf = PdfDocuments::make('admin.reports.pdf', [
             'title' => $title,
             'subtitle' => $subtitle,
             'generatedAt' => Carbon::now(),
@@ -298,6 +302,6 @@ class ReportsController extends Controller
             'leaves' => $leavesForPdf,
         ])->setPaper('a4', 'landscape');
 
-        return $pdf->download('leave_requests_report_admin.pdf');
+        return $pdf->download('leave_requests_report_senior_manager.pdf');
     }
 }

@@ -1,26 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ $title ?? 'Leave Report' }}</title>
-    <style>
-        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 12px; color: #111827; }
-        .header { margin-bottom: 14px; }
-        .title { font-size: 18px; font-weight: 700; margin: 0; }
-        .subtitle { margin: 4px 0 0; color: #475569; }
-        .meta { margin-top: 6px; color: #64748b; font-size: 11px; }
-        .cards { margin: 14px 0 12px; width: 100%; border-collapse: collapse; }
-        .cards td { padding: 10px 8px; vertical-align: middle; }
-        .k { font-size: 11px; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 4px; }
-        .v { font-weight: 800; font-size: 18px; line-height: 1.05; }
-        table.data { width: 100%; border-collapse: collapse; }
-        table.data th { background: #f1f5f9; text-align: left; padding: 8px; border: 1px solid #e2e8f0; }
-        table.data td { padding: 7px 8px; border: 1px solid #e2e8f0; vertical-align: top; }
-        .muted { color: #64748b; }
-    </style>
-</head>
-<body>
+@extends('layouts.pdf')
+
+@section('title', $title ?? 'Leave Report')
+
+@section('styles')
+    @include('partials.reports-pdf-styles')
+@endsection
+
+@section('content')
     <div class="header">
         <p class="title">{{ $title ?? 'Leave Requests Report' }}</p>
         <p class="subtitle">{{ $subtitle ?? '' }}</p>
@@ -46,7 +32,9 @@
             <tr>
                 <td>
                     {{ trim(($leave->user->first_name ?? '') . ' ' . ($leave->user->last_name ?? '')) ?: ($leave->user->email ?? 'Unknown') }}
-                    @if (($leave->user->role ?? '') === 'manager') (Manager) @endif
+                    @if (! in_array(strtolower((string) ($leave->user->role ?? '')), ['employee', ''], true))
+                        ({{ \App\Support\RoleLabels::display($leave->user->role ?? null) }})
+                    @endif
                 </td>
                 <td>{{ $leave->leave_type }}</td>
                 <td>{{ $leave->start_date }}</td>
@@ -60,8 +48,4 @@
         @endforelse
         </tbody>
     </table>
-
-    <p class="muted" style="margin-top: 16px;">&copy; {{ date('Y') }} Moepi Publishing. All rights reserved.</p>
-</body>
-</html>
-
+@endsection

@@ -4,8 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Reset Password - Leave Management</title>
-    <link rel="icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" sizes="32x32" />
-    <link rel="shortcut icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" />
+    <link rel="icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" sizes="192x192" />
+    <link rel="icon" href="{{ asset('images/favicon-48.png') }}?v=3" type="image/png" sizes="48x48" />
+    <link rel="shortcut icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -187,9 +188,9 @@
     <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
 </head>
 <body>
-    <div class="container">
+    <div class="container auth-card">
         <div class="login-logo">
-            <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
+            <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
         </div>
         <h2 class="auth-title">Reset Password</h2>
 

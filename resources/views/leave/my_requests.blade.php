@@ -79,6 +79,7 @@
                     $lateReasonName = trim(($req->overdueEscalatedBy->first_name ?? '') . ' ' . ($req->overdueEscalatedBy->last_name ?? ''));
                     $rowStatus = strtolower(trim((string) ($req->status ?? '')));
                     $canWithdraw = $req->canBeWithdrawnByEmployee();
+                    $canEdit = $req->canBeEditedByApplicant();
                     $canDelete = $req->canBeDeletedByEmployee();
                     $showAttachmentControls = LeaveProofRules::employeeCanManageAttachments($req);
                     $canSubmitAttachment = LeaveProofRules::employeeCanSubmitAttachmentNow($req);
@@ -140,6 +141,9 @@
                     </td>
                     <td class="request-actions-cell" onclick="event.stopPropagation();">
                         <div class="request-actions">
+                            @if ($canEdit)
+                                <a href="{{ route(\App\Support\LeaveApplicant::editRoute(auth()->user()), $req->id) }}" class="request-btn request-btn--edit">Edit</a>
+                            @endif
                             @if ($showAttachmentControls)
                                 @if (count($fileLinks) > 0)
                                     <div class="request-existing-files">
@@ -203,7 +207,7 @@
         </table>
     </div>
 
-    <p class="requests-hint">Click any row to view full request details.@if(($layout ?? '') === 'layouts.manager') Pending requests are reviewed by a senior manager.@endif Approved leave may be withdrawn until its final leave day; the balance is then restored. For approved sick leave, upload your doctor's letter using <strong>Upload doctor's letter</strong> in the Actions column by the day after your leave ends at the latest.</p>
+    <p class="requests-hint">Click any row to view full request details.@if(($layout ?? '') === 'layouts.manager') Pending requests are reviewed by a senior manager.@endif While a request is still pending, use <strong>Edit</strong> to correct details or replace documents. Approved leave may be withdrawn until its final leave day; the balance is then restored. For approved sick leave, upload your doctor's letter using <strong>Upload doctor's letter</strong> in the Actions column by the day after your leave ends at the latest.</p>
 
     <div class="requests-pagination">
         {{ $leaveRequests->links('pagination::bootstrap-5') }}

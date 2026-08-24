@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\LeaveRequest;
 use App\Support\LeavePortalLinks;
 use App\Support\NotifiesByMail;
+use App\Support\SystemMailMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -31,11 +32,10 @@ class LeaveRequestOverdueNotification extends Notification
             default => LeavePortalLinks::myRequestsUrl($notifiable, $this->leaveRequest->id),
         };
 
-        return (new MailMessage)
+        return SystemMailMessage::for($notifiable)
             ->subject('Leave request overdue — #'.$this->leaveRequest->id)
-            ->greeting('Hello '.trim((string) ($notifiable->first_name ?? '')).',')
             ->line($this->messageFor($notifiable))
-            ->action('Open request', $url);
+            ->action('Open in app', $url);
     }
 
     public function toArray(object $notifiable): array

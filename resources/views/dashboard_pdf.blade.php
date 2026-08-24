@@ -1,43 +1,36 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Viewer Dashboard Report</title>
-    <style>
-    .policy-container {
-        font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
-        max-width: 900px;
-        margin: 40px auto 80px;
-        background: white;
-        padding: 30px 40px;
-        border-radius: 20px;
-        box-shadow: 0 6px 20px rgba(163, 71, 71, 0.08);
-    }
+@extends('layouts.pdf')
+
+@section('title', 'Viewer Dashboard Report')
+
+@section('styles')
+<style>
     h1 {
         color: #2c3e50;
         font-weight: 700;
-        font-size: 36px;
-        margin-bottom: 20px;
-        letter-spacing: 0.04em;
+        font-size: 24px;
+        margin: 0 0 16px;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, DejaVu Sans, sans-serif;
     }
     h2 {
         font-weight: 600;
-        color: #138056ff;
-        margin-top: 30px;
-        margin-bottom: 10px;
+        color: #138056;
+        margin-top: 18px;
+        margin-bottom: 8px;
+        font-size: 16px;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, DejaVu Sans, sans-serif;
     }
     p, ul {
-        font-size: 18px;
-        line-height: 1.6;
+        font-size: 12px;
+        line-height: 1.55;
         color: #333333;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, DejaVu Sans, sans-serif;
     }
-    ul {
-        list-style-type: disc;
-        padding-left: 20px;
-    }
+    ul { padding-left: 18px; }
 </style>
+@endsection
 
-<div class="policy-container">
+@section('content')
     <h1>Company Leave Policies</h1>
 
     <h2>Annual Leave</h2>
@@ -64,6 +57,4 @@
 
     <h2>Return to Work</h2>
     <p>Upon return from extended leave, employees must provide certification if applicable and coordinate with HR for any necessary updates.</p>
-</div>
-</body>
-</html>
+@endsection

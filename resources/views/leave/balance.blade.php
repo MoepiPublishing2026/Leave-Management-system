@@ -178,7 +178,7 @@
             </div>
         @elseif($countsAgainstAnnual && $annualRemaining <= 5)
             <div class="balance-alert balance-alert--warn">
-                This leave counts against your annual pool. You have <strong>{{ $fmtDays($annualRemaining) }}</strong> annual day(s) left overall.
+                Annual leave remaining: <strong>{{ $fmtDays($annualRemaining) }}</strong> day(s). Other leave types do not take from this balance.
             </div>
         @endif
 

@@ -19,15 +19,38 @@ class DashboardEmployeeFilter
             ->orderBy('first_name')
             ->orderBy('last_name');
 
-        if ($role === 'manager') {
-            $query->employees()->where('manager_id', $viewer->id);
-        } elseif ($role === 'admin') {
-            $query->whereIn('role', ['employee', 'manager']);
+        if ($role === 'manager' || $role === 'admin') {
+            $ids = self::allowedUserIds($viewer);
+            if ($ids->isEmpty()) {
+                $query->whereRaw('1 = 0');
+            } else {
+                $query->whereIn('id', $ids);
+            }
         } else {
             $query->employees();
         }
 
         return $query->get(['id', 'first_name', 'last_name', 'role']);
+    }
+
+    /**
+     * People this viewer is allowed to see: a manager's assigned employees,
+     * or a senior manager's reporting line. Never the whole company.
+     */
+    public static function allowedUserIds(?User $viewer = null): Collection
+    {
+        $viewer = $viewer ?? Auth::user();
+        $role = strtolower((string) ($viewer->role ?? ''));
+
+        if ($role === 'manager') {
+            return ManagerTeam::employeeIdsFor($viewer);
+        }
+
+        if ($role === 'admin') {
+            return LeaveApprovalWorkflow::reportingLineUserIds($viewer);
+        }
+
+        return collect();
     }
 
     public static function selectedId(mixed $value): ?int
@@ -43,11 +66,52 @@ class DashboardEmployeeFilter
 
     public static function apply(Builder $query, ?int $employeeId, string $column = 'user_id'): void
     {
-        if ($employeeId === null) {
+        $viewer = Auth::user();
+        $role = strtolower((string) ($viewer->role ?? ''));
+        $restrictToAssigned = in_array($role, ['manager', 'admin'], true);
+        $ids = $restrictToAssigned ? self::allowedUserIds($viewer) : collect();
+
+        if ($employeeId !== null) {
+            if ($restrictToAssigned && ! $ids->contains($employeeId)) {
+                $query->whereRaw('1 = 0');
+
+                return;
+            }
+
+            $query->where($column, $employeeId);
+
             return;
         }
 
-        $query->where($column, $employeeId);
+        if (! $restrictToAssigned) {
+            return;
+        }
+
+        if ($ids->isEmpty()) {
+            $query->whereRaw('1 = 0');
+
+            return;
+        }
+
+        $query->whereIn($column, $ids->all());
+    }
+
+    public static function applyToUsers(Builder $query, ?User $viewer = null): void
+    {
+        $viewer = $viewer ?? Auth::user();
+        $role = strtolower((string) ($viewer->role ?? ''));
+        if (! in_array($role, ['manager', 'admin'], true)) {
+            return;
+        }
+
+        $ids = self::allowedUserIds($viewer);
+        if ($ids->isEmpty()) {
+            $query->whereRaw('1 = 0');
+
+            return;
+        }
+
+        $query->whereIn('id', $ids->all());
     }
 
     /**

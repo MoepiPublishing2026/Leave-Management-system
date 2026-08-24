@@ -14,9 +14,12 @@ use App\Notifications\ProofUploadReminderNotification;
 use App\Notifications\ProofUploadedNotification;
 use App\Notifications\MessageReceivedNotification;
 use App\Notifications\NewLeaveRequestNotification;
+use App\Notifications\LeaveRequestUpdatedNotification;
 use App\Notifications\OverdueLeaveEscalatedNotification;
 use App\Notifications\PendingReviewReminderNotification;
 use App\Notifications\ManagerDailySummaryNotification;
+use App\Notifications\PerformanceReviewSubmittedNotification;
+use App\Notifications\PerformanceReviewAcknowledgedNotification;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Collection;
 
@@ -81,8 +84,13 @@ class UserNotifications
                 LeaveRequestOverdueNotification::class,
                 LeaveSubmittedNotification::class,
                 ProofUploadReminderNotification::class,
+                PerformanceReviewAcknowledgedNotification::class,
             ], true)) {
                 return false;
+            }
+
+            if ($type === PerformanceReviewAcknowledgedNotification::class) {
+                return true;
             }
 
             $leaveId = $data['leave_request_id'] ?? null;
@@ -105,6 +113,7 @@ class UserNotifications
                 LeaveSubmittedNotification::class,
                 ProofUploadReminderNotification::class,
                 ProofUploadedNotification::class,
+                LeaveRequestUpdatedNotification::class,
             ], true)) {
                 $leaveId = $data['leave_request_id'] ?? null;
                 if ($leaveId) {
@@ -130,14 +139,23 @@ class UserNotifications
                 LeaveWithdrawnNotification::class,
                 PendingReviewReminderNotification::class,
                 ManagerDailySummaryNotification::class,
+                PerformanceReviewAcknowledgedNotification::class,
             ], true);
         }
 
         if ($role === 'admin') {
-            if ($type === NewLeaveRequestNotification::class) {
-                $leaveId = $data['leave_request_id'] ?? null;
+            $leaveId = $data['leave_request_id'] ?? null;
+            if ($leaveId) {
+                $leave = LeaveRequest::query()->find($leaveId);
 
-                return (bool) $leaveId && LeaveRequest::query()->whereKey($leaveId)->exists();
+                return $leave && LeaveApprovalWorkflow::seniorCanAccessLeave($user, $leave);
+            }
+
+            if (in_array($type, [
+                NewLeaveRequestNotification::class,
+                LeaveRequestUpdatedNotification::class,
+            ], true)) {
+                return false;
             }
 
             return in_array($type, [
@@ -149,6 +167,7 @@ class UserNotifications
                 LeaveWithdrawnNotification::class,
                 ProofUploadedNotification::class,
                 PendingReviewReminderNotification::class,
+                PerformanceReviewSubmittedNotification::class,
             ], true);
         }
 

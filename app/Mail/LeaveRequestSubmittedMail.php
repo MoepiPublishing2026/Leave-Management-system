@@ -16,11 +16,13 @@ class LeaveRequestSubmittedMail extends Mailable
 
     public $leaveRequest;
     public $workingDays;
+    public string $recipientFirstName = '';
 
-    public function __construct(LeaveRequest $leaveRequest)
+    public function __construct(LeaveRequest $leaveRequest, ?string $recipientFirstName = null)
     {
         $this->leaveRequest = $leaveRequest;
         $this->workingDays = $this->calculateWorkingDays($leaveRequest);
+        $this->recipientFirstName = trim((string) $recipientFirstName);
     }
 
     private function calculateWorkingDays(LeaveRequest $leaveRequest)

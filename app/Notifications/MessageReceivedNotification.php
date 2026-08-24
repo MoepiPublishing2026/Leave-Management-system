@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Support\NotifiesByMail;
+use App\Support\SystemMailMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -29,11 +30,10 @@ class MessageReceivedNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        return SystemMailMessage::for($notifiable)
             ->subject('New message from '.$this->senderName)
-            ->greeting('Hello '.trim((string) ($notifiable->first_name ?? '')).',')
             ->line('You have a new message from '.$this->senderName.' about leave request #'.$this->leaveRequestId.'.')
-            ->action('Open messages', route('messages.index', ['conversation' => $this->conversationId]));
+            ->action('Open in app', route('messages.index', ['conversation' => $this->conversationId]));
     }
 
     public function toArray(object $notifiable): array

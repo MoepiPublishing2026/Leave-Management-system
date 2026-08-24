@@ -6,8 +6,11 @@ use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Support\LeaveAttachmentLinks;
 use App\Support\LeaveDaysFormatter;
+use App\Support\LeavePortalLinks;
 use App\Support\LeaveProofRules;
 use App\Support\LeaveWorkingDays;
+use App\Support\EmailGreeting;
+use App\Support\LeaveApprovalWorkflow;
 use App\Support\PersonalLeaveDashboardData;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -24,32 +27,59 @@ class SeniorLeaveDecisionMail extends Mailable
 
     public string $reviewUrl;
 
+    public string $approveUrl;
+
+    public string $rejectUrl;
+
     public string $viewUrl;
 
     /** @var list<array{label: string, viewUrl: string, downloadUrl: string, extension: string, name: string, previewable: bool}> */
     public array $documentLinks = [];
 
-    public function __construct(LeaveRequest $leaveRequest)
+    public string $recipientFirstName = '';
+
+    public string $applicantName = '';
+
+    public string $managerName = '';
+
+    public bool $isManagerApplicant = false;
+
+    public function __construct(LeaveRequest $leaveRequest, ?string $recipientFirstName = null, ?User $recipient = null)
     {
         $this->leaveRequest = $leaveRequest->loadMissing(['user', 'user.manager']);
         $this->workingDays = LeaveWorkingDays::count($this->leaveRequest);
         $this->documentLinks = LeaveAttachmentLinks::forEmailRequest($this->leaveRequest);
+        $this->recipientFirstName = trim((string) $recipientFirstName);
 
+        $context = LeaveApprovalWorkflow::reportingContext($this->leaveRequest);
+        $this->applicantName = $context['applicant_name'];
+        $this->managerName = $context['manager_name'];
+        $this->isManagerApplicant = $context['is_manager_applicant'];
+
+        $params = LeaveApprovalWorkflow::emailDecisionRouteParams($this->leaveRequest, $recipient);
         $expires = now()->addDays(7);
-        // Decisions happen on the live review page so Approve/Reject can be hidden after submit.
-        // (Static inbox HTML cannot update after a decision.)
         $this->reviewUrl = URL::temporarySignedRoute(
             'leave.email.review',
             $expires,
-            ['leaveRequest' => $this->leaveRequest->id]
+            $params
         );
-        $this->viewUrl = url('/admin/requests?status=pending&search='.$this->leaveRequest->id);
+        $this->approveUrl = URL::temporarySignedRoute(
+            'leave.email.approve.get',
+            $expires,
+            $params
+        );
+        $this->rejectUrl = URL::temporarySignedRoute(
+            'leave.email.reject.form',
+            $expires,
+            $params
+        );
+        $this->viewUrl = LeavePortalLinks::seniorInAppUrl($this->leaveRequest->id);
     }
 
     public function build()
     {
         $applicant = $this->leaveRequest->user;
-        $name = trim(($applicant->first_name ?? '').' '.($applicant->last_name ?? '')) ?: 'Employee';
+        $name = EmailGreeting::displayName($applicant, 'Employee');
 
         return $this->subject('Action required: Leave request #'.$this->leaveRequest->id.' — '.$name)
             ->view('emails.senior_leave_decision')
@@ -94,6 +124,6 @@ class SeniorLeaveDecisionMail extends Mailable
             return '—';
         }
 
-        return trim(($user->first_name ?? '').' '.($user->last_name ?? '')) ?: 'Manager';
+        return EmailGreeting::displayName($user, 'Manager');
     }
 }

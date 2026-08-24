@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use App\Models\LeaveRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LeavePolicy;
@@ -10,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
+use App\Notifications\LeaveRequestUpdatedNotification;
 use App\Notifications\NewLeaveRequestNotification;
 use App\Notifications\LeaveWithdrawnNotification;
 use App\Notifications\LeaveSubmittedNotification;
@@ -22,6 +24,7 @@ use App\Support\LeaveRequestSearch;
 use App\Support\LeavePayFilter;
 use App\Support\MonthlyLeaveStatusBreakdown;
 use App\Support\LeaveApplicant;
+use App\Support\LeavePortalLinks;
 use App\Support\LeaveReminderService;
 use App\Support\MissingProofUnpaidConverter;
 use App\Support\ParentalLeaveRules;
@@ -70,6 +73,71 @@ private function countWorkingDaysInYear(Carbon $start, Carbon $end, array $publi
         $current->addDay();
     }
     return $daysCount;
+}
+
+/**
+ * @return array<int, float>
+ */
+private function workingDaysByYear(Carbon $start, Carbon $end, array $holidays, bool $halfDay = false): array
+{
+    if ($halfDay) {
+        $year = $start->year;
+        $dayIsWorking = ! $start->isWeekend() && ! in_array($start->toDateString(), $holidays, true);
+
+        return $dayIsWorking ? [$year => 0.5] : [$year => 0.0];
+    }
+
+    $daysByYear = [];
+    $current = $start->copy()->startOfDay();
+    $last = $end->copy()->startOfDay();
+    while ($current->lte($last)) {
+        if (! $current->isWeekend() && ! in_array($current->toDateString(), $holidays, true)) {
+            $year = $current->year;
+            $daysByYear[$year] = ($daysByYear[$year] ?? 0) + 1;
+        }
+        $current->addDay();
+    }
+
+    return $daysByYear;
+}
+
+private function remainingDaysInYear(
+    int $userId,
+    string $leaveType,
+    int $year,
+    float $defaultDays,
+    array $holidays,
+    bool $useAnnualPool = false
+): float {
+    [$yearStart, $yearEnd] = $this->yearWindow($year);
+
+    $leaves = LeaveRequest::where('user_id', $userId)
+        ->whereRaw('LOWER(TRIM(status)) = ?', ['approved'])
+        ->whereDate('end_date', '>=', $yearStart->toDateString())
+        ->whereDate('start_date', '<=', $yearEnd->toDateString())
+        ->get();
+
+    if ($useAnnualPool) {
+        $leaves = $leaves->filter(fn ($leave) => AnnualLeaveRules::countsAgainstAnnual((string) $leave->leave_type));
+    } else {
+        $leaves = $leaves->where('leave_type', $leaveType);
+    }
+
+    $takenDays = 0.0;
+    foreach ($leaves as $leave) {
+        $days = $this->countWorkingDaysInYear(
+            Carbon::parse($leave->start_date),
+            Carbon::parse($leave->end_date),
+            $holidays,
+            $year
+        );
+        if (! empty($leave->is_half_day) && $days > 0) {
+            $days = 0.5;
+        }
+        $takenDays += $days;
+    }
+
+    return max(0, $defaultDays - $takenDays);
 }
 
 private function isLeaveTypeUnavailable(
@@ -378,14 +446,39 @@ public function applyForm()
         return redirect()->route(LeaveApplicant::applyRoute($user));
     }
 
+    return view('apply', $this->applyFormData($user));
+}
+
+public function edit($id)
+{
+    $user = auth()->user();
+    if (! LeaveApplicant::canApplyLeave($user)) {
+        abort(403);
+    }
+    if (LeaveApplicant::isManager($user) && ! request()->routeIs('manager.*')) {
+        return redirect()->route('manager.leave.edit', $id);
+    }
+
+    $leaveRequest = LeaveRequest::query()
+        ->where('id', $id)
+        ->where('user_id', $user->id)
+        ->firstOrFail();
+
+    if (! $leaveRequest->canBeEditedByApplicant()) {
+        return redirect()->route($this->myRequestsRoute())
+            ->with('error', 'This leave request can no longer be edited because it is no longer pending.');
+    }
+
+    return view('apply', $this->applyFormData($user, $leaveRequest));
+}
+
+private function applyFormData($user, ?LeaveRequest $editingLeave = null): array
+{
     $nowYear = date('Y');
-    $futureYearLimit = $nowYear + 10;  // Change limit as needed
+    $futureYearLimit = $nowYear + 10;
     $publicHolidays = $this->generateHolidaysRange($nowYear, $futureYearLimit);
-
-    // Calculate leave balances for the current user, excluding weekends and public holidays
-    $userId = auth()->id();
+    $userId = (int) $user->id;
     $policies = LeavePolicy::all()->keyBy('leave_type');
-
     $holidaysByYear = $this->buildPublicHolidaysByYear((int) $nowYear, (int) $futureYearLimit);
 
     $rangeStart = Carbon::create((int) $nowYear, 1, 1)->startOfDay();
@@ -453,17 +546,35 @@ public function applyForm()
         $leaveBalancesByYear[$year][$annualKey] = max(0, $annualDefault - $annualPoolUsed);
     }
 
-    return view('apply', [
+    $existingStart = $editingLeave?->start_date
+        ? Carbon::parse($editingLeave->start_date)->toDateString()
+        : null;
+    $datePickerMinDate = ($existingStart && Carbon::parse($existingStart)->lt(Carbon::today()))
+        ? $existingStart
+        : 'today';
+
+    return [
         'publicHolidays' => $publicHolidays,
         'leaveBalancesByYear' => $leaveBalancesByYear,
         'nowYear' => $nowYear,
         'layout' => LeaveApplicant::layout($user),
-        'submitRoute' => LeaveApplicant::submitRoute($user),
+        'submitRoute' => $editingLeave
+            ? LeaveApplicant::updateRoute($user)
+            : LeaveApplicant::submitRoute($user),
+        'submitRouteParams' => $editingLeave ? ['id' => $editingLeave->id] : [],
+        'formMethod' => $editingLeave ? 'PUT' : 'POST',
+        'editingLeave' => $editingLeave,
+        'existingFileLinks' => $editingLeave ? \App\Support\LeaveAttachmentLinks::forRequest($editingLeave) : [],
+        'hasExistingAttachments' => $editingLeave ? LeaveProofRules::hasProofAttached($editingLeave) : false,
+        'datePickerMinDate' => $datePickerMinDate,
         'approverLabel' => LeaveApplicant::approverLabel($user),
         'isManagerApplicant' => LeaveApplicant::isManager($user),
         'usedParentalLeaveType' => ParentalLeaveRules::usedParentalLeaveType((int) $user->id),
         'blockedParentalLeaveType' => ParentalLeaveRules::blockedLeaveTypeLabel((int) $user->id),
-    ]);
+        'cancelUrl' => $editingLeave
+            ? route(LeaveApplicant::myRequestsRoute($user), ['status' => 'pending', 'request_id' => $editingLeave->id])
+            : url()->previous(),
+    ];
 }
 
 
@@ -474,203 +585,17 @@ public function applyForm()
         abort(403);
     }
 
-    $userId = Auth::id();
+    $payload = $this->collectLeaveApplication($request);
+    if ($payload instanceof RedirectResponse) {
+        return $payload;
+    }
 
-    $leaveType = $request->input('leave_type');
+    $leaveType = $payload['leave_type'];
     $policy = LeavePolicy::where('leave_type', $leaveType)->first();
-    $halfDay = $request->boolean('half_day');
+    $payload['user_id'] = Auth::id();
+    $payload['status'] = LeaveApplicant::isManager($user) ? 'pending_senior' : 'pending';
 
-    $rules = [
-        'leave_type' => 'required|string|max:120',
-        'start_date' => 'required|date|after_or_equal:today',
-        'end_date' => $halfDay ? 'nullable|date|after_or_equal:start_date' : 'required|date|after_or_equal:start_date',
-        'important_comment' => 'nullable|string|max:512',
-        'half_day' => 'nullable|boolean',
-    ];
-
-    if ($leaveType === 'Unpaid') {
-        $rules['important_comment'] = 'required|string|max:512';
-    }
-
-    if ($policy && $policy->requires_proof && ! LeaveProofRules::allowsDeferredProof($leaveType)) {
-        $rules['file_uploads'] = 'required|array|min:1';
-        $rules['file_uploads.*'] = 'file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx';
-    } else {
-        $rules['file_uploads'] = 'nullable|array';
-        $rules['file_uploads.*'] = 'file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx';
-    }
-
-    $messages = [
-        'leave_type.required' => 'Please select a type of leave.',
-        'important_comment.required' => 'A valid reason (comment) is required for unpaid leave.',
-        'file_uploads.required' => 'Proof (attachment) is required for this type of leave.',
-        'file_uploads.min' => 'Please attach at least one supporting document.',
-        'file_uploads.*.max' => 'Each attachment must be 10 MB or smaller.',
-        'file_uploads.*.file' => 'Each attachment must be a valid file.',
-        'file_uploads.*.mimes' => 'Attachments must be PDF, JPG, PNG, or Word documents.',
-    ];
-
-    $validated = $request->validate($rules, $messages);
-
-    if (! ParentalLeaveRules::canApply((int) $userId, (string) $leaveType)) {
-        return redirect()->back()
-            ->withErrors(['leave_type' => ParentalLeaveRules::blockedMessage((int) $userId, (string) $leaveType)])
-            ->withInput();
-    }
-
-    if ($policy && $policy->requires_proof && ! LeaveProofRules::allowsDeferredProof($leaveType) && ! $request->hasFile('file_uploads')) {
-        return redirect()->back()
-            ->withErrors(['file_uploads' => 'Proof (attachment) is required for this type of leave.'])
-            ->withInput();
-    }
-
-    if ($halfDay && (!$policy || empty($policy->allow_half_days))) {
-        return redirect()->back()
-            ->withErrors(['half_day' => 'Half-day requests are not allowed for this leave type.'])
-            ->withInput();
-    }
-
-    if ($halfDay) {
-        $validated['end_date'] = $validated['start_date'];
-    }
-
-    $startDate = Carbon::parse($validated['start_date']);
-    $endDate = Carbon::parse($validated['end_date']);
-
-    $year = $startDate->year;
-    if ($endDate->year !== $year) {
-        return redirect()->back()
-            ->withErrors(['date' => 'Start Date and End Date must be within the same year.'])
-            ->withInput();
-    }
-
-    $publicHolidays = $this->generateHolidaysRange($year, $year);
-
-    // Calculate requested leave days excluding weekends and public holidays
-    $requestedDays = 0;
-    $currentDate = $startDate->copy();
-    while ($currentDate->lte($endDate)) {
-        if (!$currentDate->isWeekend() && !in_array($currentDate->toDateString(), $publicHolidays)) {
-            $requestedDays++;
-        }
-        $currentDate->addDay();
-    }
-
-    if ($halfDay && $requestedDays > 0) {
-        $requestedDays = 0.5;
-    }
-
-    // Calculate leave balances for user excluding weekends and public holidays
-    $policies = LeavePolicy::all()->keyBy('leave_type');
-    [$startOfYear, $endOfYear] = $this->yearWindow($year);
-
-    $annualKey = $policies->has('Annual') ? 'Annual' : ($policies->has('Annual Leave') ? 'Annual Leave' : 'Annual');
-    $annualDefault = $policies[$annualKey]->default_days ?? 30;
-    $annualTakenLeaves = LeaveRequest::where('user_id', $userId)
-        ->where('status', 'approved')
-        ->whereDate('end_date', '>=', $startOfYear->toDateString())
-        ->whereDate('start_date', '<=', $endOfYear->toDateString())
-        ->get()
-        ->filter(fn ($leave) => AnnualLeaveRules::countsAgainstAnnual((string) $leave->leave_type));
-
-    $annualTakenDays = 0.0;
-    foreach ($annualTakenLeaves as $leave) {
-        $start = Carbon::parse($leave->start_date);
-        $end = Carbon::parse($leave->end_date);
-        $days = $this->countWorkingDaysInYear($start, $end, $publicHolidays, $year);
-        if (!empty($leave->is_half_day) && $days > 0) {
-            $days = 0.5;
-        }
-        $annualTakenDays += $days;
-    }
-
-    $annualBalance = max(0, $annualDefault - $annualTakenDays);
-    if (AnnualLeaveRules::countsAgainstAnnual((string) $leaveType)) {
-        if ($annualBalance <= 0) {
-            return redirect()->back()
-                ->withErrors([
-                    'balance' => AnnualLeaveRules::exhaustedAnnualMessage(),
-                ])
-                ->withInput();
-        }
-        if ($requestedDays > $annualBalance) {
-            return redirect()->back()
-                ->withErrors([
-                    'balance' => "Your remaining annual leave balance is $annualBalance days. You requested $requestedDays days (excluding weekends and public holidays).",
-                ])
-                ->withInput();
-        }
-    }
-
-    $leavesTakenRaw = LeaveRequest::where('user_id', $userId)
-        ->where('status', 'approved')
-        ->where('leave_type', $leaveType)
-        ->whereDate('end_date', '>=', $startOfYear->toDateString())
-        ->whereDate('start_date', '<=', $endOfYear->toDateString())
-        ->get();
-
-    $takenDays = 0.0;
-    foreach ($leavesTakenRaw as $leave) {
-        $start = Carbon::parse($leave->start_date);
-        $end = Carbon::parse($leave->end_date);
-        $days = $this->countWorkingDaysInYear($start, $end, $publicHolidays, $year);
-        if (!empty($leave->is_half_day) && $days > 0) {
-            $days = 0.5;
-        }
-        $takenDays += $days;
-    }
-
-    $currentBalance = max(0, ($policies[$leaveType]->default_days ?? 0) - $takenDays);
-
-    if ($requestedDays > $currentBalance) {
-        return redirect()->back()
-            ->withErrors(['balance' => "Your available leave balance for $leaveType is $currentBalance days. You requested $requestedDays days (excluding weekends and public holidays)."])
-            ->withInput();
-    }
-
-    if (!$policy || $requestedDays > $policy->default_days) {
-        return redirect()->back()
-            ->withErrors(['date' => 'You cannot apply for more than ' . ($policy ? $policy->default_days : 0) . ' days for this leave type.'])
-            ->withInput();
-    }
-
-
-    // Check for overlapping leave requests
-    $overlapExists = LeaveRequest::where('user_id', $userId)
-        ->whereIn('status', ['Pending', 'Approved'])
-        ->where(function ($query) use ($validated) {
-            $query->whereBetween('start_date', [$validated['start_date'], $validated['end_date']])
-                ->orWhereBetween('end_date', [$validated['start_date'], $validated['end_date']])
-                ->orWhere(function ($subQuery) use ($validated) {
-                    $subQuery->where('start_date', '<=', $validated['start_date'])
-                        ->where('end_date', '>=', $validated['end_date']);
-                });
-        })->exists();
-
-    if ($overlapExists) {
-        return redirect()->back()
-            ->withErrors(['overlap' => 'You have existing leave requests overlapping these dates.'])
-            ->withInput();
-    }
-
-    // Handle uploaded file
-    if ($request->hasFile('file_uploads')) {
-        \App\Support\LeaveAttachmentLinks::ensureStorageReady();
-        $paths = [];
-        foreach ($request->file('file_uploads') as $file) {
-            $paths[] = $file->store('leave_files', 'public');
-        }
-        $validated['file_uploads'] = json_encode($paths);
-    } else {
-        $validated['file_uploads'] = null;
-    }
-
-    $validated['user_id'] = $userId;
-    $validated['status'] = LeaveApplicant::isManager($user) ? 'pending_senior' : 'pending';
-    unset($validated['half_day']);
-    $validated['is_half_day'] = $halfDay;
-
-    $leaveRequest = LeaveRequest::create($validated);
+    $leaveRequest = LeaveRequest::create($payload);
 
     try {
         $user->notify(new LeaveSubmittedNotification($leaveRequest));
@@ -699,17 +624,317 @@ public function applyForm()
                 report($e);
             }
         }
+
+        try {
+            \App\Support\LeaveApprovalWorkflow::notifyAssignedSeniorAboutTeamLeave($leaveRequest->load('user'));
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     $successMessage = 'Leave application submitted successfully!';
     if ($policy && $policy->requires_proof && LeaveProofRules::allowsDeferredProof($leaveType) && ! $request->hasFile('file_uploads')) {
-        $proofDeadlineAnchor = $validated['end_date'] ?? $validated['start_date'];
+        $proofDeadlineAnchor = $payload['end_date'] ?? $payload['start_date'];
         $proofDeadline = Carbon::parse($proofDeadlineAnchor)->addDay()->format('d M Y');
         $approverLabel = LeaveApplicant::approverLabel($user);
         $successMessage = 'Sick leave submitted. Once '.$approverLabel.' approves it, upload your doctor\'s letter from My Leave Requests by '.$proofDeadline.' at the latest (the day after your leave ends).';
     }
 
     return redirect()->route(LeaveApplicant::applyRoute($user))->with('success', $successMessage);
+}
+
+public function update(Request $request, $id)
+{
+    $user = Auth::user();
+    if (! LeaveApplicant::canApplyLeave($user)) {
+        abort(403);
+    }
+
+    $leaveRequest = LeaveRequest::query()
+        ->where('id', $id)
+        ->where('user_id', $user->id)
+        ->firstOrFail();
+
+    if (! $leaveRequest->canBeEditedByApplicant()) {
+        return redirect()->route($this->myRequestsRoute())
+            ->with('error', 'This leave request can no longer be edited because it is no longer pending.');
+    }
+
+    $payload = $this->collectLeaveApplication($request, $leaveRequest);
+    if ($payload instanceof RedirectResponse) {
+        return $payload;
+    }
+
+    $payload['start_date'] = Carbon::parse($payload['start_date'])->toDateString();
+    $payload['end_date'] = Carbon::parse($payload['end_date'])->toDateString();
+
+    $substantiveChange = strcasecmp((string) $leaveRequest->leave_type, (string) $payload['leave_type']) !== 0
+        || Carbon::parse($leaveRequest->start_date)->toDateString() !== $payload['start_date']
+        || Carbon::parse($leaveRequest->end_date)->toDateString() !== $payload['end_date']
+        || (bool) $leaveRequest->is_half_day !== (bool) $payload['is_half_day'];
+
+    $wasRecommended = strtolower(trim((string) $leaveRequest->status)) === 'pending_senior'
+        && ! $leaveRequest->isManagerApplicant()
+        && ! empty($leaveRequest->recommended_by);
+
+    $sentBackToManager = $wasRecommended && $substantiveChange;
+
+    $leaveRequest->fill($payload);
+
+    if ($sentBackToManager) {
+        $leaveRequest->status = 'pending';
+        $leaveRequest->manager_recommendation = null;
+        $leaveRequest->manager_recommendation_comment = null;
+        $leaveRequest->recommended_by = null;
+        $leaveRequest->recommended_at = null;
+        $leaveRequest->pending_review_reminder_stage = 0;
+        $leaveRequest->last_pending_review_reminder_at = null;
+    }
+
+    if (! $leaveRequest->isDirty()) {
+        return redirect()->route($this->myRequestsRoute(), [
+            'status' => 'pending',
+            'request_id' => $leaveRequest->id,
+        ])->with('success', 'No changes were made to this leave request.');
+    }
+
+    $leaveRequest->save();
+
+    $this->notifyReviewersOfUpdate($leaveRequest->fresh(['user']), $sentBackToManager);
+
+    $message = $sentBackToManager
+        ? 'Leave request updated. Because the dates or leave type changed, it was sent back to your manager for a new recommendation.'
+        : 'Leave request updated. Reviewers will see the latest details and documents.';
+
+    return redirect()->route($this->myRequestsRoute(), [
+        'status' => 'pending',
+        'request_id' => $leaveRequest->id,
+    ])->with('success', $message);
+}
+
+/**
+ * @return array<string, mixed>|RedirectResponse
+ */
+private function collectLeaveApplication(Request $request, ?LeaveRequest $existing = null): array|RedirectResponse
+{
+    $userId = Auth::id();
+    $leaveType = $request->input('leave_type');
+    $policy = LeavePolicy::where('leave_type', $leaveType)->first();
+    $halfDay = $request->boolean('half_day');
+    $hasExistingFiles = $existing ? LeaveProofRules::hasProofAttached($existing) : false;
+    $requiresProofAtSubmit = $policy && $policy->requires_proof && ! LeaveProofRules::allowsDeferredProof($leaveType);
+
+    $startRule = 'required|date|after_or_equal:today';
+    if ($existing && $existing->start_date && Carbon::parse($existing->start_date)->lt(Carbon::today())) {
+        $startRule = 'required|date';
+    }
+
+    $rules = [
+        'leave_type' => 'required|string|max:120',
+        'start_date' => $startRule,
+        'end_date' => $halfDay ? 'nullable|date|after_or_equal:start_date' : 'required|date|after_or_equal:start_date',
+        'important_comment' => 'required|string|min:3|max:512',
+        'half_day' => 'nullable|boolean',
+        'file_uploads' => ($requiresProofAtSubmit && ! $hasExistingFiles) ? 'required|array|min:1' : 'nullable|array',
+        'file_uploads.*' => 'file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx',
+    ];
+
+    $validated = $request->validate($rules, [
+        'leave_type.required' => 'Please select a type of leave.',
+        'important_comment.required' => 'Please provide a reason for this leave request.',
+        'important_comment.min' => 'Please provide a valid reason (at least 3 characters).',
+        'file_uploads.required' => 'Proof (attachment) is required for this type of leave.',
+        'file_uploads.min' => 'Please attach at least one supporting document.',
+        'file_uploads.*.max' => 'Each attachment must be 10 MB or smaller.',
+        'file_uploads.*.file' => 'Each attachment must be a valid file.',
+        'file_uploads.*.mimes' => 'Attachments must be PDF, JPG, PNG, or Word documents.',
+    ]);
+
+    if (! ParentalLeaveRules::canApply((int) $userId, (string) $leaveType)) {
+        return redirect()->back()
+            ->withErrors(['leave_type' => ParentalLeaveRules::blockedMessage((int) $userId, (string) $leaveType)])
+            ->withInput();
+    }
+
+    if ($requiresProofAtSubmit && ! $request->hasFile('file_uploads') && ! $hasExistingFiles) {
+        return redirect()->back()
+            ->withErrors(['file_uploads' => 'Proof (attachment) is required for this type of leave.'])
+            ->withInput();
+    }
+
+    if ($halfDay && (! $policy || empty($policy->allow_half_days))) {
+        return redirect()->back()
+            ->withErrors(['half_day' => 'Half-day requests are not allowed for this leave type.'])
+            ->withInput();
+    }
+
+    if ($halfDay) {
+        $validated['end_date'] = $validated['start_date'];
+    }
+
+    $startDate = Carbon::parse($validated['start_date']);
+    $endDate = Carbon::parse($validated['end_date']);
+
+    if ($existing && $startDate->lt(Carbon::today()) && $startDate->toDateString() !== Carbon::parse($existing->start_date)->toDateString()) {
+        return redirect()->back()
+            ->withErrors(['start_date' => 'A new start date cannot be in the past.'])
+            ->withInput();
+    }
+
+    $startYear = (int) $startDate->year;
+    $endYear = (int) $endDate->year;
+    $publicHolidays = $this->generateHolidaysRange($startYear, $endYear);
+    $requestedByYear = $this->workingDaysByYear($startDate, $endDate, $publicHolidays, $halfDay);
+
+    $policies = LeavePolicy::all()->keyBy('leave_type');
+    $annualKey = $policies->has('Annual') ? 'Annual' : ($policies->has('Annual Leave') ? 'Annual Leave' : 'Annual');
+    $annualDefault = (float) ($policies[$annualKey]->default_days ?? 30);
+    $typeDefault = (float) ($policies[$leaveType]->default_days ?? 0);
+    $isUnpaid = strcasecmp((string) $leaveType, 'Unpaid') === 0;
+
+    foreach ($requestedByYear as $year => $daysInYear) {
+        if ($daysInYear <= 0 || $isUnpaid) {
+            continue;
+        }
+
+        if ($daysInYear > $typeDefault) {
+            return redirect()->back()
+                ->withErrors([
+                    'date' => "You cannot apply for more than {$typeDefault} days of {$leaveType} leave in {$year}. This request uses {$daysInYear} working day(s) in {$year}.",
+                ])
+                ->withInput();
+        }
+
+        $remainingForType = $this->remainingDaysInYear(
+            (int) $userId,
+            (string) $leaveType,
+            (int) $year,
+            $typeDefault,
+            $publicHolidays
+        );
+
+        if ($daysInYear > $remainingForType) {
+            return redirect()->back()
+                ->withErrors([
+                    'balance' => "Your available {$leaveType} balance for {$year} is {$remainingForType} day(s). This request uses {$daysInYear} working day(s) in {$year} (excluding weekends and public holidays).",
+                ])
+                ->withInput();
+        }
+
+        if (AnnualLeaveRules::countsAgainstAnnual((string) $leaveType)) {
+            $remainingAnnual = $this->remainingDaysInYear(
+                (int) $userId,
+                (string) $leaveType,
+                (int) $year,
+                $annualDefault,
+                $publicHolidays,
+                true
+            );
+
+            if ($remainingAnnual <= 0) {
+                return redirect()->back()
+                    ->withErrors(['balance' => AnnualLeaveRules::exhaustedAnnualMessage().' ('.$year.')'])
+                    ->withInput();
+            }
+
+            if ($daysInYear > $remainingAnnual) {
+                return redirect()->back()
+                    ->withErrors([
+                        'balance' => "Your remaining annual leave balance for {$year} is {$remainingAnnual} day(s). This request uses {$daysInYear} working day(s) in {$year} (excluding weekends and public holidays).",
+                    ])
+                    ->withInput();
+            }
+        }
+    }
+
+    $overlapExists = LeaveRequest::where('user_id', $userId)
+        ->when($existing, fn ($query) => $query->where('id', '!=', $existing->id))
+        ->where(function ($query) {
+            $query->whereRaw('LOWER(TRIM(status)) in (?, ?, ?)', ['pending', 'pending_senior', 'approved']);
+        })
+        ->where(function ($query) use ($validated) {
+            $query->whereBetween('start_date', [$validated['start_date'], $validated['end_date']])
+                ->orWhereBetween('end_date', [$validated['start_date'], $validated['end_date']])
+                ->orWhere(function ($subQuery) use ($validated) {
+                    $subQuery->where('start_date', '<=', $validated['start_date'])
+                        ->where('end_date', '>=', $validated['end_date']);
+                });
+        })->exists();
+
+    if ($overlapExists) {
+        return redirect()->back()
+            ->withErrors(['overlap' => 'You have existing leave requests overlapping these dates.'])
+            ->withInput();
+    }
+
+    if ($request->hasFile('file_uploads')) {
+        if ($existing) {
+            \App\Support\LeaveAttachmentLinks::deleteStoredFiles($existing);
+        }
+        \App\Support\LeaveAttachmentLinks::ensureStorageReady();
+        $paths = [];
+        foreach ($request->file('file_uploads') as $file) {
+            $paths[] = $file->store('leave_files', 'public');
+        }
+        $validated['file_uploads'] = json_encode($paths);
+    } elseif ($existing) {
+        $validated['file_uploads'] = $existing->file_uploads;
+    } else {
+        $validated['file_uploads'] = null;
+    }
+
+    unset($validated['half_day']);
+    $validated['is_half_day'] = $halfDay;
+
+    return $validated;
+}
+
+private function notifyReviewersOfUpdate(LeaveRequest $leaveRequest, bool $sentBackToManager): void
+{
+    $recipients = collect();
+
+    if ($sentBackToManager || strtolower(trim((string) $leaveRequest->status)) === 'pending') {
+        $applicant = $leaveRequest->user;
+        $assignedManager = $applicant?->manager_id
+            ? User::query()->managers()->whereKey($applicant->manager_id)->first()
+            : null;
+        $managers = $assignedManager
+            ? collect([$assignedManager])
+            : User::query()->where('role', 'manager')->get()->unique('email')->values();
+        $recipients = $recipients->concat($managers);
+    }
+
+    $assignedSenior = \App\Support\LeaveApprovalWorkflow::assignedSeniorForUser($leaveRequest->user);
+    if ($assignedSenior && strtolower(trim((string) $leaveRequest->status)) === 'pending') {
+        $recipients = $recipients->push($assignedSenior);
+    }
+
+    if (strtolower(trim((string) $leaveRequest->status)) === 'pending_senior') {
+        $recipients = $recipients->concat(\App\Support\LeaveApprovalWorkflow::seniorsForLeave($leaveRequest));
+    }
+
+    $recipients = $recipients
+        ->unique('id')
+        ->reject(fn (User $recipient) => (int) $recipient->id === (int) Auth::id())
+        ->values();
+
+    if ($recipients->isEmpty()) {
+        return;
+    }
+
+    foreach ($recipients as $recipient) {
+        try {
+            $recipient->notifyNow(new LeaveRequestUpdatedNotification($leaveRequest, $sentBackToManager), ['database']);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        try {
+            $recipient->notifyNow(new LeaveRequestUpdatedNotification($leaveRequest, $sentBackToManager), ['mail']);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
 }
 
 public function uploadProof(Request $request, $id)
@@ -765,7 +990,7 @@ public function uploadProof(Request $request, $id)
         }
     }
     $recipients = $recipients
-        ->concat(User::query()->where('role', 'admin')->where('is_active', true)->get())
+        ->concat(\App\Support\LeaveApprovalWorkflow::seniorsForLeave($leaveRequest))
         ->unique('id')
         ->reject(fn (User $recipient) => (int) $recipient->id === (int) Auth::id())
         ->values();
@@ -962,16 +1187,12 @@ public function withdraw($id)
 
         if ($assignedManager) {
             $recipients->push($assignedManager);
-        } else {
-            $recipients = $recipients->merge(
-                User::query()->managers()->where('is_active', true)->get()
-            );
         }
     }
 
     if ($previousStatus === 'approved' || $leaveRequest->isManagerApplicant()) {
         $recipients = $recipients->merge(
-            User::query()->where('role', 'admin')->where('is_active', true)->get()
+            \App\Support\LeaveApprovalWorkflow::seniorsForLeave($leaveRequest)
         );
     }
 
@@ -985,7 +1206,12 @@ public function withdraw($id)
         if (! empty($recipient->email)) {
             try {
                 Mail::to($recipient->email)->send(
-                    new \App\Mail\LeaveWithdrawalMail($leaveRequest, $previousStatus)
+                    new \App\Mail\LeaveWithdrawalMail(
+                        $leaveRequest,
+                        $previousStatus,
+                        \App\Support\EmailGreeting::displayName($recipient),
+                        LeavePortalLinks::reviewUrlFor($recipient, $leaveRequest->id)
+                    )
                 );
             } catch (\Throwable $e) {
                 report($e);

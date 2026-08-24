@@ -316,30 +316,57 @@ class EmployeeController extends Controller
         }
 
         $previousRole = strtolower((string) ($employee->role ?? ''));
-        $department = $role === 'manager'
-            ? ($managedDepartments[0] ?? $employee->department)
-            : ($request->department ?: null);
+        $normalizedManaged = DepartmentManagers::normalizeDepartmentList($managedDepartments);
+        $currentDepartment = trim((string) ($employee->department ?? ''));
 
-        $data = [
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
+        if ($role === 'manager') {
+            $department = in_array($currentDepartment, $normalizedManaged, true)
+                ? $employee->department
+                : ($normalizedManaged[0] ?? $employee->department);
+        } else {
+            $department = $request->filled('department') ? trim((string) $request->department) : null;
+        }
+
+        if ($department === '') {
+            $department = null;
+        }
+
+        $employee->fill([
+            'first_name' => trim((string) $request->first_name),
+            'last_name' => trim((string) $request->last_name),
             'department' => $department,
-            'designation' => $department,
-            'email' => $request->email,
+            'email' => trim((string) $request->email),
             'role' => $role,
             'is_active' => $isActive,
             'manager_id' => $managerId,
-        ];
+        ]);
 
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
+        if ($employee->isDirty('department')) {
+            $employee->designation = $department ?? $employee->designation;
         }
 
-        $employee->update($data);
+        if ($request->filled('password')) {
+            $employee->password = Hash::make($request->password);
+        }
 
-        if ($role === 'manager') {
-            DepartmentManagers::syncForManager($employee->fresh(), $managedDepartments);
-        } elseif ($previousRole === 'manager') {
+        $departmentsChanged = $role === 'manager'
+            && DepartmentManagers::normalizeDepartmentList($employee->managedDepartmentNames())
+                !== $normalizedManaged;
+        $roleLeftManager = $role !== 'manager' && $previousRole === 'manager';
+
+        if (! $employee->isDirty() && ! $departmentsChanged && ! $roleLeftManager) {
+            return redirect()
+                ->route('manager.employees.index')
+                ->with('success', 'No changes were made.');
+        }
+
+        if ($employee->isDirty()) {
+            $employee->save();
+        }
+
+        if ($role === 'manager' && $departmentsChanged) {
+            DepartmentManagers::syncForManager($employee->fresh(), $normalizedManaged);
+        } elseif ($roleLeftManager) {
             DepartmentManagers::clearForManager($employee);
         }
 

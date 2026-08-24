@@ -3,8 +3,10 @@
 namespace App\Support;
 
 use App\Models\LeaveRequest;
+use App\Models\PerformanceReview;
 use App\Models\User;
 use App\Notifications\LeaveReminderNotification;
+use App\Support\PerformanceReviews;
 use Illuminate\Notifications\DatabaseNotification;
 
 class NotificationDestination
@@ -20,6 +22,15 @@ class NotificationDestination
 
         if (! empty($data['conversation_id']) && in_array($role, ['admin', 'manager'], true)) {
             return route('messages.index', ['conversation' => $data['conversation_id']]);
+        }
+
+        if (! empty($data['performance_review_id'])) {
+            $review = PerformanceReview::query()->find((int) $data['performance_review_id']);
+            if ($review) {
+                return route(PerformanceReviews::routeName($user, 'show'), $review);
+            }
+
+            return route(PerformanceReviews::routeName($user, 'index'));
         }
 
         if (! empty($data['leave_request_id'])) {

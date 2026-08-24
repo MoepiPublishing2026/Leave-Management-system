@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use App\Models\User;
+use App\Support\DashboardEmployeeFilter;
 use App\Support\PercentageDistribution;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,13 +18,11 @@ class AnalyticsController extends Controller
          $monthFilter = $request->query('month', 'this_year');
         $staff = $request->query('staff', 'all');
 
+        $employeeFilter = DashboardEmployeeFilter::selectedId($staff);
         $leaveQuery = LeaveRequest::query()
             ->byStaffApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn']);
-
-        if (ctype_digit((string) $staff)) {
-            $leaveQuery->where('user_id', (int) $staff);
-        }
+        DashboardEmployeeFilter::apply($leaveQuery, $employeeFilter);
 
         if ($monthFilter) {
             $now = Carbon::now();
@@ -59,8 +58,13 @@ class AnalyticsController extends Controller
             ->count();
         $pendingRequests = max(0, $pendingTotal - $overduePending);
 
-        $activeEmployees = User::whereIn('role', ['employee', 'manager'])->where('is_active', 1)->count();
-        $totalEmployees = User::whereIn('role', ['employee', 'manager'])->count();
+        $assignedIds = DashboardEmployeeFilter::allowedUserIds();
+        $activeEmployees = $assignedIds->isEmpty()
+            ? 0
+            : User::query()->whereIn('id', $assignedIds)->where('is_active', 1)->count();
+        $totalEmployees = $assignedIds->isEmpty()
+            ? 0
+            : User::query()->whereIn('id', $assignedIds)->count();
         $employeesWhoApplied = (clone $leaveQuery)->distinct('user_id')->count('user_id');
 
         $approvedCount = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['approved'])->count();
@@ -102,8 +106,9 @@ class AnalyticsController extends Controller
             }
         }
 
-        $months = LeaveRequest::query()
-            ->byStaffApplicants()
+        $monthsQuery = LeaveRequest::query()->byStaffApplicants();
+        DashboardEmployeeFilter::apply($monthsQuery, null);
+        $months = $monthsQuery
             ->selectRaw("DATE_FORMAT(start_date, '%Y-%m') as month")
             ->distinct()
             ->orderBy('month', 'desc')
@@ -112,10 +117,12 @@ class AnalyticsController extends Controller
         $nowYear = (int) Carbon::now()->year;
         $years = collect(range($nowYear - 1, $nowYear - 5));
 
-        $staffOptions = User::whereIn('role', ['employee', 'manager'])
+        $staffOptionsQuery = User::query()
+            ->whereIn('role', ['employee', 'manager'])
             ->orderBy('first_name')
-            ->orderBy('last_name')
-            ->get(['id', 'first_name', 'last_name', 'email', 'role']);
+            ->orderBy('last_name');
+        DashboardEmployeeFilter::applyToUsers($staffOptionsQuery);
+        $staffOptions = $staffOptionsQuery->get(['id', 'first_name', 'last_name', 'email', 'role']);
 
         if ($staffOptions->isNotEmpty()) {
             $staffOptions = $staffOptions->unique(function ($u) {

@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Manager;
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use App\Support\ManagerTeam;
+use App\Support\PdfDocuments;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Yasumi\Yasumi;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -302,7 +302,7 @@ class ReportController extends Controller
             ? "From $startDate to $endDate"
             : "Period: $monthFilter";
 
-        $pdf = Pdf::loadView('manager.reports.pdf', [
+        $pdf = PdfDocuments::make('manager.reports.pdf', [
             'title' => $title,
             'subtitle' => $subtitle,
             'generatedAt' => Carbon::now(),

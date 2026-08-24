@@ -63,7 +63,7 @@ class NotifyOverdueLeaveRequestsCommand extends Command
                     }
 
                     $recipients = $recipients
-                        ->merge(User::query()->where('role', 'admin')->where('is_active', true)->get())
+                        ->merge(\App\Support\LeaveApprovalWorkflow::seniorsForLeave($leave))
                         ->unique('id')
                         ->values();
 

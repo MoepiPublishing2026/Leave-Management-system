@@ -28,81 +28,93 @@ class AuthController extends Controller
 
 
             //This is to avoid 2FA for local testing and development only, when pushed to production and git , uncomment the login function below and comment out this one
-            public function login(Request $request)
-            {
-                $request->validate([
-                    'email' => 'required|email',
-                    'password' => 'required|string',
-                ]);
+            // public function login(Request $request)
+            // {
+            //     $request->validate([
+            //         'email' => 'required|email',
+            //         'password' => 'required|string',
+            //     ]);
 
-                $user = User::where('email', $request->email)->first();
+            //     $user = User::where('email', $request->email)->first();
 
-                if ($user && Hash::check($request->password, $user->password)) {
+            //     if ($user && Hash::check($request->password, $user->password)) {
 
-                    // Login user directly without 2FA
-                    Auth::login($user);
+            //         // Login user directly without 2FA
+            //         Auth::login($user);
 
-                    // Regenerate session for security
-                    $request->session()->regenerate();
+            //         // Regenerate session for security
+            //         $request->session()->regenerate();
 
-                    // Redirect based on role
-                    switch ($user->role) {
-                        case 'admin':
-                            return redirect()->route('admin.dashboard');
+            //         // Redirect based on role
+            //         switch ($user->role) {
+            //             case 'admin':
+            //                 return redirect()->route('admin.dashboard');
 
-                        case 'manager':
-                            return redirect()->route('manager.dashboard');
+            //             case 'manager':
+            //                 return redirect()->route('manager.dashboard');
 
-                        case 'employee':
-                            return redirect()->route('dashboard');
+            //             case 'employee':
+            //                 return redirect()->route('dashboard');
 
-                        default:
-                            Auth::logout();
+            //             default:
+            //                 Auth::logout();
 
-                            return redirect('/login')
-                                ->withErrors([
-                                    'email' => 'Invalid user role.'
-                                ]);
-                    }
-                }
+            //                 return redirect('/login')
+            //                     ->withErrors([
+            //                         'email' => 'Invalid user role.'
+            //                     ]);
+            //         }
+            //     }
 
-                return redirect('/login')
-                    ->withErrors([
-                        'login_error' => 'Invalid credentials.'
-                    ]);
-            }
+            //     return redirect('/login')
+            //         ->withErrors([
+            //             'login_error' => 'Invalid credentials.'
+            //         ]);
+            // }
 
 
 
 
     // Handle login this is for production (when pushed to production and git , uncomment this and comment out the local login above)
-    // public function login(Request $request)
-    // {
-    //     $request->validate([
-    //         'email' => 'required|email',
-    //         'password' => 'required|string',
-    //     ]);
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
 
-    //     $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
-    //     if ($user && Hash::check($request->password, $user->password)) {
-    //         // Generate 2FA code
-    //         $code = rand(100000, 999999);
-    //         $user->two_factor_code = $code;
-    //         $user->two_factor_expires_at = now()->addMinutes(10);
-    //         $user->save();
+        if ($user && Hash::check($request->password, $user->password)) {
+            // Generate 2FA code
+            $code = rand(100000, 999999);
+            $user->two_factor_code = $code;
+            $user->two_factor_expires_at = now()->addMinutes(10);
+            $user->save();
 
-    //         // Send email
-    //         Mail::to($user->email)->send(new TwoFactorCodeMail($code));
+            $mailSent = $this->sendTwoFactorCode($user, (string) $code);
 
-    //         // Store user id in session temporarily
-    //         $request->session()->put('2fa_user_id', $user->id);
+            // Store user id in session temporarily
+            $request->session()->put('2fa_user_id', $user->id);
 
-    //         return redirect()->route('login.verify');
-    //     }
+            if ($mailSent) {
+                return redirect()->route('login.verify');
+            }
 
-    //     return redirect('/login')->withErrors(['login_error' => 'Invalid credentials.']);
-    // }
+            if (app()->environment('local')) {
+                return redirect()->route('login.verify')->with(
+                    'status',
+                    'The verification email could not be sent (mail server unreachable). Use this code: '.$code
+                );
+            }
+
+            return redirect('/login')->withErrors([
+                'login_error' => 'We could not send your verification email. Check your internet connection and try again.',
+            ]);
+        }
+
+        return redirect('/login')->withErrors(['login_error' => 'Invalid credentials.']);
+    }
 
     // Show 2FA form
     public function show2faForm()
@@ -128,7 +140,7 @@ class AuthController extends Controller
 
         $user = User::find($userId);
 
-        if (!$user || $user->two_factor_code !== $request->code) {
+        if (!$user || (string) $user->two_factor_code !== (string) $request->code) {
             return back()->withErrors(['code' => 'The provided code is invalid.']);
         }
 
@@ -176,26 +188,43 @@ class AuthController extends Controller
         $previousCode = $user->two_factor_code;
         $previousExpiry = $user->two_factor_expires_at;
         $code = random_int(100000, 999999);
+        $user->two_factor_code = $code;
+        $user->two_factor_expires_at = now()->addMinutes(10);
+        $user->save();
 
+        $mailSent = $this->sendTwoFactorCode($user, (string) $code);
+
+        if ($mailSent) {
+            return back()->with('status', 'A new authentication code has been sent to your email.');
+        }
+
+        if (app()->environment('local')) {
+            return back()->with(
+                'status',
+                'The verification email could not be sent (mail server unreachable). Use this code: '.$code
+            );
+        }
+
+        $user->two_factor_code = $previousCode;
+        $user->two_factor_expires_at = $previousExpiry;
+        $user->save();
+
+        return back()->withErrors([
+            'code' => 'The new authentication code could not be sent. Please try again.',
+        ]);
+    }
+
+    private function sendTwoFactorCode(User $user, string $code): bool
+    {
         try {
-            $user->two_factor_code = $code;
-            $user->two_factor_expires_at = now()->addMinutes(10);
-            $user->save();
+            Mail::to($user->email)->send(new TwoFactorCodeMail($code, \App\Support\EmailGreeting::displayName($user)));
 
-            Mail::to($user->email)->send(new TwoFactorCodeMail($code));
+            return true;
         } catch (\Throwable $e) {
             report($e);
 
-            $user->two_factor_code = $previousCode;
-            $user->two_factor_expires_at = $previousExpiry;
-            $user->save();
-
-            return back()->withErrors([
-                'code' => 'The new authentication code could not be sent. Please try again.',
-            ]);
+            return false;
         }
-
-        return back()->with('status', 'A new authentication code has been sent to your email.');
     }
 
     public function showForgotPasswordForm()
@@ -308,39 +337,47 @@ class AuthController extends Controller
     }
 
     // Update profile and password
-   public function update(Request $request)
-{
-    $user = auth()->user();
+    public function update(Request $request)
+    {
+        $user = auth()->user();
 
-    $rules = [
-        'current_password' => ['nullable', 'string'],
-        'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-        'profile_picture' => ['nullable', 'image', 'max:10240'],
-    ];
-    if ($request->filled('password')) {
-        $rules['current_password'] = ['required', 'current_password'];
-    }
-
-    $data = $request->validate($rules);
-
-    if (!empty($data['password'])) {
-        if (Hash::check($data['password'], $user->password)) {
-            return back()->withErrors(['password' => 'New password cannot be the same as the current password.']);
+        $rules = [
+            'current_password' => ['nullable', 'string'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'profile_picture' => ['nullable', 'image', 'max:10240'],
+        ];
+        if ($request->filled('password')) {
+            $rules['current_password'] = ['required', 'current_password'];
         }
-        $user->password = Hash::make($data['password']);
+
+        $data = $request->validate($rules);
+
+        $changed = false;
+
+        if (! empty($data['password'])) {
+            if (Hash::check($data['password'], $user->password)) {
+                return back()->withErrors(['password' => 'New password cannot be the same as the current password.']);
+            }
+            $user->password = Hash::make($data['password']);
+            $changed = true;
+        }
+
+        if ($request->hasFile('profile_picture')) {
+            $user->profile_picture = app(ProfilePictureService::class)->store(
+                $request->file('profile_picture'),
+                $user->profile_picture
+            );
+            $changed = true;
+        }
+
+        if (! $changed) {
+            return redirect()->route('profile.edit')->with('success', 'No changes were made.');
+        }
+
+        $user->save();
+
+        return redirect()->route('profile.edit')->with('success', 'Profile updated successfully.');
     }
-
-    if ($request->hasFile('profile_picture')) {
-        $user->profile_picture = app(ProfilePictureService::class)->store(
-            $request->file('profile_picture'),
-            $user->profile_picture
-        );
-    }
-
-    $user->save();
-
-    return redirect()->route('profile.edit')->with('success', 'Profile updated successfully.');
-}
 
 public function destroyProfilePicture(Request $request)
 {

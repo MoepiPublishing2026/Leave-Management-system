@@ -1,72 +1,19 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-     <style>
-        body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #ffffff;
-            color: #333333;
-            padding: 20px;
-        }
-        h2 {
-            color: #1b1e40;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-        p {
-            font-size: 16px;
-            line-height: 1.5;
-            margin-bottom: 15px;
-            color: #4b4b4b;
-        }
-        ul {
-            background-color: #f7fcef;
-            border: 1px solid #b2d12f;
-            max-width: 400px;
-            padding: 15px 25px;
-            border-radius: 8px;
-            list-style-type: none;
-            color: #4a7523;
-            font-weight: 600;
-        }
-        ul li {
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
-        a.dashboard-button {
-            display: inline-block;
-            background-color: #a2d109;
-            padding: 12px 30px;
-            margin-top: 25px;
-            color: white !important;
-            font-weight: 700;
-            border-radius: 25px;
-            text-decoration: none;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-        a.dashboard-button:hover {
-            background-color: #87b20a;
-            text-decoration: none;
-        }
-    </style>
-</head>
-<body>
-    <h2>New Leave Request Submitted</h2>
+@extends('emails.layouts.client-safe', [
+    'title' => 'New leave request submitted',
+    'preheader' => 'A leave request is waiting for review.',
+])
 
-    <p>Employee <strong>{{ $leaveRequest->user->first_name }} {{ $leaveRequest->user->last_name }}</strong> has submitted a leave request.</p>
+@section('content')
+@php
+    $applicant = trim(($leaveRequest->user->first_name ?? '').' '.($leaveRequest->user->last_name ?? '')) ?: 'An employee';
+@endphp
 
-    <ul>
-        <li><b>Leave Type:</b> {{ $leaveRequest->leave_type }}</li>
-        <li><b>Start Date:</b> {{ $leaveRequest->start_date }}</li>
-        <li><b>End Date:</b> {{ $leaveRequest->end_date }}</li>
-        <li><b>Number of Days:</b> {{ \App\Support\LeaveDaysFormatter::format($workingDays) }}</li>
-        <li><b>Comment:</b> {{ $leaveRequest->important_comment ?? 'N/A' }}</li>
-    </ul>
+    <p style="margin:0 0 16px;">{{ \App\Support\EmailGreeting::hello($recipientFirstName ?? null) }}</p>
+    <p style="margin:0 0 16px;"><strong>{{ $applicant }}</strong> has submitted a leave request.</p>
+    <p style="margin:0 0 16px;">
+        {{ $leaveRequest->leave_type }} leave from {{ $leaveRequest->start_date }} to {{ $leaveRequest->end_date }}
+        ({{ \App\Support\LeaveDaysFormatter::format($workingDays) }} working day(s)).
+    </p>
 
-    <a href="{{ url('/login') }}" class="dashboard-button">Go to Dashboard</a>
-
-    <p style="margin-top: 30px; font-size: 12px; color: #7b7b7b;">&copy; {{ date('Y') }} Moepi Publishing. All rights reserved.</p>
-</body>
-</html>
+    @include('emails.partials.primary-button', ['url' => url('/login')])
+@endsection

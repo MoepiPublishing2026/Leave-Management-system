@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Support\LeavePortalLinks;
 use App\Support\NotifiesByMail;
+use App\Support\SystemMailMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -31,9 +32,8 @@ class ManagerDailySummaryNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $count = $this->pendingItems->count();
-        $mail = (new MailMessage)
+        $mail = SystemMailMessage::for($notifiable)
             ->subject("Daily leave summary — {$count} request(s) awaiting review")
-            ->greeting('Hello '.trim((string) ($notifiable->first_name ?? '')).',')
             ->line("You have {$count} leave request(s) still awaiting your review.");
 
         if ($this->overdueCount > 0) {
@@ -50,7 +50,7 @@ class ManagerDailySummaryNotification extends Notification
             $mail->line('…and '.($count - 10).' more.');
         }
 
-        return $mail->action('Open team requests', LeavePortalLinks::teamRequestsUrl());
+        return $mail->action('Open in app', LeavePortalLinks::teamRequestsUrl());
     }
 
     public function toDatabase(object $notifiable): array

@@ -40,6 +40,8 @@ use App\Http\Controllers\Manager\AnalyticController;
 use App\Http\Controllers\Manager\ReportController;
 use App\Http\Controllers\Manager\CalendarsController;
 use App\Http\Controllers\Manager\LeaveRequestsController;
+use App\Http\Controllers\PerformanceReviewController;
+use App\Http\Controllers\PerformanceReviewEmailController;
 
 
 // Public welcome route
@@ -101,6 +103,8 @@ Route::post('/apply-for-leave', [LeaveController::class, 'submit'])
     ->middleware('auth')->name('leave.submit');
 
 Route::get('/leave/my-requests', [LeaveController::class, 'myRequests'])->middleware('auth')->name('leave.myRequests');
+Route::get('/leave/requests/{id}/edit', [LeaveController::class, 'edit'])->middleware('auth')->name('leave.edit');
+Route::put('/leave/requests/{id}', [LeaveController::class, 'update'])->middleware('auth')->name('leave.update');
 Route::post('/leave/requests/{id}/proof', [LeaveController::class, 'uploadProof'])->middleware('auth')->name('leave.uploadProof');
 Route::patch('/leave/withdraw/{id}', [LeaveController::class, 'withdraw'])->middleware('auth')->name('leave.withdraw');
 Route::delete('/leave/requests/{id}', [LeaveController::class, 'destroy'])->name('leave.destroy')->middleware('auth');
@@ -116,6 +120,17 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/leave/status/{status}', [LeaveController::class, 'statusLeaves'])->middleware('auth')->name('leave.status');
 
+Route::middleware('auth')->group(function () {
+    Route::get('/reviews', [PerformanceReviewController::class, 'index'])->name('reviews.index');
+    Route::get('/reviews/create', [PerformanceReviewController::class, 'create'])->name('reviews.create');
+    Route::post('/reviews', [PerformanceReviewController::class, 'store'])->name('reviews.store');
+    Route::get('/reviews/{review}', [PerformanceReviewController::class, 'show'])->name('reviews.show');
+    Route::get('/reviews/{review}/edit', [PerformanceReviewController::class, 'edit'])->name('reviews.edit');
+    Route::put('/reviews/{review}', [PerformanceReviewController::class, 'update'])->name('reviews.update');
+    Route::post('/reviews/{review}/submit', [PerformanceReviewController::class, 'submit'])->name('reviews.submit');
+    Route::post('/reviews/{review}/acknowledge', [PerformanceReviewController::class, 'acknowledge'])->name('reviews.acknowledge');
+});
+
 // Senior Manager email decisions (signed URLs — no login required)
 Route::get('/leave/email/{leaveRequest}/review', [LeaveEmailDecisionController::class, 'review'])
     ->name('leave.email.review');
@@ -130,6 +145,12 @@ Route::get('/leave/email/{leaveRequest}/reject', [LeaveEmailDecisionController::
     ->name('leave.email.reject.form');
 Route::post('/leave/email/{leaveRequest}/reject', [LeaveEmailDecisionController::class, 'rejectSubmit'])
     ->name('leave.email.reject.submit');
+
+// Senior Manager performance review scoring (signed URLs — no login required)
+Route::get('/reviews/email/{review}/review', [PerformanceReviewEmailController::class, 'review'])
+    ->name('reviews.email.review');
+Route::post('/reviews/email/{review}/review', [PerformanceReviewEmailController::class, 'submit'])
+    ->name('reviews.email.submit');
 
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -151,6 +172,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('/settings', [\App\Http\Controllers\Admin\LeaveSettingsController::class, 'save'])->name('settings.save');
 
      Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
+
+    Route::get('/reviews', [PerformanceReviewController::class, 'index'])->name('reviews.index');
+    Route::get('/reviews/{review}', [PerformanceReviewController::class, 'show'])->name('reviews.show');
+    Route::post('/reviews/{review}/acknowledge', [PerformanceReviewController::class, 'acknowledge'])->name('reviews.acknowledge');
 
  // route in web.php
 
@@ -187,6 +212,8 @@ Route::get('requests', [RequestsController::class, 'index'])->name('requests.ind
     Route::get('/my-calendar', [CalendarsController::class, 'personal'])->name('myCalendar');
     Route::get('/apply', [LeaveController::class, 'applyForm'])->name('apply');
     Route::post('/apply', [LeaveController::class, 'submit'])->name('leave.submit');
+    Route::get('/leave/{id}/edit', [LeaveController::class, 'edit'])->name('leave.edit');
+    Route::put('/leave/{id}', [LeaveController::class, 'update'])->name('leave.update');
     Route::get('/my-leave', [LeaveController::class, 'myRequests'])->name('myLeave');
     Route::get('/request', function () {
         return redirect()->route('manager.requests.index', ['status' => 'all']);
@@ -201,6 +228,14 @@ Route::get('requests', [RequestsController::class, 'index'])->name('requests.ind
 
     Route::get('/settings', [\App\Http\Controllers\Admin\LeaveSettingsController::class, 'index'])->name('settings');
     Route::post('/settings', [\App\Http\Controllers\Admin\LeaveSettingsController::class, 'save'])->name('settings.save');
+
+    Route::get('/reviews', [PerformanceReviewController::class, 'index'])->name('reviews.index');
+    Route::get('/reviews/create', [PerformanceReviewController::class, 'create'])->name('reviews.create');
+    Route::post('/reviews', [PerformanceReviewController::class, 'store'])->name('reviews.store');
+    Route::get('/reviews/{review}', [PerformanceReviewController::class, 'show'])->name('reviews.show');
+    Route::get('/reviews/{review}/edit', [PerformanceReviewController::class, 'edit'])->name('reviews.edit');
+    Route::put('/reviews/{review}', [PerformanceReviewController::class, 'update'])->name('reviews.update');
+    Route::post('/reviews/{review}/submit', [PerformanceReviewController::class, 'submit'])->name('reviews.submit');
 });
 
 Route::middleware(['auth'])->group(function () {

@@ -13,11 +13,19 @@ class LeaveWithdrawalMail extends Mailable
 
     public $leaveRequest;
     public $previousStatus;
+    public string $recipientFirstName = '';
+    public string $portalUrl = '';
 
-    public function __construct(LeaveRequest $leaveRequest, string $previousStatus = '')
-    {
+    public function __construct(
+        LeaveRequest $leaveRequest,
+        string $previousStatus = '',
+        ?string $recipientFirstName = null,
+        ?string $portalUrl = null
+    ) {
         $this->leaveRequest = $leaveRequest;
         $this->previousStatus = $previousStatus;
+        $this->recipientFirstName = trim((string) $recipientFirstName);
+        $this->portalUrl = trim((string) $portalUrl) ?: url('/login');
     }
 
     public function build()

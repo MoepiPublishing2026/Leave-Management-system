@@ -35,6 +35,8 @@ class LeaveRequestController extends Controller
             ->with(['user', 'overdueEscalatedBy', 'handledBy'])
             ->orderByDesc('created_at');
 
+        \App\Support\LeaveApprovalWorkflow::scopeLeaveRequestsForSenior($query, $request->user());
+
         LeaveRequestPeriodFilter::apply($query, is_string($monthFilter) ? $monthFilter : null, 'created_at');
         DashboardEmployeeFilter::apply($query, $employeeFilter);
         LeavePayFilter::apply($query, $payFilter);

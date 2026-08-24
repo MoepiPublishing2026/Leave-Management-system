@@ -19,11 +19,17 @@ class PendingReviewReminderMail extends Mailable
 
     public float $workingDays;
 
-    public function __construct(LeaveRequest $leaveRequest, string $stageLabel)
+    public string $recipientFirstName = '';
+
+    public string $reviewUrl = '';
+
+    public function __construct(LeaveRequest $leaveRequest, string $stageLabel, ?string $recipientFirstName = null, ?string $reviewUrl = null)
     {
         $this->leaveRequest = $leaveRequest->loadMissing('user');
         $this->stageLabel = $stageLabel;
         $this->workingDays = LeaveWorkingDays::count($this->leaveRequest);
+        $this->recipientFirstName = trim((string) $recipientFirstName);
+        $this->reviewUrl = trim((string) $reviewUrl);
     }
 
     public function build()

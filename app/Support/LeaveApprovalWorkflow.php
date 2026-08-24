@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use App\Mail\SeniorLeaveDecisionMail;
 use App\Models\LeaveRequest;
 use App\Models\LeaveRequestConversation;
 use App\Models\LeaveRequestMessage;
@@ -11,8 +10,6 @@ use App\Notifications\LeaveStatusNotification;
 use App\Notifications\NewLeaveRequestNotification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 
@@ -75,7 +72,10 @@ class LeaveApprovalWorkflow
         self::notifySeniorsForDecision($leave->fresh(['user']));
     }
 
-    /** Prefer the assigned senior manager; fall back to all active admins. */
+    /**
+     * Only the senior manager assigned to this applicant's manager.
+     * Never falls back to every admin — unassigned reporting lines stay unassigned.
+     */
     public static function seniorsForLeave(LeaveRequest $leave): Collection
     {
         $leave->loadMissing('user');
@@ -112,33 +112,227 @@ class LeaveApprovalWorkflow
             $pushSenior((int) ($manager?->manager_id ?? 0));
         }
 
-        if ($seniors->isEmpty()) {
-            return User::query()
-                ->where('role', 'admin')
-                ->where('is_active', true)
-                ->get()
-                ->unique('id')
-                ->values();
+        return $seniors->unique('id')->values();
+    }
+
+    public static function assignedSeniorForUser(?User $user): ?User
+    {
+        if (! $user) {
+            return null;
         }
 
-        return $seniors->unique('id')->values();
+        $role = strtolower(trim((string) ($user->role ?? '')));
+        $seniorId = 0;
+
+        if ($role === 'manager') {
+            $seniorId = (int) ($user->manager_id ?? 0);
+        } elseif ($role === 'employee') {
+            $manager = $user->manager_id
+                ? User::query()->managers()->whereKey($user->manager_id)->first()
+                : null;
+            $seniorId = (int) ($manager?->manager_id ?? 0);
+        }
+
+        if ($seniorId < 1) {
+            return null;
+        }
+
+        return User::query()
+            ->where('role', 'admin')
+            ->where('is_active', true)
+            ->whereKey($seniorId)
+            ->first();
+    }
+
+    /** Manager IDs assigned to this senior, plus those managers' employees. */
+    public static function reportingLineUserIds(?User $senior): Collection
+    {
+        if (! $senior || strtolower((string) ($senior->role ?? '')) !== 'admin') {
+            return collect();
+        }
+
+        $managerIds = User::query()
+            ->managers()
+            ->where('manager_id', $senior->id)
+            ->pluck('id');
+
+        $employeeIds = $managerIds->isEmpty()
+            ? collect()
+            : User::query()->employees()->whereIn('manager_id', $managerIds)->pluck('id');
+
+        return $managerIds->merge($employeeIds)->unique()->values();
+    }
+
+    public static function seniorCanAccessLeave(?User $senior, LeaveRequest $leave): bool
+    {
+        if (! $senior || strtolower((string) ($senior->role ?? '')) !== 'admin') {
+            return false;
+        }
+
+        $lineIds = self::reportingLineUserIds($senior);
+
+        return $lineIds->contains((int) $leave->user_id);
+    }
+
+    public static function canDecide(User $user, LeaveRequest $leave): bool
+    {
+        if (strtolower((string) ($user->role ?? '')) !== 'admin' || ! $user->is_active) {
+            return false;
+        }
+
+        return self::seniorsForLeave($leave)->contains(
+            fn (User $assigned) => (int) $assigned->id === (int) $user->id
+        );
+    }
+
+    /**
+     * Who to record as the decision-maker for an email or in-app action.
+     * Never falls back to "first admin in the database".
+     */
+    public static function resolveActingSenior(LeaveRequest $leave): User
+    {
+        $assigned = self::seniorsForLeave($leave);
+        $signedId = (int) request()->query('senior', request()->input('senior', 0));
+
+        if ($signedId > 0) {
+            $fromLink = $assigned->firstWhere('id', $signedId);
+            if (! $fromLink) {
+                abort(403, 'You are not the senior manager assigned to this employee\'s manager.');
+            }
+
+            return $fromLink;
+        }
+
+        if (auth()->check() && strtolower((string) (auth()->user()->role ?? '')) === 'admin') {
+            $loggedIn = $assigned->firstWhere('id', auth()->id());
+            if ($loggedIn) {
+                return $loggedIn;
+            }
+        }
+
+        $assignedSenior = $assigned->first();
+        if ($assignedSenior) {
+            return $assignedSenior;
+        }
+
+        abort(403, 'No senior manager is assigned to this employee\'s manager, so this request cannot be decided yet.');
+    }
+
+    /** @return array<string, int> */
+    public static function emailDecisionRouteParams(LeaveRequest $leave, ?User $senior = null): array
+    {
+        $assigned = self::seniorsForLeave($leave);
+        if (! $senior) {
+            $signedId = (int) request()->query('senior', request()->input('senior', 0));
+            $senior = $signedId > 0 ? $assigned->firstWhere('id', $signedId) : null;
+            $senior = $senior ?: $assigned->first();
+        }
+        $params = ['leaveRequest' => $leave->id];
+        if ($senior) {
+            $params['senior'] = $senior->id;
+        }
+
+        return $params;
+    }
+
+    public static function scopeLeaveRequestsForSenior($query, User $senior)
+    {
+        $ids = self::reportingLineUserIds($senior);
+        if ($ids->isEmpty()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereIn('user_id', $ids);
+    }
+
+    /**
+     * @return array{applicant_name: string, manager_name: string, is_manager_applicant: bool}
+     */
+    public static function reportingContext(LeaveRequest $leave): array
+    {
+        $leave->loadMissing(['user.manager']);
+        $applicant = $leave->user;
+        $isManagerApplicant = $applicant && strtolower(trim((string) ($applicant->role ?? ''))) === 'manager';
+        $applicantName = EmailGreeting::displayName($applicant, 'a staff member');
+
+        if ($isManagerApplicant) {
+            return [
+                'applicant_name' => $applicantName,
+                'manager_name' => $applicantName,
+                'is_manager_applicant' => true,
+            ];
+        }
+
+        $manager = $applicant?->manager;
+        if (! $manager && $applicant?->manager_id) {
+            $manager = User::query()->managers()->whereKey($applicant->manager_id)->first();
+        }
+
+        return [
+            'applicant_name' => $applicantName,
+            'manager_name' => EmailGreeting::displayName($manager),
+            'is_manager_applicant' => false,
+        ];
+    }
+
+    public static function notifyAssignedSeniorAboutTeamLeave(LeaveRequest $leave): void
+    {
+        $leave->loadMissing('user');
+        if (self::isAwaitingSenior($leave) || $leave->isManagerApplicant()) {
+            return;
+        }
+
+        $senior = self::assignedSeniorForUser($leave->user);
+        if (! $senior) {
+            return;
+        }
+
+        try {
+            $senior->notifyNow(new NewLeaveRequestNotification($leave), ['database']);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        try {
+            $senior->notifyNow(new NewLeaveRequestNotification($leave), ['mail']);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     public static function notifySeniorsForDecision(LeaveRequest $leave): void
     {
         $admins = self::seniorsForLeave($leave);
+        if ($admins->isEmpty()) {
+            \Illuminate\Support\Facades\Log::warning('No senior managers to notify for leave decision email.', [
+                'leave_request_id' => $leave->id,
+            ]);
+
+            return;
+        }
+
+        // Database first so the in-app bell still updates if email sending fails.
         foreach ($admins as $admin) {
             try {
-                Mail::to($admin->email)->send(new SeniorLeaveDecisionMail($leave));
+                $admin->notifyNow(new NewLeaveRequestNotification($leave), ['database']);
             } catch (\Throwable $e) {
                 report($e);
+                \Illuminate\Support\Facades\Log::error('Failed saving senior in-app leave notification.', [
+                    'leave_request_id' => $leave->id,
+                    'admin_id' => $admin->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
-        }
-        if ($admins->isNotEmpty()) {
+
             try {
-                Notification::send($admins, new NewLeaveRequestNotification($leave));
+                $admin->notifyNow(new NewLeaveRequestNotification($leave), ['mail']);
             } catch (\Throwable $e) {
                 report($e);
+                \Illuminate\Support\Facades\Log::error('Failed emailing senior of leave awaiting decision.', [
+                    'leave_request_id' => $leave->id,
+                    'admin_id' => $admin->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
     }
@@ -154,6 +348,10 @@ class LeaveApprovalWorkflow
 
         if (! self::isAwaitingSenior($leave) && ! ($leave->isManagerApplicant() && strtolower(trim((string) $leave->status)) === 'pending')) {
             throw new \RuntimeException('This request is not awaiting senior manager decision.');
+        }
+
+        if (! self::canDecide($decider, $leave)) {
+            throw new \RuntimeException('Only the senior manager assigned to this employee\'s manager can approve or reject this request.');
         }
 
         // Allow migrating legacy manager pending → treat as senior queue

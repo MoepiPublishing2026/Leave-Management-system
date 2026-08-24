@@ -1,6 +1,6 @@
 @extends($layout ?? 'layouts.app')
 
-@section('title', 'Leave Application')
+@section('title', !empty($editingLeave) ? 'Edit leave request' : 'Leave Application')
 
 @section('content')
 <style>
@@ -52,6 +52,14 @@
           width: 100% !important;
           max-width: 100% !important;
           box-sizing: border-box;
+      }
+      form.leave-form .button-group {
+          flex-direction: column;
+          gap: 10px;
+          margin-top: 20px;
+      }
+      form.leave-form .button-group button {
+          width: 100%;
       }
   }
   .main-content h1 {
@@ -310,8 +318,8 @@
 @include('partials.flatpickr-grid-fix')
 
 <div class="main-content">
-    <h1>Leave Application</h1>
-    <h2>Fill in the form to request a leave</h2>
+    <h1>{{ !empty($editingLeave) ? 'Edit leave request #'.$editingLeave->id : 'Leave Application' }}</h1>
+    <h2>{{ !empty($editingLeave) ? 'Correct the details or replace documents while this request is still pending.' : 'Fill in the form to request a leave' }}</h2>
 
     @if ($errors->any())
         <div class="form-alert" role="alert">
@@ -324,8 +332,11 @@
         </div>
     @endif
 
-    <form class="leave-form" method="POST" action="{{ route($submitRoute ?? 'leave.submit') }}" enctype="multipart/form-data" novalidate>
+    <form class="leave-form" method="POST" action="{{ route($submitRoute ?? 'leave.submit', $submitRouteParams ?? []) }}" enctype="multipart/form-data" novalidate>
         @csrf
+        @if (($formMethod ?? 'POST') === 'PUT')
+            @method('PUT')
+        @endif
 
         <label class="section-title" style="flex-basis:100%;font-size:16px;margin-bottom:5px;">Leave Info</label>
         <div class="input-group input-group--full">
@@ -333,7 +344,7 @@
             <select id="leave_type" name="leave_type" required>
                 <option value="">Select Leave Type</option>
                 @php
-                    $selectedLeaveType = old('leave_type', request('leave_type'));
+                    $selectedLeaveType = old('leave_type', optional($editingLeave ?? null)->leave_type ?? request('leave_type'));
                     if (!empty($blockedParentalLeaveType) && strcasecmp((string) $selectedLeaveType, (string) $blockedParentalLeaveType) === 0) {
                         $selectedLeaveType = '';
                     }
@@ -348,7 +359,8 @@
                         $isTypeExhausted = $remainingForType <= 0;
                         $isAnnualExhausted = (float) $currentAnnualBalance <= 0
                             && \App\Support\AnnualLeaveRules::countsAgainstAnnual((string) $policy->leave_type);
-                        $isUnavailable = $isBlockedParental || $isTypeExhausted || $isAnnualExhausted;
+                        $isUnavailable = ($isBlockedParental || $isTypeExhausted || $isAnnualExhausted)
+                            && strcasecmp((string) $selectedLeaveType, (string) $policy->leave_type) !== 0;
                     @endphp
                     <option value="{{ $policy->leave_type }}" data-label="{{ $policy->leave_type }}"
                         @selected($selectedLeaveType == $policy->leave_type)
@@ -365,16 +377,16 @@
 
         <div class="input-group input-group--half">
             <label for="start_date">Start Date:</label>
-            <input id="start_date" name="start_date" type="text" value="{{ old('start_date') }}" required />
+            <input id="start_date" name="start_date" type="text" value="{{ old('start_date', isset($editingLeave) ? $editingLeave->start_date : '') }}" required />
         </div>
 
         <div class="input-group input-group--half">
             <label for="end_date">End Date:</label>
-            <input id="end_date" name="end_date" type="text" value="{{ old('end_date') }}" />
+            <input id="end_date" name="end_date" type="text" value="{{ old('end_date', isset($editingLeave) && empty($editingLeave->is_half_day) ? $editingLeave->end_date : '') }}" />
         </div>
 
         <div class="input-group" style="flex-basis: 100%; flex-direction: row; align-items: center; gap: 10px;">
-            <input type="checkbox" id="half_day" name="half_day" value="1" style="width: auto;" {{ old('half_day') ? 'checked' : '' }}>
+            <input type="checkbox" id="half_day" name="half_day" value="1" style="width: auto;" {{ old('half_day', isset($editingLeave) && $editingLeave->is_half_day ? '1' : null) ? 'checked' : '' }}>
             <label for="half_day" style="margin-bottom: 0;">Half-Day Request (End Date will be ignored)</label>
         </div>
 
@@ -400,18 +412,30 @@
                     />
                 </div>
                 <ul class="file-upload-list" id="file-upload-list" hidden></ul>
+                @if (!empty($existingFileLinks))
+                    <div class="file-upload-existing" style="padding: 0 16px 16px;">
+                        <p class="file-upload-hint" style="margin: 0 0 8px;">Current documents — upload new files only if you want to replace these:</p>
+                        <ul class="file-upload-list" style="display:block;">
+                            @foreach ($existingFileLinks as $fileLink)
+                                <li class="file-upload-item">
+                                    <a href="{{ $fileLink['url'] }}" target="_blank" rel="noopener" class="file-upload-item-name">{{ $fileLink['label'] }} — {{ $fileLink['name'] }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 <p class="file-upload-error" id="file-upload-error" hidden role="alert"></p>
             </div>
         </div>
 
         <div class="input-group" style="flex-basis: 100%;">
-            <label for="important_comment">Important Comment:</label>
-            <textarea id="important_comment" name="important_comment" placeholder="Add any important comments here...">{{ old('important_comment') }}</textarea>
+            <label for="important_comment">Reason for leave (Important Comment): <span style="color:#b42318;">*</span></label>
+            <textarea id="important_comment" name="important_comment" required minlength="3" maxlength="512" placeholder="Explain why you are taking this leave...">{{ old('important_comment', optional($editingLeave ?? null)->important_comment ?? '') }}</textarea>
         </div>
 
         <div class="button-group">
-            <button type="button" class="cancel-btn" onclick="window.location.href='{{ url()->previous() }}'">Cancel</button>
-            <button type="submit" class="submit-btn" id="submit-btn">Submit Application</button>
+            <button type="button" class="cancel-btn" onclick="window.location.href='{{ $cancelUrl ?? url()->previous() }}'">Cancel</button>
+            <button type="submit" class="submit-btn" id="submit-btn">{{ !empty($editingLeave) ? 'Save changes' : 'Submit Application' }}</button>
         </div>
     </form>
 </div>
@@ -426,8 +450,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const blockedParentalLeaveType = @json($blockedParentalLeaveType ?? null);
     function countsAgainstAnnual(leaveType) {
         if (!leaveType) return false;
-        const excluded = @json(\App\Support\AnnualLeaveRules::EXCLUDED_FROM_ANNUAL);
-        return !excluded.includes(leaveType.toLowerCase());
+        const annualTypes = @json(\App\Support\AnnualLeaveRules::ANNUAL_TYPES);
+        return annualTypes.includes(leaveType.toLowerCase());
     }
 
     const disableDates = [
@@ -438,22 +462,56 @@ document.addEventListener('DOMContentLoaded', function () {
     const fpOptions = {
         dateFormat: 'Y-m-d',
         disable: disableDates,
-        minDate: 'today',
+        minDate: @json($datePickerMinDate ?? 'today'),
     };
+    const hasExistingAttachments = @json(!empty($hasExistingAttachments));
+
+    function parseLocalDate(isoDate) {
+        if (!isoDate) return null;
+        const parts = String(isoDate).split('-').map(Number);
+        if (parts.length < 3 || parts.some((n) => Number.isNaN(n))) return null;
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function formatLocalDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
 
     function calculateWorkingDays(startDate, endDate) {
         if (!startDate || !endDate) return 0;
-        const start = new Date(startDate);
-        const end = new Date(endDate);
+        const start = parseLocalDate(startDate);
+        const end = parseLocalDate(endDate);
+        if (!start || !end) return 0;
         let count = 0;
-        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        for (let d = new Date(start.getTime()); d <= end; d.setDate(d.getDate() + 1)) {
             const day = d.getDay();
-            const isoDate = d.toISOString().slice(0,10);
+            const isoDate = formatLocalDate(d);
             if (day !== 0 && day !== 6 && !publicHolidays.includes(isoDate)) {
                 count++;
             }
         }
         return count;
+    }
+
+    function workingDaysByYear(startDate, endDate) {
+        const daysByYear = {};
+        if (!startDate || !endDate) return daysByYear;
+        const start = parseLocalDate(startDate);
+        const end = parseLocalDate(endDate);
+        if (!start || !end) return daysByYear;
+        for (let d = new Date(start.getTime()); d <= end; d.setDate(d.getDate() + 1)) {
+            const day = d.getDay();
+            const isoDate = formatLocalDate(d);
+            if (day === 0 || day === 6 || publicHolidays.includes(isoDate)) {
+                continue;
+            }
+            const year = d.getFullYear();
+            daysByYear[year] = (daysByYear[year] || 0) + 1;
+        }
+        return daysByYear;
     }
 
     const halfDayCheckbox = document.getElementById('half_day');
@@ -623,10 +681,15 @@ document.addEventListener('DOMContentLoaded', function () {
         fileUploadInput.removeAttribute('required');
 
         if (needsProofAtSubmit) {
-            fileUploadContainer.classList.add('required');
-            attachmentBadge.textContent = 'Required';
-            attachmentBadge.className = 'attachment-badge attachment-badge--required';
-            fileUploadHint.textContent = 'Supporting document required for this leave type. PDF, JPG, PNG, or Word — up to 10 MB per file.';
+            const keepingExisting = hasExistingAttachments && selectedFiles.length === 0;
+            fileUploadContainer.classList.toggle('required', !keepingExisting);
+            attachmentBadge.textContent = keepingExisting ? 'On file' : 'Required';
+            attachmentBadge.className = keepingExisting
+                ? 'attachment-badge attachment-badge--optional'
+                : 'attachment-badge attachment-badge--required';
+            fileUploadHint.textContent = keepingExisting
+                ? 'Current documents will be kept. Upload new files only if you want to replace them.'
+                : 'Supporting document required for this leave type. PDF, JPG, PNG, or Word — up to 10 MB per file.';
         } else if (isDeferredSick) {
             fileUploadContainer.classList.remove('required');
             attachmentBadge.textContent = 'Optional now';
@@ -658,6 +721,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const needsProofAtSubmit = requiresProofByType[type] === true || requiresProofByType[type] === 1 || requiresProofByType[type] === '1';
         if (!needsProofAtSubmit || isSickLeaveType(type)) {
             syncFileInput();
+            return '';
+        }
+        if (hasExistingAttachments && selectedFiles.length === 0) {
             return '';
         }
         if (selectedFiles.length === 0) {
@@ -708,7 +774,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateLeaveTypeEligibility() {
         const startDate = startDateInput.value;
-        const yearKey = startDate ? new Date(startDate).getFullYear() : nowYear;
+        const yearKey = startDate ? (parseLocalDate(startDate)?.getFullYear() || nowYear) : nowYear;
         const leaveBalances = leaveBalancesByYear[yearKey] || {};
         const annualBalance = leaveBalances['Annual'] ?? leaveBalances['Annual Leave'] ?? 0;
 
@@ -787,67 +853,64 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             return;
         }
-        if (leaveType === 'Unpaid' && comment.length < 3) {
+        if (comment.length < 3) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Missing Reason',
-                text: 'Please provide a valid reason for unpaid leave.',
+                text: 'Please provide a reason for this leave request.',
                 confirmButtonText: 'OK'
             });
             return;
         }
 
-        const startYear = startDate ? new Date(startDate).getFullYear() : null;
-        const endYear = endDate ? new Date(endDate).getFullYear() : null;
-        if (startYear && endYear && startYear !== endYear) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Date Range',
-                text: 'Start Date and End Date must be within the same year.',
-                confirmButtonText: 'OK'
-            });
-            return;
-        }
+        const startYear = startDate ? parseLocalDate(startDate)?.getFullYear() : null;
 
         let daysRequested = calculateWorkingDays(startDate, endDate);
+        let daysByYear = workingDaysByYear(startDate, endDate);
         if (halfDay && calculateWorkingDays(startDate, startDate) > 0) {
             daysRequested = 0.5;
+            daysByYear = { [startYear || nowYear]: 0.5 };
         }
-        const yearKey = startYear || nowYear;
-        const leaveBalances = leaveBalancesByYear[yearKey] || {};
-        const annualBalance = leaveBalances['Annual'] ?? leaveBalances['Annual Leave'] ?? 0;
-        const balance = leaveBalances[leaveType] ?? 0;
 
-        if (countsAgainstAnnual(leaveType)) {
-            if (annualBalance <= 0) {
+        for (const [yearKey, daysInYear] of Object.entries(daysByYear)) {
+            if (leaveType === 'Unpaid') {
+                continue;
+            }
+            const leaveBalances = leaveBalancesByYear[yearKey] || {};
+            const annualBalance = Number(leaveBalances['Annual'] ?? leaveBalances['Annual Leave'] ?? 0);
+            const balance = Number(leaveBalances[leaveType] ?? 0);
+
+            if (countsAgainstAnnual(leaveType)) {
+                if (annualBalance <= 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Annual Leave Limit Reached',
+                        html: `You have exhausted your annual leave for <b>${yearKey}</b>. Other leave types use their own balances and can still be requested.`,
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                if (daysInYear > annualBalance) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Annual Leave Balance Exceeded',
+                        html: `Your remaining annual leave balance for <b>${yearKey}</b> is <b>${annualBalance}</b> day${annualBalance === 1 ? '' : 's'}. This request uses <b>${daysInYear}</b> working day${daysInYear === 1 ? '' : 's'} in ${yearKey} (excluding weekends and public holidays).`,
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+            }
+
+            if (daysInYear > balance) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Annual Leave Limit Reached',
-                    html: 'You have exhausted your annual leave limit. You may still request <b>Sick</b>, <b>Bereavement</b> (with proof), <b>Maternity</b> (with proof), <b>Paternity</b> (with proof), or <b>Unpaid</b> leave.',
+                    title: 'Insufficient Leave Balance',
+                    html: `Your remaining <b>${leaveType || 'leave'}</b> balance for <b>${yearKey}</b> is <b>${balance}</b> day${balance === 1 ? '' : 's'}. This request uses <b>${daysInYear}</b> working day${daysInYear === 1 ? '' : 's'} in ${yearKey} (excluding weekends and public holidays).`,
                     confirmButtonText: 'OK'
                 });
                 return;
             }
-
-            if (daysRequested > annualBalance) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Annual Leave Balance Exceeded',
-                    html: `Your remaining annual leave balance is <b>${annualBalance}</b> day${annualBalance === 1 ? '' : 's'}. You requested <b>${daysRequested}</b> day${daysRequested === 1 ? '' : 's'} (excluding weekends and public holidays).`,
-                    confirmButtonText: 'OK'
-                });
-                return;
-            }
-        }
-
-        if (daysRequested > balance) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Insufficient Leave Balance',
-                html: `Your remaining balance for <b>${leaveType || 'this leave type'}</b> is <b>${balance}</b> day${balance === 1 ? '' : 's'}. You requested <b>${daysRequested}</b> day${daysRequested === 1 ? '' : 's'} (excluding weekends and public holidays).`,
-                confirmButtonText: 'OK'
-            });
-            return;
         }
 
         const attachmentError = validateAttachmentsBeforeSubmit();

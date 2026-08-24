@@ -4,9 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@yield('title', 'Senior Manager Panel')</title>
-    <link rel="icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" sizes="32x32" />
-    <link rel="shortcut icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" />
-    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}" sizes="180x180" />
+    <link rel="icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" sizes="192x192" />
+    <link rel="icon" href="{{ asset('images/favicon-48.png') }}?v=3" type="image/png" sizes="48x48" />
+    <link rel="shortcut icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" />
+    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}?v=3" sizes="180x180" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -35,8 +36,10 @@
         
 
         header.navbar .logo img {
-            height: 80px;
+            height: 56px;
             width: auto;
+            max-width: 280px;
+            object-fit: contain;
         }
         header.navbar .logo a:hover,
         header.navbar .logo a:focus,
@@ -318,13 +321,14 @@
 
         @media (max-width: 992px) {
             header.navbar {
-                height: auto;
-                padding: 10px 16px;
-                flex-wrap: wrap;
+                height: 64px;
+                padding: 8px 16px;
+                flex-wrap: nowrap;
                 gap: 10px;
             }
             header.navbar .logo img {
-                height: 44px;
+                height: 40px;
+                max-width: 200px;
             }
             /* Mobile navbar: hamburger left, logo right (profile hidden) */
             header.navbar .logo {
@@ -414,7 +418,7 @@
 
         <div class="logo">
             <a href="{{ route('admin.dashboard') }}">
-                <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo">
+                <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo">
             </a>
         </div>
 
@@ -429,19 +433,7 @@
         @endphp
 
         <nav class="menu" role="navigation" aria-label="Primary Navigation">
-            <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
-            <a href="{{ route('admin.requests', ['status' => 'all']) }}" class="{{ request()->routeIs(['admin.requests', 'admin.manager-requests*']) ? 'active' : '' }}">All Leave Requests</a>
-            <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
-                Messages
-                @if($unreadMessageCount > 0)
-                    <span class="badge-notification">{{ $unreadMessageCount }}</span>
-                @endif
-            </a>
-            <a href="{{ route('admin.calendar') }}" class="{{ request()->routeIs('admin.calendar') ? 'active' : '' }}">Calendar</a>
-            <a href="{{ route('admin.analytics') }}" class="{{ request()->routeIs('admin.analytics') ? 'active' : '' }}">Analytics</a>
-            <a href="{{ route('admin.reports') }}" class="{{ request()->routeIs('admin.reports') ? 'active' : '' }}">Reports</a>
-            <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs(['profile.edit', 'settings.edit']) ? 'active' : '' }}">Profile</a>
-            <a href="{{ route('admin.settings') }}" class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">Leave Policies</a>
+            @include('partials.nav-links-admin')
         </nav>
 
         @auth
@@ -508,7 +500,7 @@
     <aside id="mobileSidebar" class="mobile-sidebar" aria-label="Mobile Navigation">
         <div class="mobile-sidebar-header">
             <a class="mobile-sidebar-brand" href="{{ route('admin.dashboard') }}" aria-label="Moepi Publishing senior manager dashboard">
-                <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
+                <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
             </a>
             @auth
                 @php $user = auth()->user(); @endphp
@@ -523,25 +515,7 @@
                 </button>
             @endauth
         </div>
-        <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
-        <a href="{{ route('admin.requests', ['status' => 'all']) }}" class="{{ request()->routeIs(['admin.requests', 'admin.manager-requests*']) ? 'active' : '' }}">All Leave Requests</a>
-        <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
-            Messages
-            @if($unreadMessageCount > 0)
-                <span class="badge-notification">{{ $unreadMessageCount }}</span>
-            @endif
-        </a>
-        <a href="{{ route('notifications.index') }}" class="{{ request()->routeIs('notifications.*') ? 'active' : '' }}">
-            <span>Notifications</span>
-            @if($notificationCount > 0)
-                <span class="badge-notification">{{ $notificationCount }}</span>
-            @endif
-        </a>
-        <a href="{{ route('admin.calendar') }}" class="{{ request()->routeIs('admin.calendar') ? 'active' : '' }}">Calendar</a>
-        <a href="{{ route('admin.analytics') }}" class="{{ request()->routeIs('admin.analytics') ? 'active' : '' }}">Analytics</a>
-        <a href="{{ route('admin.reports') }}" class="{{ request()->routeIs('admin.reports') ? 'active' : '' }}">Reports</a>
-        <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs(['profile.edit', 'settings.edit']) ? 'active' : '' }}">Profile</a>
-        <a href="{{ route('admin.settings') }}" class="{{ request()->routeIs('admin.settings') ? 'active' : '' }}">Leave Policies</a>
+        @include('partials.nav-links-admin', ['includeNotifications' => true])
         @include('partials.external-app-links')
         <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
     </aside>

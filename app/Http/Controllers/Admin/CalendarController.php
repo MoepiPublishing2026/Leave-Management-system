@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use App\Services\CalendarService;
+use App\Support\DashboardEmployeeFilter;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,7 @@ class CalendarController extends Controller
             (int) $request->query('year', Carbon::now()->year)
         );
 
-        $leaves = LeaveRequest::query()
+        $leavesQuery = LeaveRequest::query()
             ->byStaffApplicants()
             ->with('user')
             ->whereRaw('LOWER(status) = ?', ['approved'])
@@ -29,8 +30,9 @@ class CalendarController extends Controller
                             ->where('end_date', '>=', $context['endOfMonth']);
                     });
             })
-            ->orderBy('start_date')
-            ->get();
+            ->orderBy('start_date');
+        DashboardEmployeeFilter::apply($leavesQuery, null);
+        $leaves = $leavesQuery->get();
 
         $events = CalendarService::buildEvents(
             $leaves,

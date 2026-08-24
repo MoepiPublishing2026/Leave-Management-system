@@ -155,18 +155,10 @@ class LeaveProofRules
 
     public static function employeeCanManageAttachments(LeaveRequest $request): bool
     {
-        if (! self::requiresProof($request->leave_type)) {
-            return false;
-        }
-
         $status = strtolower(trim((string) ($request->status ?? '')));
 
-        if ($status === 'pending') {
-            if (self::requiresProofAtSubmit($request->leave_type)) {
-                return true;
-            }
-
-            return self::allowsDeferredProof($request->leave_type) && self::hasProofAttached($request);
+        if (in_array($status, ['pending', 'pending_senior'], true)) {
+            return true;
         }
 
         if (self::isApprovedSickLeave($request)) {
@@ -184,7 +176,7 @@ class LeaveProofRules
 
         $status = strtolower(trim((string) ($request->status ?? '')));
 
-        if ($status === 'pending') {
+        if (in_array($status, ['pending', 'pending_senior'], true)) {
             return true;
         }
 

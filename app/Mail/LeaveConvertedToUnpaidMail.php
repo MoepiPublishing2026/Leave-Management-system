@@ -16,10 +16,16 @@ class LeaveConvertedToUnpaidMail extends Mailable
 
     public ?string $proofDeadline;
 
-    public function __construct(LeaveRequest $leaveRequest)
+    public string $recipientFirstName = '';
+
+    public string $portalUrl = '';
+
+    public function __construct(LeaveRequest $leaveRequest, ?string $recipientFirstName = null, ?string $portalUrl = null)
     {
         $this->leaveRequest = $leaveRequest->loadMissing('user');
         $this->proofDeadline = LeaveProofRules::proofDeadlineAt($leaveRequest)?->format('d M Y H:i');
+        $this->recipientFirstName = trim((string) $recipientFirstName);
+        $this->portalUrl = trim((string) $portalUrl) ?: url('/login');
     }
 
     public function build()
