@@ -92,21 +92,13 @@ class AuthController extends Controller
             $user->two_factor_expires_at = now()->addMinutes(10);
             $user->save();
 
-<<<<<<< HEAD
-            // Send email
-            Mail::to($user->email)->send(new TwoFactorCodeMail($code));
-=======
+
             $mailSent = $this->sendTwoFactorCode($user, (string) $code);
->>>>>>> 30d13259b34cdf46af3d83a5c788307804dc56f0
+
 
             // Store user id in session temporarily
             $request->session()->put('2fa_user_id', $user->id);
 
-<<<<<<< HEAD
-            return redirect()->route('login.verify');
-        }
-
-=======
             if ($mailSent) {
                 return redirect()->route('login.verify');
             }
@@ -123,7 +115,7 @@ class AuthController extends Controller
             ]);
         }
 
->>>>>>> 30d13259b34cdf46af3d83a5c788307804dc56f0
+
         return redirect('/login')->withErrors(['login_error' => 'Invalid credentials.']);
     }
 
