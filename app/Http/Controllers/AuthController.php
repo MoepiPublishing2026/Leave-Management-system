@@ -28,81 +28,81 @@ class AuthController extends Controller
 
 
             //This is to avoid 2FA for local testing and development only, when pushed to production and git , uncomment the login function below and comment out this one
-            public function login(Request $request)
-            {
-                $request->validate([
-                    'email' => 'required|email',
-                    'password' => 'required|string',
-                ]);
+            // public function login(Request $request)
+            // {
+            //     $request->validate([
+            //         'email' => 'required|email',
+            //         'password' => 'required|string',
+            //     ]);
 
-                $user = User::where('email', $request->email)->first();
+            //     $user = User::where('email', $request->email)->first();
 
-                if ($user && Hash::check($request->password, $user->password)) {
+            //     if ($user && Hash::check($request->password, $user->password)) {
 
-                    // Login user directly without 2FA
-                    Auth::login($user);
+            //         // Login user directly without 2FA
+            //         Auth::login($user);
 
-                    // Regenerate session for security
-                    $request->session()->regenerate();
+            //         // Regenerate session for security
+            //         $request->session()->regenerate();
 
-                    // Redirect based on role
-                    switch ($user->role) {
-                        case 'admin':
-                            return redirect()->route('admin.dashboard');
+            //         // Redirect based on role
+            //         switch ($user->role) {
+            //             case 'admin':
+            //                 return redirect()->route('admin.dashboard');
 
-                        case 'manager':
-                            return redirect()->route('manager.dashboard');
+            //             case 'manager':
+            //                 return redirect()->route('manager.dashboard');
 
-                        case 'employee':
-                            return redirect()->route('dashboard');
+            //             case 'employee':
+            //                 return redirect()->route('dashboard');
 
-                        default:
-                            Auth::logout();
+            //             default:
+            //                 Auth::logout();
 
-                            return redirect('/login')
-                                ->withErrors([
-                                    'email' => 'Invalid user role.'
-                                ]);
-                    }
-                }
+            //                 return redirect('/login')
+            //                     ->withErrors([
+            //                         'email' => 'Invalid user role.'
+            //                     ]);
+            //         }
+            //     }
 
-                return redirect('/login')
-                    ->withErrors([
-                        'login_error' => 'Invalid credentials.'
-                    ]);
-            }
+            //     return redirect('/login')
+            //         ->withErrors([
+            //             'login_error' => 'Invalid credentials.'
+            //         ]);
+            // }
 
 
 
 
     // Handle login this is for production (when pushed to production and git , uncomment this and comment out the local login above)
-    // public function login(Request $request)
-    // {
-    //     $request->validate([
-    //         'email' => 'required|email',
-    //         'password' => 'required|string',
-    //     ]);
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
 
-    //     $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
-    //     if ($user && Hash::check($request->password, $user->password)) {
-    //         // Generate 2FA code
-    //         $code = rand(100000, 999999);
-    //         $user->two_factor_code = $code;
-    //         $user->two_factor_expires_at = now()->addMinutes(10);
-    //         $user->save();
+        if ($user && Hash::check($request->password, $user->password)) {
+            // Generate 2FA code
+            $code = rand(100000, 999999);
+            $user->two_factor_code = $code;
+            $user->two_factor_expires_at = now()->addMinutes(10);
+            $user->save();
 
-    //         // Send email
-    //         Mail::to($user->email)->send(new TwoFactorCodeMail($code));
+            // Send email
+            Mail::to($user->email)->send(new TwoFactorCodeMail($code));
 
-    //         // Store user id in session temporarily
-    //         $request->session()->put('2fa_user_id', $user->id);
+            // Store user id in session temporarily
+            $request->session()->put('2fa_user_id', $user->id);
 
-    //         return redirect()->route('login.verify');
-    //     }
+            return redirect()->route('login.verify');
+        }
 
-    //     return redirect('/login')->withErrors(['login_error' => 'Invalid credentials.']);
-    // }
+        return redirect('/login')->withErrors(['login_error' => 'Invalid credentials.']);
+    }
 
     // Show 2FA form
     public function show2faForm()
