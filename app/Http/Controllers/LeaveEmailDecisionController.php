@@ -18,23 +18,14 @@ use Illuminate\Support\Facades\Validator;
 
 class LeaveEmailDecisionController extends Controller
 {
-    private function actingSenior(?LeaveRequest $leave = null): User
+    private function actingSenior(LeaveRequest $leave): User
     {
-        if (auth()->check() && strtolower((string) (auth()->user()->role ?? '')) === 'admin') {
-            return auth()->user();
-        }
+        return LeaveApprovalWorkflow::resolveActingSenior($leave);
+    }
 
-        $admin = User::query()
-            ->where('role', 'admin')
-            ->where('is_active', true)
-            ->orderBy('id')
-            ->first();
-
-        if (! $admin) {
-            abort(503, 'No Senior Manager account is available to record this decision.');
-        }
-
-        return $admin;
+    private function signedRouteParams(LeaveRequest $leave): array
+    {
+        return LeaveApprovalWorkflow::emailDecisionRouteParams($leave);
     }
 
     private function isAwaitingSenior(LeaveRequest $leave): bool
@@ -50,7 +41,7 @@ class LeaveEmailDecisionController extends Controller
         return URL::temporarySignedRoute(
             'leave.email.review',
             now()->addDays(7),
-            ['leaveRequest' => $leave->id]
+            $this->signedRouteParams($leave)
         );
     }
 
@@ -116,12 +107,12 @@ class LeaveEmailDecisionController extends Controller
             $approveUrl = URL::temporarySignedRoute(
                 'leave.email.approve',
                 now()->addDays(7),
-                ['leaveRequest' => $leaveRequest->id]
+                $this->signedRouteParams($leaveRequest)
             );
             $rejectUrl = URL::temporarySignedRoute(
                 'leave.email.reject.submit',
                 now()->addDays(7),
-                ['leaveRequest' => $leaveRequest->id]
+                $this->signedRouteParams($leaveRequest)
             );
         }
 
@@ -192,8 +183,7 @@ class LeaveEmailDecisionController extends Controller
     }
 
     /**
-     * Legacy GET approve links from older emails: send the manager to the live review page
-     * instead of deciding in a separate tab.
+     * Leftover Approve links from older Action Required emails open the full decision page.
      */
     public function approveGet(Request $request, LeaveRequest $leaveRequest)
     {
@@ -253,7 +243,7 @@ class LeaveEmailDecisionController extends Controller
     }
 
     /**
-     * Legacy GET reject links from older emails: open the live review page (reject is inline there).
+     * Leftover Reject links from older Action Required emails open the full decision page.
      */
     public function rejectForm(Request $request, LeaveRequest $leaveRequest)
     {

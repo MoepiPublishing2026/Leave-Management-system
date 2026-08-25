@@ -340,13 +340,22 @@
     }
     .requests-table td.request-actions-cell {
         vertical-align: middle;
+        min-width: 220px;
     }
     .request-actions {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
+        justify-content: flex-start;
         gap: 8px;
         min-height: 0;
+    }
+    .request-actions > a,
+    .request-actions > form,
+    .request-actions > button,
+    .request-actions > span {
+        flex: 0 0 auto;
+        margin: 0;
     }
     .request-actions form {
         display: inline-flex;
@@ -400,9 +409,13 @@
         border-radius: 999px;
         cursor: pointer;
         text-decoration: none;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         vertical-align: middle;
-        line-height: 1.35;
+        line-height: 1.2;
+        white-space: nowrap;
+        box-sizing: border-box;
         box-shadow: 0 3px 8px rgba(15, 23, 42, 0.08);
         transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
     }
@@ -457,12 +470,17 @@
         background: #d1fae5;
         color: #065f46;
     }
+    .request-btn--edit {
+        border: 1px solid #91bf14;
+        background: #b2cd16;
+        color: #0a1347;
+    }
+    .request-btn--edit:hover {
+        background: #9eb812;
+        color: #0a1347;
+    }
     .request-existing-files {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-bottom: 6px;
-        width: 100%;
+        display: contents;
     }
     .request-status-cell {
         min-width: 120px;
@@ -497,6 +515,8 @@
     }
     .proof-upload-form {
         margin: 0;
+        display: inline-flex;
+        align-items: center;
     }
     .proof-upload-input {
         display: none;

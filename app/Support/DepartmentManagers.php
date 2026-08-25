@@ -88,19 +88,21 @@ class DepartmentManagers
 
     /**
      * Replace a manager's department ownership and re-link employees.
+     * No-op when the department set is unchanged, so a save without edits
+     * does not rewrite employee or manager records.
      *
      * @param  list<string>  $departments
      */
     public static function syncForManager(User $manager, array $departments): void
     {
-        $departments = array_values(array_unique(array_filter(array_map(
-            fn ($d) => trim((string) $d),
-            $departments
-        ))));
+        $departments = self::normalizeDepartmentList($departments);
+        $previous = self::normalizeDepartmentList(self::departmentsForManager($manager));
 
-        DB::transaction(function () use ($manager, $departments): void {
-            $previous = self::departmentsForManager($manager);
+        if ($previous === $departments) {
+            return;
+        }
 
+        DB::transaction(function () use ($manager, $departments, $previous): void {
             ManagerDepartment::query()
                 ->where('user_id', $manager->id)
                 ->delete();
@@ -125,9 +127,25 @@ class DepartmentManagers
                 User::query()
                     ->employees()
                     ->whereIn('department', $departments)
+                    ->where(function ($q) use ($manager) {
+                        $q->whereNull('manager_id')
+                            ->orWhere('manager_id', '!=', $manager->id);
+                    })
                     ->update(['manager_id' => $manager->id]);
             }
         });
+    }
+
+    /** @param  list<string>  $departments */
+    public static function normalizeDepartmentList(array $departments): array
+    {
+        $departments = array_values(array_unique(array_filter(array_map(
+            fn ($d) => trim((string) $d),
+            $departments
+        ))));
+        sort($departments);
+
+        return $departments;
     }
 
     public static function clearForManager(User|int $manager): void

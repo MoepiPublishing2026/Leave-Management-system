@@ -4,9 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@yield('title', 'Leave Management System')</title>
-    <link rel="icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" sizes="32x32" />
-    <link rel="shortcut icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" />
-    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}" sizes="180x180" />
+    <link rel="icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" sizes="192x192" />
+    <link rel="icon" href="{{ asset('images/favicon-48.png') }}?v=3" type="image/png" sizes="48x48" />
+    <link rel="shortcut icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" />
+    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}?v=3" sizes="180x180" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
@@ -47,8 +48,10 @@
         }
 
         .navbar-logo img {
-            height: 80px;
+            height: 56px;
             width: auto;
+            max-width: 280px;
+            object-fit: contain;
             vertical-align: middle;
         }
 
@@ -302,9 +305,9 @@
 
         @media (max-width: 992px) {
             nav.navbar {
-                height: auto;
-                padding: 10px 16px;
-                flex-wrap: wrap;
+                height: 64px;
+                padding: 8px 16px;
+                flex-wrap: nowrap;
                 gap: 10px;
             }
             /* Mobile navbar: hamburger left, small logo right (profile hidden) */
@@ -313,7 +316,7 @@
                 margin-left: auto;
                 cursor: pointer;
             }
-            .navbar-logo img { height: 44px; }
+            .navbar-logo img { height: 40px; max-width: 200px; }
             .navbar-profile { display: none; }
             nav.menu { display: none; }
             .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
@@ -406,7 +409,7 @@
         <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
 
         <a class="navbar-logo" href="{{ route('dashboard') }}" aria-label="Go to dashboard">
-            <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
+            <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
         </a>
 
         @auth
@@ -423,12 +426,7 @@
         @endauth
 
         <nav class="menu" aria-label="Primary Navigation">
-            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
-            <a href="{{ route('apply') }}" class="{{ request()->routeIs('apply') ? 'active' : '' }}">Apply</a>
-            <a href="{{ route('leave.myRequests') }}" class="{{ request()->routeIs('leave.myRequests') ? 'active' : '' }}">My Requests</a>
-            <a href="{{ route('employee.calendar') }}" class="{{ request()->routeIs('employee.calendar') ? 'active' : '' }}">Calendar</a>
-            <a href="{{ route('policies') }}" class="{{ request()->routeIs('policies') ? 'active' : '' }}">Policies</a>
-            <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs(['profile.edit', 'settings.edit']) ? 'active' : '' }}">Profile</a>
+            @include('partials.nav-links-employee')
 
             @auth
             <div class="nav-item dropdown">
@@ -492,7 +490,7 @@
     <aside id="mobileSidebar" class="mobile-sidebar" aria-label="Mobile Navigation">
         <div class="mobile-sidebar-header">
             <a class="mobile-sidebar-brand" href="{{ route('dashboard') }}" aria-label="Go to dashboard">
-                <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
+                <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
             </a>
             @auth
                 @php $user = auth()->user(); @endphp
@@ -507,18 +505,7 @@
                 </button>
             @endauth
         </div>
-        <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
-        <a href="{{ route('apply') }}" class="{{ request()->routeIs('apply') ? 'active' : '' }}">Apply</a>
-        <a href="{{ route('leave.myRequests') }}" class="{{ request()->routeIs('leave.myRequests') ? 'active' : '' }}">My Requests</a>
-        <a href="{{ route('employee.calendar') }}" class="{{ request()->routeIs('employee.calendar') ? 'active' : '' }}">Calendar</a>
-        <a href="{{ route('policies') }}" class="{{ request()->routeIs('policies') ? 'active' : '' }}">Policies</a>
-        <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs(['profile.edit', 'settings.edit']) ? 'active' : '' }}">Profile</a>
-        <a href="{{ route('notifications.index') }}" class="{{ request()->routeIs('notifications.*') ? 'active' : '' }}">
-            <span>Notifications</span>
-            @if($notificationCount > 0)
-                <span class="badge-notification">{{ $notificationCount }}</span>
-            @endif
-        </a>
+        @include('partials.nav-links-employee', ['includeNotifications' => true])
         @include('partials.external-app-links')
         <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
     </aside>

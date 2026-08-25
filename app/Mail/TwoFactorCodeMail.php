@@ -13,10 +13,12 @@ class TwoFactorCodeMail extends Mailable
     use Queueable, SerializesModels;
 
     public $code;
+    public $recipientFirstName;
 
-    public function __construct($code)
+    public function __construct($code, $recipientFirstName = null)
     {
         $this->code = $code;
+        $this->recipientFirstName = $recipientFirstName;
     }
 
     public function envelope(): Envelope

@@ -1,42 +1,38 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Company Leave Policies</title>
+@extends('layouts.pdf')
+
+@section('title', 'Company Leave Policies')
+
+@section('styles')
     <style>
         body {
-            font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, DejaVu Sans, sans-serif;
             color: #333;
-            margin: 0;
-            padding: 24px 32px 48px;
         }
         h1 {
             color: #2c3e50;
             font-weight: 700;
-            font-size: 28px;
-            margin: 0 0 24px;
+            font-size: 24px;
+            margin: 0 0 12px;
         }
         h2 {
             font-weight: 600;
             color: #138056;
-            font-size: 18px;
-            margin: 22px 0 8px;
+            font-size: 16px;
+            margin: 18px 0 6px;
         }
         p {
-            font-size: 13px;
+            font-size: 12px;
             line-height: 1.55;
             margin: 0 0 10px;
         }
-        .policy-badges {
-            margin: 0 0 10px;
-        }
+        .policy-badges { margin: 0 0 8px; }
         .policy-badge {
             display: inline-block;
             background: #e8f5ef;
             color: #138056;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
-            padding: 4px 8px;
+            padding: 3px 7px;
             border-radius: 6px;
             margin: 0 6px 6px 0;
         }
@@ -45,22 +41,23 @@
             color: #475569;
         }
         ul {
-            font-size: 13px;
+            font-size: 12px;
             line-height: 1.55;
-            margin: 0 0 14px;
-            padding-left: 20px;
+            margin: 0 0 12px;
+            padding-left: 18px;
         }
         .section-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             color: #334155;
-            margin: 28px 0 8px;
+            margin: 22px 0 6px;
         }
     </style>
-</head>
-<body>
+@endsection
+
+@section('content')
     <h1>Company Leave Policies</h1>
-    <p style="font-size:12px;color:#64748b;margin-bottom:20px;">Generated {{ now()->format('d M Y') }} — reflects current policy settings.</p>
+    <p style="font-size:11px;color:#64748b;margin-bottom:16px;">Generated {{ now()->format('d M Y') }} — reflects current policy settings.</p>
 
     @foreach ($leaveTypes as $type)
         @php $policy = $policies[$type] ?? null; @endphp
@@ -91,5 +88,4 @@
 
     <div class="section-title">Return to work</div>
     <p>Upon return from extended leave, employees must provide certification if applicable and coordinate with HR for any necessary updates.</p>
-</body>
-</html>
+@endsection

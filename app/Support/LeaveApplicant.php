@@ -31,6 +31,16 @@ class LeaveApplicant
         return self::isManager($user) ? 'manager.leave.submit' : 'leave.submit';
     }
 
+    public static function editRoute(?User $user): string
+    {
+        return self::isManager($user) ? 'manager.leave.edit' : 'leave.edit';
+    }
+
+    public static function updateRoute(?User $user): string
+    {
+        return self::isManager($user) ? 'manager.leave.update' : 'leave.update';
+    }
+
     public static function myRequestsRoute(?User $user): string
     {
         return self::isManager($user) ? 'manager.myLeave' : 'leave.myRequests';

@@ -111,6 +111,11 @@ class LeaveRequest extends Model
         return $this->isOverdue() && empty($this->overdue_escalated_at);
     }
 
+    public function canBeEditedByApplicant(): bool
+    {
+        return \App\Support\LeaveStatusLabels::isStillPending($this->status);
+    }
+
     public function canBeWithdrawnByEmployee(): bool
     {
         $status = strtolower(trim((string) ($this->status ?? '')));

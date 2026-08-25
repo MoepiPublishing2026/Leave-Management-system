@@ -108,7 +108,7 @@ class MissingProofUnpaidConverter
         }
 
         $recipients = $recipients
-            ->merge(User::query()->where('role', 'admin')->where('is_active', true)->get())
+            ->merge(\App\Support\LeaveApprovalWorkflow::seniorsForLeave($leaveRequest))
             ->unique('id')
             ->values();
 
@@ -121,7 +121,11 @@ class MissingProofUnpaidConverter
 
             if (! empty($recipient->email)) {
                 try {
-                    Mail::to($recipient->email)->send(new LeaveConvertedToUnpaidMail($leaveRequest));
+                    Mail::to($recipient->email)->send(new LeaveConvertedToUnpaidMail(
+                        $leaveRequest,
+                        \App\Support\EmailGreeting::displayName($recipient),
+                        LeavePortalLinks::reviewUrlFor($recipient, $leaveRequest->id)
+                    ));
                 } catch (\Throwable $e) {
                     report($e);
                 }

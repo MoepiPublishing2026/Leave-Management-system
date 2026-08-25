@@ -68,6 +68,10 @@ main.content::-webkit-scrollbar-thumb:hover {
 
 /* Mobile navbar: logo left, menu button right */
 @media (max-width: 992px) {
+  :root {
+    --navbar-height: 64px;
+  }
+
   :where(nav.navbar, header.navbar) {
     justify-content: flex-start;
     gap: 12px;
@@ -98,7 +102,8 @@ main.content {
 }
 
 .login-logo,
-.auth-logo {
+.auth-logo,
+.signup-logo {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -106,12 +111,13 @@ main.content {
 }
 
 .login-logo img,
-.auth-logo img {
+.auth-logo img,
+.signup-logo img {
   display: block;
-  max-width: min(280px, 100%);
+  max-width: min(360px, 100%);
   width: auto;
   height: auto;
-  max-height: 110px;
+  max-height: 96px;
   object-fit: contain;
 }
 
@@ -139,16 +145,16 @@ header.navbar,
 
 :where(nav.navbar, header.navbar) :where(.navbar-logo img, .logo img) {
   display: block;
-  height: 80px;
+  height: 56px;
   width: auto;
-  max-width: min(220px, 42vw);
+  max-width: min(280px, 48vw);
   object-fit: contain;
 }
 
 @media (max-width: 992px) {
   :where(nav.navbar, header.navbar) :where(.navbar-logo img, .logo img) {
-    height: 44px;
-    max-width: min(160px, 48vw);
+    height: 40px;
+    max-width: min(200px, 56vw);
   }
 }
 
@@ -176,6 +182,13 @@ nav.menu a,
 /* Mobile responsiveness helpers (dashboards, cards, headings)
    Uses common container/card classnames already in views. */
 @media (max-width: 768px) {
+  main {
+    overflow-wrap: anywhere;
+  }
+  main img {
+    max-width: 100%;
+    height: auto;
+  }
   /* Global mobile typography (content only) */
   main :where(h1) { font-size: 26px !important; }
   main :where(h2) { font-size: 20px !important; }
@@ -319,7 +332,18 @@ nav.menu a,
   display: none;
 }
 
-/* Consistent auth form headings */
+/* Consistent card width for all pre-dashboard auth pages */
+.login-container,
+.auth-card {
+  max-width: 600px !important;
+  width: 100%;
+}
+
+/* Public signup only (not in-app Add Employee, which uses the same class) */
+body > .signup-container {
+  max-width: 600px !important;
+  width: 100%;
+}
 .auth-title {
   text-align: center;
   margin: 0 0 18px;

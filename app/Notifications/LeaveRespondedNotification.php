@@ -2,9 +2,10 @@
 
 namespace App\Notifications;
 
+use App\Support\LeavePortalLinks;
+use App\Support\SystemMailMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Notifications\Messages\MailMessage;
 
 class LeaveRespondedNotification extends Notification
 {
@@ -25,13 +26,10 @@ class LeaveRespondedNotification extends Notification
     public function toMail($notifiable)
     {
         $status = ucfirst($this->leaveRequest->status);
-        $url = url('/leave/myRequests'); // or wherever the user checks leave status
 
-        return (new MailMessage)
+        return SystemMailMessage::for($notifiable)
                     ->subject("Your Leave Request Has Been $status")
-                    ->greeting("Hello {$notifiable->first_name},")
                     ->line("Your leave request has been {$status}.")
-                    ->action('Check your leave status', $url)
-                    ->line('Thank you for using our leave management system!');
+                    ->action('Open in app', LeavePortalLinks::myRequestsUrl($notifiable, $this->leaveRequest->id ?? null));
     }
 }

@@ -6,6 +6,7 @@ use App\Models\LeaveRequest;
 use App\Support\LeaveApplicant;
 use App\Support\LeaveReminderMessage;
 use App\Support\NotifiesByMail;
+use App\Support\SystemMailMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -39,7 +40,7 @@ class LeaveReminderNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $body = LeaveReminderMessage::build($notifiable, $this->leaveRequest, $this->kind, $this->referenceDate);
+        $body = LeaveReminderMessage::build($notifiable, $this->leaveRequest, $this->kind, $this->referenceDate, false);
         $role = strtolower((string) ($notifiable->role ?? 'employee'));
         $isTeam = str_starts_with($this->kind, 'team_');
 
@@ -55,10 +56,10 @@ class LeaveReminderNotification extends Notification
             default => 'Upcoming leave reminder',
         };
 
-        return (new MailMessage)
+        return SystemMailMessage::for($notifiable)
             ->subject($subject)
             ->line($body)
-            ->action('Open calendar', $url);
+            ->action('Open in app', $url);
     }
 
     public function toDatabase(object $notifiable): array

@@ -3,13 +3,15 @@
 namespace App\Notifications;
 
 use App\Models\LeaveRequest;
+use App\Support\EmailGreeting;
+use App\Support\LeaveApprovalWorkflow;
 use App\Support\LeavePortalLinks;
 use App\Support\LeaveWorkingDays;
 use App\Support\NotifiesByMail;
+use App\Support\SystemMailMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\URL;
 
 class PendingReviewReminderNotification extends Notification
 {
@@ -30,27 +32,26 @@ class PendingReviewReminderNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $applicant = $this->leaveRequest->user;
-        $name = trim(($applicant->first_name ?? '').' '.($applicant->last_name ?? '')) ?: 'an employee';
+        $name = EmailGreeting::displayName($applicant, 'an employee');
         $type = $this->leaveRequest->leave_type ?: 'leave';
         $days = LeaveWorkingDays::count($this->leaveRequest);
         $role = strtolower((string) ($notifiable->role ?? ''));
         $stage = $this->stageLabel === 'daily' ? 'still pending (daily reminder)' : "pending for {$this->stageLabel}";
+        $context = LeaveApprovalWorkflow::reportingContext($this->leaveRequest);
 
-        $mail = (new MailMessage)
+        $mail = SystemMailMessage::for($notifiable)
             ->subject('Reminder: Leave request #'.$this->leaveRequest->id.' still awaiting your review')
-            ->greeting('Hello '.trim((string) ($notifiable->first_name ?? '')).',')
             ->line("{$name}'s {$type} leave request (#{$this->leaveRequest->id}) has been {$stage}.")
             ->line("Dates: {$this->leaveRequest->start_date} to {$this->leaveRequest->end_date} ({$days} working day(s)).");
 
+        if ($role === 'admin' && $context['manager_name'] !== '' && ! $context['is_manager_applicant']) {
+            $mail->line('Assigned manager: '.$context['manager_name'].'.');
+        }
+
         if ($role === 'admin') {
-            $url = URL::temporarySignedRoute(
-                'leave.email.review',
-                now()->addDays(7),
-                ['leaveRequest' => $this->leaveRequest->id]
-            );
-            $mail->action('Review leave request', $url);
+            $mail->action('Open in app', LeavePortalLinks::seniorInAppUrl($this->leaveRequest->id));
         } else {
-            $mail->action('Open team requests', LeavePortalLinks::teamRequestsUrl($this->leaveRequest->id));
+            $mail->action('Open in app', LeavePortalLinks::teamRequestsUrl($this->leaveRequest->id));
         }
 
         return $mail;
@@ -59,7 +60,7 @@ class PendingReviewReminderNotification extends Notification
     public function toDatabase(object $notifiable): array
     {
         $applicant = $this->leaveRequest->user;
-        $name = trim(($applicant->first_name ?? '').' '.($applicant->last_name ?? '')) ?: 'an employee';
+        $name = EmailGreeting::displayName($applicant, 'an employee');
         $stage = $this->stageLabel === 'daily'
             ? 'still awaiting your review'
             : "awaiting your review for {$this->stageLabel}";

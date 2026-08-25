@@ -8,10 +8,22 @@ use Illuminate\Support\Carbon;
 
 class LeaveReminderMessage
 {
-    public static function build(User $user, LeaveRequest $leave, string $kind, Carbon $referenceDate): string
+    public static function build(User $user, LeaveRequest $leave, string $kind, Carbon $referenceDate, bool $withGreeting = true): string
     {
-        $name = trim((string) ($user->first_name ?? ''));
+        $sentence = self::sentence($leave, $kind, $referenceDate);
+
+        if (! $withGreeting) {
+            return ucfirst($sentence);
+        }
+
+        $name = EmailGreeting::displayName($user);
         $greeting = $name !== '' ? "Hello {$name}" : 'Hello';
+
+        return "{$greeting}, {$sentence}";
+    }
+
+    private static function sentence(LeaveRequest $leave, string $kind, Carbon $referenceDate): string
+    {
         $type = trim((string) ($leave->leave_type ?? 'leave'));
         $start = Carbon::parse($leave->start_date)->startOfDay();
         $today = $referenceDate->copy()->startOfDay();
@@ -21,37 +33,37 @@ class LeaveReminderMessage
             $employee = $employee !== '' ? $employee : 'A team member';
             $when = $kind === 'team_today' ? 'today' : 'tomorrow';
 
-            return "{$greeting}, {$employee} is on {$type} leave {$when}.";
+            return "{$employee} is on {$type} leave {$when}.";
         }
 
         if ($kind === 'today') {
             if ($start->isSameDay($today)) {
-                return "{$greeting}, today is your leave day ({$type}).";
+                return "today is your leave day ({$type}).";
             }
 
-            return "{$greeting}, you are on leave today ({$type}).";
+            return "you are on leave today ({$type}).";
         }
 
         if ($kind === 'tomorrow') {
             $tomorrow = $today->copy()->addDay();
             if ($start->isSameDay($tomorrow)) {
-                return "{$greeting}, tomorrow is your leave day ({$type}).";
+                return "tomorrow is your leave day ({$type}).";
             }
 
-            return "{$greeting}, tomorrow you are still on leave ({$type}).";
+            return "tomorrow you are still on leave ({$type}).";
         }
 
         $startLabel = $start->format('l, j M Y');
         $daysUntil = $today->diffInDays($start);
 
         if ($daysUntil === 1) {
-            return "{$greeting}, tomorrow is your leave day ({$type}).";
+            return "tomorrow is your leave day ({$type}).";
         }
 
         if ($daysUntil === 7) {
-            return "{$greeting}, your {$type} leave starts next week ({$startLabel}).";
+            return "your {$type} leave starts next week ({$startLabel}).";
         }
 
-        return "{$greeting}, your {$type} leave starts in {$daysUntil} days ({$startLabel}).";
+        return "your {$type} leave starts in {$daysUntil} days ({$startLabel}).";
     }
 }

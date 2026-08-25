@@ -5,7 +5,7 @@
 
 @if ($policy)
     @if($type === 'Annual')
-        Annual leave is the primary leave balance for the year. Approved leave that counts against your annual pool reduces this balance. Sick, Maternity, Paternity, Bereavement, and Unpaid leave do not reduce your annual balance. Sick, Maternity, Paternity, and Bereavement have their own allocations. Once the annual balance reaches 0, other leave types are disabled, but Sick, Bereavement, Maternity, Paternity, and Unpaid can still be requested (with proof where required).
+        Annual leave is a standalone balance for the year. Only approved Annual leave reduces this allocation. Every other leave type (Sick, Maternity, Paternity, Bereavement, Family Responsibility, Study, and Unpaid) uses its own days and does not take from annual leave. Once the annual balance reaches 0, Annual leave cannot be requested; other types can still be requested if they have remaining days (with proof where required).
         @if((int) $policy->max_carry_over > 0)
             Up to {{ (int) $policy->max_carry_over }} unused day(s) may be carried over to the next year.
         @endif
@@ -16,11 +16,11 @@
     @elseif($type === 'Bereavement')
         Employees may take up to {{ (int) $policy->default_days }} days of paid bereavement leave for the death of immediate family members.
     @elseif($type === 'Family Responsibility')
-        Family responsibility leave of up to {{ (int) $policy->default_days }} days may be requested when an employee needs to attend to urgent family matters. Approval is subject to operational requirements.
+        Family responsibility leave of up to {{ (int) $policy->default_days }} days is standalone and does not take days from annual leave. It may be requested when an employee needs to attend to urgent family matters. Approval is subject to operational requirements.
     @elseif($type === 'Unpaid')
-        Unpaid leave does not reduce your annual leave balance. Employees may request unpaid leave for personal reasons. Approval is at the discretion of management and based on operational requirements.
+        Unpaid leave is a standalone leave type and does not reduce your annual leave balance. Employees may request unpaid leave for personal reasons. Approval is at the discretion of management and based on operational requirements.
     @elseif($type === 'Study')
-        Study leave may be requested for approved training or educational programs. Supporting documentation is required, and approval is subject to operational requirements.
+        Study leave is standalone and does not take days from annual leave. It may be requested for approved training or educational programs. Supporting documentation is required, and approval is subject to operational requirements.
     @else
         {{ $type }} leave details are as per company policy. Employees are allowed {{ (int) $policy->default_days }} days annually.
     @endif

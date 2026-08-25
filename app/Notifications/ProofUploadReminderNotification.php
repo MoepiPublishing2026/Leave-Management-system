@@ -6,6 +6,7 @@ use App\Models\LeaveRequest;
 use App\Support\LeavePortalLinks;
 use App\Support\LeaveProofRules;
 use App\Support\NotifiesByMail;
+use App\Support\SystemMailMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -42,18 +43,16 @@ class ProofUploadReminderNotification extends Notification
     {
         $deadline = LeaveProofRules::proofDeadlineAt($this->leaveRequest)?->format('d M Y') ?? 'the deadline';
 
-        $mail = (new MailMessage)
+        $mail = SystemMailMessage::for($notifiable)
             ->subject($this->subjectLine())
-            ->greeting('Hello '.trim((string) ($notifiable->first_name ?? '')).',')
             ->line($this->messageFor())
-            ->line('Upload your doctor\'s letter from My Leave Requests by '.$deadline.' at the latest.')
-            ->action('Upload document', LeavePortalLinks::myRequestsUrl($notifiable, $this->leaveRequest->id));
+            ->line('Upload your doctor\'s letter from My Leave Requests by '.$deadline.' at the latest.');
 
         if ($this->kind === 'deadline_today') {
             $mail->line('If the letter is not uploaded today, this approved sick leave will be changed to unpaid leave.');
         }
 
-        return $mail;
+        return $mail->action('Open in app', LeavePortalLinks::myRequestsUrl($notifiable, $this->leaveRequest->id));
     }
 
     public function toDatabase(object $notifiable): array

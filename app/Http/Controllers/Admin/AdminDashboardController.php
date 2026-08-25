@@ -67,14 +67,13 @@ class AdminDashboardController extends Controller
 
         $onLeaveTodayCount = 0;
         if (!$isTodayDisabled) {
-            $onLeaveTodayCount = LeaveRequest::query()
+            $onLeaveTodayQuery = LeaveRequest::query()
                 ->byStaffApplicants()
-                ->when($employeeFilter, fn ($q) => $q->where('user_id', $employeeFilter))
                 ->whereRaw('LOWER(TRIM(status)) = ?', ['approved'])
                 ->whereDate('start_date', '<=', $today)
-                ->whereDate('end_date', '>=', $today)
-                ->distinct('user_id')
-                ->count('user_id');
+                ->whereDate('end_date', '>=', $today);
+            DashboardEmployeeFilter::apply($onLeaveTodayQuery, $employeeFilter);
+            $onLeaveTodayCount = $onLeaveTodayQuery->distinct('user_id')->count('user_id');
         }
 
         // Monthly applications line chart: when requests were submitted (created_at).

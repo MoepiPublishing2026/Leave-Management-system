@@ -92,15 +92,38 @@ class AuthController extends Controller
             $user->two_factor_expires_at = now()->addMinutes(10);
             $user->save();
 
+<<<<<<< HEAD
             // Send email
             Mail::to($user->email)->send(new TwoFactorCodeMail($code));
+=======
+            $mailSent = $this->sendTwoFactorCode($user, (string) $code);
+>>>>>>> 30d13259b34cdf46af3d83a5c788307804dc56f0
 
             // Store user id in session temporarily
             $request->session()->put('2fa_user_id', $user->id);
 
+<<<<<<< HEAD
             return redirect()->route('login.verify');
         }
 
+=======
+            if ($mailSent) {
+                return redirect()->route('login.verify');
+            }
+
+            if (app()->environment('local')) {
+                return redirect()->route('login.verify')->with(
+                    'status',
+                    'The verification email could not be sent (mail server unreachable). Use this code: '.$code
+                );
+            }
+
+            return redirect('/login')->withErrors([
+                'login_error' => 'We could not send your verification email. Check your internet connection and try again.',
+            ]);
+        }
+
+>>>>>>> 30d13259b34cdf46af3d83a5c788307804dc56f0
         return redirect('/login')->withErrors(['login_error' => 'Invalid credentials.']);
     }
 
@@ -128,7 +151,7 @@ class AuthController extends Controller
 
         $user = User::find($userId);
 
-        if (!$user || $user->two_factor_code !== $request->code) {
+        if (!$user || (string) $user->two_factor_code !== (string) $request->code) {
             return back()->withErrors(['code' => 'The provided code is invalid.']);
         }
 
@@ -176,26 +199,43 @@ class AuthController extends Controller
         $previousCode = $user->two_factor_code;
         $previousExpiry = $user->two_factor_expires_at;
         $code = random_int(100000, 999999);
+        $user->two_factor_code = $code;
+        $user->two_factor_expires_at = now()->addMinutes(10);
+        $user->save();
 
+        $mailSent = $this->sendTwoFactorCode($user, (string) $code);
+
+        if ($mailSent) {
+            return back()->with('status', 'A new authentication code has been sent to your email.');
+        }
+
+        if (app()->environment('local')) {
+            return back()->with(
+                'status',
+                'The verification email could not be sent (mail server unreachable). Use this code: '.$code
+            );
+        }
+
+        $user->two_factor_code = $previousCode;
+        $user->two_factor_expires_at = $previousExpiry;
+        $user->save();
+
+        return back()->withErrors([
+            'code' => 'The new authentication code could not be sent. Please try again.',
+        ]);
+    }
+
+    private function sendTwoFactorCode(User $user, string $code): bool
+    {
         try {
-            $user->two_factor_code = $code;
-            $user->two_factor_expires_at = now()->addMinutes(10);
-            $user->save();
+            Mail::to($user->email)->send(new TwoFactorCodeMail($code, \App\Support\EmailGreeting::displayName($user)));
 
-            Mail::to($user->email)->send(new TwoFactorCodeMail($code));
+            return true;
         } catch (\Throwable $e) {
             report($e);
 
-            $user->two_factor_code = $previousCode;
-            $user->two_factor_expires_at = $previousExpiry;
-            $user->save();
-
-            return back()->withErrors([
-                'code' => 'The new authentication code could not be sent. Please try again.',
-            ]);
+            return false;
         }
-
-        return back()->with('status', 'A new authentication code has been sent to your email.');
     }
 
     public function showForgotPasswordForm()
@@ -308,39 +348,47 @@ class AuthController extends Controller
     }
 
     // Update profile and password
-   public function update(Request $request)
-{
-    $user = auth()->user();
+    public function update(Request $request)
+    {
+        $user = auth()->user();
 
-    $rules = [
-        'current_password' => ['nullable', 'string'],
-        'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-        'profile_picture' => ['nullable', 'image', 'max:10240'],
-    ];
-    if ($request->filled('password')) {
-        $rules['current_password'] = ['required', 'current_password'];
-    }
-
-    $data = $request->validate($rules);
-
-    if (!empty($data['password'])) {
-        if (Hash::check($data['password'], $user->password)) {
-            return back()->withErrors(['password' => 'New password cannot be the same as the current password.']);
+        $rules = [
+            'current_password' => ['nullable', 'string'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'profile_picture' => ['nullable', 'image', 'max:10240'],
+        ];
+        if ($request->filled('password')) {
+            $rules['current_password'] = ['required', 'current_password'];
         }
-        $user->password = Hash::make($data['password']);
+
+        $data = $request->validate($rules);
+
+        $changed = false;
+
+        if (! empty($data['password'])) {
+            if (Hash::check($data['password'], $user->password)) {
+                return back()->withErrors(['password' => 'New password cannot be the same as the current password.']);
+            }
+            $user->password = Hash::make($data['password']);
+            $changed = true;
+        }
+
+        if ($request->hasFile('profile_picture')) {
+            $user->profile_picture = app(ProfilePictureService::class)->store(
+                $request->file('profile_picture'),
+                $user->profile_picture
+            );
+            $changed = true;
+        }
+
+        if (! $changed) {
+            return redirect()->route('profile.edit')->with('success', 'No changes were made.');
+        }
+
+        $user->save();
+
+        return redirect()->route('profile.edit')->with('success', 'Profile updated successfully.');
     }
-
-    if ($request->hasFile('profile_picture')) {
-        $user->profile_picture = app(ProfilePictureService::class)->store(
-            $request->file('profile_picture'),
-            $user->profile_picture
-        );
-    }
-
-    $user->save();
-
-    return redirect()->route('profile.edit')->with('success', 'Profile updated successfully.');
-}
 
 public function destroyProfilePicture(Request $request)
 {

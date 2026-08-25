@@ -4,9 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Two-Factor Authentication - Leave Management</title>
-    <link rel="icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" sizes="32x32" />
-    <link rel="shortcut icon" href="{{ asset('images/favicon-32.png') }}" type="image/png" />
-    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}" sizes="180x180" />
+    <link rel="icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" sizes="192x192" />
+    <link rel="icon" href="{{ asset('images/favicon-48.png') }}?v=3" type="image/png" sizes="48x48" />
+    <link rel="shortcut icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" />
+    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}?v=3" sizes="180x180" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -23,7 +24,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 500px;
+            max-width: 600px;
             width: 100%;
             background: white;
             padding: 40px;
@@ -223,9 +224,9 @@
     <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
 </head>
 <body>
-    <div class="container">
+    <div class="container auth-card">
         <div class="login-logo">
-            <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Publishing Logo" />
+            <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
         </div>
         <h2 class="auth-title">Two-Factor Authentication</h2>
         <p>A verification code has been sent to your email. Please enter it below to continue.</p>

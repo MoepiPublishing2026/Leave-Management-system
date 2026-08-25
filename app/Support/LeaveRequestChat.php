@@ -2,9 +2,11 @@
 
 namespace App\Support;
 
+use App\Models\LeaveRequest;
 use App\Models\LeaveRequestConversation;
 use App\Models\User;
 use App\Notifications\MessageReceivedNotification;
+use App\Support\LeaveApprovalWorkflow;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -17,9 +19,14 @@ class LeaveRequestChat
 
         if (($user->role ?? null) === 'manager') {
             $query->where('manager_id', $user->id);
+        } elseif (($user->role ?? null) === 'admin') {
+            $managerIds = User::query()->managers()->where('manager_id', $user->id)->pluck('id');
+            if ($managerIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
+            $query->whereIn('manager_id', $managerIds);
         }
 
-        // All administrators can access every manager↔admin thread.
         return $query;
     }
 
@@ -30,7 +37,9 @@ class LeaveRequestChat
         }
 
         if (($user->role ?? null) === 'admin') {
-            return true;
+            $manager = User::query()->find($conversation->manager_id);
+
+            return $manager && (int) $manager->manager_id === (int) $user->id;
         }
 
         return false;
@@ -54,6 +63,12 @@ class LeaveRequestChat
 
         if ($role === 'manager') {
             $query->where('c.manager_id', $user->id);
+        } elseif ($role === 'admin') {
+            $managerIds = User::query()->managers()->where('manager_id', $user->id)->pluck('id');
+            if ($managerIds->isEmpty()) {
+                return 0;
+            }
+            $query->whereIn('c.manager_id', $managerIds);
         }
 
         return (int) $query->count();
@@ -61,7 +76,10 @@ class LeaveRequestChat
 
     public static function notifyAdmins(int $conversationId, int $leaveRequestId, string $senderName): void
     {
-        $admins = User::query()->where('role', 'admin')->get();
+        $leave = LeaveRequest::query()->with('user')->find($leaveRequestId);
+        $admins = $leave
+            ? LeaveApprovalWorkflow::seniorsForLeave($leave)
+            : collect();
 
         foreach ($admins as $admin) {
             try {

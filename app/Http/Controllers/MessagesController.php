@@ -7,6 +7,7 @@ use App\Models\LeaveRequestConversation;
 use App\Models\LeaveRequestMessage;
 use App\Models\User;
 use App\Notifications\MessageReceivedNotification;
+use App\Support\LeaveApprovalWorkflow;
 use App\Support\LeaveRequestChat;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -129,9 +130,18 @@ class MessagesController extends Controller
         }
     }
 
-    private function defaultAdminId(): ?int
+    private function defaultAdminId(?LeaveRequest $leaveRequest = null): ?int
     {
-        return User::where('role', 'admin')->orderBy('id')->value('id');
+        if ($leaveRequest) {
+            return LeaveApprovalWorkflow::seniorsForLeave($leaveRequest)->first()?->id;
+        }
+
+        $user = Auth::user();
+        if ($user && strtolower((string) ($user->role ?? '')) === 'manager') {
+            return LeaveApprovalWorkflow::assignedSeniorForUser($user)?->id;
+        }
+
+        return null;
     }
 
     private function isManagerUserId(mixed $userId): bool
@@ -255,7 +265,7 @@ class MessagesController extends Controller
             ]);
 
             if (!$conversation->admin_id) {
-                $conversation->admin_id = $this->defaultAdminId();
+                $conversation->admin_id = $this->defaultAdminId($leaveRequest);
                 $conversation->save();
             }
         } else {
@@ -325,7 +335,8 @@ class MessagesController extends Controller
         }
 
         if (($user->role ?? null) === 'manager' && !$conversation->admin_id) {
-            $conversation->admin_id = $this->defaultAdminId();
+            $conversation->loadMissing('leaveRequest');
+            $conversation->admin_id = $this->defaultAdminId($conversation->leaveRequest);
             $conversation->save();
         }
 

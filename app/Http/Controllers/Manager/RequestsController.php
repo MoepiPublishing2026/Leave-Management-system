@@ -220,12 +220,12 @@ public function escalate(Request $r, $id)
     ]);
     $conversation->touch();
 
-    $admins = User::where('role', 'admin')->get();
+    $seniors = \App\Support\LeaveApprovalWorkflow::seniorsForLeave($leave);
     $managerName = trim((Auth::user()->first_name ?? '') . ' ' . (Auth::user()->last_name ?? ''));
     if ($managerName === '') {
         $managerName = 'Manager';
     }
-    foreach ($admins as $admin) {
+    foreach ($seniors as $admin) {
         try {
             $admin->notify(new OverdueLeaveEscalatedNotification($leave, $managerName));
         } catch (\Throwable $e) {

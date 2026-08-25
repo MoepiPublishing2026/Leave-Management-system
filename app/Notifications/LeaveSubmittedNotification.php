@@ -6,6 +6,7 @@ use App\Models\LeaveRequest;
 use App\Support\LeaveApplicant;
 use App\Support\LeavePortalLinks;
 use App\Support\NotifiesByMail;
+use App\Support\SystemMailMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -28,13 +29,11 @@ class LeaveSubmittedNotification extends Notification
         $approver = LeaveApplicant::approverLabel($notifiable);
         $type = $this->leaveRequest->leave_type ?: 'leave';
 
-        return (new MailMessage)
+        return SystemMailMessage::for($notifiable)
             ->subject('Leave request submitted — #'.$this->leaveRequest->id)
-            ->greeting('Hello '.trim((string) ($notifiable->first_name ?? '')).',')
             ->line("Your {$type} leave request #{$this->leaveRequest->id} has been submitted.")
             ->line('It is now waiting for '.$approver.' to review.')
-            ->action('View my requests', LeavePortalLinks::myRequestsUrl($notifiable, $this->leaveRequest->id))
-            ->line('You will get another email when a decision is made.');
+            ->action('Open in app', LeavePortalLinks::myRequestsUrl($notifiable, $this->leaveRequest->id));
     }
 
     public function toDatabase(object $notifiable): array

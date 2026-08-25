@@ -29,18 +29,24 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        flex: 0 0 42px;
         width: 42px;
         height: 42px;
+        padding: 0;
         border-radius: 50%;
         border: 1px solid #e2e8f0;
         background: #fff;
         color: #5c7212;
         text-decoration: none;
-        font-size: 22px;
-        line-height: 1;
+        line-height: 0;
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
         transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
         user-select: none;
+    }
+    .cal-nav-btn svg {
+        display: block;
+        width: 18px;
+        height: 18px;
     }
     .cal-nav-btn:hover {
         background: rgba(178, 205, 22, 0.18);
@@ -133,16 +139,24 @@
         border-bottom: 1px solid #eef3f0;
     }
     .cal-nav-year-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         width: 34px;
         height: 34px;
+        padding: 0;
         border: 1px solid #e2e8f0;
         border-radius: 10px;
         background: #fff;
         color: #5c7212;
-        font-size: 1.25rem;
-        line-height: 1;
+        line-height: 0;
         cursor: pointer;
         transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .cal-nav-year-btn svg {
+        display: block;
+        width: 16px;
+        height: 16px;
     }
     .cal-nav-year-btn:hover:not(:disabled) {
         background: rgba(178, 205, 22, 0.2);
@@ -217,6 +231,7 @@
         .cal-nav-btn {
             width: 34px;
             height: 34px;
+            flex-basis: 34px;
         }
     }
 </style>
@@ -225,7 +240,11 @@
 <div class="calendar-nav-bar" id="{{ $pickerId }}" data-year-min="{{ $yearMin }}" data-year-max="{{ $yearMax }}">
     <a href="{{ route($routeName, $navParams($month === 1 ? 12 : $month - 1, $month === 1 ? $year - 1 : $year)) }}"
        class="cal-nav-btn"
-       aria-label="Previous month">&lsaquo;</a>
+       aria-label="Previous month">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M15 5.5L8.5 12 15 18.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </a>
 
     <div class="cal-nav-picker">
         <button type="button"
@@ -244,9 +263,17 @@
 
         <div class="cal-nav-panel" id="{{ $pickerId }}-panel" role="dialog" aria-label="Month picker">
             <div class="cal-nav-panel-head">
-                <button type="button" class="cal-nav-year-btn" data-year-step="-1" aria-label="Previous year">&lsaquo;</button>
+                <button type="button" class="cal-nav-year-btn" data-year-step="-1" aria-label="Previous year">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M15 5.5L8.5 12 15 18.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
                 <span class="cal-nav-panel-year">{{ $year }}</span>
-                <button type="button" class="cal-nav-year-btn" data-year-step="1" aria-label="Next year">&rsaquo;</button>
+                <button type="button" class="cal-nav-year-btn" data-year-step="1" aria-label="Next year">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M9 5.5L15.5 12 9 18.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
             </div>
             <div class="cal-nav-month-grid">
                 @foreach (range(1, 12) as $m)
@@ -262,7 +289,11 @@
 
     <a href="{{ route($routeName, $navParams($month === 12 ? 1 : $month + 1, $month === 12 ? $year + 1 : $year)) }}"
        class="cal-nav-btn"
-       aria-label="Next month">&rsaquo;</a>
+       aria-label="Next month">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M9 5.5L15.5 12 9 18.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </a>
 </div>
 
 @once

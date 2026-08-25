@@ -1,24 +1,32 @@
-<table class="cards">
+@php
+    $colors = config('leave_status_colors.colors', []);
+    $cardAll = $colors['all'] ?? '#00C0A3';
+    $cardPending = $colors['pending'] ?? '#C291A4';
+    $cardOverdue = $colors['overdue'] ?? '#C154C1';
+    $cardApproved = $colors['approved'] ?? '#E27A53';
+    $cardRejected = $colors['rejected'] ?? '#87AFC7';
+@endphp
+<table class="pdf-cards" cellpadding="0" cellspacing="8">
     <tr>
-        <td style="background:#00C0A3;color:#fff;border:1px solid #00C0A3;text-align:center;">
-            <div class="k" style="color:#fff;">All Requests</div>
-            <div class="v" style="color:#fff;">{{ $totalRequests ?? 0 }}</div>
+        <td class="pdf-card" style="background-color: {{ $cardAll }}; border: 1px solid {{ $cardAll }};">
+            <div class="pdf-card-title">All Requests</div>
+            <div class="pdf-card-value">{{ $totalRequests ?? 0 }}</div>
         </td>
-        <td style="background:#C291A4;color:#fff;border:1px solid #C291A4;text-align:center;">
-            <div class="k" style="color:#fff;">Pending Requests</div>
-            <div class="v" style="color:#fff;">{{ $pendingRequests ?? 0 }}</div>
+        <td class="pdf-card" style="background-color: {{ $cardPending }}; border: 1px solid {{ $cardPending }};">
+            <div class="pdf-card-title">Pending Requests</div>
+            <div class="pdf-card-value">{{ $pendingRequests ?? 0 }}</div>
         </td>
-        <td style="background:#C154C1;color:#fff;border:1px solid #C154C1;text-align:center;">
-            <div class="k" style="color:#fff;">Overdue Requests</div>
-            <div class="v" style="color:#fff;">{{ $overdueRequests ?? 0 }}</div>
+        <td class="pdf-card" style="background-color: {{ $cardOverdue }}; border: 1px solid {{ $cardOverdue }};">
+            <div class="pdf-card-title">Overdue Requests</div>
+            <div class="pdf-card-value">{{ $overdueRequests ?? 0 }}</div>
         </td>
-        <td style="background:#E27A53;color:#fff;border:1px solid #E27A53;text-align:center;">
-            <div class="k" style="color:#fff;">Approved Requests</div>
-            <div class="v" style="color:#fff;">{{ $approvedRequests ?? 0 }}</div>
+        <td class="pdf-card" style="background-color: {{ $cardApproved }}; border: 1px solid {{ $cardApproved }};">
+            <div class="pdf-card-title">Approved Requests</div>
+            <div class="pdf-card-value">{{ $approvedRequests ?? 0 }}</div>
         </td>
-        <td style="background:#87AFC7;color:#fff;border:1px solid #87AFC7;text-align:center;">
-            <div class="k" style="color:#fff;">Rejected Requests</div>
-            <div class="v" style="color:#fff;">{{ $rejectedRequests ?? 0 }}</div>
+        <td class="pdf-card" style="background-color: {{ $cardRejected }}; border: 1px solid {{ $cardRejected }};">
+            <div class="pdf-card-title">Rejected Requests</div>
+            <div class="pdf-card-value">{{ $rejectedRequests ?? 0 }}</div>
         </td>
     </tr>
 </table>
