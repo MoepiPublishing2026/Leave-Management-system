@@ -19,14 +19,32 @@
         box-shadow: 0 6px 20px rgba(163, 71, 71, 0.08);
         margin: 0 auto;
     }
-    h1 {
+    .admin-page-header {
+        max-width: 1200px;
+        margin: 0 auto 18px;
+        padding: 0 18px;
+    }
+    .admin-page-header h1 {
         font-weight: 700;
-        font-size: 40px;
+        font-size: 34px;
         color: #0f172a;
-        margin: 0 0 24px 0;
-    
-        padding-left: 15px;
-        letter-spacing: 0.04em;
+        margin: 0;
+        padding: 0;
+        letter-spacing: 0.02em;
+        line-height: 1.15;
+    }
+    @media (max-width: 1200px) {
+        .admin-page-header h1 {
+            font-size: 28px;
+        }
+        .dash-charts-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+    @media (max-width: 520px) {
+        .admin-page-header h1 {
+            font-size: 24px;
+        }
     }
     .cards {
         display: flex;
@@ -116,7 +134,9 @@
     }
 </style>
 
-<h1>Senior Manager Dashboard</h1>
+<div class="admin-page-header">
+    <h1>Senior Manager Dashboard</h1>
+</div>
 <div class="admin-container">
 @include('partials.dashboard-period-filter', [
     'monthFilter' => $monthFilter ?? 'this_year',

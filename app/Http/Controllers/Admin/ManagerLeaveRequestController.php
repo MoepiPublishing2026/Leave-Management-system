@@ -20,7 +20,7 @@ class ManagerLeaveRequestController extends Controller
         return redirect()->route('admin.requests', $request->query());
     }
 
-    public function approve($id)
+    public function approve(Request $request, $id)
     {
         $leave = LeaveRequest::with('user')->findOrFail($id);
         $this->assertAdmin();
@@ -33,16 +33,26 @@ class ManagerLeaveRequestController extends Controller
             return redirect()->back()->with('error', 'Only requests awaiting Senior Manager decision can be approved.');
         }
 
-        if ($status === 'pending' && $leave->isOverdue()) {
-            return redirect()->back()->with('error', 'Overdue manager leave still on pending cannot be approved here.');
+        if ($leave->isOverdue()) {
+            return redirect()->back()->with('error', 'The start date has passed, so this request can no longer be approved or rejected.');
         }
 
         if (! LeaveProofRules::canApprove($leave)) {
             return redirect()->back()->with('error', LeaveProofRules::approvalBlockedReason($leave) ?? 'Supporting proof is required before approval.');
         }
 
+        $validated = $request->validate([
+            'approval_comment' => 'nullable|string|max:1000',
+        ]);
+
         try {
-            LeaveApprovalWorkflow::finalize($leave, Auth::user(), 'approved');
+            LeaveApprovalWorkflow::finalize(
+                $leave,
+                Auth::user(),
+                'approved',
+                null,
+                $validated['approval_comment'] ?? null
+            );
         } catch (\Throwable $e) {
             report($e);
 
@@ -63,6 +73,10 @@ class ManagerLeaveRequestController extends Controller
 
         if (! $awaitingSenior) {
             return redirect()->back()->with('error', 'Only requests awaiting Senior Manager decision can be rejected.');
+        }
+
+        if ($leave->isOverdue()) {
+            return redirect()->back()->with('error', 'The start date has passed, so this request can no longer be approved or rejected.');
         }
 
         $request->validate(['rejection_reason' => 'required|string|max:500']);

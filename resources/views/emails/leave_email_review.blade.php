@@ -69,15 +69,20 @@
         </div>
     </div>
 
-    @if ($awaiting)
+    @if ($awaiting && empty($isOverdue))
         @if (! $canApproveWithProof && $proofBlockReason)
             <p class="lh-note">{{ $proofBlockReason }}</p>
         @endif
-        <div class="lh-actions">
+        <div class="lh-actions" style="flex-direction:column;align-items:stretch;">
             @if ($canApproveWithProof)
                 <form method="POST" action="{{ $approveUrl }}">
                     @csrf
-                    <button type="submit" class="lh-btn lh-btn--approve">Approve</button>
+                    <label for="approval_comment" style="display:block;font-weight:700;margin:0 0 8px;">Note for the employee (optional)</label>
+                    <textarea id="approval_comment" name="approval_comment" class="lh-comment" maxlength="1000" placeholder="You can leave this blank.">{{ old('approval_comment') }}</textarea>
+                    @error('approval_comment')
+                        <p class="lh-note">{{ $message }}</p>
+                    @enderror
+                    <button type="submit" class="lh-btn lh-btn--approve" style="margin-top:12px;">Approve</button>
                 </form>
             @else
                 <span class="lh-btn lh-btn--disabled">Approve (proof required)</span>
@@ -94,6 +99,10 @@
                 <button type="submit" class="lh-btn lh-btn--reject" style="margin-top:12px;">Reject</button>
             </form>
         </div>
+    @elseif ($awaiting && ! empty($isOverdue))
+        <p class="lh-note">The requested start date has passed, so this request can no longer be approved or rejected.</p>
+    @elseif (strtolower(trim((string) ($leaveRequest->status ?? ''))) === 'withdrawn')
+        <p class="lh-note" style="color:#166534;">This request was withdrawn. No decision is needed.</p>
     @else
         <p class="lh-note" style="color:#166534;">This decision has already been submitted. Approve and Reject are no longer available.</p>
     @endif

@@ -11,8 +11,8 @@
     }
     /* Reserve header/footer space on EVERY page so content cannot overlap. */
     @page {
-        margin-top: 108px;
-        margin-right: 32px;
+        margin-top: 186px;
+        margin-right: 36px;
         margin-bottom: 92px;
         margin-left: 36px;
     }
@@ -24,46 +24,85 @@
     }
     .pdf-accent {
         position: fixed;
-        top: -108px;
+        top: -186px;
         left: -36px;
-        width: 12px;
-        height: 96px;
+        width: 18px;
+        height: 168px;
         background: #d6e05a;
-        border-bottom-right-radius: 8px;
+        border-bottom-right-radius: 22px;
     }
     .pdf-header {
         position: fixed;
-        top: -100px;
-        left: -20px;
-        right: -16px;
-        height: 92px;
+        top: -160px;
+        left: -16px;
+        right: -36px;
+        height: 148px;
     }
     .pdf-header-table {
         width: 100%;
         border-collapse: collapse;
     }
-    .pdf-header-table td {
-        vertical-align: middle;
+    .pdf-emblem-cell {
+        width: 118px;
+        white-space: nowrap;
         padding: 0;
         border: 0;
+        vertical-align: middle;
     }
-    .pdf-logo {
-        height: 78px;
+    .pdf-emblem {
+        height: 118px;
         width: auto;
-        max-width: 340px;
+        display: block;
+    }
+    .pdf-gap-cell {
+        width: 28px;
+        padding: 0;
+        border: 0;
+        font-size: 1px;
+        line-height: 1px;
+        vertical-align: middle;
+    }
+    .pdf-lockup-cell {
+        padding: 0;
+        border: 0;
+        vertical-align: middle;
+    }
+    .pdf-lockup-table {
+        width: 100%;
+        border-collapse: collapse;
     }
     .pdf-wordmark {
+        width: 1%;
+        white-space: nowrap;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, DejaVu Sans, sans-serif;
-        font-size: 28px;
+        font-size: 36px;
         font-weight: 700;
         color: #1b1e40;
-        letter-spacing: 1px;
+        letter-spacing: 0.04em;
         line-height: 1;
+        padding: 0;
+        vertical-align: top;
+    }
+    .pdf-name-gap {
+        width: 20px;
+        padding: 0;
+        border: 0;
+        font-size: 1px;
+        line-height: 1px;
+        vertical-align: top;
+    }
+    .pdf-rule-cell {
+        width: 99%;
+        vertical-align: top;
+        padding: 2px 0 0;
+        border: 0;
     }
     .pdf-rule {
-        border-top: 6px solid #2f2f2f;
-        margin-left: 14px;
-        margin-top: 2px;
+        width: 100%;
+        border-top: 7px solid #1b1e40;
+        height: 0;
+        font-size: 1px;
+        line-height: 0;
     }
     .pdf-footer {
         position: fixed;

@@ -268,7 +268,7 @@
         font-variant-numeric: tabular-nums;
     }
     .requests-table td:nth-child(2) {
-        color: #173f3a;
+        color: #0f766e;
         font-weight: 700;
     }
     .requests-table tbody tr {
@@ -503,16 +503,6 @@
         color: #991b1b;
         border: 1px solid #fca5a5;
     }
-    .request-badge--manager {
-        background: #ede9fe;
-        color: #5b21b6;
-        border: 1px solid #c4b5fd;
-        font-size: 0.72rem;
-        vertical-align: middle;
-        min-width: 0;
-        margin-left: 6px;
-        padding: 3px 8px;
-    }
     .proof-upload-form {
         margin: 0;
         display: inline-flex;
@@ -526,6 +516,64 @@
         font-size: 0.92rem;
         color: #475569;
         line-height: 1.45;
+    }
+    .swal2-popup.swal-approve-popup {
+        background: #f8fafc !important;
+        border-radius: 16px !important;
+        padding: 28px 24px 22px !important;
+        color: #1e293b !important;
+    }
+    .swal2-popup.swal-approve-popup .swal-approve-title {
+        color: #0f766e !important;
+        font-size: 1.35rem !important;
+        font-weight: 700 !important;
+    }
+    .swal2-popup.swal-approve-popup .swal-approve-html {
+        color: #475569 !important;
+        font-size: 0.95rem !important;
+        margin: 0 0 8px !important;
+    }
+    .swal-approve-copy {
+        margin: 0 0 4px;
+        color: #475569;
+        text-align: left;
+        line-height: 1.5;
+    }
+    .swal-approve-notes {
+        margin: 0 0 12px;
+        padding: 10px 12px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        color: #334155;
+        text-align: left;
+    }
+    .swal-approve-notes p {
+        margin: 0 0 6px;
+        line-height: 1.45;
+    }
+    .swal-approve-notes p:last-child {
+        margin-bottom: 0;
+    }
+    .swal2-popup.swal-approve-popup .swal-approve-input {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 10px !important;
+        box-shadow: none !important;
+        background: #ffffff !important;
+        color: #1e293b !important;
+        min-height: 92px;
+    }
+    .swal2-popup.swal-approve-popup .swal-approve-confirm {
+        background: #16a34a !important;
+        color: #ffffff !important;
+        box-shadow: none !important;
+        font-weight: 700 !important;
+    }
+    .swal2-popup.swal-approve-popup .swal-approve-cancel {
+        background: #e2e8f0 !important;
+        color: #334155 !important;
+        box-shadow: none !important;
+        font-weight: 600 !important;
     }
     @media (max-width: 768px) {
         .requests-page h1 {

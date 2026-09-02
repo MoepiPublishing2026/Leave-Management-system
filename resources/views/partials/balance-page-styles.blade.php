@@ -2,7 +2,9 @@
     $balanceStatusColors = config('leave_status_colors.colors', []);
     $balanceMaroon = '#850621';
     $balanceMaroonDark = '#680523';
-    $balanceMeterPink = '#f00e65';
+    $balanceHeadingTeal = '#0f766e';
+    $balanceHeadingTealDark = '#123f3a';
+    $balanceHeadingTealSoft = '#d3e5df';
     $balanceApplyGreen = '#b2cd16';
     $balanceApplyGreenBorder = '#91bf14';
     $balanceApplyGreenText = '#0a1347';
@@ -150,7 +152,7 @@
         font-weight: 600;
         text-transform: none;
         letter-spacing: normal;
-        color: {{ $balanceMaroonDark }};
+        color: {{ $balanceHeadingTealDark }};
         margin-bottom: 0;
         min-height: 2.6rem;
         line-height: 1.25;
@@ -171,7 +173,7 @@
     .balance-summary-v {
         font-size: 2.2rem;
         font-weight: 700;
-        color: {{ $balanceMaroon }};
+        color: {{ $balanceHeadingTeal }};
         line-height: 1.1;
         margin: 0;
     }
@@ -183,7 +185,7 @@
         margin-top: 8px;
         font-size: 0.9rem;
         font-weight: 600;
-        color: {{ $balanceMeterPink }};
+        color: {{ $balanceHeadingTeal }};
         min-height: 1.35rem;
         line-height: 1.35;
     }
@@ -195,7 +197,7 @@
         padding: 16px 18px 0 13px;
         justify-content: flex-start;
         overflow: hidden;
-        border-left: 5px solid {{ $balanceMeterPink }};
+        border-left: 5px solid {{ $balanceHeadingTeal }};
         min-height: 168px;
     }
     .balance-summary-card--used .balance-summary-k,
@@ -222,7 +224,7 @@
     .balance-summary-meter-fill {
         height: 100%;
         min-width: 48px;
-        background: {{ $balanceMeterPink }};
+        background: {{ $balanceHeadingTeal }};
         border-radius: 0;
         display: flex;
         align-items: center;
@@ -277,7 +279,7 @@
     }
     .balance-usage-fill {
         height: 100%;
-        background: {{ $balanceMeterPink }};
+        background: {{ $balanceHeadingTeal }};
         border-radius: 999px;
         transition: width 0.35s ease;
     }
@@ -330,7 +332,7 @@
         list-style: none;
     }
     .balance-type-card {
-        background: rgb(252, 213, 234);
+        background: {{ $balanceHeadingTealSoft }};
         border-radius: 16px;
         padding: 18px 20px;
         display: flex;
@@ -341,7 +343,7 @@
         color: #050505;
         box-shadow: 0 3px 7px rgba(13, 59, 53, 0.12);
         text-decoration: none;
-        border: 1px solid {{ $balanceMeterPink }};
+        border: 1px solid {{ $balanceHeadingTeal }};
         border-left-width: 5px;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
@@ -360,7 +362,7 @@
     }
     .balance-type-card .type-days {
         font-weight: 600;
-        color: {{ $balanceMaroon }};
+        color: {{ $balanceHeadingTeal }};
         white-space: nowrap;
     }
 

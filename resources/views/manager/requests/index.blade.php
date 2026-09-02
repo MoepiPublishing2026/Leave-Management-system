@@ -140,6 +140,7 @@
                         'lateReasonSent' => (bool) $req->overdue_escalated_at,
                         'lateReason' => (string) ($req->overdue_escalation_reason ?? ''),
                         'rejectionReason' => (string) ($req->rejection_reason ?? ''),
+                        'approvalComment' => (string) ($req->approval_comment ?? ''),
                         'originalLeaveType' => (string) ($req->original_leave_type ?? ''),
                         'convertedToUnpaidAt' => $req->converted_to_unpaid_at?->format('d M Y H:i') ?? '',
                         'conversionReason' => (string) ($req->converted_to_unpaid_reason ?? ''),
@@ -185,6 +186,7 @@
                                                 @csrf
                                                 @method('PATCH')
                                                 <input type="hidden" name="recommendation" value="approve" />
+                                                <input type="hidden" name="manager_recommendation_comment" class="approval-comment-input" value="" />
                                                 <button type="submit" class="request-btn request-btn--approve">Recommend Approve</button>
                                             </form>
                                         @else
@@ -351,6 +353,8 @@ async function submitForcedOverdueReason(requestId, reason) {
     });
 
     try {
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => controller.abort(), 20000);
         const response = await fetch(lateReasonUrlTemplate.replace('__ID__', String(requestId)), {
             method: 'POST',
             headers: {
@@ -360,7 +364,9 @@ async function submitForcedOverdueReason(requestId, reason) {
                 'X-Requested-With': 'XMLHttpRequest',
             },
             body: JSON.stringify({ overdue_escalation_reason: reason }),
+            signal: controller.signal,
         });
+        window.clearTimeout(timeoutId);
 
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) {
@@ -388,10 +394,13 @@ async function submitForcedOverdueReason(requestId, reason) {
         });
         window.location.reload();
     } catch (error) {
+        const timedOut = error?.name === 'AbortError';
         Swal.fire({
             icon: 'error',
             title: 'Could not send reason',
-            text: error.message || 'Please try again.',
+            text: timedOut
+                ? 'The senior manager email is taking too long. The reason may still have been saved — retry, or ask them to check Team Requests.'
+                : (error.message || 'Please try again.'),
             confirmButtonText: 'Retry',
             allowOutsideClick: false,
             allowEscapeKey: false,
@@ -426,16 +435,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function openRejectPopup(requestId) {
     Swal.fire({
-        icon: 'warning',
+        icon: false,
         title: 'Recommend Reject',
+        html: '<p class="swal-approve-copy">Add an optional comment for the senior manager. You can leave this blank.</p>',
         input: 'textarea',
-        inputLabel: 'Comments for Senior Manager (optional)',
-        inputPlaceholder: 'Add a short recommendation comment...',
-        inputAttributes: { 'aria-label': 'Recommendation comments' },
+        inputPlaceholder: 'Optional comment…',
+        inputAttributes: { 'aria-label': 'Recommendation comments', maxlength: 1000 },
         showCancelButton: true,
         confirmButtonText: 'Send to Senior Manager',
         confirmButtonColor: '#dc2626',
-        cancelButtonText: 'Cancel',
+        cancelButtonColor: '#94a3b8',
+        reverseButtons: true,
+        customClass: {
+            popup: 'swal-approve-popup',
+            title: 'swal-approve-title',
+            htmlContainer: 'swal-approve-html',
+            input: 'swal-approve-input',
+            cancelButton: 'swal-approve-cancel',
+        },
         preConfirm: (value) => {
             const v = (value || '').trim();
             if (v.length > 1000) {

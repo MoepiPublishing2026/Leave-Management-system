@@ -186,6 +186,12 @@ class PerformanceReviewController extends Controller
 
     private function submitReview(PerformanceReview $review, User $user)
     {
+        if (! $review->hasRequiredContent()) {
+            return redirect()
+                ->route(PerformanceReviews::routeName($user, 'edit'), $review)
+                ->with('error', 'Fill in every section before submitting this review.');
+        }
+
         $seniors = PerformanceReviews::seniorsToNotify($user);
         if ($seniors->isEmpty()) {
             return redirect()
@@ -228,7 +234,15 @@ class PerformanceReviewController extends Controller
             'employee_id' => $user->id,
             'period_year' => (int) ($request->input('period_year') ?: ($review->period_year ?? $year)),
             'period_month' => (int) ($request->input('period_month') ?: ($review->period_month ?? Carbon::today()->month)),
+            'goals_achieved' => trim((string) $request->input('goals_achieved')),
+            'quality_of_work' => trim((string) $request->input('quality_of_work')),
+            'initiative_examples' => trim((string) $request->input('initiative_examples')),
+            'areas_for_improvement' => trim((string) $request->input('areas_for_improvement')),
         ]);
+
+        $narrative = strtolower((string) $request->input('intent')) === 'submit'
+            ? ['required', 'string', 'max:8000']
+            : ['nullable', 'string', 'max:8000'];
 
         $rules = [
             'employee_id' => ['required', 'integer', $employeeRule],
@@ -236,13 +250,18 @@ class PerformanceReviewController extends Controller
             'review_date' => ['required', 'date'],
             'period_year' => ['required', 'integer', 'min:2020', 'max:'.($year + 1)],
             'period_month' => ['required', 'integer', 'min:1', 'max:12'],
-            'goals_achieved' => ['nullable', 'string', 'max:8000'],
-            'quality_of_work' => ['nullable', 'string', 'max:8000'],
-            'initiative_examples' => ['nullable', 'string', 'max:8000'],
-            'areas_for_improvement' => ['nullable', 'string', 'max:8000'],
+            'goals_achieved' => $narrative,
+            'quality_of_work' => $narrative,
+            'initiative_examples' => $narrative,
+            'areas_for_improvement' => $narrative,
         ];
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, [
+            'goals_achieved.required' => 'Fill in goals achieved before submitting.',
+            'quality_of_work.required' => 'Fill in quality of work before submitting.',
+            'initiative_examples.required' => 'Fill in examples of initiative before submitting.',
+            'areas_for_improvement.required' => 'Fill in areas for improvement before submitting.',
+        ]);
         unset($validated['scores']);
 
         return $validated;

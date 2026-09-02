@@ -7,23 +7,24 @@
     .messages-page-title {
         font-weight: 700;
         font-size: 40px;
-        color: #2c3e50;
+        color: #123f3a;
         margin: 0 0 14px;
         letter-spacing: 0.04em;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     }
     .messages-wrap {
         max-width: 1200px;
         margin: 0 auto 40px;
         background: #fff;
         border-radius: 14px;
-        box-shadow: 0 8px 28px rgba(74, 92, 18, 0.14);
+        box-shadow: 0 8px 28px rgba(15, 118, 110, 0.14);
         overflow: hidden;
         display: grid;
         grid-template-columns: 340px 1fr;
         min-height: 72vh;
     }
     .messages-sidebar {
-        background: linear-gradient(180deg, #5c7212 0%, #8faa1a 32%, #b2cd16 62%, #d8ea5c 100%);
+        background: linear-gradient(180deg, #123f3a 0%, #0f766e 48%, #16a085 100%);
         border-right: none;
         display: flex;
         flex-direction: column;
@@ -80,7 +81,7 @@
     .thread-avatar-fallback {
         font-size: 0.95rem;
         font-weight: 800;
-        color: #5c7212;
+        color: #0f766e;
         letter-spacing: 0.02em;
     }
     .thread-body {
@@ -95,16 +96,17 @@
         margin-bottom: 4px;
     }
     .thread-name {
-        font-weight: 700;
-        font-size: 1rem;
+        font-weight: 800;
+        font-size: 0.95rem;
         color: #fff;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        letter-spacing: 0.01em;
     }
     .thread-time {
-        font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.72);
         flex-shrink: 0;
         font-weight: 600;
     }
@@ -115,8 +117,8 @@
         gap: 8px;
     }
     .thread-preview {
-        font-size: 0.84rem;
-        color: rgba(255, 255, 255, 0.88);
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.78);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -131,7 +133,7 @@
         padding: 0 6px;
         border-radius: 999px;
         background: #fff;
-        color: #5c7212;
+        color: #0f766e;
         font-size: 0.72rem;
         font-weight: 800;
         display: inline-flex;
@@ -142,7 +144,7 @@
         display: flex;
         flex-direction: column;
         min-width: 0;
-        background: #eef1e6;
+        background: #e8f2ef;
     }
     .messages-header {
         border-bottom: none;
@@ -150,8 +152,8 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        background: linear-gradient(90deg, #c8de2e 0%, #b2cd16 55%, #9eb812 100%);
-        box-shadow: 0 2px 10px rgba(74, 92, 18, 0.15);
+        background: linear-gradient(90deg, #123f3a 0%, #0f766e 100%);
+        box-shadow: 0 2px 10px rgba(15, 118, 110, 0.15);
     }
     .messages-header-avatar {
         width: 42px;
@@ -173,20 +175,23 @@
     .messages-header-avatar span {
         font-size: 0.85rem;
         font-weight: 800;
-        color: #5c7212;
+        color: #0f766e;
     }
     .messages-header-text h3 {
         margin: 0;
-        font-size: 1rem;
+        font-size: 1.05rem;
         font-weight: 800;
         color: #fff;
+        letter-spacing: 0.01em;
+        line-height: 1.25;
     }
     .messages-header-text .meta {
-        margin-top: 2px;
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 0.8rem;
+        margin-top: 4px;
+        color: rgba(255, 255, 255, 0.86);
+        font-size: 0.78rem;
         font-weight: 600;
-        line-height: 1.35;
+        line-height: 1.45;
+        white-space: normal;
     }
     .messages-body {
         flex: 1;
@@ -196,11 +201,12 @@
         flex-direction: column;
         align-items: stretch;
         gap: 6px;
-        background: linear-gradient(180deg, #f3f6eb 0%, #e8eddf 100%);
+        background: linear-gradient(180deg, #eef6f4 0%, #d3e5df 100%);
     }
     .bubble-row {
         display: flex;
         width: 100%;
+        align-items: flex-end;
     }
     .bubble-row.me {
         justify-content: flex-end;
@@ -208,50 +214,66 @@
     .bubble-row:not(.me) {
         justify-content: flex-start;
     }
+    .bubble-wrap {
+        display: flex;
+        flex-direction: column;
+        width: max-content;
+        max-width: min(24rem, 70%);
+        min-width: 0;
+    }
+    .bubble-row.me .bubble-wrap {
+        align-items: stretch;
+        margin-left: auto;
+    }
+    .bubble-row:not(.me) .bubble-wrap {
+        align-items: stretch;
+        margin-right: auto;
+    }
     .bubble {
-        display: inline-block;
-        width: auto;
-        min-width: 88px;
-        max-width: 72%;
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
         padding: 10px 14px 8px;
         border-radius: 10px;
         background: #fff;
-        color: #111b21;
+        color: #1e293b;
         font-size: 0.95rem;
-        line-height: 1.45;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
         word-break: break-word;
-        vertical-align: top;
         box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+        cursor: pointer;
+        transition: outline-color 0.12s ease, box-shadow 0.12s ease;
     }
     .bubble-line {
-        display: inline-flex;
-        flex-wrap: wrap;
-        align-items: flex-end;
-        justify-content: flex-start;
-        gap: 6px 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        min-width: 0;
         max-width: 100%;
     }
     .bubble-text {
+        display: block;
+        min-width: 0;
+        max-width: 100%;
         white-space: pre-wrap;
+        overflow-wrap: anywhere;
         word-break: break-word;
     }
-    .bubble-row:not(.me) .bubble {
-        flex: 0 0 auto;
-        width: auto;
-    }
     .bubble-row.me .bubble {
-        background: linear-gradient(135deg, #b2cd16 0%, #9eb812 100%);
+        background: linear-gradient(135deg, #0f766e 0%, #0b5f58 100%);
         color: #fff;
-        box-shadow: 0 2px 6px rgba(74, 92, 18, 0.2);
-        flex: 0 0 auto;
-        width: auto;
+        box-shadow: 0 2px 6px rgba(15, 118, 110, 0.2);
     }
     .bubble-meta {
+        align-self: flex-end;
         font-size: 0.72rem;
         font-weight: 600;
         color: #667781;
         white-space: nowrap;
-        flex-shrink: 0;
         line-height: 1.3;
         padding-top: 2px;
     }
@@ -280,7 +302,7 @@
         opacity: 0.85;
     }
     .bubble-reply {
-        border-left: 3px solid #b2cd16;
+        border-left: 3px solid #0f766e;
         padding: 6px 10px;
         margin-bottom: 8px;
         border-radius: 6px;
@@ -295,7 +317,7 @@
         display: block;
         font-size: 0.72rem;
         font-weight: 800;
-        color: #5c7212;
+        color: #0f766e;
         margin-bottom: 2px;
     }
     .bubble-row.me .bubble-reply-name {
@@ -305,21 +327,14 @@
         display: block;
         font-size: 0.82rem;
         opacity: 0.9;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: 260px;
-    }
-    .bubble-wrap {
-        display: inline-block;
-        max-width: min(82%, 100%);
-    }
-    .bubble {
-        cursor: pointer;
-        transition: outline-color 0.12s ease, box-shadow 0.12s ease;
+        min-width: 0;
+        max-width: 100%;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        word-break: break-word;
     }
     .bubble:hover {
-        box-shadow: 0 2px 10px rgba(74, 92, 18, 0.22);
+        box-shadow: 0 2px 10px rgba(15, 118, 110, 0.22);
     }
     .bubble.is-selected {
         outline: 3px solid #eff106;
@@ -329,11 +344,12 @@
         margin: 0 0 10px;
         padding: 10px 14px;
         border-radius: 8px;
-        background: rgba(178, 205, 22, 0.22);
-        color: #3d4f0f;
-        font-size: 0.88rem;
-        font-weight: 700;
+        background: rgba(15, 118, 110, 0.12);
+        color: #123f3a;
+        font-size: 0.86rem;
+        font-weight: 600;
         text-align: center;
+        letter-spacing: 0.01em;
     }
     .message-actions-bar {
         display: flex;
@@ -390,7 +406,7 @@
         gap: 10px;
         padding: 8px 12px;
         margin-bottom: 8px;
-        border-left: 4px solid #b2cd16;
+        border-left: 4px solid #0f766e;
         border-radius: 8px;
         background: rgba(255, 255, 255, 0.75);
     }
@@ -401,7 +417,7 @@
     .reply-bar-text strong {
         display: block;
         font-size: 0.8rem;
-        color: #5c7212;
+        color: #0f766e;
         margin-bottom: 2px;
     }
     .reply-bar-text span {
@@ -426,7 +442,7 @@
         inset: 0;
         z-index: 10040;
         background: rgba(2, 10, 14, 0.88);
-        border: 3px solid #b2cd16;
+        border: 3px solid #0f766e;
         box-shadow: inset 0 0 0 2px #0f766e;
         box-sizing: border-box;
         -webkit-backdrop-filter: blur(4px);
@@ -479,7 +495,7 @@
     .messages-compose {
         border-top: none;
         padding: 12px 16px;
-        background: linear-gradient(180deg, #e8eddf 0%, #dfe8c8 100%);
+        background: linear-gradient(180deg, #dfecea 0%, #d3e5df 100%);
     }
     .compose-form {
         display: flex;
@@ -493,7 +509,7 @@
         resize: none;
         padding: 10px 14px;
         border-radius: 24px;
-        border: 1px solid rgba(145, 191, 20, 0.45);
+        border: 1px solid rgba(15, 118, 110, 0.45);
         background: #fff;
         font-family: inherit;
         font-size: 0.95rem;
@@ -501,8 +517,8 @@
         box-shadow: inset 0 1px 2px rgba(10, 19, 71, 0.04);
     }
     .compose-form textarea:focus {
-        border-color: #b2cd16;
-        box-shadow: 0 0 0 3px rgba(178, 205, 22, 0.28);
+        border-color: #0f766e;
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.22);
     }
     .compose-form button[type="submit"] {
         width: 44px;
@@ -548,7 +564,7 @@
         margin-top: 8px;
         font-size: 0.82rem;
         font-weight: 600;
-        color: #5c7212;
+        color: #0f766e;
     }
     .voice-status.is-recording {
         color: #dc2626;
@@ -573,7 +589,7 @@
     .messages-body .messages-empty {
         padding: 48px 20px;
         text-align: center;
-        color: #5c7212;
+        color: #0f766e;
         font-weight: 600;
         font-size: 0.92rem;
     }
@@ -582,8 +598,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(180deg, #f3f6eb 0%, #e8eddf 100%);
-        color: #5c7212;
+        background: linear-gradient(180deg, #eef6f4 0%, #d3e5df 100%);
+        color: #0f766e;
         font-size: 0.95rem;
         font-weight: 600;
     }

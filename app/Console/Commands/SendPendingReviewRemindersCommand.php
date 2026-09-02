@@ -39,6 +39,10 @@ class SendPendingReviewRemindersCommand extends Command
             ->get();
 
         foreach ($requests as $leave) {
+            if ($leave->isOverdue()) {
+                continue;
+            }
+
             [$nextStage, $label] = $this->nextStage($leave, $now);
             if ($nextStage === null || $label === null) {
                 continue;
@@ -76,6 +80,10 @@ class SendPendingReviewRemindersCommand extends Command
             ->get();
 
         foreach ($requests as $leave) {
+            if ($leave->isOverdue()) {
+                continue;
+            }
+
             // Prefer time since recommendation; fall back to created_at for manager-applicant leave.
             $anchor = $leave->recommended_at
                 ? Carbon::parse($leave->recommended_at)

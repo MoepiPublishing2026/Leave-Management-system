@@ -21,31 +21,49 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 12px;
-        height: 96px;
+        width: 18px;
+        height: 176px;
         background: #d6e05a;
-        border-bottom-right-radius: 8px;
+        border-bottom-right-radius: 22px;
         z-index: 2;
     }
     .lh-header {
         display: flex;
         align-items: center;
-        gap: 14px;
-        padding: 18px 28px 10px 28px;
+        gap: 28px;
+        padding: 24px 0 18px 36px;
     }
-    .lh-header img {
-        height: 72px;
+    .lh-emblem {
+        height: 132px;
         width: auto;
-        max-width: 280px;
+        max-width: 160px;
         object-fit: contain;
         display: block;
+        flex: 0 0 auto;
+    }
+    .lh-lockup {
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+    }
+    .lh-wordmark {
+        flex: 0 0 auto;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 42px;
+        font-weight: 800;
+        color: #1b1e40;
+        letter-spacing: 0.04em;
+        line-height: 1;
+        margin: 0;
     }
     .lh-rule {
-        flex: 1;
-        height: 0;
+        flex: 1 1 auto;
+        height: 7px;
         border: 0;
-        border-top: 6px solid #2f2f2f;
-        margin: 0;
+        margin: 4px 0 0;
+        background: #1b1e40;
     }
     .lh-body {
         padding: 8px 32px 28px;
@@ -211,9 +229,13 @@
     }
     .lh-pill--ok { background: #dcfce7; color: #166534; }
     .lh-center { text-align: center; }
+    .pr-doc {
+        position: relative;
+        overflow: hidden;
+    }
     .pr-doc > .lh-header {
-        margin: -28px -32px 16px;
-        padding: 18px 32px 10px;
+        margin: -28px -32px 18px;
+        padding: 24px 0 18px 36px;
     }
     .pr-doc > .lh-footer {
         margin: 28px -32px -36px;
@@ -224,20 +246,31 @@
         .pr-doc { padding: 16px; }
         .pr-doc > .lh-header {
             margin: -16px -16px 12px;
-            padding: 12px 12px 8px;
+            padding: 18px 0 12px 24px;
         }
         .pr-doc > .lh-footer {
             margin: 20px -16px -16px;
         }
         .lh-body { padding: 4px 12px 20px; }
         .lh-header {
-            padding: 12px 12px 8px;
-            gap: 10px;
+            padding: 18px 0 12px 24px;
+            gap: 16px;
         }
-        .lh-header img {
-            height: 44px;
-            max-width: min(200px, 62vw);
+        .lh-emblem {
+            height: 84px;
+            max-width: 104px;
         }
+        .lh-lockup {
+            gap: 12px;
+        }
+        .lh-rule {
+            height: 6px;
+            margin-top: 6px;
+        }
+        .lh-wordmark {
+            font-size: 28px;
+        }
+        .lh-accent { width: 12px; height: 118px; border-bottom-right-radius: 16px; }
         .lh-split { grid-template-columns: 1fr; }
         .lh-doc-title { font-size: 20px; margin: 4px 0 14px; }
         .lh-meta,

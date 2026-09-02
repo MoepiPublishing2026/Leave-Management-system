@@ -16,6 +16,7 @@ use App\Notifications\MessageReceivedNotification;
 use App\Notifications\NewLeaveRequestNotification;
 use App\Notifications\LeaveRequestUpdatedNotification;
 use App\Notifications\OverdueLeaveEscalatedNotification;
+use App\Notifications\PendingLeaveActionReminderNotification;
 use App\Notifications\PendingReviewReminderNotification;
 use App\Notifications\ManagerDailySummaryNotification;
 use App\Notifications\PerformanceReviewSubmittedNotification;
@@ -138,6 +139,7 @@ class UserNotifications
                 MessageReceivedNotification::class,
                 LeaveWithdrawnNotification::class,
                 PendingReviewReminderNotification::class,
+                PendingLeaveActionReminderNotification::class,
                 ManagerDailySummaryNotification::class,
                 PerformanceReviewAcknowledgedNotification::class,
             ], true);
@@ -167,6 +169,7 @@ class UserNotifications
                 LeaveWithdrawnNotification::class,
                 ProofUploadedNotification::class,
                 PendingReviewReminderNotification::class,
+                PendingLeaveActionReminderNotification::class,
                 PerformanceReviewSubmittedNotification::class,
             ], true);
         }

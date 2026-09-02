@@ -360,9 +360,13 @@
             rows.push(row('Rejection', `<span class="rd-row-value--block">${escapeHtml(details.rejectionReason)}</span>`));
         }
 
+        if (hasText(details.approvalComment)) {
+            rows.push(row('Approval note', `<span class="rd-row-value--block">${escapeHtml(details.approvalComment)}</span>`));
+        }
+
         let messagesHtml = '';
         if (details.messagesUrl) {
-            messagesHtml = `<div class="rd-messages"><a href="${escapeHtml(details.messagesUrl)}">Open messages</a></div>`;
+            messagesHtml += `<div class="rd-messages"><a href="${escapeHtml(details.messagesUrl)}">Open messages</a></div>`;
         }
 
         const reviewHtml = renderReviewChecklist(details.review);
@@ -566,42 +570,74 @@
                     return;
                 }
 
+                e.preventDefault();
+
                 const row = form.closest('tr');
                 let details = {};
                 try {
                     details = JSON.parse(row?.getAttribute('data-details') || '{}');
                 } catch (err) {
-                    return;
+                    details = {};
                 }
 
                 const review = details.review || {};
-                const warnings = [];
+                const notes = [];
                 if (review.willConvertToUnpaid && review.unpaidNote) {
-                    warnings.push(review.unpaidNote);
+                    notes.push(review.unpaidNote);
                 }
                 if (review.fitsBalance === false) {
-                    warnings.push('This request is more working days than the remaining balance for this leave type.');
-                }
-                if (!warnings.length) {
-                    return;
+                    notes.push('This request is more working days than the remaining balance for this leave type.');
                 }
 
-                e.preventDefault();
                 const isSenior = form.classList.contains('senior-approve-form');
+                const notesHtml = notes.length
+                    ? `<div class="swal-approve-notes">${notes.map((note) => `<p>${escapeHtml(note)}</p>`).join('')}</div>`
+                    : '';
+
                 Swal.fire({
-                    icon: 'warning',
-                    title: 'Please confirm before continuing',
-                    html: warnings.map((warning) => `<p style="text-align:left;margin:0 0 10px;">${escapeHtml(warning)}</p>`).join(''),
+                    icon: false,
+                    title: isSenior ? 'Approve this leave request?' : 'Recommend approve?',
+                    html: `${notesHtml}<p class="swal-approve-copy">Add an optional note. You can leave this blank.</p>`,
+                    input: 'textarea',
+                    inputPlaceholder: 'Optional note…',
+                    inputAttributes: {
+                        maxlength: 1000,
+                        'aria-label': 'Optional note',
+                    },
                     showCancelButton: true,
                     confirmButtonText: isSenior ? 'Approve' : 'Recommend Approve',
                     cancelButtonText: 'Cancel',
-                    confirmButtonColor: '#15803d',
-                    cancelButtonColor: '#64748b',
+                    confirmButtonColor: '#16a34a',
+                    cancelButtonColor: '#94a3b8',
+                    reverseButtons: true,
+                    focusConfirm: false,
+                    customClass: {
+                        popup: 'swal-approve-popup',
+                        title: 'swal-approve-title',
+                        htmlContainer: 'swal-approve-html',
+                        confirmButton: 'swal-approve-confirm',
+                        cancelButton: 'swal-approve-cancel',
+                        input: 'swal-approve-input',
+                    },
+                    preConfirm: (value) => {
+                        const note = (value || '').trim();
+                        if (note.length > 1000) {
+                            Swal.showValidationMessage('Note must be 1000 characters or less.');
+                            return false;
+                        }
+                        return note;
+                    },
                 }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.dataset.confirmed = '1';
-                        form.submit();
+                    if (!result.isConfirmed) {
+                        return;
                     }
+
+                    const input = form.querySelector('.approval-comment-input');
+                    if (input) {
+                        input.value = result.value || '';
+                    }
+                    form.dataset.confirmed = '1';
+                    form.submit();
                 });
             });
         });

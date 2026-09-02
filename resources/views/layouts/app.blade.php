@@ -26,6 +26,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: nowrap;
             padding: 0 20px;
             box-shadow: 0 0 10px #bdb6b6ff;
             border-bottom: 3px solid #a5d817;
@@ -303,7 +304,7 @@
             background-color: #ffffff;
         }
 
-        @media (max-width: 992px) {
+        @media (max-width: 1200px) {
             nav.navbar {
                 height: 64px;
                 padding: 8px 16px;
@@ -365,7 +366,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20260902n" />
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -438,24 +439,7 @@
                         <span class="badge-notification">{{ $notificationCount }}</span>
                     @endif
                 </a>
-                <ul class="dropdown-menu notifications-dropdown dropdown-menu-end" aria-labelledby="notificationsDropdown">
-                    <li class="dropdown-header">Notifications</li>
-                    @forelse($notifications as $notification)
-                        <li>
-                            @php
-                                $notificationRedirect = \App\Support\NotificationDestination::url($notification, $user);
-                            @endphp
-                            <a href="{{ route('notifications.open', ['notification' => $notification->id, 'redirect' => $notificationRedirect]) }}" class="dropdown-item d-flex justify-content-between align-items-center">
-                                <span>{{ $notification->data['message'] ?? 'Notification' }}</span>
-                                <small class="text-muted ms-3" style="white-space: nowrap;">{{ $notification->created_at->diffForHumans() }}</small>
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                    @empty
-                        <li class="dropdown-item text-center text-muted">No new notifications</li>
-                    @endforelse
-                    <li><a href="{{ route('notifications.index') }}" class="dropdown-item text-center">View All</a></li>
-                </ul>
+                @include('partials.navbar-notifications-dropdown', ['showViewAll' => true])
             </div>
 
             @endauth

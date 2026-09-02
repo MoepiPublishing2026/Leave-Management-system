@@ -3,6 +3,7 @@
     /* Shared dashboard chart layout — keeps legends visible on mobile */
     .chart-card {
         overflow: visible;
+        min-width: 0;
     }
     .chart-card h3 {
         font-weight: 700;
@@ -26,6 +27,7 @@
     .chart-body--plot {
         height: 220px;
         min-height: 200px;
+        overflow: hidden;
     }
     .chart-body--plot canvas {
         width: 100% !important;

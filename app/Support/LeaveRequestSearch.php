@@ -119,7 +119,8 @@ class LeaveRequestSearch
     {
         $like = '%' . $search . '%';
         $bindings = [$like];
-        $conditions = ["{$table}.{$column} LIKE ?"];
+        // Compare the date only so a search like "27" matches 27 Aug, not 11:27.
+        $conditions = ["DATE({$table}.{$column}) LIKE ?"];
 
         $formats = [
             '%e %M %Y',

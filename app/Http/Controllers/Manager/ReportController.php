@@ -85,10 +85,8 @@ class ReportController extends Controller
         }
 
         $totalRequests = (clone $leaveQuery)->count();
-        $pendingTotal = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['pending'])->count();
-        $overdueRequests = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['pending'])
-            ->whereDate('start_date', '<', Carbon::today())
-            ->count();
+        $pendingTotal = (clone $leaveQuery)->whereRaw('LOWER(TRIM(status)) in (?, ?)', ['pending', 'pending_senior'])->count();
+        $overdueRequests = (clone $leaveQuery)->overdue()->count();
         $pendingRequests = max(0, $pendingTotal - $overdueRequests);
         $approvedRequests = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['approved'])->count();
         $rejectedRequests = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['rejected'])->count();
@@ -187,8 +185,7 @@ class ReportController extends Controller
                         ? 0.5
                         : (Carbon::parse($leave->end_date)->diffInDays(Carbon::parse($leave->start_date)) + 1);
                     $status = $leave->status;
-                    $statusLower = strtolower(trim((string) $status));
-                    if ($statusLower === 'pending' && $leave->start_date && Carbon::parse($leave->start_date)->lt(Carbon::today())) {
+                    if ($leave->isOverdue()) {
                         $status = 'Overdue';
                     }
                     $employeeName = trim(($leave->user->first_name ?? '') . ' ' . ($leave->user->last_name ?? ''));
@@ -255,12 +252,10 @@ class ReportController extends Controller
         $leaves = $query->get();
 
         $totalRequests = $leaves->count();
-        $pendingTotal = $leaves->filter(fn ($l) => strtolower((string) $l->status) === 'pending')->count();
-        $overdueRequests = $leaves->filter(function ($l) {
-            return strtolower((string) $l->status) === 'pending'
-                && $l->start_date
-                && Carbon::parse($l->start_date)->lt(Carbon::today());
-        })->count();
+        $pendingTotal = $leaves->filter(
+            fn ($l) => in_array(strtolower(trim((string) $l->status)), ['pending', 'pending_senior'], true)
+        )->count();
+        $overdueRequests = $leaves->filter(fn ($l) => $l->isOverdue())->count();
         $pendingRequests = max(0, $pendingTotal - $overdueRequests);
         $approvedRequests = $leaves->filter(fn ($l) => strtolower((string) $l->status) === 'approved')->count();
         $rejectedRequests = $leaves->filter(fn ($l) => strtolower((string) $l->status) === 'rejected')->count();

@@ -10,14 +10,15 @@
     .reports-page h1 {
         font-weight: 700;
         font-size: 40px;
-        color: #2c3e50;
+        color: #123f3a;
         margin: 0 0 8px;
         letter-spacing: 0.04em;
     }
     .reports-page-lead {
         margin: 0 0 20px;
-        color: #64748b;
+        color: #475569;
         font-size: 0.92rem;
+        font-weight: 600;
     }
     .reports-toolbar {
         display: flex;
@@ -157,62 +158,107 @@
     .reports-section-title {
         font-size: 1.05rem;
         font-weight: 700;
-        color: #2c3e50;
+        color: #123f3a;
         margin: 0 0 12px;
         letter-spacing: 0.02em;
     }
     .reports-table-wrap {
+        position: relative;
         overflow-x: auto;
-        border: 1px solid #dbe3ef;
-        border-radius: 14px;
-        box-shadow: 0 6px 22px rgba(15, 61, 46, 0.06);
-        background: #fff;
+        border: 2px solid #8fb3a8;
+        border-radius: 18px;
+        box-shadow:
+            0 18px 45px rgba(15, 61, 46, 0.10),
+            0 2px 8px rgba(15, 23, 42, 0.05);
+        background: #d3e5df;
+    }
+    .reports-table-wrap::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        z-index: 3;
+        background: linear-gradient(90deg, #0f766e 0%, #16a085 45%, #b2cd16 100%);
     }
     .reports-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
         font-size: 0.92rem;
         min-width: 720px;
     }
     .reports-table th,
     .reports-table td {
-        padding: 12px 14px;
+        padding: 15px 16px;
         text-align: left;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid #a9c6bc;
+        border-right: 1px solid #a9c6bc;
         vertical-align: middle;
+        color: #1e293b;
+    }
+    .reports-table th:last-child,
+    .reports-table td:last-child {
+        border-right: none;
     }
     .reports-table th {
-        background: #f8fafc;
-        font-weight: 700;
-        color: #334155;
-        font-size: 0.82rem;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: linear-gradient(135deg, #123f3a 0%, #0f766e 100%);
+        font-weight: 800;
+        color: #fff;
+        font-size: 0.76rem;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.075em;
+        white-space: nowrap;
+        border-bottom-color: #0b5f58;
+        border-right-color: rgba(255, 255, 255, 0.22);
+        box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .reports-table th:first-child,
+    .reports-table td:first-child {
+        padding-left: 20px;
+    }
+    .reports-table td:first-child {
+        color: #0f766e;
+        font-weight: 800;
+    }
+    .reports-table td:nth-child(2) {
+        color: #0f766e;
+        font-weight: 700;
+    }
+    .reports-table tbody tr {
+        background: #d3e5df;
+    }
+    .reports-table tbody tr:hover {
+        background: #bfd9d0;
     }
     .reports-table tbody tr:last-child td {
         border-bottom: none;
     }
-    .reports-table tbody tr:hover {
-        background: #f8fafc;
-    }
-    .reports-empty {
-        text-align: center;
-        padding: 32px 16px;
-        color: #64748b;
+    .reports-table td.reports-empty,
+    .reports-table td:first-child.reports-empty {
+        color: #475569;
+        font-weight: 600;
         font-style: italic;
+        text-align: center;
     }
     .reports-page .request-badge {
         display: inline-block;
         min-width: 5.5rem;
-        padding: 5px 10px;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.78rem;
+        padding: 6px 11px;
+        border-radius: 999px;
+        font-weight: 750;
+        font-size: 0.76rem;
         text-align: center;
         color: #fff;
-        border: none;
+        border: 1px solid rgba(255, 255, 255, 0.28);
         letter-spacing: 0.01em;
         font-family: inherit;
+        line-height: 1.25;
+        box-shadow: 0 3px 8px rgba(15, 23, 42, 0.12);
     }
     @media (max-width: 768px) {
         .reports-page {

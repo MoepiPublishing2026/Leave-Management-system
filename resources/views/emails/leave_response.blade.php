@@ -12,8 +12,12 @@
     <p style="margin:0 0 16px;">{{ \App\Support\EmailGreeting::helloUser($leaveRequest->user) }}</p>
     <p style="margin:0 0 16px;">Your leave request status has been updated to <strong>{{ $status }}</strong>.</p>
 
-    @if (strtolower((string) $leaveRequest->status) === 'rejected')
+    @if (strtolower((string) $leaveRequest->status) === 'rejected' && filled($leaveRequest->rejection_reason))
         <p style="margin:0 0 16px;">Reason for rejection: {{ $leaveRequest->rejection_reason }}</p>
+    @endif
+
+    @if (strtolower((string) $leaveRequest->status) === 'approved' && filled($leaveRequest->approval_comment))
+        <p style="margin:0 0 16px;">Note: {{ $leaveRequest->approval_comment }}</p>
     @endif
 
     @if (strtolower((string) $leaveRequest->status) === 'approved' && \App\Support\LeaveProofRules::requiresDoctorsLetter($leaveRequest))

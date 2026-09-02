@@ -180,6 +180,12 @@
         filter: none;
         color-scheme: light;
     }
+    .pr-submit-hint {
+        margin: 16px 0 0;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.45;
+    }
     .pr-actions {
         display: flex;
         flex-wrap: wrap;

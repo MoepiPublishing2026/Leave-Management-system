@@ -16,6 +16,12 @@ class AdminDashboardController extends Controller
 {
     public function index(\Illuminate\Http\Request $request)
     {
+        try {
+            \App\Support\OverdueLeaveNotifier::notifyDue();
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         $monthFilter = $request->query('month', 'this_year');
         $employeeFilter = DashboardEmployeeFilter::selectedId($request->query('employee'));
         $employees = DashboardEmployeeFilter::employees();
@@ -47,8 +53,7 @@ class AdminDashboardController extends Controller
             ->whereIn(DB::raw('LOWER(TRIM(status))'), ['pending', 'pending_senior'])
             ->count();
 
-        $overduePendingCount = (clone $baseQuery)->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
-            ->whereDate('start_date', '<', Carbon::today())->count();
+        $overduePendingCount = (clone $baseQuery)->overdue()->count();
         $pendingRequestsCount = max(0, $pendingTotalCount - $overduePendingCount);
 
         $approvedRequestsCount = (clone $baseQuery)->whereRaw('LOWER(TRIM(status)) = ?', ['approved'])->count();

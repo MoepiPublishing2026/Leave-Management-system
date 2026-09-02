@@ -108,7 +108,7 @@
         width: 100%;
         overflow: visible;
     }
-    @media (max-width: 992px) {
+    @media (max-width: 1200px) {
         .charts-container {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }

@@ -8,8 +8,10 @@ use App\Models\LeaveRequestMessage;
 use App\Models\User;
 use App\Notifications\LeaveStatusNotification;
 use App\Notifications\NewLeaveRequestNotification;
+use App\Notifications\OverdueLeaveEscalatedNotification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 
@@ -17,15 +19,19 @@ class LeaveApprovalWorkflow
 {
     public static function ensureHandledColumnsExist(): void
     {
-        if (Schema::hasColumn('leave_requests', 'handled_by')) {
-            return;
+        if (! Schema::hasColumn('leave_requests', 'handled_by')) {
+            Schema::table('leave_requests', function (Blueprint $table) {
+                $table->unsignedBigInteger('handled_by')->nullable();
+                $table->timestamp('handled_at')->nullable();
+                $table->string('handled_action', 40)->nullable();
+            });
         }
 
-        Schema::table('leave_requests', function (Blueprint $table) {
-            $table->unsignedBigInteger('handled_by')->nullable();
-            $table->timestamp('handled_at')->nullable();
-            $table->string('handled_action', 40)->nullable();
-        });
+        if (! Schema::hasColumn('leave_requests', 'approval_comment')) {
+            Schema::table('leave_requests', function (Blueprint $table) {
+                $table->text('approval_comment')->nullable();
+            });
+        }
     }
 
     public static function isAwaitingSenior(LeaveRequest $leave): bool
@@ -304,7 +310,7 @@ class LeaveApprovalWorkflow
     {
         $admins = self::seniorsForLeave($leave);
         if ($admins->isEmpty()) {
-            \Illuminate\Support\Facades\Log::warning('No senior managers to notify for leave decision email.', [
+            Log::warning('No senior managers to notify for leave decision email.', [
                 'leave_request_id' => $leave->id,
             ]);
 
@@ -317,7 +323,7 @@ class LeaveApprovalWorkflow
                 $admin->notifyNow(new NewLeaveRequestNotification($leave), ['database']);
             } catch (\Throwable $e) {
                 report($e);
-                \Illuminate\Support\Facades\Log::error('Failed saving senior in-app leave notification.', [
+                Log::error('Failed saving senior in-app leave notification.', [
                     'leave_request_id' => $leave->id,
                     'admin_id' => $admin->id,
                     'error' => $e->getMessage(),
@@ -328,7 +334,7 @@ class LeaveApprovalWorkflow
                 $admin->notifyNow(new NewLeaveRequestNotification($leave), ['mail']);
             } catch (\Throwable $e) {
                 report($e);
-                \Illuminate\Support\Facades\Log::error('Failed emailing senior of leave awaiting decision.', [
+                Log::error('Failed emailing senior of leave awaiting decision.', [
                     'leave_request_id' => $leave->id,
                     'admin_id' => $admin->id,
                     'error' => $e->getMessage(),
@@ -337,13 +343,49 @@ class LeaveApprovalWorkflow
         }
     }
 
-    public static function finalize(LeaveRequest $leave, User $decider, string $action, ?string $rejectionReason = null): string
+    public static function notifySeniorsOfOverdueEscalation(LeaveRequest $leave, string $managerName): void
+    {
+        $leave->loadMissing('user');
+        $admins = self::seniorsForLeave($leave);
+        if ($admins->isEmpty()) {
+            Log::warning('No senior manager to notify of overdue escalation reason.', [
+                'leave_request_id' => $leave->id,
+            ]);
+
+            return;
+        }
+
+        foreach ($admins as $admin) {
+            try {
+                $admin->notifyNow(new OverdueLeaveEscalatedNotification($leave, $managerName), ['database']);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            try {
+                $admin->notifyNow(new OverdueLeaveEscalatedNotification($leave, $managerName), ['mail']);
+            } catch (\Throwable $e) {
+                report($e);
+                Log::error('Failed emailing senior of overdue escalation reason.', [
+                    'leave_request_id' => $leave->id,
+                    'admin_id' => $admin->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+    }
+
+    public static function finalize(LeaveRequest $leave, User $decider, string $action, ?string $rejectionReason = null, ?string $approvalComment = null): string
     {
         $normalized = strtolower(trim($action));
         $action = in_array($normalized, ['reject', 'rejected'], true) ? 'rejected' : 'approved';
 
         if ($action === 'rejected' && (trim((string) $rejectionReason) === '')) {
             throw new \InvalidArgumentException('A rejection reason is required.');
+        }
+
+        if ($leave->isOverdue()) {
+            throw new \RuntimeException('The start date has passed, so this request can no longer be approved or rejected.');
         }
 
         if (! self::isAwaitingSenior($leave) && ! ($leave->isManagerApplicant() && strtolower(trim((string) $leave->status)) === 'pending')) {
@@ -363,9 +405,11 @@ class LeaveApprovalWorkflow
         $leave->status = $action === 'approved' ? 'approved' : 'rejected';
         if ($action === 'rejected') {
             $leave->rejection_reason = trim((string) $rejectionReason);
+            $leave->approval_comment = null;
         } else {
-            // Clear any previous rejection reason if approving
             $leave->rejection_reason = null;
+            $note = trim((string) $approvalComment);
+            $leave->approval_comment = $note !== '' ? $note : null;
         }
         $leave->handled_by = $decider->id;
         $leave->handled_at = Carbon::now();
@@ -387,7 +431,10 @@ class LeaveApprovalWorkflow
 
         $body = $action === 'approved'
             ? 'Senior Manager decision: Approved.'
-            : 'Senior Manager decision: Rejected. Reason: '.$leave->rejection_reason;
+            : 'Senior Manager decision: Rejected.'.($leave->rejection_reason ? ' Reason: '.$leave->rejection_reason : '');
+        if ($action === 'approved' && $leave->approval_comment) {
+            $body .= ' Note: '.$leave->approval_comment;
+        }
         LeaveRequestMessage::create([
             'conversation_id' => $conversation->id,
             'sender_id' => $decider->id,

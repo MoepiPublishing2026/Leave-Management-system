@@ -13,12 +13,12 @@ use App\Support\LeaveRequestPeriodFilter;
 use App\Support\LeavePayFilter;
 use App\Support\DashboardEmployeeFilter;
 use App\Support\OverdueLeaveEscalation;
+use App\Support\OverdueLeaveNotifier;
 use App\Support\ManagerTeam;
 use App\Support\LeaveApprovalWorkflow;
 use App\Support\MissingProofUnpaidConverter;
 use Illuminate\Support\Carbon;
 use App\Models\User;
-use App\Notifications\OverdueLeaveEscalatedNotification;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use App\Models\LeaveRequestConversation;
@@ -44,6 +44,11 @@ class RequestsController extends Controller
     public function index(Request $request)
     {
         MissingProofUnpaidConverter::convertDue();
+        try {
+            OverdueLeaveNotifier::notifyDue();
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         $status = strtolower((string) $request->query('status', 'all'));
         $payFilter = LeavePayFilter::normalize($request->query('pay', 'all'));
@@ -63,18 +68,13 @@ class RequestsController extends Controller
         LeavePayFilter::apply($query, $payFilter);
 
         if ($status === 'overdue') {
-            $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
-                ->whereDate('start_date', '<', Carbon::today());
+            $query->overdue();
         } elseif ($status === 'pending_senior') {
-            $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending_senior']);
+            $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending_senior'])
+                ->whereDate('start_date', '>=', Carbon::today());
         } elseif ($status === 'pending') {
-            // Manager "Pending" includes own review queue + items already sent to senior
-            $query->where(function ($q) {
-                $q->where(function ($inner) {
-                    $inner->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
-                        ->whereDate('start_date', '>=', Carbon::today());
-                })->orWhereRaw('LOWER(TRIM(status)) = ?', ['pending_senior']);
-            });
+            $query->whereRaw('LOWER(TRIM(status)) in (?, ?)', ['pending', 'pending_senior'])
+                ->whereDate('start_date', '>=', Carbon::today());
         } elseif ($status !== 'all') {
             $query->whereRaw('LOWER(TRIM(status)) = ?', [$status]);
         } else {
@@ -83,16 +83,11 @@ class RequestsController extends Controller
 
         $effectiveSearch = $search;
         if ($status === 'all' && $searchKey === 'overdue') {
-            $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
-                ->whereDate('start_date', '<', Carbon::today());
+            $query->overdue();
             $effectiveSearch = '';
         } elseif ($status === 'all' && $searchKey === 'pending') {
-            $query->where(function ($q) {
-                $q->where(function ($inner) {
-                    $inner->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
-                        ->whereDate('start_date', '>=', Carbon::today());
-                })->orWhereRaw('LOWER(TRIM(status)) = ?', ['pending_senior']);
-            });
+            $query->whereRaw('LOWER(TRIM(status)) in (?, ?)', ['pending', 'pending_senior'])
+                ->whereDate('start_date', '>=', Carbon::today());
             $effectiveSearch = '';
         }
 
@@ -207,6 +202,9 @@ public function escalate(Request $r, $id)
     $leave->handled_by = Auth::id();
     $leave->handled_at = Carbon::now();
     $leave->handled_action = 'unattended';
+    $leave->status = 'pending_senior';
+    $leave->pending_review_reminder_stage = 0;
+    $leave->last_pending_review_reminder_at = null;
     $leave->save();
 
     $conversation = LeaveRequestConversation::firstOrCreate([
@@ -220,18 +218,11 @@ public function escalate(Request $r, $id)
     ]);
     $conversation->touch();
 
-    $seniors = \App\Support\LeaveApprovalWorkflow::seniorsForLeave($leave);
     $managerName = trim((Auth::user()->first_name ?? '') . ' ' . (Auth::user()->last_name ?? ''));
     if ($managerName === '') {
         $managerName = 'Manager';
     }
-    foreach ($seniors as $admin) {
-        try {
-            $admin->notify(new OverdueLeaveEscalatedNotification($leave, $managerName));
-        } catch (\Throwable $e) {
-            report($e);
-        }
-    }
+    LeaveApprovalWorkflow::notifySeniorsOfOverdueEscalation($leave, $managerName);
 
     if ($r->expectsJson()) {
         return response()->json([

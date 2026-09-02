@@ -104,6 +104,7 @@
                         'handledAt' => $req->handled_at ? \Carbon\Carbon::parse($req->handled_at)->format('d M Y H:i') : '',
                         'handledAction' => (string) ($req->handled_action ?? ''),
                         'rejectionReason' => (string) ($req->rejection_reason ?? ''),
+                        'approvalComment' => (string) ($req->approval_comment ?? ''),
                         'originalLeaveType' => (string) ($req->original_leave_type ?? ''),
                         'convertedToUnpaidAt' => $req->converted_to_unpaid_at?->format('d M Y H:i') ?? '',
                         'conversionReason' => (string) ($req->converted_to_unpaid_reason ?? ''),
@@ -125,12 +126,7 @@
                 <tr class="row-click {{ $req->isOverdue() ? 'overdue-row' : '' }}" data-details='@json($details)'>
                     <td>{{ $requests->firstItem() + $index }}</td>
                     <td>{{ $req->leave_type }}</td>
-                    <td>
-                        {{ $applicantFull }}
-                        @if ($isManager)
-                            <span class="request-badge request-badge--manager">Manager</span>
-                        @endif
-                    </td>
+                    <td>{{ $applicantFull }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>
                     <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y H:i') : '—' }}</td>
@@ -145,12 +141,13 @@
                     </td>
                     <td class="request-actions-cell" onclick="event.stopPropagation();">
                         <div class="request-actions">
-                            @if ($canDecide)
+                            @if ($canDecide && ! $req->isOverdue())
                                 <div class="request-actions-inline">
                                     @if ($canApproveWithProof)
                                         <form class="senior-approve-form" action="{{ route('admin.requests.approve', $req) }}" method="POST">
                                             @csrf
                                             @method('PATCH')
+                                            <input type="hidden" name="approval_comment" class="approval-comment-input" value="" />
                                             <button type="submit" class="request-btn request-btn--approve">Approve</button>
                                         </form>
                                     @else
@@ -158,6 +155,8 @@
                                     @endif
                                     <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Reject</button>
                                 </div>
+                            @elseif ($canDecide && $req->isOverdue())
+                                <span class="request-actions-note">Start date has passed, so this request can no longer be approved or rejected.</span>
                             @elseif ($rowStatus === 'rejected')
                                 <a href="{{ route('admin.manager-requests.show_reason', $req) }}" class="request-link">View Reason</a>
                             @endif

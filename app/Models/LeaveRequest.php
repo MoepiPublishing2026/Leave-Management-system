@@ -16,7 +16,7 @@ class LeaveRequest extends Model
         'original_leave_type', 'converted_to_unpaid_at', 'converted_to_unpaid_reason',
         'manager_recommendation', 'manager_recommendation_comment', 'recommended_by', 'recommended_at',
         'pending_review_reminder_stage', 'last_pending_review_reminder_at',
-        'overdue_notified_at',
+        'overdue_notified_at', 'approval_comment',
     ];
 
     protected $casts = [
@@ -86,8 +86,7 @@ class LeaveRequest extends Model
     public function isOverdue(): bool
     {
         $status = strtolower(trim((string) ($this->status ?? '')));
-        // Overdue applies while waiting on manager review (or legacy pending manager leave).
-        if ($status !== 'pending') {
+        if (! in_array($status, ['pending', 'pending_senior'], true)) {
             return false;
         }
 
@@ -95,7 +94,14 @@ class LeaveRequest extends Model
             return false;
         }
 
-        return Carbon::parse($this->start_date)->lt(Carbon::today());
+        return Carbon::parse($this->start_date)->startOfDay()->lt(Carbon::today());
+    }
+
+    /** Still awaiting a decision, and the leave start date has already passed. */
+    public function scopeOverdue($query)
+    {
+        return $query->whereRaw('LOWER(TRIM(status)) in (?, ?)', ['pending', 'pending_senior'])
+            ->whereDate('start_date', '<', Carbon::today());
     }
 
     /** Pending overdue requests still awaiting a manager late-response reason. */
@@ -108,7 +114,9 @@ class LeaveRequest extends Model
 
     public function needsOverdueEscalationReason(): bool
     {
-        return $this->isOverdue() && empty($this->overdue_escalated_at);
+        $status = strtolower(trim((string) ($this->status ?? '')));
+
+        return $status === 'pending' && $this->isOverdue() && empty($this->overdue_escalated_at);
     }
 
     public function canBeEditedByApplicant(): bool

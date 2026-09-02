@@ -24,14 +24,19 @@
         <a class="pr-btn pr-btn--ghost" href="{{ route(PerformanceReviews::routeName($user, 'index')) }}">Back to list</a>
     </div>
 
-    @if ($errors->any())
+    @if ($errors->any() || session('error'))
         <div class="form-alert" style="margin-bottom:14px;padding:12px 14px;border-radius:8px;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;">
-            <strong>Please fix the following:</strong>
-            <ul style="margin:6px 0 0; padding-left:18px;">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+            @if (session('error'))
+                <strong>{{ session('error') }}</strong>
+            @endif
+            @if ($errors->any())
+                <strong>Please fix the following:</strong>
+                <ul style="margin:6px 0 0; padding-left:18px;">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            @endif
         </div>
     @endif
 
@@ -41,10 +46,8 @@
             @method('PUT')
         @endif
 
-        <div class="lh-header">
-            <img src="{{ asset('images/logo_trimmed.png') }}?v=20260819t" alt="Moepi Publishing">
-            <hr class="lh-rule" />
-        </div>
+        <div class="lh-accent" aria-hidden="true"></div>
+        @include('partials.letterhead-document-header')
 
         <div class="pr-title">Monthly Performance Review</div>
 
@@ -92,26 +95,28 @@
 
         <div class="pr-section">
             <h2>Goals achieved</h2>
-            <textarea name="goals_achieved" placeholder="List the goals achieved this month">{{ old('goals_achieved', $review->goals_achieved) }}</textarea>
+            <textarea name="goals_achieved" required placeholder="List the goals achieved this month">{{ old('goals_achieved', $review->goals_achieved) }}</textarea>
         </div>
 
         <div class="pr-section">
             <h2>Quality of work</h2>
-            <textarea name="quality_of_work" placeholder="Comment on quality of work">{{ old('quality_of_work', $review->quality_of_work) }}</textarea>
+            <textarea name="quality_of_work" required placeholder="Comment on quality of work">{{ old('quality_of_work', $review->quality_of_work) }}</textarea>
         </div>
 
         <div class="pr-section">
             <h2>Examples of taking initiative and being creative</h2>
-            <textarea name="initiative_examples" placeholder="Add examples">{{ old('initiative_examples', $review->initiative_examples) }}</textarea>
+            <textarea name="initiative_examples" required placeholder="Add examples">{{ old('initiative_examples', $review->initiative_examples) }}</textarea>
         </div>
 
         <div class="pr-section">
             <h2>Areas for improvement</h2>
-            <textarea name="areas_for_improvement" placeholder="Add areas for improvement">{{ old('areas_for_improvement', $review->areas_for_improvement) }}</textarea>
+            <textarea name="areas_for_improvement" required placeholder="Add areas for improvement">{{ old('areas_for_improvement', $review->areas_for_improvement) }}</textarea>
         </div>
 
+        <p class="pr-submit-hint">All four sections must be filled in before you submit. You can still save a draft if something is incomplete.</p>
+
         <div class="pr-actions">
-            <button type="submit" name="intent" value="draft" class="pr-btn pr-btn--draft">Save draft</button>
+            <button type="submit" name="intent" value="draft" class="pr-btn pr-btn--draft" formnovalidate>Save draft</button>
             <button type="submit" name="intent" value="submit" class="pr-btn pr-btn--primary">Submit review</button>
         </div>
 

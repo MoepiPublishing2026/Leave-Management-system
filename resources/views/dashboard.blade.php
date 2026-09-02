@@ -50,13 +50,7 @@
     .leave-balance-item {
       padding: 12px 10px;
       font-size: 0.92rem;
-      min-height: 52px;
-    }
-    .leave-type {
-      white-space: normal;
-      word-break: break-word;
-      line-height: 1.3;
-      hyphens: auto;
+      min-height: 76px;
     }
     .dash-charts-grid {
       grid-template-columns: 1fr;
@@ -93,15 +87,15 @@
     border-radius: 16px;
     padding: 20px 24px;
     box-shadow: 0 6px 20px rgba(32, 50, 93, 0.1);
-    color: #680523;
+    color: #123f3a;
     cursor: pointer;
     max-width: 1200px;
     margin-bottom: 24px;
     transition: box-shadow 0.3s ease;
-    border-left: 5px solid #94068d;
-    border-top: 1px solid #94068d;
-    border-right: 1px solid #94068d;
-    border-bottom: 1px solid #94068d;
+    border-left: 5px solid #0f766e;
+    border-top: 1px solid #0f766e;
+    border-right: 1px solid #0f766e;
+    border-bottom: 1px solid #0f766e;
   }
   .leave-balance-card:hover {
     box-shadow: 0 10px 40px rgba(32, 80, 110, 0.2);
@@ -126,6 +120,8 @@
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 18px 20px;
+    align-items: stretch;
+    grid-auto-rows: 1fr;
   }
   .leave-balance-list.open {
     max-height: 800px;
@@ -134,22 +130,25 @@
     padding-top: 4px;
   }
   .leave-balance-item {
-    background-color: rgb(252, 213, 234);
+    background-color: #d3e5df;
     border-radius: 16px;
-    padding: 14px 18px;
+    padding: 14px 12px;
     display: flex;
     justify-content: center;
     align-items: center;
     min-width: 0;
+    min-height: 88px;
+    height: 100%;
+    box-sizing: border-box;
     font-size: 1.1rem;
     font-weight: 600;
     color: #050505ff;
     box-shadow: 0 0 10px rgba(167, 189, 141, 0.85);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border-left: 5px solid #f00e65;
-    border-top: 1px solid #f00e65;
-    border-right: 1px solid #f00e65;
-    border-bottom: 1px solid #f00e65;
+    border-left: 5px solid #0f766e;
+    border-top: 1px solid #0f766e;
+    border-right: 1px solid #0f766e;
+    border-bottom: 1px solid #0f766e;
   }
   .leave-balance-item:hover {
     box-shadow: 0 8px 20px rgba(13, 59, 53, 0.25);
@@ -166,12 +165,24 @@
   }
   .leave-type {
     text-align: center;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.3;
+    hyphens: auto;
+    max-width: 100%;
+  }
+  @media (max-width: 1100px) {
+    .leave-balance-list.open {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
   }
 
   .cards {
     display: flex;
     flex-wrap: nowrap;
+    align-items: stretch;
     gap: 12px;
     margin-bottom: 40px;
     width: 100%;
@@ -192,7 +203,9 @@
     gap: 6px;
     flex: 1 1 0;
     min-width: 0;
-    min-height: 100px;
+    min-height: 110px;
+    height: auto;
+    align-self: stretch;
     cursor: move;
     position: relative;
     transition: box-shadow 0.3s ease, transform 0.2s ease;
@@ -249,7 +262,7 @@
     flex-direction: column;
     min-height: 280px;
   }
-  @media (max-width: 992px) {
+  @media (max-width: 1200px) {
     .dash-charts-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }

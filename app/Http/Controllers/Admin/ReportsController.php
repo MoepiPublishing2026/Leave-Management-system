@@ -49,9 +49,7 @@ class ReportsController extends Controller
         $pendingTotal = (clone $leaveQuery)
             ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(TRIM(status))'), ['pending', 'pending_senior'])
             ->count();
-        $overdueRequests = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['pending'])
-            ->whereDate('start_date', '<', Carbon::today())
-            ->count();
+        $overdueRequests = (clone $leaveQuery)->overdue()->count();
         $pendingRequests = max(0, $pendingTotal - $overdueRequests);
         $approvedRequests = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['approved'])->count();
         $rejectedRequests = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['rejected'])->count();
@@ -174,8 +172,7 @@ class ReportsController extends Controller
                         ? 0.5
                         : (Carbon::parse($leave->end_date)->diffInDays(Carbon::parse($leave->start_date)) + 1);
                     $status = $leave->status;
-                    $statusLower = strtolower(trim((string) $status));
-                    if ($statusLower === 'pending' && $leave->start_date && Carbon::parse($leave->start_date)->lt(Carbon::today())) {
+                    if ($leave->isOverdue()) {
                         $status = 'Overdue';
                     }
                     fputcsv($file, [
@@ -242,11 +239,7 @@ class ReportsController extends Controller
         $pendingTotal = $leaves->filter(
             fn ($l) => in_array(strtolower(trim((string) $l->status)), ['pending', 'pending_senior'], true)
         )->count();
-        $overdueRequests = $leaves->filter(function ($l) {
-            return strtolower((string) $l->status) === 'pending'
-                && $l->start_date
-                && Carbon::parse($l->start_date)->lt(Carbon::today());
-        })->count();
+        $overdueRequests = $leaves->filter(fn ($l) => $l->isOverdue())->count();
         $pendingRequests = max(0, $pendingTotal - $overdueRequests);
         $approvedRequests = $leaves->filter(fn ($l) => strtolower((string) $l->status) === 'approved')->count();
         $rejectedRequests = $leaves->filter(fn ($l) => strtolower((string) $l->status) === 'rejected')->count();

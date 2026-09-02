@@ -103,7 +103,7 @@ class LeaveEmailDecisionController extends Controller
         $approveUrl = null;
         $rejectUrl = null;
 
-        if ($awaiting) {
+        if ($awaiting && ! $leaveRequest->isOverdue()) {
             $approveUrl = URL::temporarySignedRoute(
                 'leave.email.approve',
                 now()->addDays(7),
@@ -126,6 +126,7 @@ class LeaveEmailDecisionController extends Controller
         return view('emails.leave_email_review', [
             'leaveRequest' => $leaveRequest,
             'awaiting' => $awaiting,
+            'isOverdue' => $leaveRequest->isOverdue(),
             'attachments' => $attachments,
             'approveUrl' => $approveUrl,
             'rejectUrl' => $rejectUrl,
@@ -135,7 +136,7 @@ class LeaveEmailDecisionController extends Controller
             'recLabel' => $recLabel,
             'canApproveWithProof' => LeaveProofRules::canApprove($leaveRequest),
             'proofBlockReason' => LeaveProofRules::approvalBlockedReason($leaveRequest),
-            'statusLabel' => LeaveStatusLabels::display($leaveRequest->status),
+            'statusLabel' => LeaveStatusLabels::display($leaveRequest->status, $leaveRequest->isOverdue()),
             'flashSuccess' => session('decision_success'),
             'flashError' => session('decision_error'),
         ]);
@@ -210,6 +211,14 @@ class LeaveEmailDecisionController extends Controller
             );
         }
 
+        if ($leaveRequest->isOverdue()) {
+            return $this->redirectToReview(
+                $leaveRequest,
+                'decision_error',
+                'The start date has passed, so this request can no longer be approved or rejected.'
+            );
+        }
+
         if (! LeaveProofRules::canApprove($leaveRequest)) {
             return $this->redirectToReview(
                 $leaveRequest,
@@ -218,8 +227,18 @@ class LeaveEmailDecisionController extends Controller
             );
         }
 
+        $validated = $request->validate([
+            'approval_comment' => 'nullable|string|max:1000',
+        ]);
+
         try {
-            LeaveApprovalWorkflow::finalize($leaveRequest, $this->actingSenior($leaveRequest), 'approved');
+            LeaveApprovalWorkflow::finalize(
+                $leaveRequest,
+                $this->actingSenior($leaveRequest),
+                'approved',
+                null,
+                $validated['approval_comment'] ?? null
+            );
         } catch (\Throwable $e) {
             report($e);
 
@@ -267,6 +286,14 @@ class LeaveEmailDecisionController extends Controller
                 $leaveRequest,
                 'decision_success',
                 'This decision was already submitted. No further action is needed.'
+            );
+        }
+
+        if ($leaveRequest->isOverdue()) {
+            return $this->redirectToReview(
+                $leaveRequest,
+                'decision_error',
+                'The start date has passed, so this request can no longer be approved or rejected.'
             );
         }
 

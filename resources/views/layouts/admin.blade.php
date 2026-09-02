@@ -27,6 +27,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: nowrap;
             padding: 0 20px;
             z-index: 9999;
             border-bottom: 3px solid #a5d817;
@@ -319,7 +320,7 @@
             background-color: #ffffff;
         }
 
-        @media (max-width: 992px) {
+        @media (max-width: 1200px) {
             header.navbar {
                 height: 64px;
                 padding: 8px 16px;
@@ -380,7 +381,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20260902n" />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -454,23 +455,7 @@
                     @endif
                 </a>
 
-                <ul class="dropdown-menu notifications-dropdown dropdown-menu-end" aria-labelledby="notificationsDropdown">
-                    <li class="dropdown-header">Notifications</li>
-                    @forelse($notifications as $notification)
-                        <li>
-                            @php
-                                $notificationRedirect = \App\Support\NotificationDestination::url($notification, $user);
-                            @endphp
-                            <a href="{{ route('notifications.open', ['notification' => $notification->id, 'redirect' => $notificationRedirect]) }}" class="dropdown-item d-flex justify-content-between align-items-center">
-                                <span>{{ $notification->data['message'] ?? 'Notification' }}</span>
-                                <small class="text-muted ms-3" style="white-space: nowrap;">{{ $notification->created_at->diffForHumans() }}</small>
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                    @empty
-                        <li class="dropdown-item text-center text-muted">No new notifications</li>
-                    @endforelse
-                </ul>
+                @include('partials.navbar-notifications-dropdown')
             </div>
 
             <div class="navbar-profile" id="profileMenu" tabindex="0" aria-haspopup="true" aria-expanded="false" aria-label="User menu">

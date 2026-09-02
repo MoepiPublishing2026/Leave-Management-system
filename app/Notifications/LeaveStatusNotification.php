@@ -44,6 +44,9 @@ class LeaveStatusNotification extends Notification
             if (strtolower((string) $this->leaveRequest->status) === 'rejected' && filled($this->leaveRequest->rejection_reason)) {
                 $mail->line('Reason: '.$this->leaveRequest->rejection_reason);
             }
+            if (strtolower((string) $this->leaveRequest->status) === 'approved' && filled($this->leaveRequest->approval_comment)) {
+                $mail->line('Note: '.$this->leaveRequest->approval_comment);
+            }
             $mail->action('Open in app', LeavePortalLinks::myRequestsUrl($notifiable, $this->leaveRequest->id));
         } else {
             $applicant = $this->leaveRequest->user;

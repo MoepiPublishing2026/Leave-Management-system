@@ -54,10 +54,8 @@ class AnalyticController extends Controller
         }
 
         $totalLeaves = $leaveQuery->count();
-        $pendingTotal = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['pending'])->count();
-        $overduePending = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['pending'])
-            ->whereDate('start_date', '<', Carbon::today())
-            ->count();
+        $pendingTotal = (clone $leaveQuery)->whereRaw('LOWER(TRIM(status)) in (?, ?)', ['pending', 'pending_senior'])->count();
+        $overduePending = (clone $leaveQuery)->overdue()->count();
         $pendingRequests = max(0, $pendingTotal - $overduePending);
 
         $activeEmployees = User::employees()->where('is_active', 1)->whereIn('id', ManagerTeam::employeeIdsFor())->count();

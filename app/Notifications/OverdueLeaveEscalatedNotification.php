@@ -18,7 +18,7 @@ class OverdueLeaveEscalatedNotification extends Notification
 
     public function __construct(LeaveRequest $leaveRequest, string $managerName)
     {
-        $this->leaveRequest = $leaveRequest;
+        $this->leaveRequest = $leaveRequest->loadMissing('user');
         $this->managerName = $managerName;
     }
 

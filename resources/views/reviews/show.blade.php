@@ -22,10 +22,8 @@
     </div>
 
     <div class="pr-doc">
-        <div class="lh-header">
-            <img src="{{ asset('images/logo_trimmed.png') }}?v=20260819t" alt="Moepi Publishing">
-            <hr class="lh-rule" />
-        </div>
+        <div class="lh-accent" aria-hidden="true"></div>
+        @include('partials.letterhead-document-header')
 
         <div class="pr-title">Monthly Performance Review</div>
 

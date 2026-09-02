@@ -45,13 +45,10 @@ class MonthlyLeaveStatusBreakdown
             }
 
             $status = strtolower(trim((string) $record->status));
-            $isPendingSenior = $status === 'pending_senior';
             if ($status === 'pending_senior') {
                 $status = 'pending';
             }
             if (
-                ! $isPendingSenior
-                &&
                 $status === 'pending'
                 && $record->start_date
                 && Carbon::parse($record->start_date)->lt($asOf)

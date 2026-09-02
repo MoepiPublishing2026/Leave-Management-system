@@ -80,6 +80,7 @@
                         'proofBlockReason' => (string) ($proofBlockReason ?? ''),
                         'messagesUrl' => route('messages.leave', $req),
                         'rejectionReason' => (string) ($req->rejection_reason ?? ''),
+                        'approvalComment' => (string) ($req->approval_comment ?? ''),
                     ];
                     $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req));
                 @endphp
@@ -102,12 +103,13 @@
                     </td>
                     <td class="request-actions-cell" onclick="event.stopPropagation();">
                         <div class="request-actions">
-                            @if ($rowStatus === 'pending' && ! $req->isOverdue())
+                            @if (in_array($rowStatus, ['pending', 'pending_senior'], true) && ! $req->isOverdue())
                                 <div class="request-actions-inline">
                                     @if ($canApproveWithProof)
                                         <form class="senior-approve-form" action="{{ route('admin.manager-requests.approve', $req) }}" method="POST">
                                             @csrf
                                             @method('PATCH')
+                                            <input type="hidden" name="approval_comment" class="approval-comment-input" value="" />
                                             <button type="submit" class="request-btn request-btn--approve">Approve</button>
                                         </form>
                                     @else
@@ -115,6 +117,8 @@
                                     @endif
                                     <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Reject</button>
                                 </div>
+                            @elseif ($req->isOverdue() && in_array($rowStatus, ['pending', 'pending_senior'], true))
+                                <span class="request-actions-note">Start date has passed, so this request can no longer be approved or rejected.</span>
                             @elseif ($rowStatus === 'rejected')
                                 <a href="{{ route('admin.manager-requests.show_reason', $req) }}" class="request-link">View Reason</a>
                             @endif

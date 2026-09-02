@@ -4,44 +4,194 @@
 
 @section('content')
 <style>
-    /* Existing styles... */
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 20px;
-        font-family: Arial, sans-serif;
+    .employees-page {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 4px 32px;
+        color: #1e293b;
     }
-    th, td {
-        border: 1px solid #ddd;
+    .employees-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+    .employees-page h1 {
+        font-weight: 700;
+        font-size: 40px;
+        color: #123f3a;
+        margin: 0;
+        letter-spacing: 0.04em;
+    }
+    .add-employee-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #b2cd16;
+        border: 1px solid #91bf14;
+        color: #0a1347;
+        padding: 9px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.88rem;
+        white-space: nowrap;
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .add-employee-button:hover {
+        background-color: #9eb812;
+        color: #0a1347;
+    }
+    .flash-message {
         padding: 12px 16px;
+        border-radius: 10px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        font-size: 0.92rem;
+    }
+    .flash-message--success {
+        background: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #86efac;
+    }
+    .flash-message--error {
+        background: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+    .employees-table-wrap {
+        position: relative;
+        overflow-x: auto;
+        border: 2px solid #8fb3a8;
+        border-radius: 18px;
+        box-shadow:
+            0 18px 45px rgba(15, 61, 46, 0.10),
+            0 2px 8px rgba(15, 23, 42, 0.05);
+        background: #d3e5df;
+    }
+    .employees-table-wrap::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        z-index: 3;
+        background: linear-gradient(90deg, #0f766e 0%, #16a085 45%, #b2cd16 100%);
+    }
+    .employees-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.92rem;
+        min-width: 880px;
+    }
+    .employees-table th,
+    .employees-table td {
+        padding: 14px 16px;
         text-align: left;
+        border-bottom: 1px solid #a9c6bc;
+        border-right: 1px solid #a9c6bc;
+        vertical-align: middle;
+        color: #1e293b;
     }
-    th {
-        background-color: #dff8eeff;
-        color: black;
+    .employees-table th:last-child,
+    .employees-table td:last-child {
+        border-right: none;
     }
-    tr:nth-child(even) {
-        background-color: #f9f9f9;
+    .employees-table th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: linear-gradient(135deg, #123f3a 0%, #0f766e 100%);
+        font-weight: 800;
+        color: #fff;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.075em;
+        white-space: nowrap;
+        border-bottom-color: #0b5f58;
+        border-right-color: rgba(255, 255, 255, 0.22);
+        box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .employees-table th:first-child,
+    .employees-table td:first-child {
+        padding-left: 20px;
+    }
+    .employees-table td:first-child,
+    .employees-table td:nth-child(2) {
+        color: #0f766e;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .employees-table tbody tr {
+        background: #d3e5df;
+    }
+    .employees-table tbody tr:hover {
+        background: #bfd9d0;
+    }
+    .employees-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .employees-email {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        max-width: 220px;
+    }
+    .employees-dept,
+    .employees-assigned {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        max-width: 160px;
+        line-height: 1.35;
+    }
+    .employee-status {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 5.5rem;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-weight: 750;
+        font-size: 0.76rem;
+        color: #fff;
+        letter-spacing: 0.01em;
+    }
+    .employee-status--active {
+        background: #0f766e;
+    }
+    .employee-status--inactive {
+        background: #64748b;
     }
     .employee-actions {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: 8px;
         align-items: center;
+    }
+    .edit-button,
+    .delete-button {
+        min-width: 84px;
+        justify-content: center;
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        font-family: inherit;
+        transition: background-color 0.15s ease, color 0.15s ease;
     }
     .edit-button {
         background-color: #850621;
         border: 1px solid #680523;
         color: #fff;
-        padding: 8px 14px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 700;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        transition: background-color 0.15s ease;
     }
     .edit-button:hover {
         background-color: #680523;
@@ -51,124 +201,110 @@
         background-color: #dc2626;
         border: 1px solid #b91c1c;
         color: #fff;
-        padding: 8px 14px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 700;
-        transition: background-color 0.15s ease, color 0.15s ease;
     }
     .delete-button:hover {
         background-color: #b91c1c;
         color: #fff;
     }
-    .flash-message {
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 16px;
+    .employees-empty {
+        text-align: center;
+        padding: 36px 20px;
+        color: #475569;
+        font-style: italic;
         font-weight: 600;
-        font-size: 0.92rem;
     }
-    .flash-message--success {
-        background: #dcfce7;
-        color: #166534;
-        border: 1px solid #86efac;
+    @media (max-width: 768px) {
+        .employees-page h1 {
+            font-size: 1.75rem;
+        }
+        .add-employee-button {
+            width: 100%;
+        }
+        .employee-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .edit-button,
+        .delete-button {
+            width: 100%;
+        }
     }
-    .flash-message--error {
-        background: #fee2e2;
-        color: #991b1b;
-        border: 1px solid #fca5a5;
-    }
-    .add-employee-button {
-        background-color: #b2cd16;
-        border: 1px solid #91bf14;
-        color: #0a1347;
-        padding: 8px 14px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 700;
-        float: right;
-        margin-bottom: 10px;
-        font-size: 16px;
-        transition: background-color 0.15s ease, color 0.15s ease;
-    }
-    .add-employee-button:hover {
-        background-color: #9eb812;
-        color: #0a1347;
-    }
-    h1 {
-        font-weight: 700;
-        font-size: 2.4rem;
-        color: #2c3e50;
-        margin: 0 0 20px 0;
-        letter-spacing: 0.04em;
-        margin-bottom:30px;
-    }
-
 </style>
 
-<div class="employees-header" style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom: 20px;">
-    <h1 style="margin-bottom: 0;">Employees List</h1>
-    <a href="{{ route('manager.employees.create') }}" class="add-employee-button">+ Add Employee</a>
+<div class="employees-page">
+    <div class="employees-header">
+        <h1>Employees List</h1>
+        <a href="{{ route('manager.employees.create') }}" class="add-employee-button">+ Add Employee</a>
+    </div>
+
+    @if(session('success'))
+        <div class="flash-message flash-message--success">{{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+        <div class="flash-message flash-message--error">{{ session('error') }}</div>
+    @endif
+
+    <div class="employees-table-wrap">
+        <table class="employees-table">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Assigned to / Manages</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($employees as $employee)
+                    <tr>
+                        <td>{{ $employee->first_name }}</td>
+                        <td>{{ $employee->last_name }}</td>
+                        <td class="employees-email">{{ $employee->email }}</td>
+                        <td class="employees-dept">{{ $employee->department ?: '—' }}</td>
+                        <td class="employees-assigned">
+                            @if(strtolower((string) ($employee->role ?? '')) === 'manager')
+                                @php $managed = $employee->managedDepartments->pluck('department')->filter()->values(); @endphp
+                                @if($managed->isNotEmpty())
+                                    {{ $managed->implode(', ') }}
+                                @else
+                                    —
+                                @endif
+                            @elseif($employee->manager)
+                                {{ trim(($employee->manager->first_name ?? '').' '.($employee->manager->last_name ?? '')) ?: '—' }}
+                            @else
+                                —
+                            @endif
+                        </td>
+                        <td>{{ \App\Support\RoleLabels::display($employee->role) }}</td>
+                        <td>
+                            <span class="employee-status {{ $employee->is_active ? 'employee-status--active' : 'employee-status--inactive' }}">
+                                {{ $employee->is_active ? 'Active' : 'Inactive' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="employee-actions">
+                                <a href="{{ route('manager.employees.edit', $employee->id) }}" class="edit-button">Edit</a>
+                                <form id="delete-form-{{ $employee->id }}" action="{{ route('manager.employees.destroy', $employee->id) }}" method="POST" style="display:none;">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                                <button type="button" class="delete-button delete-employee-btn" data-employee-id="{{ $employee->id }}">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="8" class="employees-empty">No employees to show.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
-
-@if(session('success'))
-    <div class="flash-message flash-message--success">{{ session('success') }}</div>
-@endif
-@if(session('error'))
-    <div class="flash-message flash-message--error">{{ session('error') }}</div>
-@endif
-
-<table>
-    <thead>
-        <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th>Department</th>
-            <th>Assigned to / Manages</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach ($employees as $employee)
-            <tr>
-                <td>{{ $employee->first_name }}</td>
-                <td>{{ $employee->last_name }}</td>
-                <td>{{ $employee->email }}</td>
-                <td>{{ $employee->department }}</td>
-                <td>
-                    @if(strtolower((string) ($employee->role ?? '')) === 'manager')
-                        @php $managed = $employee->managedDepartments->pluck('department')->filter()->values(); @endphp
-                        @if($managed->isNotEmpty())
-                            {{ $managed->implode(', ') }}
-                        @else
-                            —
-                        @endif
-                    @elseif($employee->manager)
-                        {{ trim(($employee->manager->first_name ?? '').' '.($employee->manager->last_name ?? '')) ?: '—' }}
-                    @else
-                        —
-                    @endif
-                </td>
-                <td>{{ \App\Support\RoleLabels::display($employee->role) }}</td>
-                <td>{{ $employee->is_active ? 'Active' : 'Inactive' }}</td>
-                <td>
-                    <div class="employee-actions">
-                        <a href="{{ route('manager.employees.edit', $employee->id) }}" class="edit-button">Edit</a>
-                        <form id="delete-form-{{ $employee->id }}" action="{{ route('manager.employees.destroy', $employee->id) }}" method="POST" style="display:none;">
-                            @csrf
-                            @method('DELETE')
-                        </form>
-                        <button type="button" class="delete-button delete-employee-btn" data-employee-id="{{ $employee->id }}">Delete</button>
-                    </div>
-                </td>
-            </tr>
-        @endforeach
-    </tbody>
-</table>
 
 <script>
     document.querySelectorAll('.delete-employee-btn').forEach((btn) => {

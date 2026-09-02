@@ -53,9 +53,7 @@ class AnalyticsController extends Controller
         $pendingTotal = (clone $leaveQuery)
             ->whereIn(DB::raw('LOWER(TRIM(status))'), ['pending', 'pending_senior'])
             ->count();
-        $overduePending = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['pending'])
-            ->whereDate('start_date', '<', Carbon::today())
-            ->count();
+        $overduePending = (clone $leaveQuery)->overdue()->count();
         $pendingRequests = max(0, $pendingTotal - $overduePending);
 
         $assignedIds = DashboardEmployeeFilter::allowedUserIds();

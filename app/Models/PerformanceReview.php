@@ -60,6 +60,26 @@ class PerformanceReview extends Model
         return $this->belongsTo(User::class, 'senior_id');
     }
 
+    public function hasRequiredContent(): bool
+    {
+        foreach ([
+            'review_period',
+            'review_date',
+            'goals_achieved',
+            'quality_of_work',
+            'initiative_examples',
+            'areas_for_improvement',
+        ] as $field) {
+            if (trim((string) $this->{$field}) === '') {
+                return false;
+            }
+        }
+
+        return (int) $this->period_year > 0
+            && (int) $this->period_month >= 1
+            && (int) $this->period_month <= 12;
+    }
+
     public function isDraft(): bool
     {
         return strtolower((string) $this->status) === 'draft';

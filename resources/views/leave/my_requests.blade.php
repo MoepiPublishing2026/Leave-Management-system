@@ -118,6 +118,7 @@
                         'handledAt' => $req->handled_at ? \Carbon\Carbon::parse($req->handled_at)->format('d M Y H:i') : '',
                         'handledAction' => (string) ($req->handled_action ?? ''),
                         'rejectionReason' => (string) ($req->rejection_reason ?? ''),
+                        'approvalComment' => (string) ($req->approval_comment ?? ''),
                         'originalLeaveType' => (string) ($req->original_leave_type ?? ''),
                         'convertedToUnpaidAt' => $req->converted_to_unpaid_at?->format('d M Y H:i') ?? '',
                         'conversionReason' => (string) ($req->converted_to_unpaid_reason ?? ''),

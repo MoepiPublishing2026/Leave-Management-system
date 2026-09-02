@@ -29,8 +29,7 @@ class PersonalLeaveDashboardData
         $withdrawnCount = $statusCounts['withdrawn'];
 
         $overduePendingCount = LeaveRequest::where('user_id', $userId)
-            ->whereRaw('LOWER(status) = ?', ['pending'])
-            ->whereDate('start_date', '<', Carbon::today())
+            ->overdue()
             ->count();
         $pendingCount = max(0, $pendingTotalCount - $overduePendingCount);
 

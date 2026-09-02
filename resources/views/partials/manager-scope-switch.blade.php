@@ -16,7 +16,7 @@
         gap: 14px;
         max-width: 1200px;
         margin: 0 auto 18px;
-        padding: 0 4px;
+        padding: 0 18px;
     }
     .mgr-page-header__main h1 {
         margin: 0;
@@ -86,9 +86,14 @@
         color: #680523;
         border-bottom-color: #680523;
     }
-    @media (max-width: 520px) {
+    @media (max-width: 1200px) {
         .mgr-page-header__main h1 {
             font-size: 28px;
+        }
+    }
+    @media (max-width: 520px) {
+        .mgr-page-header__main h1 {
+            font-size: 24px;
         }
         .mgr-scope-switch {
             width: 100%;

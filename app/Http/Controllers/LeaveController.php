@@ -27,6 +27,7 @@ use App\Support\LeaveApplicant;
 use App\Support\LeavePortalLinks;
 use App\Support\LeaveReminderService;
 use App\Support\MissingProofUnpaidConverter;
+use App\Support\OverdueLeaveNotifier;
 use App\Support\ParentalLeaveRules;
 use App\Support\PersonalLeaveDashboardData;
 
@@ -163,6 +164,11 @@ public function dashboard()
         }
 
         LeaveReminderService::syncForUser($user);
+        try {
+            OverdueLeaveNotifier::notifyDue();
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return view('dashboard', array_merge(
             PersonalLeaveDashboardData::build((int) $user->id),
@@ -296,7 +302,7 @@ public function leaveBalance(Request $request)
         }
 
         $statusKey = strtolower(trim((string) $req->status));
-        if ($statusKey === 'pending' && Carbon::parse($req->start_date)->lt(Carbon::today())) {
+        if ($req->isOverdue()) {
             $requestCounts['overdue']++;
         } elseif ($statusKey === 'pending_senior') {
             $requestCounts['pending']++;
@@ -989,15 +995,28 @@ public function uploadProof(Request $request, $id)
             $recipients->push($manager);
         }
     }
+
+    $assignedSenior = \App\Support\LeaveApprovalWorkflow::assignedSeniorForUser($applicant);
+    if ($assignedSenior) {
+        $recipients->push($assignedSenior);
+    }
+
     $recipients = $recipients
         ->concat(\App\Support\LeaveApprovalWorkflow::seniorsForLeave($leaveRequest))
         ->unique('id')
         ->reject(fn (User $recipient) => (int) $recipient->id === (int) Auth::id())
         ->values();
 
-    if ($recipients->isNotEmpty()) {
+    $notification = new ProofUploadedNotification($leaveRequest);
+    foreach ($recipients as $recipient) {
         try {
-            Notification::send($recipients, new ProofUploadedNotification($leaveRequest));
+            $recipient->notifyNow($notification, ['database']);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        try {
+            $recipient->notifyNow($notification, ['mail']);
         } catch (\Throwable $e) {
             report($e);
         }
@@ -1052,6 +1071,11 @@ public function myRequests(Request $request)
         abort(403);
     }
     LeaveReminderService::syncForUser($user);
+    try {
+        OverdueLeaveNotifier::notifyDue();
+    } catch (\Throwable $e) {
+        report($e);
+    }
     MissingProofUnpaidConverter::convertDue();
     if (LeaveApplicant::isManager($user) && ! request()->routeIs('manager.*')) {
         return redirect()->route('manager.myLeave', $request->query());
@@ -1074,32 +1098,21 @@ public function myRequests(Request $request)
     LeavePayFilter::apply($query, $payFilter);
 
     if ($status === 'overdue') {
-        $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
-            ->whereDate('start_date', '<', Carbon::today());
+        $query->overdue();
     } elseif ($status === 'pending') {
-        // Still "pending" from employee view while with manager or senior manager
-        $query->where(function ($q) {
-            $q->where(function ($inner) {
-                $inner->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
-                    ->whereDate('start_date', '>=', Carbon::today());
-            })->orWhereRaw('LOWER(TRIM(status)) = ?', ['pending_senior']);
-        });
+        $query->whereRaw('LOWER(TRIM(status)) in (?, ?)', ['pending', 'pending_senior'])
+            ->whereDate('start_date', '>=', Carbon::today());
     } elseif ($status !== 'all') {
         $query->whereRaw('LOWER(TRIM(status)) = ?', [$status]);
     }
 
     $effectiveSearch = $search;
     if ($status === 'all' && $searchKey === 'overdue') {
-        $query->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
-            ->whereDate('start_date', '<', Carbon::today());
+        $query->overdue();
         $effectiveSearch = '';
     } elseif ($status === 'all' && $searchKey === 'pending') {
-        $query->where(function ($q) {
-            $q->where(function ($inner) {
-                $inner->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
-                    ->whereDate('start_date', '>=', Carbon::today());
-            })->orWhereRaw('LOWER(TRIM(status)) = ?', ['pending_senior']);
-        });
+        $query->whereRaw('LOWER(TRIM(status)) in (?, ?)', ['pending', 'pending_senior'])
+            ->whereDate('start_date', '>=', Carbon::today());
         $effectiveSearch = '';
     }
 
@@ -1173,13 +1186,14 @@ public function withdraw($id)
     }
 
     $previousStatus = strtolower(trim((string) $leaveRequest->status));
+    $wasManagerApplicant = $leaveRequest->isManagerApplicant();
     $leaveRequest->status = 'withdrawn';
     $leaveRequest->save();
 
     $recipients = collect();
     $applicant = $leaveRequest->user;
 
-    if (! $leaveRequest->isManagerApplicant()) {
+    if (! $wasManagerApplicant) {
         $managerId = $leaveRequest->recommended_by ?: ($applicant->manager_id ?? null);
         $assignedManager = $managerId
             ? User::query()->managers()->whereKey($managerId)->where('is_active', true)->first()
@@ -1190,11 +1204,14 @@ public function withdraw($id)
         }
     }
 
-    if ($previousStatus === 'approved' || $leaveRequest->isManagerApplicant()) {
-        $recipients = $recipients->merge(
-            \App\Support\LeaveApprovalWorkflow::seniorsForLeave($leaveRequest)
-        );
+    $assignedSenior = \App\Support\LeaveApprovalWorkflow::assignedSeniorForUser($applicant);
+    if ($assignedSenior) {
+        $recipients->push($assignedSenior);
     }
+
+    $recipients = $recipients->merge(
+        \App\Support\LeaveApprovalWorkflow::seniorsForLeave($leaveRequest)
+    );
 
     foreach ($recipients->unique('id')->values() as $recipient) {
         try {
@@ -1220,10 +1237,12 @@ public function withdraw($id)
     }
 
     $notice = $previousStatus === 'approved'
-        ? 'Approved leave withdrawn. Your manager and senior managers were notified, and your leave balance was restored.'
-        : ($leaveRequest->isManagerApplicant()
+        ? ($wasManagerApplicant
+            ? 'Approved leave withdrawn. Senior managers were notified, and your leave balance was restored.'
+            : 'Approved leave withdrawn. Your manager and senior manager were notified, and your leave balance was restored.')
+        : ($wasManagerApplicant
             ? 'Leave request withdrawn and senior managers notified.'
-            : 'Leave request withdrawn and your manager notified.');
+            : 'Leave request withdrawn. Your manager and senior manager were notified.');
 
     return redirect()->route($this->myRequestsRoute())->with('success', $notice);
 }

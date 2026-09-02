@@ -12,6 +12,7 @@ use App\Support\DashboardEmployeeFilter;
 use App\Support\PersonalLeaveDashboardData;
 use App\Support\LeaveReminderService;
 use App\Support\ManagerTeam;
+use App\Support\OverdueLeaveNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +38,11 @@ class DashboardsController extends Controller
     public function personal(Request $request)
     {
         LeaveReminderService::syncForUser(Auth::user());
+        try {
+            OverdueLeaveNotifier::notifyDue();
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return view('dashboard', array_merge(
             PersonalLeaveDashboardData::build((int) Auth::id()),
@@ -51,6 +57,11 @@ class DashboardsController extends Controller
     public function team(Request $request)
     {
         LeaveReminderService::syncForUser(Auth::user());
+        try {
+            OverdueLeaveNotifier::notifyDue();
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         $monthFilter = $request->query('month', 'this_year');
         $employeeFilter = DashboardEmployeeFilter::selectedId($request->query('employee'));
@@ -64,9 +75,10 @@ class DashboardsController extends Controller
 
         $allRequestsCount = (clone $baseQuery)->count();
 
-        $pendingTotalCount = (clone $baseQuery)->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])->count();
-        $overduePendingCount = (clone $baseQuery)->whereRaw('LOWER(TRIM(status)) = ?', ['pending'])
-            ->whereDate('start_date', '<', Carbon::today())->count();
+        $pendingTotalCount = (clone $baseQuery)
+            ->whereRaw('LOWER(TRIM(status)) in (?, ?)', ['pending', 'pending_senior'])
+            ->count();
+        $overduePendingCount = (clone $baseQuery)->overdue()->count();
         $pendingRequestsCount = max(0, $pendingTotalCount - $overduePendingCount);
 
         $approvedRequestsCount = (clone $baseQuery)->whereRaw('LOWER(TRIM(status)) = ?', ['approved'])->count();

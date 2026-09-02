@@ -92,9 +92,6 @@
                 <tr>
                     <td>
                         {{ $employeeName }}
-                        @if ($reportsForSeniorManager && ($leave->user->role ?? '') === 'manager')
-                            <span class="request-badge request-badge--pending">Manager</span>
-                        @endif
                     </td>
                     <td>{{ $leave->leave_type }}</td>
                     <td>{{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }} – {{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}</td>
