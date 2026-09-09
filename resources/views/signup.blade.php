@@ -148,8 +148,13 @@
 
         <h2>SignUp</h2>
 
-        <form method="POST" action="{{ route('signup.post') }}">
+        <form method="POST" action="{{ route('signup.post') }}" autocomplete="off">
             @csrf
+
+            <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;">
+                <input type="text" tabindex="-1" autocomplete="username">
+                <input type="password" tabindex="-1" autocomplete="current-password">
+            </div>
 
             <label for="first_name">First Name</label>
             <input type="text" name="first_name" value="{{ old('first_name') }}" required />
@@ -174,20 +179,30 @@
                 <div class="error">{{ $message }}</div>
             @enderror
 
-            <label for="email">Username (Email)</label>
-            <input type="email" name="email" value="{{ old('email') }}" required />
+            <label for="signup_email">Username (Email)</label>
+            <input
+                type="email"
+                name="email"
+                id="signup_email"
+                value="{{ old('email') }}"
+                data-expected="{{ old('email') }}"
+                autocomplete="off"
+                readonly
+                onfocus="this.removeAttribute('readonly')"
+                required
+            />
             @error('email')
                 <div class="error">{{ $message }}</div>
             @enderror
 
             <label for="password">Password</label>
-            <input type="password" name="password" required />
+            <input type="password" name="password" id="password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
             @error('password')
                 <div class="error">{{ $message }}</div>
             @enderror
 
             <label for="password_confirmation">Confirm Password</label>
-            <input type="password" name="password_confirmation" required />
+            <input type="password" name="password_confirmation" id="password_confirmation" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
 
             <div class="button-group">
                 <button type="submit">SignUp</button>
@@ -225,5 +240,23 @@
             });
         </script>
     @endif
+
+    <script>
+        function clearBrowserAutofill() {
+            const email = document.getElementById('signup_email');
+            const password = document.getElementById('password');
+            const confirm = document.getElementById('password_confirmation');
+            const expectedEmail = email ? (email.getAttribute('data-expected') || '') : '';
+            if (email && email.value !== expectedEmail) {
+                email.value = expectedEmail;
+            }
+            if (password) password.value = '';
+            if (confirm) confirm.value = '';
+        }
+        window.addEventListener('load', function () {
+            clearBrowserAutofill();
+            setTimeout(clearBrowserAutofill, 150);
+        });
+    </script>
 </body>
 </html>

@@ -13,6 +13,7 @@
         max-width: 920px;
         margin: 0 auto;
         background: #ffffff;
+        border: 0;
         box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
         overflow: hidden;
         box-sizing: border-box;
@@ -22,22 +23,25 @@
         top: 0;
         left: 0;
         width: 18px;
-        height: 176px;
+        height: 228px;
         background: #d6e05a;
-        border-bottom-right-radius: 22px;
+        border-bottom-right-radius: 24px;
         z-index: 2;
     }
     .lh-header {
         display: flex;
         align-items: center;
-        gap: 28px;
-        padding: 24px 0 18px 36px;
+        gap: 22px;
+        padding: 36px 24px 36px 48px;
+        min-height: 228px;
+        box-sizing: border-box;
     }
     .lh-emblem {
-        height: 132px;
+        height: 156px;
         width: auto;
-        max-width: 160px;
+        max-width: none;
         object-fit: contain;
+        object-position: center;
         display: block;
         flex: 0 0 auto;
     }
@@ -45,27 +49,31 @@
         flex: 1 1 auto;
         min-width: 0;
         display: flex;
-        align-items: flex-start;
-        gap: 20px;
+        align-items: center;
+        gap: 18px;
+        padding-right: 0;
     }
     .lh-wordmark {
         flex: 0 0 auto;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        font-size: 42px;
-        font-weight: 800;
+        font-size: 46px;
+        font-weight: 700;
         color: #1b1e40;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.06em;
         line-height: 1;
         margin: 0;
+        white-space: nowrap;
     }
     .lh-rule {
         flex: 1 1 auto;
-        height: 7px;
+        height: 8px;
         border: 0;
-        margin: 4px 0 0;
+        margin: 0;
         background: #1b1e40;
+        align-self: center;
     }
-    .lh-body {
+    .lh-body,
+    .lh-doc-body {
         padding: 8px 32px 28px;
     }
     .lh-doc-title {
@@ -146,18 +154,75 @@
         margin: 16px 0;
     }
     .lh-footer {
-        background: #9e9e9e;
+        position: relative;
+        width: calc(100% - 64px);
+        max-width: 920px;
+        box-sizing: border-box;
+        margin: 18px auto 0;
+        background: #808388;
         color: #ffffff;
         text-align: center;
-        padding: 16px 18px 14px;
-        font-size: 12px;
-        line-height: 1.55;
+        padding: 20px 44px 18px;
+        min-height: 0;
+        overflow: hidden;
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 1.25;
+        letter-spacing: 0.01em;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        border-radius: 999px 999px 0 0;
+        box-shadow: none;
     }
-    .lh-footer-row { margin: 0 0 4px; }
-    .lh-footer-icon,
-    .lh-footer-sep { color: #d6e05a; }
-    .lh-footer-sep { padding: 0 8px; }
+    .lh-footer-shape { display: none; }
+    .lh-footer-text {
+        position: relative;
+        z-index: 2;
+        padding: 0;
+        display: block;
+        width: 100%;
+    }
+    .lh-footer-row { margin: 0 0 12px; }
+    .lh-footer-row:last-child { margin-bottom: 0; }
+    .lh-footer-row--contacts {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 8px 28px;
+        width: 100%;
+    }
+    .lh-footer-row--address {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+    .lh-footer-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        font-weight: 500;
+        color: #ffffff;
+    }
+    .lh-footer-item--address {
+        justify-content: center;
+        white-space: normal;
+        text-align: center;
+        max-width: 100%;
+    }
+    .lh-footer-icon {
+        width: 19px;
+        height: 19px;
+        flex: 0 0 auto;
+        display: block;
+        color: #e3c44d;
+        overflow: visible;
+    }
+    .lh-footer-icon--phone {
+        width: 20px;
+        height: 20px;
+    }
+    .lh-footer-sep { color: #ffffff; padding: 0 8px; }
     .lh-footer a { color: #ffffff; text-decoration: none; font-weight: 700; }
     .lh-actions {
         display: flex;
@@ -232,45 +297,44 @@
     .pr-doc {
         position: relative;
         overflow: hidden;
+        padding: 0;
+        border: 0;
+        box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
     }
     .pr-doc > .lh-header {
-        margin: -28px -32px 18px;
-        padding: 24px 0 18px 36px;
+        margin: 0;
     }
     .pr-doc > .lh-footer {
-        margin: 28px -32px -36px;
+        margin: 18px auto 0;
+        width: calc(100% - 64px);
     }
     @media (max-width: 760px) {
         .lh-page-body { padding: 8px 6px 20px; }
         .lh-sheet { max-width: 100%; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08); }
-        .pr-doc { padding: 16px; }
-        .pr-doc > .lh-header {
-            margin: -16px -16px 12px;
-            padding: 18px 0 12px 24px;
-        }
-        .pr-doc > .lh-footer {
-            margin: 20px -16px -16px;
-        }
-        .lh-body { padding: 4px 12px 20px; }
+        .pr-doc { padding: 0; }
+        .lh-body,
+        .lh-doc-body { padding: 4px 12px 20px; }
         .lh-header {
-            padding: 18px 0 12px 24px;
+            padding: 24px 12px 24px 36px;
             gap: 16px;
+            min-height: 160px;
         }
         .lh-emblem {
-            height: 84px;
-            max-width: 104px;
+            height: 112px;
+            width: auto;
+            max-width: none;
         }
         .lh-lockup {
-            gap: 12px;
+            gap: 14px;
         }
         .lh-rule {
-            height: 6px;
-            margin-top: 6px;
+            height: 7px;
+            margin: 0;
         }
         .lh-wordmark {
-            font-size: 28px;
+            font-size: 32px;
         }
-        .lh-accent { width: 12px; height: 118px; border-bottom-right-radius: 16px; }
+        .lh-accent { width: 14px; height: 172px; border-bottom-right-radius: 18px; }
         .lh-split { grid-template-columns: 1fr; }
         .lh-doc-title { font-size: 20px; margin: 4px 0 14px; }
         .lh-meta,
@@ -318,16 +382,40 @@
             text-align: center;
         }
         .lh-footer {
-            padding: 12px 10px;
-            font-size: 11px;
-            line-height: 1.65;
+            width: calc(100% - 24px);
+            max-width: none;
+            min-height: 0;
+            font-size: 12px;
+            line-height: 1.3;
+            border-radius: 36px 36px 0 0;
+            padding: 14px 22px 12px;
         }
-        .lh-footer-sep { display: none; }
-        .lh-footer-row {
+        .lh-footer-row--contacts {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-            align-items: center;
+            justify-content: center;
+            position: static;
+            flex-wrap: wrap;
+            gap: 6px 16px;
+        }
+        .lh-footer-row--contacts .lh-footer-item:nth-child(2) {
+            position: static;
+            left: auto;
+            transform: none;
+        }
+        .lh-footer-icon {
+            width: 14px;
+            height: 14px;
+        }
+        .lh-footer-icon--phone {
+            width: 16px;
+            height: 16px;
+        }
+        .lh-footer-text { padding: 0; width: 100%; }
+        .lh-footer-item { white-space: nowrap; }
+        .lh-footer-item--address { white-space: normal; }
+        .lh-footer-sep { display: inline; padding: 0 6px; }
+        .lh-footer-row {
+            margin-bottom: 8px;
         }
         .lh-scores,
         .lh-legend {

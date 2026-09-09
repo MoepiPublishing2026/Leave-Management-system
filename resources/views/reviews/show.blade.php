@@ -25,6 +25,7 @@
         <div class="lh-accent" aria-hidden="true"></div>
         @include('partials.letterhead-document-header')
 
+        <div class="lh-doc-body">
         <div class="pr-title">Monthly Performance Review</div>
 
         <table class="pr-meta">
@@ -132,6 +133,7 @@
                 </form>
             @endif
         @endif
+        </div>
 
         @include('partials.letterhead-document-footer')
     </div>

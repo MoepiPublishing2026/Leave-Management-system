@@ -16,6 +16,7 @@
         color: #1e293b;
     }
     .signup-container {
+        position: relative;
         max-width: 980px;
         margin: 0 auto;
         background-color: #ffffff;
@@ -64,10 +65,6 @@
         box-shadow: 0 0 0 3px rgba(19, 128, 86, 0.12);
     }
     /* Match auth/login password toggle (eye icons + placement) */
-    .input-wrapper {
-        position: relative;
-        width: 100%;
-    }
     .input-wrapper input[type="password"],
     .input-wrapper input[type="text"] {
         padding-right: 48px;
@@ -100,17 +97,42 @@
         outline-offset: 2px;
         border-radius: 4px;
     }
+    .autofill-trap {
+        position: absolute;
+        left: -10000px;
+        top: 0;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+    }
+    .autofill-trap input {
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: 0 !important;
+    }
     .error {
         color: #ff1e5a;
         font-size: 13px;
         margin-top: 5px;
         text-align: left;
     }
+    .input-wrapper {
+        position: relative;
+        display: block;
+        width: 100%;
+        min-height: 52px;
+    }
     .button-group {
         display: flex;
         justify-content: center;
         gap: 15px;
-        margin-top: 30px;
+        margin-top: 32px;
+        position: relative;
+        z-index: 1;
     }
     .button-group .btn-form-action {
         box-sizing: border-box;
@@ -171,8 +193,14 @@
     <p style="margin:0 0 18px; color:#64748b; font-size:0.92rem;">Create a new user account and send their login details by email.</p>
 
     <div class="signup-container">
-    <form method="POST" action="{{ route('manager.employees.store') }}">
+    <form method="POST" action="{{ route('manager.employees.store') }}" autocomplete="off">
         @csrf
+
+        {{-- Absorb saved login credentials so they are not applied to a new employee. --}}
+        <div class="autofill-trap" aria-hidden="true">
+            <input type="text" tabindex="-1" autocomplete="username">
+            <input type="password" tabindex="-1" autocomplete="current-password">
+        </div>
 
         <label for="first_name">First Name</label>
         <input type="text" name="first_name" value="{{ old('first_name') }}" required />
@@ -265,8 +293,20 @@
             @enderror
         </div>
 
-        <label for="email">Username (Email)</label>
-        <input type="email" name="email" value="{{ old('email') }}" required />
+        <label for="employee_email">Username (Email)</label>
+        <input
+            type="email"
+            name="email"
+            id="employee_email"
+            value="{{ old('email') }}"
+            data-expected="{{ old('email') }}"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            readonly
+            onfocus="this.removeAttribute('readonly')"
+            required
+        />
         @error('email')
             <div class="error">{{ $message }}</div>
         @enderror
@@ -274,7 +314,7 @@
         <!-- Password with toggle (same icons as login) -->
         <label for="password">Password</label>
         <div class="input-wrapper">
-            <input type="password" name="password" id="password" required />
+            <input type="password" name="password" id="password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
             <span class="toggle-password" id="togglePasswordAdd" role="button" tabindex="0" aria-label="Show or hide password">
                 <svg id="eyeOpenAdd" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -294,7 +334,7 @@
         <!-- Confirm password with toggle (same icons as login) -->
         <label for="password_confirmation">Confirm Password</label>
         <div class="input-wrapper">
-            <input type="password" name="password_confirmation" id="password_confirmation" required />
+            <input type="password" name="password_confirmation" id="password_confirmation" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
             <span class="toggle-password" id="togglePasswordAddConfirm" role="button" tabindex="0" aria-label="Show or hide confirm password">
                 <svg id="eyeOpenAddConfirm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -349,6 +389,22 @@
 
         setupPasswordToggle(document.getElementById('togglePasswordAdd'), 'password', 'eyeOpenAdd', 'eyeClosedAdd');
         setupPasswordToggle(document.getElementById('togglePasswordAddConfirm'), 'password_confirmation', 'eyeOpenAddConfirm', 'eyeClosedAddConfirm');
+
+        function clearBrowserAutofill() {
+            const email = document.getElementById('employee_email');
+            const password = document.getElementById('password');
+            const confirm = document.getElementById('password_confirmation');
+            const expectedEmail = email ? (email.getAttribute('data-expected') || '') : '';
+            if (email && email.value !== expectedEmail) {
+                email.value = expectedEmail;
+            }
+            if (password) password.value = '';
+            if (confirm) confirm.value = '';
+        }
+        window.addEventListener('load', function () {
+            clearBrowserAutofill();
+            setTimeout(clearBrowserAutofill, 150);
+        });
 
         const roleSelect = document.getElementById('role');
         const departmentSelect = document.getElementById('department');

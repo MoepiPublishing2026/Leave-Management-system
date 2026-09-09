@@ -1,7 +1,7 @@
 <div class="lh-header">
     <img
         class="lh-emblem"
-        src="{{ asset('images/letterhead-emblem.png') }}?v=20260831f"
+        src="{{ asset('images/letterhead-emblem.png') }}?v=20260908h"
         alt=""
     >
     <div class="lh-lockup">

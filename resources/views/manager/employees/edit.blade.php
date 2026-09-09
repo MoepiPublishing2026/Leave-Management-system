@@ -184,9 +184,14 @@
     <p style="margin:0 0 18px; color:#64748b; font-size:0.92rem;">Update account details for {{ $employee->first_name }} {{ $employee->last_name }}.</p>
 
     <div class="signup-container">
-    <form method="POST" action="{{ route('manager.employees.update', $employee->id) }}">
+    <form method="POST" action="{{ route('manager.employees.update', $employee->id) }}" autocomplete="off">
         @csrf
         @method('PUT')
+
+        <div class="autofill-trap" aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;">
+            <input type="text" tabindex="-1" autocomplete="username">
+            <input type="password" tabindex="-1" autocomplete="current-password">
+        </div>
 
         <label for="first_name">First Name</label>
         <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $employee->first_name) }}" required />
@@ -281,15 +286,23 @@
             @enderror
         </div>
 
-        <label for="email">Username (Email)</label>
-        <input type="email" name="email" id="email" value="{{ old('email', $employee->email) }}" required />
+        <label for="employee_email">Username (Email)</label>
+        <input
+            type="email"
+            name="email"
+            id="employee_email"
+            value="{{ old('email', $employee->email) }}"
+            data-expected="{{ old('email', $employee->email) }}"
+            autocomplete="off"
+            required
+        />
         @error('email')
             <div class="error">{{ $message }}</div>
         @enderror
 
         <label for="password">New Password</label>
         <div class="input-wrapper">
-            <input type="password" name="password" id="password" autocomplete="new-password" />
+            <input type="password" name="password" id="password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" />
             <span class="toggle-password" id="togglePasswordEdit" role="button" tabindex="0" aria-label="Show or hide password">
                 <svg id="eyeOpenEdit" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -309,7 +322,7 @@
 
         <label for="password_confirmation">Confirm New Password</label>
         <div class="input-wrapper">
-            <input type="password" name="password_confirmation" id="password_confirmation" autocomplete="new-password" />
+            <input type="password" name="password_confirmation" id="password_confirmation" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" />
             <span class="toggle-password" id="togglePasswordEditConfirm" role="button" tabindex="0" aria-label="Show or hide confirm password">
                 <svg id="eyeOpenEditConfirm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -372,6 +385,22 @@
 
         setupPasswordToggle(document.getElementById('togglePasswordEdit'), 'password', 'eyeOpenEdit', 'eyeClosedEdit');
         setupPasswordToggle(document.getElementById('togglePasswordEditConfirm'), 'password_confirmation', 'eyeOpenEditConfirm', 'eyeClosedEditConfirm');
+
+        function clearBrowserAutofill() {
+            const email = document.getElementById('employee_email');
+            const password = document.getElementById('password');
+            const confirm = document.getElementById('password_confirmation');
+            const expectedEmail = email ? (email.getAttribute('data-expected') || '') : '';
+            if (email && email.value !== expectedEmail) {
+                email.value = expectedEmail;
+            }
+            if (password) password.value = '';
+            if (confirm) confirm.value = '';
+        }
+        window.addEventListener('load', function () {
+            clearBrowserAutofill();
+            setTimeout(clearBrowserAutofill, 150);
+        });
 
         const roleSelect = document.getElementById('role');
         const departmentSelect = document.getElementById('department');

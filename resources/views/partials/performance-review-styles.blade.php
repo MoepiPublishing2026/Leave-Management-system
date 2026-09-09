@@ -4,7 +4,7 @@
         font-family: Inter, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         max-width: 980px;
         margin: 0 auto;
-        padding: 8px 12px 48px;
+        padding: 8px 0 48px;
         color: #334155;
     }
     .pr-toolbar {
@@ -14,6 +14,7 @@
         align-items: center;
         justify-content: flex-end;
         margin-bottom: 16px;
+        padding: 0 12px;
     }
     .pr-toolbar h1 {
         margin: 0;
@@ -23,9 +24,11 @@
     }
     .pr-doc {
         background: #fff;
-        border: 1px solid #dbe3ea;
-        box-shadow: 0 0 12px rgba(148, 163, 184, 0.25);
-        padding: 28px 32px 36px;
+        border: 0;
+        box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
+        padding: 0;
+        position: relative;
+        overflow: hidden;
     }
     .pr-brand {
         display: flex;
@@ -291,8 +294,8 @@
         font-size: 14px;
     }
         @media (max-width: 760px) {
-        .pr-page { padding: 4px 0 32px; }
-        .pr-doc { padding: 16px 12px 24px; }
+        .pr-page { padding: 4px 0 0; }
+        .pr-doc { padding: 0; }
         .pr-split { grid-template-columns: 1fr; }
         .pr-title { font-size: 22px; }
         .pr-brand img { height: 48px; max-width: min(200px, 70vw); }

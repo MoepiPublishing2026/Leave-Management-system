@@ -11,9 +11,9 @@
     }
     /* Reserve header/footer space on EVERY page so content cannot overlap. */
     @page {
-        margin-top: 186px;
+        margin-top: 228px;
         margin-right: 36px;
-        margin-bottom: 92px;
+        margin-bottom: 108px;
         margin-left: 36px;
     }
     body {
@@ -24,38 +24,38 @@
     }
     .pdf-accent {
         position: fixed;
-        top: -186px;
+        top: -228px;
         left: -36px;
         width: 18px;
-        height: 168px;
+        height: 210px;
         background: #d6e05a;
-        border-bottom-right-radius: 22px;
+        border-bottom-right-radius: 24px;
     }
     .pdf-header {
         position: fixed;
-        top: -160px;
-        left: -16px;
+        top: -200px;
+        left: -12px;
         right: -36px;
-        height: 148px;
+        height: 180px;
     }
     .pdf-header-table {
         width: 100%;
         border-collapse: collapse;
     }
     .pdf-emblem-cell {
-        width: 118px;
+        width: 156px;
         white-space: nowrap;
         padding: 0;
         border: 0;
         vertical-align: middle;
     }
     .pdf-emblem {
-        height: 118px;
+        height: 148px;
         width: auto;
         display: block;
     }
     .pdf-gap-cell {
-        width: 28px;
+        width: 22px;
         padding: 0;
         border: 0;
         font-size: 1px;
@@ -75,73 +75,83 @@
         width: 1%;
         white-space: nowrap;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, DejaVu Sans, sans-serif;
-        font-size: 36px;
+        font-size: 42px;
         font-weight: 700;
         color: #1b1e40;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.06em;
         line-height: 1;
         padding: 0;
-        vertical-align: top;
+        vertical-align: middle;
     }
     .pdf-name-gap {
-        width: 20px;
+        width: 18px;
         padding: 0;
         border: 0;
         font-size: 1px;
         line-height: 1px;
-        vertical-align: top;
+        vertical-align: middle;
     }
     .pdf-rule-cell {
         width: 99%;
-        vertical-align: top;
-        padding: 2px 0 0;
+        vertical-align: middle;
+        padding: 0;
         border: 0;
     }
     .pdf-rule {
         width: 100%;
-        border-top: 7px solid #1b1e40;
+        border-top: 8px solid #1b1e40;
         height: 0;
         font-size: 1px;
         line-height: 0;
     }
     .pdf-footer {
         position: fixed;
-        left: -36px;
-        right: -32px;
-        bottom: -92px;
-        height: 92px;
+        left: 56px;
+        right: 56px;
+        bottom: -108px;
+        height: 100px;
         overflow: hidden;
+        background: #808388;
+        border-radius: 48px 48px 0 0;
     }
     .pdf-footer-shape {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100%;
-        height: 92px;
+        display: none;
     }
     .pdf-footer-text {
         position: relative;
         z-index: 2;
         color: #ffffff;
         text-align: center;
-        padding: 28px 18px 8px;
+        padding: 18px 24px 12px;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, DejaVu Sans, sans-serif;
-        font-size: 9px;
-        line-height: 1.5;
+        font-size: 11px;
+        line-height: 1.35;
+    }
+    .pdf-footer-contacts {
+        width: auto;
+        margin: 0 auto 10px;
+        border-collapse: collapse;
+    }
+    .pdf-footer-contacts td {
+        padding: 0 10px;
+        white-space: nowrap;
+        color: #ffffff;
+        font-size: 11px;
+        vertical-align: middle;
     }
     .pdf-footer-row {
-        margin: 0 0 3px;
+        margin: 0;
         color: #ffffff;
+        text-align: center;
     }
     .pdf-footer-icon {
-        color: #d6e05a;
-        font-size: 10px;
+        color: #e3c44d;
+        font-size: 11px;
         padding-right: 4px;
     }
     .pdf-footer-sep {
-        color: #d6e05a;
-        padding: 0 9px;
+        color: #ffffff;
+        padding: 0 6px;
     }
     .pdf-content {
         padding: 0;

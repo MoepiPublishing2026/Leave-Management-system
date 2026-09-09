@@ -49,6 +49,7 @@
         <div class="lh-accent" aria-hidden="true"></div>
         @include('partials.letterhead-document-header')
 
+        <div class="lh-doc-body">
         <div class="pr-title">Monthly Performance Review</div>
 
         <table class="pr-meta">
@@ -118,6 +119,7 @@
         <div class="pr-actions">
             <button type="submit" name="intent" value="draft" class="pr-btn pr-btn--draft" formnovalidate>Save draft</button>
             <button type="submit" name="intent" value="submit" class="pr-btn pr-btn--primary">Submit review</button>
+        </div>
         </div>
 
         @include('partials.letterhead-document-footer')

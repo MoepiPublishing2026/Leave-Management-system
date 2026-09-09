@@ -33,11 +33,11 @@ class PerformanceReviews
     public static function scoreLabels(): array
     {
         return [
-            1 => 'unsatisfactory',
-            2 => 'below expectation',
-            3 => 'satisfactory',
-            4 => 'above expectation',
-            5 => 'exceptional',
+            1 => 'Unsatisfactory',
+            2 => 'Below expectation',
+            3 => 'Satisfactory',
+            4 => 'Above expectation',
+            5 => 'Exceptional',
         ];
     }
 
