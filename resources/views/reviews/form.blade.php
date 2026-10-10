@@ -12,6 +12,8 @@
     $action = $editing
         ? route(PerformanceReviews::routeName($user, 'update'), $review)
         : route(PerformanceReviews::routeName($user, 'store'));
+    $criteria = $criteria ?? PerformanceReviews::criteria();
+    $scoreLabels = $scoreLabels ?? PerformanceReviews::scoreLabels();
     $monthNames = [
         1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
         5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
@@ -21,7 +23,7 @@
 
 <div class="pr-page">
     <div class="pr-toolbar">
-        <a class="pr-btn pr-btn--ghost" href="{{ route(PerformanceReviews::routeName($user, 'index')) }}">Back to list</a>
+        <a class="pr-btn pr-btn--ghost" href="{{ route(PerformanceReviews::routeName($user, 'index'), $indexParams ?? []) }}">Back to list</a>
     </div>
 
     @if ($errors->any() || session('error'))
@@ -114,7 +116,33 @@
             <textarea name="areas_for_improvement" required placeholder="Add areas for improvement">{{ old('areas_for_improvement', $review->areas_for_improvement) }}</textarea>
         </div>
 
-        <p class="pr-submit-hint">All four sections must be filled in before you submit. You can still save a draft if something is incomplete.</p>
+        <div class="pr-score-block">
+            <h2>Your self-rating</h2>
+            <p class="pr-submit-hint" style="margin-top:0;">Rate yourself on every criterion. {{ strtolower((string) ($user->role ?? '')) === 'manager' ? 'Your senior manager' : 'Your manager' }} will give the final rating after you submit.</p>
+            <div class="pr-split">
+                <table class="pr-id-table">
+                    <tr><th>Employee</th><td>{{ PerformanceReviews::displayName($user) }}</td></tr>
+                    <tr><th>Position</th><td>{{ PerformanceReviews::positionLabel($user) ?: '—' }}</td></tr>
+                    <tr><th>Reviewer</th><td>{{ $reviewerName ?: '—' }}</td></tr>
+                    <tr><th>Date of review</th><td>{{ old('review_date', optional($review->review_date)->format('d M Y') ?: now()->format('d M Y')) }}</td></tr>
+                </table>
+                <table class="pr-legend">
+                    <tr><th colspan="2">Numerical values</th></tr>
+                    @foreach ($scoreLabels as $value => $label)
+                        <tr><th>{{ $value }}</th><td>{{ $label }}</td></tr>
+                    @endforeach
+                </table>
+            </div>
+            @include('reviews.partials.score-table', [
+                'name' => 'self_scores',
+                'values' => old('self_scores', $review->self_scores ?? []),
+                'editable' => true,
+                'criteria' => $criteria,
+                'scoreLabels' => $scoreLabels,
+            ])
+        </div>
+
+        <p class="pr-submit-hint">All four sections and your self-rating must be filled in before you submit. You can still save a draft if something is incomplete.</p>
 
         <div class="pr-actions">
             <button type="submit" name="intent" value="draft" class="pr-btn pr-btn--draft" formnovalidate>Save draft</button>

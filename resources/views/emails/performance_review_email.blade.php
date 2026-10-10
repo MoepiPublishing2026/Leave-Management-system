@@ -52,6 +52,35 @@
         </table>
     </div>
 
+    @if (filled($review->self_scores))
+        <div class="lh-section"><h2>Self-rating</h2></div>
+        <table class="lh-scores">
+            <thead>
+            <tr>
+                <th>Criteria</th>
+                @foreach ($scoreLabels as $value => $label)
+                    <th title="{{ $label }}">{{ $value }}</th>
+                @endforeach
+            </tr>
+            </thead>
+            <tbody>
+            @foreach ($criteria as $key => $label)
+                @php $selected = (int) $review->selfScoreFor($key); @endphp
+                <tr>
+                    <td>{{ $label }}</td>
+                    @foreach ($scoreLabels as $value => $scoreLabel)
+                        <td>{{ $selected === (int) $value ? '●' : '' }}</td>
+                    @endforeach
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+        @if ($review->averageSelfScore())
+            <p style="font-weight:700;">Average self-rating: {{ $review->averageSelfScore() }} / 5</p>
+        @endif
+    @endif
+
+    <div class="lh-section"><h2>Final rating</h2></div>
     <table class="lh-scores">
         <thead>
         <tr>
@@ -83,14 +112,14 @@
     @if ($awaiting)
             <p style="margin:16px 0 6px; font-weight:700;">Comment (optional)</p>
             <textarea name="senior_comment" class="lh-comment">{{ old('senior_comment', $review->senior_comment) }}</textarea>
-            <p style="margin-top:16px;"><button type="submit" class="lh-btn lh-btn--primary">Save scores and mark as reviewed</button></p>
+            <p style="margin-top:16px;"><button type="submit" class="lh-btn lh-btn--primary">Save final rating and mark as reviewed</button></p>
         </form>
     @else
         @if ($review->averageScore())
-            <p style="font-weight:700;">Average score: {{ $review->averageScore() }} / 5</p>
+            <p style="font-weight:700;">Average final rating: {{ $review->averageScore() }} / 5</p>
         @endif
         @if ($review->senior_comment)
-            <div class="lh-section"><h2>Senior manager comment</h2><div class="lh-section-body">{{ $review->senior_comment }}</div></div>
+            <div class="lh-section"><h2>Comment</h2><div class="lh-section-body">{{ $review->senior_comment }}</div></div>
         @endif
     @endif
 

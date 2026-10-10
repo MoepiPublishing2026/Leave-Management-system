@@ -1,4 +1,4 @@
-@extends('layouts.manager')
+@extends($layout ?? 'layouts.manager')
 
 @section('title', 'Employees List')
 

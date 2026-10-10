@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PerformanceReview;
 use App\Models\User;
 use App\Notifications\PerformanceReviewSubmittedNotification;
-use App\Support\LeaveApprovalWorkflow;
+use App\Support\ManagerTeam;
 use App\Support\PerformanceReviews;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -19,7 +19,14 @@ class PerformanceReviewController extends Controller
         $user = Auth::user();
         $status = strtolower(trim((string) $request->query('status', 'all')));
         $search = trim((string) $request->query('search', ''));
+        $reviewScope = $this->reviewScope($user, $request);
         $query = $this->visibleQuery($user)->with(['employee', 'reviewer', 'senior'])->latest('updated_at');
+
+        if ($reviewScope === 'mine') {
+            $query->where('employee_id', $user->id);
+        } elseif ($reviewScope === 'team') {
+            $query->where('employee_id', '!=', $user->id);
+        }
 
         if (in_array($status, ['draft', 'submitted', 'reviewed'], true)) {
             $query->where('status', $status);
@@ -41,7 +48,8 @@ class PerformanceReviewController extends Controller
             'status' => $status,
             'search' => $search,
             'user' => $user,
-            'canCreate' => $this->canCreate($user),
+            'canCreate' => $this->canCreate($user) && $reviewScope !== 'team',
+            'reviewScope' => $reviewScope,
         ]);
     }
 
@@ -115,6 +123,9 @@ class PerformanceReviewController extends Controller
             'canEdit' => $this->canEdit($user, $review),
             'canAcknowledge' => $this->canAcknowledge($user, $review),
             'reviewerName' => $this->reviewerDisplayName($review),
+            'showSelfScores' => filled($review->self_scores),
+            'showFinalScores' => $this->canAcknowledge($user, $review) || $review->isReviewed(),
+            'indexParams' => $this->indexParams($user, $review),
         ]);
     }
 
@@ -192,29 +203,29 @@ class PerformanceReviewController extends Controller
                 ->with('error', 'Fill in every section before submitting this review.');
         }
 
-        $seniors = PerformanceReviews::seniorsToNotify($user);
-        if ($seniors->isEmpty()) {
+        $raters = PerformanceReviews::ratersToNotify($user);
+        if ($raters->isEmpty()) {
             return redirect()
                 ->route(PerformanceReviews::routeName($user, 'edit'), $review)
-                ->with('error', 'No senior manager is assigned to receive this review.');
+                ->with('error', PerformanceReviews::missingRaterMessage($user));
         }
 
         $review->status = 'submitted';
         $review->submitted_by = $user->id;
         $review->submitted_at = now();
-        $review->senior_id = $seniors->first()->id;
+        $review->senior_id = $raters->first()->id;
         $review->save();
 
         $freshReview = $review->fresh(['employee', 'reviewer']);
-        foreach ($seniors as $senior) {
+        foreach ($raters as $rater) {
             try {
-                $senior->notifyNow(new PerformanceReviewSubmittedNotification($freshReview), ['database']);
+                $rater->notifyNow(new PerformanceReviewSubmittedNotification($freshReview), ['database']);
             } catch (\Throwable $e) {
                 report($e);
             }
 
             try {
-                $senior->notifyNow(new PerformanceReviewSubmittedNotification($freshReview), ['mail']);
+                $rater->notifyNow(new PerformanceReviewSubmittedNotification($freshReview), ['mail']);
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -240,9 +251,13 @@ class PerformanceReviewController extends Controller
             'areas_for_improvement' => trim((string) $request->input('areas_for_improvement')),
         ]);
 
-        $narrative = strtolower((string) $request->input('intent')) === 'submit'
+        $submitting = strtolower((string) $request->input('intent')) === 'submit';
+        $narrative = $submitting
             ? ['required', 'string', 'max:8000']
             : ['nullable', 'string', 'max:8000'];
+        $scoreRule = $submitting
+            ? ['required', 'integer', 'min:1', 'max:5']
+            : ['nullable', 'integer', 'min:1', 'max:5'];
 
         $rules = [
             'employee_id' => ['required', 'integer', $employeeRule],
@@ -254,15 +269,21 @@ class PerformanceReviewController extends Controller
             'quality_of_work' => $narrative,
             'initiative_examples' => $narrative,
             'areas_for_improvement' => $narrative,
+            'self_scores' => [$submitting ? 'required' : 'nullable', 'array'],
         ];
+
+        foreach (array_keys(PerformanceReviews::criteria()) as $key) {
+            $rules['self_scores.'.$key] = $scoreRule;
+        }
 
         $validated = $request->validate($rules, [
             'goals_achieved.required' => 'Fill in goals achieved before submitting.',
             'quality_of_work.required' => 'Fill in quality of work before submitting.',
             'initiative_examples.required' => 'Fill in examples of initiative before submitting.',
             'areas_for_improvement.required' => 'Fill in areas for improvement before submitting.',
+            'self_scores.required' => 'Rate yourself on every criterion before submitting.',
+            'self_scores.*.required' => 'Rate yourself on every criterion before submitting.',
         ]);
-        unset($validated['scores']);
 
         return $validated;
     }
@@ -287,6 +308,7 @@ class PerformanceReviewController extends Controller
             'quality_of_work' => $validated['quality_of_work'] ?? null,
             'initiative_examples' => $validated['initiative_examples'] ?? null,
             'areas_for_improvement' => $validated['areas_for_improvement'] ?? null,
+            'self_scores' => $validated['self_scores'] ?? $review->self_scores,
         ]);
 
         if (! $review->exists) {
@@ -303,7 +325,37 @@ class PerformanceReviewController extends Controller
             'editing' => $editing,
             'employees' => $this->reviewableEmployees($user),
             'reviewerName' => $this->reviewerDisplayName($review, $user),
+            'criteria' => PerformanceReviews::criteria(),
+            'scoreLabels' => PerformanceReviews::scoreLabels(),
+            'indexParams' => $editing
+                ? $this->indexParams($user, $review)
+                : $this->indexParams($user, new PerformanceReview(['employee_id' => $user->id])),
         ];
+    }
+
+    private function reviewScope(User $user, Request $request): string
+    {
+        if (strtolower((string) ($user->role ?? '')) !== 'manager') {
+            return 'all';
+        }
+
+        return strtolower(trim((string) $request->query('scope', 'team'))) === 'mine'
+            ? 'mine'
+            : 'team';
+    }
+
+    /** @return array<string, string> */
+    private function indexParams(User $user, ?PerformanceReview $review = null): array
+    {
+        if (strtolower((string) ($user->role ?? '')) !== 'manager') {
+            return [];
+        }
+
+        if ($review && (int) $review->employee_id === (int) $user->id) {
+            return ['scope' => 'mine'];
+        }
+
+        return ['scope' => 'team'];
     }
 
     private function visibleQuery(User $user)
@@ -312,18 +364,35 @@ class PerformanceReviewController extends Controller
         $query = PerformanceReview::query();
 
         if ($role === 'admin') {
-            $ids = LeaveApprovalWorkflow::reportingLineUserIds($user);
-            $query->whereIn('status', ['submitted', 'reviewed']);
-            if ($ids->isEmpty()) {
-                return $query->where(function ($q) use ($user) {
-                    $q->where('senior_id', $user->id)->orWhereRaw('1 = 0');
-                });
-            }
+            $managerIds = User::query()
+                ->managers()
+                ->where('manager_id', $user->id)
+                ->pluck('id');
 
-            return $query->where(function ($q) use ($ids, $user) {
-                $q->whereIn('employee_id', $ids)
-                    ->orWhereIn('reviewer_id', $ids)
-                    ->orWhere('senior_id', $user->id);
+            $query->whereIn('status', ['submitted', 'reviewed']);
+
+            return $query->where(function ($q) use ($managerIds, $user) {
+                $q->where('senior_id', $user->id);
+                if ($managerIds->isNotEmpty()) {
+                    $q->orWhereIn('employee_id', $managerIds);
+                }
+            });
+        }
+
+        if ($role === 'manager') {
+            $teamIds = ManagerTeam::employeeIdsFor($user);
+
+            return $query->where(function ($q) use ($user, $teamIds) {
+                $q->where('employee_id', $user->id)
+                    ->orWhere(function ($team) use ($user, $teamIds) {
+                        $team->whereIn('status', ['submitted', 'reviewed'])
+                            ->where(function ($inner) use ($user, $teamIds) {
+                                $inner->where('senior_id', $user->id);
+                                if ($teamIds->isNotEmpty()) {
+                                    $inner->orWhereIn('employee_id', $teamIds);
+                                }
+                            });
+                    });
             });
         }
 
@@ -357,8 +426,17 @@ class PerformanceReviewController extends Controller
 
     private function canAcknowledge(User $user, PerformanceReview $review): bool
     {
-        return strtolower((string) $user->role) === 'admin'
-            && $review->isSubmitted();
+        if (! $review->isSubmitted()) {
+            return false;
+        }
+
+        if ((int) $review->senior_id === (int) $user->id) {
+            return true;
+        }
+
+        $rater = PerformanceReviews::finalRater($review->employee);
+
+        return $rater && (int) $rater->id === (int) $user->id;
     }
 
     private function canReviewEmployee(User $user, ?User $employee): bool
@@ -384,16 +462,16 @@ class PerformanceReviewController extends Controller
     private function reviewerDisplayName(PerformanceReview $review, ?User $fallback = null): string
     {
         $subject = $review->employee ?: $fallback;
-        $senior = PerformanceReviews::assignedSenior($subject);
-        $name = PerformanceReviews::displayName($senior);
+        $rater = PerformanceReviews::finalRater($subject);
+        $name = PerformanceReviews::displayName($rater);
 
         return $name !== '' ? $name : (string) ($review->reviewer_name ?? '');
     }
 
     private function defaultReviewerId(User $submitter, ?User $employee = null): int
     {
-        $senior = PerformanceReviews::assignedSenior($employee ?: $submitter);
+        $rater = PerformanceReviews::finalRater($employee ?: $submitter);
 
-        return $senior ? (int) $senior->id : (int) $submitter->id;
+        return $rater ? (int) $rater->id : (int) $submitter->id;
     }
 }

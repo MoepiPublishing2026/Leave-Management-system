@@ -9,6 +9,7 @@ use App\Support\MonthlyLeaveStatusBreakdown;
 use App\Support\PercentageDistribution;
 use App\Support\LeaveRequestPeriodFilter;
 use App\Support\DashboardEmployeeFilter;
+use App\Support\LeaveYear;
 use Illuminate\Support\Carbon;
 use Yasumi\Yasumi;
 
@@ -82,14 +83,16 @@ class AdminDashboardController extends Controller
         }
 
         // Monthly applications line chart: when requests were submitted (created_at).
-        $chartYear = ctype_digit((string) $monthFilter) ? (int) $monthFilter : (int) Carbon::now()->year;
-        $barLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $chartYear = ctype_digit((string) $monthFilter) ? (int) $monthFilter : LeaveYear::current();
+        $barLabels = LeaveYear::barLabels();
         $barData = array_fill(0, 12, 0);
+        [$chartStart, $chartEnd] = LeaveYear::window($chartYear);
 
         $monthlyApplicationsQuery = LeaveRequest::query()
             ->byStaffApplicants()
             ->whereRaw('LOWER(status) != ?', ['withdrawn'])
-            ->whereYear('leave_requests.created_at', $chartYear);
+            ->where('leave_requests.created_at', '>=', $chartStart)
+            ->where('leave_requests.created_at', '<=', $chartEnd);
         DashboardEmployeeFilter::apply($monthlyApplicationsQuery, $employeeFilter);
 
         $monthlyData = (clone $monthlyApplicationsQuery)
@@ -99,7 +102,7 @@ class AdminDashboardController extends Controller
             ->get();
 
         foreach ($monthlyData as $row) {
-            $idx = ((int) $row->month) - 1;
+            $idx = LeaveYear::monthIndexFromNumber((int) $row->month);
             if ($idx >= 0 && $idx < 12) {
                 $barData[$idx] = (int) $row->total;
             }

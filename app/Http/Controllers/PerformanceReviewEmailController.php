@@ -24,7 +24,7 @@ class PerformanceReviewEmailController extends Controller
             'awaiting' => $awaiting,
             'criteria' => PerformanceReviews::criteria(),
             'scoreLabels' => PerformanceReviews::scoreLabels(),
-            'reviewerName' => PerformanceReviews::displayName(PerformanceReviews::assignedSenior($review->employee))
+            'reviewerName' => PerformanceReviews::displayName(PerformanceReviews::finalRater($review->employee))
                 ?: $review->reviewer_name,
             'submitUrl' => $awaiting ? PerformanceReviews::signedSubmitUrl($review) : null,
             'flashSuccess' => session('review_success'),
@@ -56,19 +56,19 @@ class PerformanceReviewEmailController extends Controller
                 ->withInput();
         }
 
-        $senior = $review->senior
-            ?: PerformanceReviews::assignedSenior($review->employee ?: $review->submitter);
-        if (! $senior) {
+        $rater = $review->senior
+            ?: PerformanceReviews::finalRater($review->employee ?: $review->submitter);
+        if (! $rater) {
             return redirect()
                 ->to(PerformanceReviews::signedReviewUrl($review))
-                ->with('review_error', 'No senior manager is assigned to complete this review.');
+                ->with('review_error', PerformanceReviews::missingRaterMessage($review->employee ?: $review->submitter));
         }
 
         PerformanceReviews::complete(
             $review,
             $request->input('scores'),
             $request->input('senior_comment'),
-            $senior
+            $rater
         );
 
         return redirect()

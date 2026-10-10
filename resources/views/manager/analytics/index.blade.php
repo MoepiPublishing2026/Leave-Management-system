@@ -304,7 +304,7 @@
                 <option value="this_month" {{ $monthFilter == 'this_month' ? 'selected' : '' }}>This Month</option>
                 <option value="this_quarter" {{ $monthFilter == 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
                 @foreach(($years ?? []) as $year)
-                    <option value="{{ $year }}" {{ (string) $monthFilter === (string) $year ? 'selected' : '' }}>{{ $year }}</option>
+                    <option value="{{ $year }}" {{ (string) $monthFilter === (string) $year ? 'selected' : '' }}>{{ \App\Support\LeaveYear::label((int) $year) }}</option>
                 @endforeach
             </select>
             <select name="staff" class="filter-select" onchange="document.getElementById('monthFilterForm').submit()">

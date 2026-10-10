@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
+use App\Support\LeaveRequestPeriodFilter;
+use App\Support\LeaveYear;
 use App\Support\ManagerTeam;
 use App\Support\PdfDocuments;
 use Illuminate\Http\Request;
@@ -17,7 +19,7 @@ class ReportController extends Controller
         $startDate = $request->query('start_date');
         $endDate = $request->query('end_date');
         $monthFilter = $request->query('month', 'this_year');
-        $nowYear = (int) Carbon::now()->year;
+        $nowYear = LeaveYear::current();
         $years = range($nowYear - 1, $nowYear - 5);
 
         // Base leave query excluding withdrawn
@@ -31,21 +33,7 @@ class ReportController extends Controller
             $leaveQuery->whereDate('created_at', '>=', $startDate)
                        ->whereDate('created_at', '<=', $endDate);
         } else {
-            $now = Carbon::now();
-            if (ctype_digit((string) $monthFilter)) {
-                $leaveQuery->whereYear('created_at', (int) $monthFilter);
-            } elseif ($monthFilter === 'this_month') {
-                $leaveQuery->whereYear('created_at', $now->year)
-                    ->whereMonth('created_at', $now->month);
-            } elseif ($monthFilter === 'this_quarter') {
-                $quarter = (int) ceil($now->month / 3);
-                $startMonth = ($quarter - 1) * 3 + 1;
-                $endMonth = $startMonth + 2;
-                $leaveQuery->whereYear('created_at', $now->year)
-                    ->whereBetween(\Illuminate\Support\Facades\DB::raw('MONTH(created_at)'), [$startMonth, $endMonth]);
-            } else { // this_year
-                $leaveQuery->whereYear('created_at', $now->year);
-            }
+            LeaveRequestPeriodFilter::apply($leaveQuery, $monthFilter, 'created_at');
         }
 
         // Fetch approved leaves to calculate days
@@ -145,21 +133,7 @@ class ReportController extends Controller
             $query->whereDate('created_at', '>=', $startDate)
                   ->whereDate('created_at', '<=', $endDate);
         } else {
-            $now = Carbon::now();
-            if (ctype_digit((string) $monthFilter)) {
-                $query->whereYear('created_at', (int) $monthFilter);
-            } elseif ($monthFilter === 'this_month') {
-                $query->whereYear('created_at', $now->year)
-                    ->whereMonth('created_at', $now->month);
-            } elseif ($monthFilter === 'this_quarter') {
-                $quarter = (int) ceil($now->month / 3);
-                $startMonth = ($quarter - 1) * 3 + 1;
-                $endMonth = $startMonth + 2;
-                $query->whereYear('created_at', $now->year)
-                    ->whereBetween(\Illuminate\Support\Facades\DB::raw('MONTH(created_at)'), [$startMonth, $endMonth]);
-            } else { // this_year
-                $query->whereYear('created_at', $now->year);
-            }
+            LeaveRequestPeriodFilter::apply($query, $monthFilter, 'created_at');
         }
 
         $leaves = $query->with('user')->get();
@@ -232,21 +206,7 @@ class ReportController extends Controller
             $query->whereDate('created_at', '>=', $startDate)
                 ->whereDate('created_at', '<=', $endDate);
         } else {
-            $now = Carbon::now();
-            if (ctype_digit((string) $monthFilter)) {
-                $query->whereYear('created_at', (int) $monthFilter);
-            } elseif ($monthFilter === 'this_month') {
-                $query->whereYear('created_at', $now->year)
-                    ->whereMonth('created_at', $now->month);
-            } elseif ($monthFilter === 'this_quarter') {
-                $quarter = (int) ceil($now->month / 3);
-                $startMonth = ($quarter - 1) * 3 + 1;
-                $endMonth = $startMonth + 2;
-                $query->whereYear('created_at', $now->year)
-                    ->whereBetween(\Illuminate\Support\Facades\DB::raw('MONTH(created_at)'), [$startMonth, $endMonth]);
-            } else { // this_year
-                $query->whereYear('created_at', $now->year);
-            }
+            LeaveRequestPeriodFilter::apply($query, $monthFilter, 'created_at');
         }
 
         $leaves = $query->get();

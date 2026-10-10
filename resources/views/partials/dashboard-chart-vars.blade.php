@@ -309,14 +309,24 @@
     });
 
     window.statusStackedBarChartOptions = () => window.mergeChartOptions({
-        layout: window.getMonthChartLayout(),
+        layout: {
+            ...window.getMonthChartLayout(),
+            padding: {
+                ...(window.getMonthChartLayout().padding || {}),
+                bottom: 12,
+            },
+        },
         plugins: { legend: { display: false } },
         scales: {
             x: {
                 type: 'category',
                 stacked: true,
                 offset: true,
-                ticks: { ...window.getMonthAxisTicks() },
+                ticks: {
+                    ...window.getMonthAxisTicks(),
+                    autoSkip: false,
+                    maxTicksLimit: 12,
+                },
             },
             y: {
                 stacked: true,

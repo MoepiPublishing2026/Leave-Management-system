@@ -5,7 +5,7 @@
     $isSeniorManager = strtolower((string) (auth()->user()->role ?? '')) === 'admin';
     $personLabel = $isSeniorManager ? 'Staff member' : 'Employee';
     $allPeopleLabel = $isSeniorManager ? 'All Staff' : 'All Employees';
-    $nowY = (int) \Illuminate\Support\Carbon::now()->year;
+    $nowY = \App\Support\LeaveYear::current();
     $yearOptions = $yearOptions ?? range($nowY - 1, $nowY - 5);
 @endphp
 
@@ -44,7 +44,7 @@
             <option value="this_quarter" {{ $monthFilter === 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
             <option value="this_month" {{ $monthFilter === 'this_month' ? 'selected' : '' }}>This Month</option>
             @foreach ($yearOptions as $y)
-                <option value="{{ $y }}" {{ (string) $monthFilter === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
+                <option value="{{ $y }}" {{ (string) $monthFilter === (string) $y ? 'selected' : '' }}>{{ \App\Support\LeaveYear::label($y) }}</option>
             @endforeach
         </select>
         <noscript>

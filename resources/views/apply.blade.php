@@ -447,6 +447,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const publicHolidays = @json($publicHolidays);
     const leaveBalancesByYear = @json($leaveBalancesByYear);
     const nowYear = @json($nowYear);
+    const leaveYearStartMonth = @json($leaveYearStartMonth ?? 5);
+
+    function leaveYearForDate(date) {
+        if (!date) return nowYear;
+        const d = date instanceof Date ? date : parseLocalDate(date);
+        if (!d) return nowYear;
+        const month = d.getMonth() + 1;
+        return month < leaveYearStartMonth ? d.getFullYear() - 1 : d.getFullYear();
+    }
+
+    function leaveYearLabel(year) {
+        const y = Number(year);
+        if (!Number.isFinite(y)) return String(year);
+        return `${y}/${String(y + 1).slice(-2)}`;
+    }
     const blockedParentalLeaveType = @json($blockedParentalLeaveType ?? null);
     function countsAgainstAnnual(leaveType) {
         if (!leaveType) return false;
@@ -508,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (day === 0 || day === 6 || publicHolidays.includes(isoDate)) {
                 continue;
             }
-            const year = d.getFullYear();
+            const year = leaveYearForDate(d);
             daysByYear[year] = (daysByYear[year] || 0) + 1;
         }
         return daysByYear;
@@ -774,7 +789,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateLeaveTypeEligibility() {
         const startDate = startDateInput.value;
-        const yearKey = startDate ? (parseLocalDate(startDate)?.getFullYear() || nowYear) : nowYear;
+        const yearKey = startDate ? (leaveYearForDate(startDate) || nowYear) : nowYear;
         const leaveBalances = leaveBalancesByYear[yearKey] || {};
         const annualBalance = leaveBalances['Annual'] ?? leaveBalances['Annual Leave'] ?? 0;
 
@@ -863,7 +878,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const startYear = startDate ? parseLocalDate(startDate)?.getFullYear() : null;
+        const startYear = startDate ? leaveYearForDate(startDate) : null;
 
         let daysRequested = calculateWorkingDays(startDate, endDate);
         let daysByYear = workingDaysByYear(startDate, endDate);
@@ -885,7 +900,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     Swal.fire({
                         icon: 'error',
                         title: 'Annual Leave Limit Reached',
-                        html: `You have exhausted your annual leave for <b>${yearKey}</b>. Other leave types use their own balances and can still be requested.`,
+                        html: `You have exhausted your annual leave for <b>${leaveYearLabel(yearKey)}</b>. Other leave types use their own balances and can still be requested.`,
                         confirmButtonText: 'OK'
                     });
                     return;
@@ -895,7 +910,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     Swal.fire({
                         icon: 'error',
                         title: 'Annual Leave Balance Exceeded',
-                        html: `Your remaining annual leave balance for <b>${yearKey}</b> is <b>${annualBalance}</b> day${annualBalance === 1 ? '' : 's'}. This request uses <b>${daysInYear}</b> working day${daysInYear === 1 ? '' : 's'} in ${yearKey} (excluding weekends and public holidays).`,
+                        html: `Your remaining annual leave balance for <b>${leaveYearLabel(yearKey)}</b> is <b>${annualBalance}</b> day${annualBalance === 1 ? '' : 's'}. This request uses <b>${daysInYear}</b> working day${daysInYear === 1 ? '' : 's'} in ${leaveYearLabel(yearKey)} (excluding weekends and public holidays).`,
                         confirmButtonText: 'OK'
                     });
                     return;
@@ -906,7 +921,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 Swal.fire({
                     icon: 'error',
                     title: 'Insufficient Leave Balance',
-                    html: `Your remaining <b>${leaveType || 'leave'}</b> balance for <b>${yearKey}</b> is <b>${balance}</b> day${balance === 1 ? '' : 's'}. This request uses <b>${daysInYear}</b> working day${daysInYear === 1 ? '' : 's'} in ${yearKey} (excluding weekends and public holidays).`,
+                    html: `Your remaining <b>${leaveType || 'leave'}</b> balance for <b>${leaveYearLabel(yearKey)}</b> is <b>${balance}</b> day${balance === 1 ? '' : 's'}. This request uses <b>${daysInYear}</b> working day${daysInYear === 1 ? '' : 's'} in ${leaveYearLabel(yearKey)} (excluding weekends and public holidays).`,
                     confirmButtonText: 'OK'
                 });
                 return;

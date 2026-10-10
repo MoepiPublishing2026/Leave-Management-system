@@ -14,14 +14,21 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use App\Services\UserDeletionService;
 use App\Support\DepartmentManagers;
+use App\Support\PerformanceReviews;
+use App\Support\SupportStaff;
 
 class EmployeeController extends Controller
 {
-    private function ensureManager(): void
+    private function ensureCanManageEmployees(): void
     {
-        if (strtolower((string) (Auth::user()->role ?? '')) !== 'manager') {
-            abort(403);
+        if (! SupportStaff::canManageEmployees(Auth::user())) {
+            abort(403, 'Only Support staff can add and manage employees.');
         }
+    }
+
+    private function pageLayout(): string
+    {
+        return PerformanceReviews::layout(Auth::user());
     }
 
     private function departments(?string $current = null): array
@@ -87,7 +94,7 @@ class EmployeeController extends Controller
 
     public function index()
     {
-        $this->ensureManager();
+        $this->ensureCanManageEmployees();
 
         $employees = User::query()
             ->with(['manager', 'managedDepartments'])
@@ -96,14 +103,18 @@ class EmployeeController extends Controller
             ->orderBy('last_name')
             ->get();
 
-        return view('manager.employees.index', compact('employees'));
+        return view('manager.employees.index', [
+            'employees' => $employees,
+            'layout' => $this->pageLayout(),
+        ]);
     }
 
     public function create()
     {
-        $this->ensureManager();
+        $this->ensureCanManageEmployees();
 
         return view('manager.employees.create', [
+            'layout' => $this->pageLayout(),
             'departments' => $this->departments(),
             'seniorManagers' => $this->seniorManagersForSelect(),
             'departmentManagers' => DepartmentManagers::ownershipMap(),
@@ -112,7 +123,7 @@ class EmployeeController extends Controller
 
     public function store(Request $request)
     {
-        $this->ensureManager();
+        $this->ensureCanManageEmployees();
 
         $role = (string) $request->input('role');
         $managedDepartments = $this->selectedManagedDepartments($request);
@@ -216,10 +227,11 @@ class EmployeeController extends Controller
 
     public function edit($id)
     {
-        $this->ensureManager();
+        $this->ensureCanManageEmployees();
         $employee = User::with('managedDepartments')->findOrFail($id);
 
         return view('manager.employees.edit', [
+            'layout' => $this->pageLayout(),
             'employee' => $employee,
             'departments' => $this->departments($employee->department),
             'seniorManagers' => $this->seniorManagersForSelect(),
@@ -230,7 +242,7 @@ class EmployeeController extends Controller
 
     public function update(Request $request, $id)
     {
-        $this->ensureManager();
+        $this->ensureCanManageEmployees();
         $employee = User::findOrFail($id);
 
         $role = (string) $request->input('role');
@@ -271,7 +283,7 @@ class EmployeeController extends Controller
         $isSelf = (int) Auth::id() === (int) $employee->id;
         $isActive = $request->boolean('is_active');
 
-        if ($isSelf && $request->role !== 'manager') {
+        if ($isSelf && strtolower((string) $request->role) !== strtolower((string) ($employee->role ?? ''))) {
             return redirect()->back()
                 ->withErrors(['role' => 'You cannot change your own role.'])
                 ->withInput();
@@ -375,7 +387,7 @@ class EmployeeController extends Controller
 
     public function destroy($id)
     {
-        $this->ensureManager();
+        $this->ensureCanManageEmployees();
         $employee = User::findOrFail($id);
 
         if ((int) Auth::id() === (int) $employee->id) {

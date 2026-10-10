@@ -8,7 +8,8 @@ use Illuminate\Support\Carbon;
 class LeaveRequestPeriodFilter
 {
     /**
-     * Filter requests by submission period (created_at) so status tabs match dashboard counts.
+     * Filter requests by submission period so status tabs match dashboard counts.
+     * "This year" and numbered years use the company leave year (1 May – 30 April).
      */
     public static function apply(Builder $query, mixed $monthFilter, string $column = 'created_at'): void
     {
@@ -20,7 +21,7 @@ class LeaveRequestPeriodFilter
         $now = Carbon::now();
 
         if (ctype_digit($monthFilter)) {
-            $query->whereYear($column, (int) $monthFilter);
+            LeaveYear::constrain($query, (int) $monthFilter, $column);
 
             return;
         }
@@ -41,7 +42,7 @@ class LeaveRequestPeriodFilter
         }
 
         if ($monthFilter === 'this_year') {
-            $query->whereYear($column, $now->year);
+            LeaveYear::constrain($query, LeaveYear::current($now), $column);
         }
     }
 
@@ -51,6 +52,6 @@ class LeaveRequestPeriodFilter
             return $column;
         }
 
-        return $query->getModel()->getTable() . '.' . $column;
+        return $query->getModel()->getTable().'.'.$column;
     }
 }

@@ -143,6 +143,17 @@
         width: auto;
         text-align: center;
     }
+    .pr-score-block {
+        margin-top: 22px;
+    }
+    .pr-score-block h2 {
+        margin: 0 0 10px;
+        background: #4F81BD;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 700;
+        padding: 10px 14px;
+    }
     .pr-score-table {
         width: 100%;
         border-collapse: collapse;
@@ -322,6 +333,14 @@
         .pr-toolbar, .pr-actions, .pr-filters, nav, header, .navbar, .mobile-menu-btn { display: none !important; }
         .pr-doc { box-shadow: none; border: 0; }
         .pr-page { max-width: none; }
+    }
+    .pr-reviews-page .mgr-page-header {
+        max-width: none;
+        padding: 0;
+        margin: 0 0 18px;
+    }
+    .pr-reviews-page .mgr-page-header .requests-page-lead {
+        margin-bottom: 0;
     }
     .pr-reviews-page .requests-filter--draft.is-active { background: #D2B55B; }
     .pr-reviews-page .requests-filter--submitted.is-active { background: #C291A4; }

@@ -22,9 +22,10 @@
     @if(empty($selectedType) || empty($focusedBalance))
         <h1>Leave Balance</h1>
         <p class="balance-page-lead">
-            Choose a leave type to view your <strong>{{ $year }}</strong> balance and activity.
+            Choose a leave type to view your <strong>{{ $yearLabel ?? $year }}</strong> balance and activity
+            ({{ $yearRangeLabel ?? ('1 May '.$year.' – 30 April '.($year + 1)) }}).
             @if($year === $currentYear)
-                Showing the current calendar year.
+                This leave year runs until 30 April {{ $year + 1 }}.
             @endif
         </p>
 
@@ -34,7 +35,7 @@
                 <select id="year" name="year">
                     @foreach($yearOptions as $optionYear)
                         <option value="{{ $optionYear }}" @selected($year === $optionYear)>
-                            {{ $optionYear }}{{ $optionYear === $currentYear ? ' (Current)' : '' }}
+                            {{ \App\Support\LeaveYear::label($optionYear) }}{{ $optionYear === $currentYear ? ' (Current)' : '' }}
                         </option>
                     @endforeach
                 </select>
@@ -54,12 +55,12 @@
                 <div class="balance-summary-card">
                     <div class="balance-summary-k">Annual remaining</div>
                     <div class="balance-summary-v">{{ $fmtDays($annualRemaining) }}</div>
-                    <div class="balance-summary-cap">days available in {{ $year }}</div>
+                    <div class="balance-summary-cap">days available in {{ $yearLabel ?? $year }}</div>
                 </div>
             </div>
             <div class="balance-usage-panel">
                 <div class="balance-usage-label">
-                    <span>Annual usage in {{ $year }}</span>
+                    <span>Annual usage in {{ $yearLabel ?? $year }}</span>
                     <span>{{ $annualUsagePercent }}% · {{ $fmtDays($annualTaken) }} / {{ $fmtDays($annualAllocated) }} days</span>
                 </div>
                 <div class="balance-usage-track">
@@ -106,7 +107,7 @@
 
         <h1>{{ $selectedType }} Leave</h1>
         <p class="balance-page-lead">
-            Your <strong>{{ $year }}</strong> balance and activity for this leave type.
+            Your <strong>{{ $yearLabel ?? $year }}</strong> balance and activity for this leave type.
         </p>
 
         <div class="balance-toolbar">
@@ -116,7 +117,7 @@
                 <select id="year-detail" name="year">
                     @foreach($yearOptions as $optionYear)
                         <option value="{{ $optionYear }}" @selected($year === $optionYear)>
-                            {{ $optionYear }}{{ $optionYear === $currentYear ? ' (Current)' : '' }}
+                            {{ \App\Support\LeaveYear::label($optionYear) }}{{ $optionYear === $currentYear ? ' (Current)' : '' }}
                         </option>
                     @endforeach
                 </select>
@@ -136,7 +137,7 @@
                 <div class="balance-summary-k">{{ $selectedType }} remaining</div>
                 <div class="balance-summary-body">
                     <div class="balance-summary-v">{{ $fmtDays($remaining) }}</div>
-                    <div class="balance-summary-cap">days available in {{ $year }}</div>
+                    <div class="balance-summary-cap">days available in {{ $yearLabel ?? $year }}</div>
                 </div>
             </div>
             <div class="balance-summary-card balance-summary-card--used">
@@ -191,7 +192,7 @@
         @if($allocated > 0)
             <div class="balance-usage-panel">
                 <div class="balance-usage-label">
-                    <span>Usage in {{ $year }}</span>
+                    <span>Usage in {{ $yearLabel ?? $year }}</span>
                     <span>{{ $usagePct }}% · {{ $fmtDays($taken) }} / {{ $fmtDays($allocated) }} days</span>
                 </div>
                 <div class="balance-usage-track">
@@ -279,7 +280,7 @@
         @endif
 
         <div class="balance-panel">
-            <h3 class="balance-section-title">Approved leave taken ({{ $year }})</h3>
+            <h3 class="balance-section-title">Approved leave taken ({{ $yearLabel ?? $year }})</h3>
             <div class="balance-table-wrap">
                 <table class="balance-table">
                     <thead>
@@ -300,7 +301,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="balance-empty">No approved {{ $selectedType }} leave for {{ $year }}.</td>
+                                <td colspan="4" class="balance-empty">No approved {{ $selectedType }} leave for {{ $yearLabel ?? $year }}.</td>
                             </tr>
                         @endforelse
                     </tbody>

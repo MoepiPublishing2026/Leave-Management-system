@@ -24,6 +24,7 @@ class PerformanceReview extends Model
         'quality_of_work',
         'initiative_examples',
         'areas_for_improvement',
+        'self_scores',
         'scores',
         'status',
         'submitted_at',
@@ -33,6 +34,7 @@ class PerformanceReview extends Model
 
     protected $casts = [
         'review_date' => 'date',
+        'self_scores' => 'array',
         'scores' => 'array',
         'submitted_at' => 'datetime',
         'reviewed_at' => 'datetime',
@@ -77,7 +79,20 @@ class PerformanceReview extends Model
 
         return (int) $this->period_year > 0
             && (int) $this->period_month >= 1
-            && (int) $this->period_month <= 12;
+            && (int) $this->period_month <= 12
+            && $this->hasCompleteSelfScores();
+    }
+
+    public function hasCompleteSelfScores(): bool
+    {
+        foreach (array_keys(PerformanceReviews::criteria()) as $key) {
+            $value = $this->self_scores[$key] ?? null;
+            if (! is_numeric($value) || (int) $value < 1 || (int) $value > 5) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function isDraft(): bool
@@ -104,26 +119,49 @@ class PerformanceReview extends Model
 
     public function scoreFor(string $criterion): ?int
     {
-        $value = $this->scores[$criterion] ?? null;
+        return $this->numericScore($this->scores[$criterion] ?? null);
+    }
 
-        return is_numeric($value) ? (int) $value : null;
+    public function selfScoreFor(string $criterion): ?int
+    {
+        return $this->numericScore($this->self_scores[$criterion] ?? null);
     }
 
     public function averageScore(): ?float
     {
-        $scores = collect($this->scores ?? [])
-            ->filter(fn ($value) => is_numeric($value) && (int) $value >= 1)
-            ->map(fn ($value) => (int) $value);
+        return $this->averageFrom($this->scores);
+    }
 
-        if ($scores->isEmpty()) {
-            return null;
-        }
-
-        return round($scores->avg(), 1);
+    public function averageSelfScore(): ?float
+    {
+        return $this->averageFrom($this->self_scores);
     }
 
     public function statusLabel(?string $role = null): string
     {
         return PerformanceReviews::statusLabel((string) $this->status, $role);
+    }
+
+    public function statusLabelFor(?User $viewer = null): string
+    {
+        return PerformanceReviews::statusLabelFor((string) $this->status, $viewer, $this);
+    }
+
+    private function numericScore(mixed $value): ?int
+    {
+        return is_numeric($value) ? (int) $value : null;
+    }
+
+    private function averageFrom(?array $scores): ?float
+    {
+        $values = collect($scores ?? [])
+            ->filter(fn ($value) => is_numeric($value) && (int) $value >= 1)
+            ->map(fn ($value) => (int) $value);
+
+        if ($values->isEmpty()) {
+            return null;
+        }
+
+        return round($values->avg(), 1);
     }
 }

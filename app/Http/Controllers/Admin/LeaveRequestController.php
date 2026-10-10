@@ -108,8 +108,10 @@ class LeaveRequestController extends Controller
         }
 
         $status = strtolower(trim((string) ($leaveRequest->status ?? '')));
-        $currentYear = (int) \Carbon\Carbon::now()->year;
-        $requestYear = $leaveRequest->start_date ? (int) \Carbon\Carbon::parse($leaveRequest->start_date)->year : $currentYear;
+        $currentYear = \App\Support\LeaveYear::current();
+        $requestYear = $leaveRequest->start_date
+            ? \App\Support\LeaveYear::forDate($leaveRequest->start_date)
+            : $currentYear;
         $isPreviousYear = $requestYear === ($currentYear - 1);
         if (! $isPreviousYear) {
             return redirect()

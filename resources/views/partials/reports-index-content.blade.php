@@ -15,7 +15,7 @@
                 <option value="this_quarter" {{ ($monthFilter ?? '') === 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
                 <option value="this_month" {{ ($monthFilter ?? '') === 'this_month' ? 'selected' : '' }}>This Month</option>
                 @foreach(($years ?? []) as $y)
-                    <option value="{{ $y }}" {{ (string) ($monthFilter ?? '') === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
+                    <option value="{{ $y }}" {{ (string) ($monthFilter ?? '') === (string) $y ? 'selected' : '' }}>{{ \App\Support\LeaveYear::label((int) $y) }}</option>
                 @endforeach
             </select>
             <input type="text" name="start_date" id="reports_start_date" class="reports-date-input" value="{{ request('start_date') }}" placeholder="Start date" autocomplete="off" aria-label="Start date" />

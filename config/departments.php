@@ -5,6 +5,7 @@ return [
     'UI / UX',
     'Development',
     'Data Science',
-    'BDM & Training',
+    'BDM',
+    'Training',
     'Testing',
 ];

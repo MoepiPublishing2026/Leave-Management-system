@@ -201,7 +201,7 @@
             <ul class="chart-html-legend" id="statusPieLegend" aria-label="Leave status legend"></ul>
         </div>
         <div class="chart-card">
-            <h3>Monthly Applications Submitted ({{ $chartYear }})</h3>
+            <h3>Monthly Applications Submitted ({{ \App\Support\LeaveYear::label((int) ($chartYear ?? now()->year)) }})</h3>
             <div class="chart-body chart-body--plot">
                 <canvas id="monthlyLine"></canvas>
             </div>
@@ -217,7 +217,7 @@
             @endif
         </div>
         <div class="chart-card">
-            <h3>Monthly Requests by Status ({{ $chartYear }})</h3>
+            <h3>Monthly Requests by Status ({{ \App\Support\LeaveYear::label((int) ($chartYear ?? now()->year)) }})</h3>
             <div class="chart-body chart-body--plot">
                 <canvas id="monthlyStatusStackedBar"></canvas>
             </div>
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     renderChartHtmlLegend('statusPieLegend', statusPieLabels, statusPieColors, statusPct);
 
-    const allMonthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const allMonthLabels = @json($barLabels ?? \App\Support\LeaveYear::barLabels());
     const padMonthlySeries = (values) => {
         const series = Array.isArray(values) ? [...values] : [];
         while (series.length < 12) {

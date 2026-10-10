@@ -39,7 +39,7 @@ class MonthlyLeaveStatusBreakdown
                 continue;
             }
 
-            $idx = (int) Carbon::parse($dateValue)->month - 1;
+            $idx = LeaveYear::monthIndex(Carbon::parse($dateValue));
             if ($idx < 0 || $idx > 11) {
                 continue;
             }

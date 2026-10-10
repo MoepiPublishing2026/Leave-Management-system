@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Support\PercentageDistribution;
+use App\Support\LeaveRequestPeriodFilter;
+use App\Support\LeaveYear;
 use App\Support\ManagerTeam;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -30,26 +32,11 @@ class AnalyticController extends Controller
         }
 
         if ($monthFilter) {
-            $now = Carbon::now();
-
-            if (ctype_digit((string) $monthFilter)) {
-                $leaveQuery->whereYear('start_date', (int) $monthFilter);
-            } elseif ($monthFilter === 'this_month') {
-                $leaveQuery->whereYear('start_date', $now->year)
-                           ->whereMonth('start_date', $now->month);
-            } elseif ($monthFilter === 'this_quarter') {
-                $quarter = ceil($now->month / 3);
-                $startMonth = ($quarter - 1) * 3 + 1;
-                $endMonth = $startMonth + 2;
-
-                $leaveQuery->whereYear('start_date', $now->year)
-                           ->whereBetween(DB::raw('MONTH(start_date)'), [$startMonth, $endMonth]);
-            } elseif ($monthFilter === 'this_year') {
-                $leaveQuery->whereYear('start_date', $now->year);
-            } else {
-                // Specific month YYYY-MM
+            if (preg_match('/^\d{4}-\d{2}$/', (string) $monthFilter)) {
                 $leaveQuery->whereYear('start_date', substr($monthFilter, 0, 4))
                            ->whereMonth('start_date', substr($monthFilter, 5, 2));
+            } else {
+                LeaveRequestPeriodFilter::apply($leaveQuery, $monthFilter, 'start_date');
             }
         }
 
@@ -108,7 +95,7 @@ class AnalyticController extends Controller
             ->orderBy('month', 'desc')
             ->pluck('month');
 
-        $nowYear = (int) Carbon::now()->year;
+        $nowYear = LeaveYear::current();
         $years = collect(range($nowYear - 1, $nowYear - 5));
 
         $staffOptions = User::employees()

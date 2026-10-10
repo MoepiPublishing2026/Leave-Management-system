@@ -9,13 +9,13 @@
 @php
     use App\Support\PerformanceReviews;
     $user = $user ?? auth()->user();
-    $isSenior = strtolower((string) ($user->role ?? '')) === 'admin';
-    $showScoring = $isSenior || $review->isReviewed();
+    $showSelfScores = $showSelfScores ?? filled($review->self_scores);
+    $showFinalScores = $showFinalScores ?? ($canAcknowledge || $review->isReviewed());
 @endphp
 
 <div class="pr-page">
     <div class="pr-toolbar">
-        <a class="pr-btn pr-btn--ghost" href="{{ route(PerformanceReviews::routeName($user, 'index')) }}">Back to list</a>
+        <a class="pr-btn pr-btn--ghost" href="{{ route(PerformanceReviews::routeName($user, 'index'), $indexParams ?? []) }}">Back to list</a>
         @if ($canEdit)
             <a class="pr-btn pr-btn--secondary" href="{{ route(PerformanceReviews::routeName($user, 'edit'), $review) }}">Edit</a>
         @endif
@@ -43,7 +43,7 @@
             </tr>
             <tr>
                 <th>Status</th>
-                <td style="padding:10px 12px;" colspan="3">{{ $review->statusLabel($user->role ?? null) }}</td>
+                <td style="padding:10px 12px;" colspan="3">{{ $review->statusLabelFor($user) }}</td>
             </tr>
         </table>
 
@@ -64,12 +64,7 @@
             <div class="pr-readonly">{{ $review->areas_for_improvement ?: '—' }}</div>
         </div>
 
-        @if ($showScoring)
-            @if ($canAcknowledge)
-                <form method="POST" action="{{ route(PerformanceReviews::routeName($user, 'acknowledge'), $review) }}">
-                    @csrf
-            @endif
-
+        @if ($showSelfScores || $showFinalScores)
             <div class="pr-split">
                 <table class="pr-id-table">
                     <tr><th>Employee</th><td>{{ $review->employee_name }}</td></tr>
@@ -84,37 +79,43 @@
                     @endforeach
                 </table>
             </div>
+        @endif
 
-            <table class="pr-score-table{{ $canAcknowledge ? '' : ' pr-score-readonly' }}">
-                <thead>
-                <tr>
-                    <th>Criteria</th>
-                    @foreach ($scoreLabels as $value => $label)
-                        <th title="{{ $label }}">{{ $value }}</th>
-                    @endforeach
-                </tr>
-                </thead>
-                <tbody>
-                @foreach ($criteria as $key => $label)
-                    @php $selected = (int) old('scores.'.$key, $review->scoreFor($key)); @endphp
-                    <tr>
-                        <td>{{ $label }}</td>
-                        @foreach ($scoreLabels as $value => $scoreLabel)
-                            <td>
-                                @if ($canAcknowledge)
-                                    <input type="radio" name="scores[{{ $key }}]" value="{{ $value }}" @checked($selected === (int) $value) title="{{ $scoreLabel }}" required>
-                                @else
-                                    <input type="radio" tabindex="-1" @checked($selected === (int) $value) title="{{ $scoreLabel }}">
-                                @endif
-                            </td>
-                        @endforeach
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
+        @if ($showSelfScores)
+            <div class="pr-score-block">
+                <h2>Self-rating</h2>
+                @include('reviews.partials.score-table', [
+                    'name' => 'self_scores',
+                    'values' => $review->self_scores ?? [],
+                    'editable' => false,
+                    'criteria' => $criteria,
+                    'scoreLabels' => $scoreLabels,
+                ])
+                @if ($review->averageSelfScore())
+                    <p style="margin-top:12px; font-weight:600;">Average self-rating: {{ $review->averageSelfScore() }} / 5</p>
+                @endif
+            </div>
+        @endif
+
+        @if ($showFinalScores)
+            @if ($canAcknowledge)
+                <form method="POST" action="{{ route(PerformanceReviews::routeName($user, 'acknowledge'), $review) }}">
+                    @csrf
+            @endif
+
+            <div class="pr-score-block">
+                <h2>Final rating</h2>
+                @include('reviews.partials.score-table', [
+                    'name' => 'scores',
+                    'values' => old('scores', $review->scores ?? []),
+                    'editable' => $canAcknowledge,
+                    'criteria' => $criteria,
+                    'scoreLabels' => $scoreLabels,
+                ])
+            </div>
 
             @if ($review->averageScore() && ! $canAcknowledge)
-                <p style="margin-top:12px; font-weight:600;">Average score: {{ $review->averageScore() }} / 5</p>
+                <p style="margin-top:12px; font-weight:600;">Average final rating: {{ $review->averageScore() }} / 5</p>
             @endif
 
             @if ($review->senior_comment && ! $canAcknowledge)
@@ -128,7 +129,7 @@
                     <label for="senior_comment" style="display:block;font-weight:700;margin:18px 0 6px;">Comment (optional)</label>
                     <textarea id="senior_comment" name="senior_comment" class="pr-comment">{{ old('senior_comment', $review->senior_comment) }}</textarea>
                     <div class="pr-actions">
-                        <button type="submit" class="pr-btn pr-btn--primary">Save scores and mark as reviewed</button>
+                        <button type="submit" class="pr-btn pr-btn--primary">Save final rating and mark as reviewed</button>
                     </div>
                 </form>
             @endif

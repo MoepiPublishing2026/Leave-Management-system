@@ -79,6 +79,49 @@ class PerformanceReviews
         return trim((string) ($user->designation ?: $user->department ?: ''));
     }
 
+    /**
+     * Final rater: employee reviews are completed by their manager;
+     * manager reviews are completed by their senior manager.
+     */
+    public static function finalRater(?User $person): ?User
+    {
+        if (! $person) {
+            return null;
+        }
+
+        $role = strtolower(trim((string) ($person->role ?? '')));
+
+        if ($role === 'manager') {
+            return self::assignedSenior($person);
+        }
+
+        if ($role !== 'employee') {
+            return null;
+        }
+
+        $managerId = (int) ($person->manager_id ?? 0);
+        if ($managerId <= 0) {
+            return null;
+        }
+
+        return User::query()
+            ->where('role', 'manager')
+            ->where(function ($q) {
+                $q->where('is_active', true)->orWhereNull('is_active');
+            })
+            ->whereKey($managerId)
+            ->first();
+    }
+
+    public static function missingRaterMessage(?User $submitter): string
+    {
+        $role = strtolower(trim((string) ($submitter->role ?? '')));
+
+        return $role === 'manager'
+            ? 'No senior manager is assigned to give the final rating.'
+            : 'No manager is assigned to give the final rating.';
+    }
+
     /** Assigned senior manager: employee → their manager → that manager's senior. */
     public static function assignedSenior(?User $person): ?User
     {
@@ -155,9 +198,14 @@ class PerformanceReviews
 
     public static function seniorsToNotify(?User $submitter): Collection
     {
-        $senior = self::assignedSenior($submitter);
+        return self::ratersToNotify($submitter);
+    }
 
-        return $senior ? collect([$senior]) : collect();
+    public static function ratersToNotify(?User $submitter): Collection
+    {
+        $rater = self::finalRater($submitter);
+
+        return $rater ? collect([$rater]) : collect();
     }
 
     public static function statusLabel(string $status, ?string $role = null): string
@@ -166,10 +214,30 @@ class PerformanceReviews
         $role = strtolower(trim((string) $role));
 
         return match ($status) {
-            'submitted' => $role === 'admin' ? 'Awaiting review' : 'Submitted',
+            'submitted' => in_array($role, ['admin', 'manager'], true) ? 'Awaiting review' : 'Submitted',
             'reviewed' => 'Reviewed',
             default => 'Draft',
         };
+    }
+
+    public static function statusLabelFor(string $status, ?User $viewer = null, ?PerformanceReview $review = null): string
+    {
+        $status = strtolower(trim($status));
+
+        if ($status === 'reviewed') {
+            return 'Reviewed';
+        }
+
+        if ($status !== 'submitted') {
+            return 'Draft';
+        }
+
+        $rater = $review?->employee ? self::finalRater($review->employee) : null;
+        if ($viewer && $rater && (int) $rater->id === (int) $viewer->id) {
+            return 'Awaiting review';
+        }
+
+        return 'Submitted';
     }
 
     public static function badgeClass(string $status): string

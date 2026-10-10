@@ -236,6 +236,7 @@ Route::get('requests', [RequestsController::class, 'index'])->name('requests.ind
     Route::get('/reviews/{review}/edit', [PerformanceReviewController::class, 'edit'])->name('reviews.edit');
     Route::put('/reviews/{review}', [PerformanceReviewController::class, 'update'])->name('reviews.update');
     Route::post('/reviews/{review}/submit', [PerformanceReviewController::class, 'submit'])->name('reviews.submit');
+    Route::post('/reviews/{review}/acknowledge', [PerformanceReviewController::class, 'acknowledge'])->name('reviews.acknowledge');
 });
 
 Route::middleware(['auth'])->group(function () {

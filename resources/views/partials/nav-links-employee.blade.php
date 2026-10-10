@@ -1,5 +1,8 @@
-{{-- Canonical order: Dashboard, Apply, Requests, Reviews, Calendar, Profile, Leave Policies --}}
+{{-- Canonical order: Dashboard, Employees, Apply, Requests, Reviews, Calendar, Profile, Leave Policies --}}
 <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
+@if(\App\Support\SupportStaff::canManageEmployees(auth()->user()))
+    <a href="{{ route('manager.employees.index') }}" class="{{ request()->routeIs('manager.employees.*') ? 'active' : '' }}">Employees</a>
+@endif
 <a href="{{ route('apply') }}" class="{{ request()->routeIs('apply') ? 'active' : '' }}">Apply</a>
 <a href="{{ route('leave.myRequests') }}" class="{{ request()->routeIs('leave.myRequests') ? 'active' : '' }}">My Requests</a>
 <a href="{{ route('reviews.index') }}" class="{{ request()->routeIs('reviews.*') ? 'active' : '' }}">Reviews</a>

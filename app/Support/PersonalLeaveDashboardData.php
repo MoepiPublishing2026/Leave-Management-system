@@ -44,18 +44,23 @@ class PersonalLeaveDashboardData
         arsort($leaveTypeCounts, SORT_NUMERIC);
         $leaveTypePercentages = PercentageDistribution::oneDecimalPercents($leaveTypeCounts);
 
-        $dashboardYear = (int) Carbon::now()->year;
-        $barLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $dashboardYear = LeaveYear::current();
+        [$yearStart, $yearEnd] = LeaveYear::window($dashboardYear);
+        $barLabels = LeaveYear::barLabels();
         $barData = [];
-        foreach ($barLabels as $month) {
+        foreach ($barLabels as $i => $month) {
+            $monthNumber = ((LeaveYear::START_MONTH - 1 + $i) % 12) + 1;
             $barData[] = LeaveRequest::where('user_id', $userId)
-                ->whereYear('created_at', $dashboardYear)
-                ->whereMonth('created_at', date('m', strtotime($month . ' 1')))
+                ->where('created_at', '>=', $yearStart)
+                ->where('created_at', '<=', $yearEnd)
+                ->whereMonth('created_at', $monthNumber)
                 ->count();
         }
 
         $monthlyBreakdown = MonthlyLeaveStatusBreakdown::fromQuery(
-            LeaveRequest::where('user_id', $userId)->whereYear('created_at', $dashboardYear),
+            LeaveRequest::where('user_id', $userId)
+                ->where('created_at', '>=', $yearStart)
+                ->where('created_at', '<=', $yearEnd),
             'created_at'
         );
 
@@ -67,8 +72,8 @@ class PersonalLeaveDashboardData
 
         $policies = LeavePolicy::all()->keyBy('leave_type');
         $year = $dashboardYear;
-        $startOfYear = Carbon::create($year, 1, 1)->startOfDay();
-        $endOfYear = Carbon::create($year, 12, 31)->endOfDay();
+        $startOfYear = $yearStart;
+        $endOfYear = $yearEnd;
 
         $leavesTakenRaw = LeaveRequest::where('user_id', $userId)
             ->whereRaw('LOWER(status) = ?', ['approved'])
@@ -76,13 +81,13 @@ class PersonalLeaveDashboardData
             ->whereDate('start_date', '<=', $endOfYear->toDateString())
             ->get();
 
-        $publicHolidays = self::generateHolidaysRange($year, $year);
+        $publicHolidays = self::generateHolidaysRange((int) $startOfYear->year, (int) $endOfYear->year);
 
         $leaveDaysCounted = [];
         foreach ($leavesTakenRaw as $leave) {
             $start = Carbon::parse($leave->start_date);
             $end = Carbon::parse($leave->end_date);
-            $daysCount = self::countWorkingDaysInYear($start, $end, $publicHolidays, $year);
+            $daysCount = self::countWorkingDaysInLeaveYear($start, $end, $publicHolidays, $year);
             if (! empty($leave->is_half_day) && $daysCount > 0) {
                 $daysCount = 0.5;
             }
@@ -188,13 +193,17 @@ class PersonalLeaveDashboardData
         return $holidays;
     }
 
-    private static function countWorkingDaysInYear(Carbon $start, Carbon $end, array $publicHolidaysForYear, int $year): int
+    private static function countWorkingDaysInLeaveYear(Carbon $start, Carbon $end, array $publicHolidaysForYear, int $year): int
     {
-        $current = $start->copy();
+        [$yearStart, $yearEnd] = LeaveYear::window($year);
+        $windowStart = $yearStart->copy()->startOfDay();
+        $windowEnd = $yearEnd->copy()->startOfDay();
+        $current = $start->copy()->startOfDay();
+        $last = $end->copy()->startOfDay();
         $daysCount = 0;
-        while ($current->lte($end)) {
+        while ($current->lte($last)) {
             if (
-                $current->year === $year
+                $current->betweenIncluded($windowStart, $windowEnd)
                 && ! $current->isWeekend()
                 && ! in_array($current->toDateString(), $publicHolidaysForYear, true)
             ) {

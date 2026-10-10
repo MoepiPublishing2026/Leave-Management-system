@@ -141,6 +141,7 @@ class UserNotifications
                 PendingReviewReminderNotification::class,
                 PendingLeaveActionReminderNotification::class,
                 ManagerDailySummaryNotification::class,
+                PerformanceReviewSubmittedNotification::class,
                 PerformanceReviewAcknowledgedNotification::class,
             ], true);
         }

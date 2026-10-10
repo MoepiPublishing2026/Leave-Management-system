@@ -33,7 +33,7 @@ class PerformanceReviewSubmittedNotification extends Notification
             ->subject('Monthly performance review — '.$employee)
             ->view('emails.performance_review_submitted', [
                 'review' => $this->review,
-                'reviewerName' => PerformanceReviews::displayName(PerformanceReviews::assignedSenior($this->review->employee))
+                'reviewerName' => PerformanceReviews::displayName(PerformanceReviews::finalRater($this->review->employee))
                     ?: $this->review->reviewer_name,
                 'reviewUrl' => PerformanceReviews::signedReviewUrl($this->review),
                 'appUrl' => route(PerformanceReviews::routeName($notifiable instanceof \App\Models\User ? $notifiable : null, 'show'), $this->review),

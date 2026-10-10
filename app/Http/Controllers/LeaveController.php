@@ -29,6 +29,7 @@ use App\Support\LeaveReminderService;
 use App\Support\MissingProofUnpaidConverter;
 use App\Support\OverdueLeaveNotifier;
 use App\Support\ParentalLeaveRules;
+use App\Support\LeaveYear;
 use App\Support\PersonalLeaveDashboardData;
 
 
@@ -41,9 +42,7 @@ private function myRequestsRoute(): string
 
 private function yearWindow(int $year): array
 {
-    $start = Carbon::create($year, 1, 1)->startOfDay();
-    $end = Carbon::create($year, 12, 31)->endOfDay();
-    return [$start, $end];
+    return LeaveYear::window($year);
 }
 
 private function buildPublicHolidaysByYear(int $startYear, int $endYear): array
@@ -61,11 +60,15 @@ private function buildPublicHolidaysByYear(int $startYear, int $endYear): array
 
 private function countWorkingDaysInYear(Carbon $start, Carbon $end, array $publicHolidaysForYear, int $year): int
 {
-    $current = $start->copy();
+    [$yearStart, $yearEnd] = $this->yearWindow($year);
+    $windowStart = $yearStart->copy()->startOfDay();
+    $windowEnd = $yearEnd->copy()->startOfDay();
+    $current = $start->copy()->startOfDay();
+    $last = $end->copy()->startOfDay();
     $daysCount = 0;
-    while ($current->lte($end)) {
+    while ($current->lte($last)) {
         if (
-            $current->year === $year &&
+            $current->betweenIncluded($windowStart, $windowEnd) &&
             !$current->isWeekend() &&
             !in_array($current->toDateString(), $publicHolidaysForYear)
         ) {
@@ -82,7 +85,7 @@ private function countWorkingDaysInYear(Carbon $start, Carbon $end, array $publi
 private function workingDaysByYear(Carbon $start, Carbon $end, array $holidays, bool $halfDay = false): array
 {
     if ($halfDay) {
-        $year = $start->year;
+        $year = LeaveYear::forDate($start);
         $dayIsWorking = ! $start->isWeekend() && ! in_array($start->toDateString(), $holidays, true);
 
         return $dayIsWorking ? [$year => 0.5] : [$year => 0.0];
@@ -93,7 +96,7 @@ private function workingDaysByYear(Carbon $start, Carbon $end, array $holidays, 
     $last = $end->copy()->startOfDay();
     while ($current->lte($last)) {
         if (! $current->isWeekend() && ! in_array($current->toDateString(), $holidays, true)) {
-            $year = $current->year;
+            $year = LeaveYear::forDate($current);
             $daysByYear[$year] = ($daysByYear[$year] ?? 0) + 1;
         }
         $current->addDay();
@@ -183,10 +186,10 @@ public function leaveBalance(Request $request)
 {
     $userId = auth()->id();
 
-    $currentYear = (int) Carbon::now()->year;
+    $currentYear = LeaveYear::current();
     $year = (int) $request->query('year', $currentYear);
     $year = max(2000, min(2100, $year));
-    $yearOptions = range($currentYear - 4, $currentYear + 1);
+    $yearOptions = LeaveYear::options($currentYear);
     [$startOfYear, $endOfYear] = $this->yearWindow($year);
 
     $policies = LeavePolicy::all()->keyBy('leave_type');
@@ -198,7 +201,7 @@ public function leaveBalance(Request $request)
         ->orderByDesc('start_date')
         ->get();
 
-    $publicHolidays = $this->generateHolidaysRange($year, $year);
+    $publicHolidays = $this->generateHolidaysRange((int) $startOfYear->year, (int) $endOfYear->year);
 
     $leaveDaysCounted = [];
     foreach ($leavesTakenRaw as $leave) {
@@ -412,6 +415,8 @@ public function leaveBalance(Request $request)
         'typeUsagePercent',
         'countsAgainstAnnual'
     ), [
+        'yearLabel' => LeaveYear::label($year),
+        'yearRangeLabel' => LeaveYear::rangeLabel($year),
         'layout' => LeaveApplicant::layout($user),
         'dashboardRoute' => LeaveApplicant::personalDashboardRoute($user),
         'myRequestsRoute' => LeaveApplicant::myRequestsRoute($user),
@@ -480,15 +485,14 @@ public function edit($id)
 
 private function applyFormData($user, ?LeaveRequest $editingLeave = null): array
 {
-    $nowYear = date('Y');
+    $nowYear = LeaveYear::current();
     $futureYearLimit = $nowYear + 10;
-    $publicHolidays = $this->generateHolidaysRange($nowYear, $futureYearLimit);
+    [$rangeStart] = LeaveYear::window($nowYear);
+    [, $rangeEnd] = LeaveYear::window($futureYearLimit);
+    $publicHolidays = $this->generateHolidaysRange((int) $rangeStart->year, (int) $rangeEnd->year);
     $userId = (int) $user->id;
     $policies = LeavePolicy::all()->keyBy('leave_type');
-    $holidaysByYear = $this->buildPublicHolidaysByYear((int) $nowYear, (int) $futureYearLimit);
-
-    $rangeStart = Carbon::create((int) $nowYear, 1, 1)->startOfDay();
-    $rangeEnd = Carbon::create((int) $futureYearLimit, 12, 31)->endOfDay();
+    $holidaysByYear = $this->buildPublicHolidaysByYear((int) $rangeStart->year, (int) $rangeEnd->year);
 
     $leavesTakenRaw = LeaveRequest::where('user_id', $userId)
         ->whereRaw('LOWER(status) = ?', ['approved'])
@@ -500,9 +504,9 @@ private function applyFormData($user, ?LeaveRequest $editingLeave = null): array
     foreach ($leavesTakenRaw as $leave) {
         if (!empty($leave->is_half_day)) {
             $d = Carbon::parse($leave->start_date);
-            $y = $d->year;
+            $y = LeaveYear::forDate($d);
             if ($y >= (int) $nowYear && $y <= (int) $futureYearLimit) {
-                $holidaysForYear = $holidaysByYear[$y] ?? [];
+                $holidaysForYear = $holidaysByYear[(int) $d->year] ?? [];
                 if (!$d->isWeekend() && !in_array($d->toDateString(), $holidaysForYear)) {
                     $leaveDaysCountedByYear[$y][$leave->leave_type] = ($leaveDaysCountedByYear[$y][$leave->leave_type] ?? 0) + 0.5;
                 }
@@ -515,7 +519,7 @@ private function applyFormData($user, ?LeaveRequest $editingLeave = null): array
 
         $current = $start->copy();
         while ($current->lte($end)) {
-            $y = $current->year;
+            $y = LeaveYear::forDate($current);
             if ($y < (int) $nowYear || $y > (int) $futureYearLimit) {
                 $current->addDay();
                 continue;
@@ -526,7 +530,7 @@ private function applyFormData($user, ?LeaveRequest $editingLeave = null): array
                 continue;
             }
 
-            $holidaysForYear = $holidaysByYear[$y] ?? [];
+            $holidaysForYear = $holidaysByYear[(int) $current->year] ?? [];
             if (in_array($current->toDateString(), $holidaysForYear)) {
                 $current->addDay();
                 continue;
@@ -563,6 +567,7 @@ private function applyFormData($user, ?LeaveRequest $editingLeave = null): array
         'publicHolidays' => $publicHolidays,
         'leaveBalancesByYear' => $leaveBalancesByYear,
         'nowYear' => $nowYear,
+        'leaveYearStartMonth' => LeaveYear::START_MONTH,
         'layout' => LeaveApplicant::layout($user),
         'submitRoute' => $editingLeave
             ? LeaveApplicant::updateRoute($user)
@@ -787,9 +792,9 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
             ->withInput();
     }
 
-    $startYear = (int) $startDate->year;
-    $endYear = (int) $endDate->year;
-    $publicHolidays = $this->generateHolidaysRange($startYear, $endYear);
+    $startYear = LeaveYear::forDate($startDate);
+    $endYear = LeaveYear::forDate($endDate);
+    $publicHolidays = $this->generateHolidaysRange((int) $startDate->year, (int) $endDate->year);
     $requestedByYear = $this->workingDaysByYear($startDate, $endDate, $publicHolidays, $halfDay);
 
     $policies = LeavePolicy::all()->keyBy('leave_type');
@@ -803,10 +808,14 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
             continue;
         }
 
+        $yearLabel = LeaveYear::label((int) $year);
+        [$yearStart, $yearEnd] = LeaveYear::window((int) $year);
+        $yearHolidays = $this->generateHolidaysRange((int) $yearStart->year, (int) $yearEnd->year);
+
         if ($daysInYear > $typeDefault) {
             return redirect()->back()
                 ->withErrors([
-                    'date' => "You cannot apply for more than {$typeDefault} days of {$leaveType} leave in {$year}. This request uses {$daysInYear} working day(s) in {$year}.",
+                    'date' => "You cannot apply for more than {$typeDefault} days of {$leaveType} leave in {$yearLabel}. This request uses {$daysInYear} working day(s) in {$yearLabel}.",
                 ])
                 ->withInput();
         }
@@ -816,13 +825,13 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
             (string) $leaveType,
             (int) $year,
             $typeDefault,
-            $publicHolidays
+            $yearHolidays
         );
 
         if ($daysInYear > $remainingForType) {
             return redirect()->back()
                 ->withErrors([
-                    'balance' => "Your available {$leaveType} balance for {$year} is {$remainingForType} day(s). This request uses {$daysInYear} working day(s) in {$year} (excluding weekends and public holidays).",
+                    'balance' => "Your available {$leaveType} balance for {$yearLabel} is {$remainingForType} day(s). This request uses {$daysInYear} working day(s) in {$yearLabel} (excluding weekends and public holidays).",
                 ])
                 ->withInput();
         }
@@ -833,20 +842,20 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
                 (string) $leaveType,
                 (int) $year,
                 $annualDefault,
-                $publicHolidays,
+                $yearHolidays,
                 true
             );
 
             if ($remainingAnnual <= 0) {
                 return redirect()->back()
-                    ->withErrors(['balance' => AnnualLeaveRules::exhaustedAnnualMessage().' ('.$year.')'])
+                    ->withErrors(['balance' => AnnualLeaveRules::exhaustedAnnualMessage().' ('.$yearLabel.')'])
                     ->withInput();
             }
 
             if ($daysInYear > $remainingAnnual) {
                 return redirect()->back()
                     ->withErrors([
-                        'balance' => "Your remaining annual leave balance for {$year} is {$remainingAnnual} day(s). This request uses {$daysInYear} working day(s) in {$year} (excluding weekends and public holidays).",
+                        'balance' => "Your remaining annual leave balance for {$yearLabel} is {$remainingAnnual} day(s). This request uses {$daysInYear} working day(s) in {$yearLabel} (excluding weekends and public holidays).",
                     ])
                     ->withInput();
             }
