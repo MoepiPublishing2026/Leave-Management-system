@@ -53,7 +53,7 @@
         @if($annualAllocated > 0)
             <div class="balance-summary-grid" style="margin-bottom: 22px;">
                 <div class="balance-summary-card">
-                    <div class="balance-summary-k">Annual remaining</div>
+                    <div class="balance-summary-k">Annual remainings</div>
                     <div class="balance-summary-v">{{ $fmtDays($annualRemaining) }}</div>
                     <div class="balance-summary-cap">days available in {{ $yearLabel ?? $year }}</div>
                 </div>
@@ -137,14 +137,13 @@
                 <div class="balance-summary-k">{{ $selectedType }} remaining</div>
                 <div class="balance-summary-body">
                     <div class="balance-summary-v">{{ $fmtDays($remaining) }}</div>
-                    <div class="balance-summary-cap">days available in {{ $yearLabel ?? $year }}</div>
                 </div>
             </div>
             <div class="balance-summary-card balance-summary-card--used">
                 <div class="balance-summary-k">Used</div>
                 <div class="balance-summary-body balance-summary-body--meter">
                     <div class="balance-summary-meter">
-                        <div class="balance-summary-meter-fill" style="width: {{ $usedMeterWidth }}%;">
+                        <div class="balance-summary-meter-fill" > 
                             {{ $fmtDays($taken) }}
                         </div>
                     </div>
@@ -205,15 +204,15 @@
             <div class="balance-detail-card balance-detail-card--status">
                 <div class="detail-k">Requests status</div>
                 <div class="balance-status-bars" role="img" aria-label="Pending {{ $requestCounts['pending'] ?? 0 }}, approved {{ $requestCounts['approved'] ?? 0 }}, declined {{ $requestCounts['rejected'] ?? 0 }}">
-                    <div class="balance-status-bar" style="height: {{ $pendingBarHeight }}px; background: {{ $chartPending }};" title="Pending: {{ $requestCounts['pending'] ?? 0 }}"></div>
-                    <div class="balance-status-bar" style="height: {{ $approvedBarHeight }}px; background: {{ $chartApproved }};" title="Approved: {{ $requestCounts['approved'] ?? 0 }}"></div>
-                    <div class="balance-status-bar" style="height: {{ $declinedBarHeight }}px; background: {{ $chartDeclined }};" title="Declined: {{ $requestCounts['rejected'] ?? 0 }}"></div>
+                    <div class="balance-status-bar" style="height: {{ $pendingBarHeight }}px; background: #263142;" title="Pending: {{ $requestCounts['pending'] ?? 0 }}"></div>
+                    <div class="balance-status-bar" style="height: {{ $approvedBarHeight }}px; background: #263142;" title="Approved: {{ $requestCounts['approved'] ?? 0 }}"></div>
+                    <div class="balance-status-bar" style="height: {{ $declinedBarHeight }}px; background: #263142;" title="Declined: {{ $requestCounts['rejected'] ?? 0 }}"></div>
                 </div>
                 <div class="detail-v detail-v--status-meta">Declined: {{ $requestCounts['rejected'] ?? 0 }}</div>
             </div>
             <div class="balance-detail-card">
                 <div class="detail-k">Pending requests</div>
-                <div class="detail-v">{{ $requestCounts['pending'] ?? 0 }} ({{ $fmtDays($pendingDaysTotal) }} days)</div>
+                <div class="detail-v">{{ $fmtDays($pendingDaysTotal) }} days</div>
             </div>
             <div class="balance-detail-card">
                 <div class="detail-k">Documents</div>

@@ -16,7 +16,7 @@
 <style>
     .balance-page {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        max-width: 1200px;
+        max-width: 1000px;
         margin: 0 auto;
         padding: 0 4px 32px;
         background-color: #fff;
@@ -24,17 +24,17 @@
     }
     .balance-page h1 {
         font-weight: 700;
-        font-size: 40px;
-        color: #2c3e50;
-        margin: 0 0 8px;
-        letter-spacing: 0.04em;
+        font-size: 28px;
+        color: #263548;
+        margin: 0 0 6px;
+        letter-spacing: 0;
     }
     .balance-page-lead {
-        margin: 0 0 20px;
-        color: #64748b;
-        font-size: 0.9rem;
-        font-weight: 600;
-        line-height: 1.5;
+        margin: 0 0 16px;
+        color: #737373;
+        font-size: 0.82rem;
+        font-weight: 400;
+        line-height: 1.4;
     }
     .balance-page-lead strong {
         color: #475569;
@@ -43,49 +43,49 @@
     .balance-toolbar {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 10px;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 22px;
-        padding: 14px 18px;
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+        margin-bottom: 16px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
     }
     .balance-toolbar-left,
     .balance-toolbar-right {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
     }
     .balance-toolbar-right {
         margin-left: auto;
     }
     .balance-year-form {
-        display: flex;
-        flex-wrap: wrap;
+        padding: 9px 12px;
+        background: #dce8e8;
+        border-radius: 8px;
         gap: 8px;
-        align-items: center;
     }
     .balance-year-form label {
-        font-weight: 600;
-        font-size: 0.92rem;
-        color: #334155;
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: #263548;
         text-transform: none;
         letter-spacing: normal;
         margin: 0;
     }
     .balance-year-form select {
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        padding: 8px 12px;
-        font-size: 0.92rem;
+        border: none;
+        border-radius: 7px;
+        padding: 8px 10px;
+        font-size: 0.82rem;
         font-weight: 600;
-        color: #334155;
+        color: #263548;
         background: #fff;
-        min-width: 140px;
+        min-width: 122px;
     }
     .balance-year-form select:focus {
         outline: none;
@@ -96,27 +96,29 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 9px 16px;
+        padding: 9px 18px;
         font-weight: 700;
-        font-size: 0.88rem;
-        border-radius: 8px;
+        font-size: 0.82rem;
+        border-radius: 7px;
         cursor: pointer;
-        border: 1px solid {{ $balanceMaroonDark }};
+        border: 1px solid transparent;
         text-decoration: none;
-        background: {{ $balanceMaroon }};
-        color: #fff;
+        background: #b2d43b;
+        color: #243000;
         transition: background-color 0.15s ease;
         white-space: nowrap;
+        box-shadow: none;
     }
     .balance-btn:hover {
-        background: {{ $balanceMaroonDark }};
-        color: #fff;
+        background: #a5c92f;
+        color: #243000;
     }
     .balance-btn--secondary,
     .balance-btn--primary {
-        background: {{ $balanceMaroon }};
-        border-color: {{ $balanceMaroonDark }};
-        color: #fff;
+        background: #b2d43b;
+        border-color: #b2d43b;
+        color: #243000;
+        box-shadow: none;
     }
     .balance-btn--apply {
         background: {{ $balanceApplyGreen }};
@@ -134,58 +136,60 @@
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 16px;
-        margin-bottom: 18px;
+        margin-bottom: 12px;
     }
     .balance-summary-card {
         background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        box-shadow: 0 0 10px rgba(167, 189, 141, 0.85);
-        padding: 16px 18px;
-        min-height: 168px;
+        border: 1px solid #d2d2d2;
+        border-radius: 18px;
+        box-shadow: 0 8px 14px rgba(0, 0, 0, 0.20);
+        padding: 12px 10px;
+        min-height: 105px;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
     }
     .balance-summary-k {
-        font-size: 1.1rem;
-        font-weight: 600;
+        font-size: 1rem;
+        font-weight: 500;
         text-transform: none;
         letter-spacing: normal;
-        color: {{ $balanceHeadingTealDark }};
+        color: #111;
         margin-bottom: 0;
-        min-height: 2.6rem;
+        min-height: auto;
         line-height: 1.25;
+        text-align: center;
         flex-shrink: 0;
     }
     .balance-summary-body {
-        flex: 1;
+        min-height: 70px;
         display: flex;
-        flex-direction: column;
         justify-content: center;
-        min-height: 96px;
+        align-items: center;
+        text-align: center;
+        
     }
     .balance-summary-body--meter {
-        justify-content: flex-end;
-        min-height: 96px;
-        margin-top: auto;
+        min-height: 70px;
+        margin-top: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
     }
-    .balance-summary-v {
-        font-size: 2.2rem;
-        font-weight: 700;
-        color: {{ $balanceHeadingTeal }};
-        line-height: 1.1;
+    .balance-summary-v,
+    .balance-summary-v--black {
+        font-size: 30px;
+        font-weight: 400;
+        line-height: 1.15;
+        color: #050505;
         margin: 0;
     }
-    .balance-summary-v--black {
-        color: #0f172a;
-        font-size: 2.5rem;
-    }
     .balance-summary-cap {
-        margin-top: 8px;
-        font-size: 0.9rem;
+        margin-top: 4px;
+        font-size: 0.75rem;
+        color: #111;
         font-weight: 600;
-        color: {{ $balanceHeadingTeal }};
         min-height: 1.35rem;
         line-height: 1.35;
     }
@@ -194,11 +198,17 @@
     }
     .balance-summary-card--used,
     .balance-summary-card--remaining-meter {
-        padding: 16px 18px 0 13px;
+        min-height: 106px;
+        padding: 12px 10px;
         justify-content: flex-start;
+        align-items: stretch;
+        text-align: center;
         overflow: hidden;
-        border-left: 5px solid {{ $balanceHeadingTeal }};
-        min-height: 168px;
+        background: #fff;
+        border: 1px solid #d2d2d2;
+        border-radius: 20px;
+        box-shadow: 0 8px 14px rgba(0, 0, 0, 0.20);
+        
     }
     .balance-summary-card--used .balance-summary-k,
     .balance-summary-card--remaining-meter .balance-summary-k {
@@ -207,79 +217,94 @@
     }
     .balance-summary-card--used .balance-summary-meter,
     .balance-summary-card--remaining-meter .balance-summary-meter {
-        width: calc(100% + 31px);
-        margin-left: -13px;
-        margin-right: -18px;
-        margin-top: 0;
-        margin-bottom: 0;
-        height: 72px;
-        flex-shrink: 0;
-        background: #e5e7eb;
-        border-radius: 0 12px 0 0;
-        overflow: hidden;
+        width: 100%;
+        height: auto;
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        border-radius: 0;
+        overflow: visible;
+        align-items: center;
+        justify-content: center;
     }
     .balance-summary-card--remaining-meter .balance-summary-meter {
         background: #cbd5e1;
     }
     .balance-summary-meter-fill {
         height: 100%;
-        min-width: 48px;
-        background: {{ $balanceHeadingTeal }};
+        min-width: 0;
+        background: #fff;
         border-radius: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #fff;
-        font-weight: 600;
+        color: #000;
         font-size: 1rem;
-        padding: 0 12px;
+        font-weight: 500;
+        padding: 0;
         box-sizing: border-box;
     }
+
     .balance-summary-card--used .balance-summary-meter-fill,
     .balance-summary-card--remaining-meter .balance-summary-meter-fill {
-        border-radius: 0 12px 12px 0;
+        width: 100%;
+        height: auto;
+        min-width: 0;
+        min-height: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border-radius: 0;
+        color: #050505;
+        font-size: 28px;
+        font-weight: 400;
+        line-height: 1.2;
+        text-align: center;
     }
+
     .balance-status-bars {
         display: flex;
         align-items: flex-end;
         justify-content: center;
-        gap: 12px;
-        height: 58px;
-        margin: 4px 0 8px;
+        height: 45px;
+        gap: 5px;
+        margin: 4px 0 6px;
     }
     .balance-status-bar {
-        width: 24px;
-        border-radius: 0;
+        width: 14px;
+        border-radius: 2px;
         min-height: 10px;
     }
 
     .balance-usage-panel {
         background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        box-shadow: 0 0 10px rgba(167, 189, 141, 0.85);
-        padding: 18px 20px;
-        margin-bottom: 18px;
+        background: #fff;
+        border: 1px solid #d2d2d2;
+        border-radius: 16px;
+        box-shadow: 0 8px 14px rgba(0, 0, 0, 0.20);
+        padding: 10px 14px;
+        margin-bottom: 22px;
     }
     .balance-usage-label {
         display: flex;
+        align-items: center;
         justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 12px;
         font-weight: 600;
-        color: #334155;
-        margin-bottom: 10px;
-        font-size: 0.9rem;
+        line-height: 1.3;
+        color: #263548;
     }
     .balance-usage-track {
         height: 10px;
-        background: #e5e7eb;
+        background: #e7e7e7;
         border-radius: 999px;
-        overflow: hidden;
     }
     .balance-usage-fill {
         height: 100%;
-        background: {{ $balanceHeadingTeal }};
+        background: #b2d43b;
         border-radius: 999px;
         transition: width 0.35s ease;
     }
@@ -287,40 +312,45 @@
     .balance-detail-grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 16px;
+        gap: 18px;
         margin-bottom: 22px;
     }
     .balance-detail-card {
         background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        box-shadow: 0 0 10px rgba(167, 189, 141, 0.85);
-        padding: 16px 18px;
-        min-height: 120px;
+        border: 1px solid #d0d0d0;
+        border-radius: 20px;
+        box-shadow: 0 9px 13px rgba(0, 0, 0, 0.22);
+        padding: 14px 8px 10px;
+        min-height: 127px;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
+        align-items: stretch;
+        box-sizing: border-box;
     }
     .balance-detail-card .detail-k {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #334155;
-        margin-bottom: 6px;
-        min-height: 2.2rem;
-        line-height: 1.25;
+        font-size: 12px;
+        font-weight: 400;
+        color: #050505;
+        margin-bottom: 4px;
+        min-height: 32px;
+        line-height: 1.3;
+        text-align: center;
     }
     .balance-detail-card .detail-v {
-        font-size: 1.1rem;
+        font-size: 0.92rem;
         font-weight: 600;
-        color: #0f172a;
+        color: #000;
         line-height: 1.35;
         margin-top: auto;
+        text-align: left;
     }
     .balance-detail-card--status .detail-v--status-meta {
-        margin-top: 0;
-        font-size: 0.88rem;
-        color: #64748b;
+        margin-top: 5px;
+        font-size: 0.90rem;
+        color: #000;
         font-weight: 600;
+        text-align: left;
     }
 
     .balance-type-grid {
@@ -368,30 +398,31 @@
 
     .balance-panel {
         background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
-        padding: 20px 22px;
+        border: 1px solid #d2d2d2;
+        border-radius: 15px;
+        box-shadow: 0 8px 14px rgba(0, 0, 0, 0.20);
+        padding: 0;
         margin-bottom: 18px;
     }
     .balance-alert {
-        padding: 12px 16px;
-        border-radius: 10px;
-        font-weight: 600;
-        font-size: 0.92rem;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 0.75rem;
         margin-bottom: 14px;
-        border-left: 4px solid;
-        line-height: 1.45;
+        border: 2px solid #c8d85c;
+        background: #F3F48C;
+        color: #A6AD3A;
+        line-height: 1.4;
     }
     .balance-alert--warn {
-        background: #fffbeb;
-        border-color: #eab308;
-        color: #92400e;
+        background: #eef59b;
+        border-color: #c8d85c;
+        color: #8a9a13;
     }
     .balance-alert--info {
-        background: #eff6ff;
-        border-color: #2563eb;
-        color: #1e40af;
+        background:  #F3F48C;
+        border-color: #8a9a13;
+        color: #A6AD3A;
     }
     .balance-alert--danger {
         background: #fff1f2;
@@ -399,35 +430,34 @@
         color: #881337;
     }
     .balance-section-title {
-        font-weight: 600;
-        font-size: 1.1rem;
-        color: #334155;
-        margin: 0 0 12px;
-        text-transform: none;
-        letter-spacing: normal;
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: #111;
+        margin: 0;
+        padding: 6px 12px;
     }
     .balance-table-wrap {
         overflow-x: auto;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        background: #fff;
+        border: none;
+        border-top: 1px solid #ddd;
+        border-radius: 0 0 15px 15px;
     }
     .balance-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.92rem;
+        font-size: 0.78rem;
         min-width: 480px;
     }
     .balance-table th,
     .balance-table td {
-        padding: 12px 14px;
-        text-align: left;
-        border-bottom: 1px solid #e2e8f0;
+        padding: 8px 12px;
+        border-bottom: 1px solid #e1e1e1;
+        text-align: left; 
     }
     .balance-table th {
-        background: #f8fafc;
-        font-weight: 600;
-        color: #334155;
+        background: #fff;
+        font-weight: 500;
+        color: #111;
         font-size: 0.9rem;
         text-transform: none;
         letter-spacing: normal;
@@ -436,17 +466,20 @@
     .balance-table tbody tr:hover { background: #f8fafc; }
     .balance-empty {
         text-align: center;
-        color: #64748b;
-        font-style: italic;
-        padding: 28px 16px !important;
+        color: #888;
+        font-size: 0.7rem;
+        padding: 12px 16px !important;
     }
     .balance-back { margin-top: 8px; }
     .balance-back a {
-        font-weight: 600;
-        color: {{ $balanceMaroon }};
+        font-weight: 700;
+        color: #d91f3d;
         text-decoration: none;
     }
-    .balance-back a:hover { text-decoration: underline; }
+    .balance-back a:hover { 
+        color: #b91831;
+        text-decoration: none; 
+    }
 
     @media (max-width: 1100px) {
         .balance-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
