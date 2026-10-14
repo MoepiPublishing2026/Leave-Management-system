@@ -26,8 +26,7 @@
     .request-details-popup.swal2-popup::before {
         content: "";
         display: block;
-        height: 4px;
-        background: linear-gradient(90deg, #0f766e 0%, #16a085 45%, #b2cd16 100%);
+        
     }
     .request-details-popup .swal2-icon,
     .request-details-popup .swal2-close,

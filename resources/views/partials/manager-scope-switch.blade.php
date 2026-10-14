@@ -46,8 +46,8 @@
         text-decoration: none;
         white-space: nowrap;
         cursor: pointer;
-        border: 1px solid #680523;
-        background: #850621;
+        border: 1px solid #D72638;
+        background: #D72638;
         color: #fff;
         transition: background-color 0.15s ease;
     }

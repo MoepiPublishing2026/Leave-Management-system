@@ -12,6 +12,7 @@
         padding: 16px 12px !important;
         align-items: center !important;
         justify-content: center !important;
+        border: 0 !important;
     }
     .calendar-details-container .swal2-popup.request-details-popup {
         margin: 0 auto !important;

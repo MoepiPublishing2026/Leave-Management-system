@@ -95,7 +95,7 @@
     .cal-nav-current-year {
         font-size: 0.9rem;
         font-weight: 800;
-        color: #5c7212;
+        color: #C5D931;
     }
     .cal-nav-chevron {
         margin-left: auto;

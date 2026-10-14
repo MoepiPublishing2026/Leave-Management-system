@@ -8,10 +8,10 @@
       margin: 0; padding: 0; height: 100%; min-height: 100vh; background: white;
   }
   .main-content {
-      margin: 40px auto 0;
+      margin: 24px auto 0;
       padding: 40px 50px;
       min-height: 100vh;
-      width: 100%;
+      width: calc(100% - 32px);
       max-width: 1500px;
       background: #fff;
       border-radius: 20px;
@@ -65,12 +65,12 @@
   .main-content h1 {
       font-weight: 700;
       font-size: 28px;
-      color: #4b4b4b;
+      color: #555555;
       margin-bottom: 8px;
   }
   .main-content h2 {
       font-weight: normal;
-      color: #b2b6be;
+      color: #8888;
       font-size: 14px;
       margin-bottom: 30px;
   }
@@ -116,7 +116,7 @@
   form.leave-form .input-group input[type="text"],
   form.leave-form .input-group textarea {
       padding: 10px 12px;
-      border: 1px solid #55771eff;
+      border: 1px solid #C4D931;
       border-radius: 6px;
       font-size: 14px;
       color: #333;
@@ -166,9 +166,9 @@
       border: 1px solid #fecaca;
   }
   .file-upload {
-      border: 2px dashed #55771dff;
+      border: 2px dashed #C4D931;
       border-radius: 8px;
-      background: #fafdf8;
+      background: #ECECE3;
       transition: border-color 0.25s, background 0.25s;
   }
   .file-upload.required {
@@ -197,12 +197,12 @@
       width: 40px;
       height: 40px;
       margin-bottom: 10px;
-      fill: #55771d;
+      fill: #A0B026;
       opacity: 0.85;
   }
   .file-upload-text {
       margin: 0 0 6px;
-      color: #436e0b;
+      color: #A0B026;
       font-size: 14px;
   }
   .file-upload-hint {
@@ -300,17 +300,18 @@
   }
   form.leave-form .button-group .submit-btn,
   form.leave-form .button-group .cancel-btn {
-      background-color: #b2cd16;
-      color: #0a1347;
-      border: 1px solid #91bf14;
+      background-color: #A0B026;
+      color: #000000;
+      border: 1px solid #A0B026;
       box-shadow: 0 4px 14px rgba(178, 205, 22, 0.2);
       transition: background-color 0.25s;
   }
   form.leave-form .button-group .submit-btn:hover,
   form.leave-form .button-group .cancel-btn:hover {
-      background-color: #9eb812;
-      color: #0a1347;
+      background-color: #8F9E20;
+      color: #000000;
   }
+
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">

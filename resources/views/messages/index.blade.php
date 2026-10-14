@@ -6,37 +6,44 @@
 <style>
     .messages-page-title {
         font-weight: 700;
-        font-size: 40px;
-        color: #123f3a;
-        margin: 0 0 14px;
-        letter-spacing: 0.04em;
+        font-size: clamp(24px, 3vw, 34px);
+        color: #273548;
+        margin: 0 0 20px;
+        letter-spacing: 0;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     }
     .messages-wrap {
+        width: 100%;
         max-width: 1200px;
+        height: clamp(400px, 65vh, 750px);
+        min-height: 400px;
         margin: 0 auto 40px;
         background: #fff;
-        border-radius: 14px;
-        box-shadow: 0 8px 28px rgba(15, 118, 110, 0.14);
+        border-radius: 12px;
+        box-shadow: none;
         overflow: hidden;
         display: grid;
-        grid-template-columns: 340px 1fr;
-        min-height: 72vh;
+        box-sizing: border-box;
+        grid-template-columns: minmax(220px, 30%) minmax(0, 1fr);
+        border: none;
     }
     .messages-sidebar {
-        background: linear-gradient(180deg, #123f3a 0%, #0f766e 48%, #16a085 100%);
-        border-right: none;
+        background: #fffaf0;
+        border-right: 3px solid #858585;
         display: flex;
         flex-direction: column;
         min-height: 0;
+        min-width: 0;
+        box-sizing: border-box;
     }
     .messages-sidebar-head {
-        padding: 16px 18px;
+        padding: clamp(12px, 2vw, 20px);
         font-size: 1.05rem;
         font-weight: 800;
-        color: #fff;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        background: rgba(255, 255, 255, 0.12);
+        color: #273548;
+        text-align: center;
+        border-bottom: 1px solid #b8b4aa;
+        background: #fffaf0;
         letter-spacing: 0.02em;
     }
     .thread-list {
@@ -46,32 +53,32 @@
     .thread {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
+        gap: 8px;
+        padding: 7px 12px;
         text-decoration: none;
         color: inherit;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+        border-bottom: 1px solid #b8b4aa;
         transition: background-color 0.12s ease;
     }
     .thread:hover {
-        background: rgba(255, 255, 255, 0.22);
+        background: #f4f0e6;
     }
     .thread.active {
-        background: rgba(255, 255, 255, 0.22);
-        box-shadow: inset 3px 0 0 #fff;
+        background: #fffaf0;
+        box-shadow: inset 3px 0 0 #a0b51b;
     }
     .thread-avatar {
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 36px;
         border-radius: 50%;
         flex-shrink: 0;
         overflow: hidden;
-        background: #fff;
+        background: #a0b51b;
         border: none;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 2px 8px rgba(10, 19, 71, 0.12);
+        box-shadow: none;
     }
     .thread-avatar img {
         width: 100%;
@@ -81,7 +88,7 @@
     .thread-avatar-fallback {
         font-size: 0.95rem;
         font-weight: 800;
-        color: #0f766e;
+        color: #273548;
         letter-spacing: 0.02em;
     }
     .thread-body {
@@ -98,15 +105,15 @@
     .thread-name {
         font-weight: 800;
         font-size: 0.95rem;
-        color: #fff;
+        color: #273548;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
         letter-spacing: 0.01em;
     }
     .thread-time {
-        font-size: 0.72rem;
-        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.58rem;
+        color: #4b5563;
         flex-shrink: 0;
         font-weight: 600;
     }
@@ -117,24 +124,24 @@
         gap: 8px;
     }
     .thread-preview {
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.58rem;
+        color: #555;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
         flex: 1;
         min-width: 0;
-        font-weight: 500;
+        font-weight: 600;
     }
     .thread-unread {
         flex-shrink: 0;
-        min-width: 20px;
-        height: 20px;
-        padding: 0 6px;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
         border-radius: 999px;
-        background: #fff;
-        color: #0f766e;
-        font-size: 0.72rem;
+        background: #80bce0;
+        color: #fff;
+        font-size: 0.65rem;
         font-weight: 800;
         display: inline-flex;
         align-items: center;
@@ -144,24 +151,26 @@
         display: flex;
         flex-direction: column;
         min-width: 0;
-        background: #e8f2ef;
+        min-height: 0;
+        overflow: hidden;
+        background: #fffaf0;
     }
     .messages-header {
-        border-bottom: none;
-        padding: 12px 16px;
+        border-bottom: 1px solid #b8b4aa;
+        padding: 10px 12px;
         display: flex;
         align-items: center;
         gap: 12px;
-        background: linear-gradient(90deg, #123f3a 0%, #0f766e 100%);
-        box-shadow: 0 2px 10px rgba(15, 118, 110, 0.15);
+        background: #fffaf0;
+        box-shadow: none;
     }
     .messages-header-avatar {
-        width: 42px;
-        height: 42px;
+        width: 40px;
+        height: 36px;
         border-radius: 50%;
         flex-shrink: 0;
         overflow: hidden;
-        background: #fff;
+        background: #a0b51b;
         border: none;
         display: flex;
         align-items: center;
@@ -175,34 +184,35 @@
     .messages-header-avatar span {
         font-size: 0.85rem;
         font-weight: 800;
-        color: #0f766e;
+        color: #273548;
     }
     .messages-header-text h3 {
         margin: 0;
-        font-size: 1.05rem;
+        font-size: 0.85rem;
         font-weight: 800;
-        color: #fff;
+        color: #273548;
         letter-spacing: 0.01em;
         line-height: 1.25;
     }
     .messages-header-text .meta {
         margin-top: 4px;
-        color: rgba(255, 255, 255, 0.86);
-        font-size: 0.78rem;
+        color: #555;
+        font-size: 0.58rem;
         font-weight: 600;
         line-height: 1.45;
         white-space: normal;
     }
     .messages-body {
         flex: 1;
-        padding: 16px 18px;
+        padding: 10px 14px;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
         align-items: stretch;
         gap: 6px;
-        background: linear-gradient(180deg, #eef6f4 0%, #d3e5df 100%);
+        background: #fffaf0;
     }
+    
     .bubble-row {
         display: flex;
         width: 100%;
@@ -218,7 +228,7 @@
         display: flex;
         flex-direction: column;
         width: max-content;
-        max-width: min(24rem, 70%);
+        max-width: min(24rem, 85%);
         min-width: 0;
     }
     .bubble-row.me .bubble-wrap {
@@ -235,15 +245,15 @@
         max-width: 100%;
         min-width: 0;
         box-sizing: border-box;
-        padding: 10px 14px 8px;
-        border-radius: 10px;
-        background: #fff;
-        color: #1e293b;
-        font-size: 0.95rem;
-        line-height: 1.5;
+        padding: 8px 10px 5px;
+        border-radius: 5px;
+        background: #e9f2f4;
+        color: #273548;
+        font-size: 13px;
+        line-height: 1.45;
         overflow-wrap: anywhere;
         word-break: break-word;
-        box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+        box-shadow: none;
         cursor: pointer;
         transition: outline-color 0.12s ease, box-shadow 0.12s ease;
     }
@@ -264,21 +274,21 @@
         word-break: break-word;
     }
     .bubble-row.me .bubble {
-        background: linear-gradient(135deg, #0f766e 0%, #0b5f58 100%);
+        background: #80bce0;
         color: #fff;
-        box-shadow: 0 2px 6px rgba(15, 118, 110, 0.2);
+        box-shadow: none;
     }
     .bubble-meta {
         align-self: flex-end;
-        font-size: 0.72rem;
-        font-weight: 600;
+        font-size: 0.58rem;
+        font-weight: 700;
         color: #667781;
         white-space: nowrap;
         line-height: 1.3;
         padding-top: 2px;
     }
     .bubble-row.me .bubble-meta {
-        color: rgba(255, 255, 255, 0.88);
+        color: #fff;
     }
     .ticks.gray { color: rgba(255, 255, 255, 0.75); }
     .ticks.blue { color: #fff; }
@@ -334,22 +344,23 @@
         word-break: break-word;
     }
     .bubble:hover {
-        box-shadow: 0 2px 10px rgba(15, 118, 110, 0.22);
+        box-shadow: 0 2px 6px rgba(39, 53, 72, 0.12);
     }
     .bubble.is-selected {
-        outline: 3px solid #eff106;
+        outline: 2px solid #a0b51b;
         outline-offset: 2px;
     }
     .messages-options-hint {
-        margin: 0 0 10px;
-        padding: 10px 14px;
-        border-radius: 8px;
-        background: rgba(15, 118, 110, 0.12);
-        color: #123f3a;
-        font-size: 0.86rem;
-        font-weight: 600;
+        margin: 0 0 8px;
+        margin: 0 0 8px;
+        padding: 10px 12px;
+        border-radius: 7px;
+        background: #faf5e9;
+        color: #273548;
+        font-size: 0.72rem;
+        font-weight: 800;
         text-align: center;
-        letter-spacing: 0.01em;
+        letter-spacing: 0;
     }
     .message-actions-bar {
         display: flex;
@@ -493,62 +504,68 @@
         color: #fff;
     }
     .messages-compose {
-        border-top: none;
-        padding: 12px 16px;
-        background: linear-gradient(180deg, #dfecea 0%, #d3e5df 100%);
+        display: block;
+        flex: 0 0 auto;
+        width: 100%;
+        box-sizing: border-box;
+        border-top: 1px solid #e5dfd2;
+        padding: 8px 16px 10px;
+        background: #fffaf0;
+        position: relative;
+        z-index: 2;
     }
     .compose-form {
         display: flex;
-        gap: 10px;
-        align-items: flex-end;
+        gap: 12px;
+        align-items: center;
     }
     .compose-form textarea {
         flex: 1;
-        min-height: 42px;
+        min-height: 30px;
         max-height: 120px;
         resize: none;
-        padding: 10px 14px;
+        padding: 7px 32px;
         border-radius: 24px;
-        border: 1px solid rgba(15, 118, 110, 0.45);
-        background: #fff;
+        border: none;
+        background: #e7f1f2;
         font-family: inherit;
-        font-size: 0.95rem;
+        font-size: 14px;
         outline: none;
-        box-shadow: inset 0 1px 2px rgba(10, 19, 71, 0.04);
+        box-shadow: none;
     }
     .compose-form textarea:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.22);
+        border-color: #a0b51b;
+        box-shadow: 0 0 0 2px rgba(160, 181, 27, 0.15);
     }
     .compose-form button[type="submit"] {
-        width: 44px;
-        height: 44px;
+        width: 36px;
+        height: 30px;
         padding: 0;
         border-radius: 50%;
-        border: 1px solid rgba(255, 255, 255, 0.35);
+        border: none;
         font-weight: 700;
-        font-size: 1rem;
+        font-size: 0.9rem;
         line-height: 1;
-        background: linear-gradient(135deg, #c8de2e 0%, #b2cd16 100%);
+        background: #a0b51b;
         color: #fff;
         cursor: pointer;
-        box-shadow: 0 3px 10px rgba(74, 92, 18, 0.22);
+        box-shadow: none;
     }
     .compose-form button[type="submit"]:hover {
-        background: linear-gradient(135deg, #b2cd16 0%, #9eb812 100%);
+        background: #8d9f16;
     }
     .compose-voice-btn {
         width: auto;
-        min-width: 44px;
-        height: 44px;
-        padding: 0 14px;
+        min-width: 48px;
+        height: 30px;
+        padding: 0 12px;
         border-radius: 22px;
-        border: 1px solid rgba(145, 191, 20, 0.55);
-        background: #fff;
-        color: #5c7212;
-        font-size: 0.82rem;
+        border: none;
+        background: #e7f1f2;
+        color: #a0b51b;
+        font-size: 0.7rem;
         font-weight: 800;
-        letter-spacing: 0.03em;
+        letter-spacing: 0;
         line-height: 1;
         cursor: pointer;
         flex-shrink: 0;
@@ -582,7 +599,7 @@
     .messages-sidebar .messages-empty {
         padding: 48px 20px;
         text-align: center;
-        color: rgba(255, 255, 255, 0.92);
+        color: #555;
         font-weight: 600;
         font-size: 0.92rem;
     }
@@ -598,9 +615,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(180deg, #eef6f4 0%, #d3e5df 100%);
-        color: #0f766e;
-        font-size: 0.95rem;
+        background: #fffaf0;
+        color: #555;
+        font-size: 0.85rem;
         font-weight: 600;
     }
     .mobile-back {
@@ -615,12 +632,19 @@
         text-decoration: none;
         line-height: 1;
     }
-    @media (max-width: 900px) {
+    @media (max-width: 560px) {
         .messages-page-title { font-size: 28px; }
-        .messages-wrap { grid-template-columns: 1fr; }
+        .messages-wrap { 
+            height: 70vh;
+            min-height: 400px;
+            grid-template-columns: 1fr;
+        }
         .messages-wrap.is-mobile-thread .messages-sidebar { display: none; }
         .messages-wrap:not(.is-mobile-thread) .messages-main { display: none; }
         .mobile-back { display: inline-flex; }
+        .messages-compose { padding: 8px; }
+        .compose-form { gap: 6px; }
+        .compose-form textarea { padding: 7px 14px; }
     }
 </style>
 
