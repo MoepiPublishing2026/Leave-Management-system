@@ -1,9 +1,10 @@
-@extends($layout ?? 'layouts.manager')
+@extends('layouts.manager')
 
 @section('title', 'Edit Employee')
 
 @section('content')
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
@@ -162,6 +163,9 @@
         user-select: none;
         letter-spacing: 0.5px;
     }
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     @media (max-width: 576px) {
         .signup-container { padding: 24px; }
         input[type="text"], input[type="email"], input[type="password"], select { font-size: 16px; padding: 11px 14px; }
@@ -176,7 +180,65 @@
             padding: 12px 16px;
             font-size: 15px;
         }
-    }
+    }    
+
+    /* ===== Match prototype ===== */
+html body .employee-create-page { font-family:'Poppins',"Segoe UI",sans-serif !important; max-width:720px !important; margin:0 auto !important; padding:34px 16px 40px !important; }
+html body .employee-create-page h1 { font-size:34px !important; color:#263248 !important; letter-spacing:0 !important; }
+html body .employee-create-page > p { font-size:.75rem !important; color:#666 !important; }
+
+html body .employee-create-page .signup-container {
+    max-width:100% !important; border-radius:16px !important; border:1px solid #ddd !important;
+    box-shadow:0 4px 18px rgba(0,0,0,.18) !important; padding:34px 44px 24px !important;
+}
+
+/* labels */
+html body .employee-create-page .signup-container label {
+    font-size:12px !important; font-weight:400 !important; letter-spacing:0 !important;
+    color:#333 !important; margin-top:16px !important;
+}
+
+/* text boxes */
+html body .employee-create-page .signup-container input[type="text"],
+html body .employee-create-page .signup-container input[type="email"],
+html body .employee-create-page .signup-container input[type="password"] {
+    border:2px solid #a2b222 !important; border-radius:14px !important;
+    padding:13px 16px !important; font-size:14px !important;
+}
+
+/* dropdowns: thick grey border, bold text */
+html body .employee-create-page .signup-container select {
+    border:2px solid #777 !important; border-radius:14px !important;
+    padding:11px 16px !important; font-size:14px !important;
+    font-weight:700 !important; color:#263248 !important;
+}
+
+/* department checkboxes and "Account is active" */
+html body .employee-create-page .managed-dept-list label,
+html body .employee-create-page .checkbox-row label {
+    margin-top:0 !important; font-size:13px !important; font-weight:400 !important;
+    text-transform:none !important; letter-spacing:0 !important; color:#333 !important;
+}
+html body .employee-create-page .managed-dept-list label span { font-weight:400 !important; }
+html body .employee-create-page input[type="checkbox"] { accent-color:#a2b222 !important; }
+
+/* helper text under fields */
+html body .employee-create-page .field-hint {
+    font-size:11px !important; font-weight:400 !important; color:#767672 !important;
+}
+
+/* both buttons: same olive */
+html body .employee-create-page .button-group .btn-form-action,
+html body .employee-create-page .button-group a.btn-form-action,
+html body .employee-create-page .button-group button.btn-form-action {
+    background:#a2b222 !important; color:#000 !important; border:0 !important;
+    border-radius:12px !important; padding:12px 38px !important;
+    font-size:15px !important; min-height:0 !important;
+}
+html body .employee-create-page .button-group .btn-form-action:hover { background:#8d9c1c !important; }
+
+html body .employee-create-page .branding { font-size:11px !important; margin-top:20px !important; }
+
 </style>
 
 <div class="employee-create-page">
@@ -242,21 +304,26 @@
 
         <div id="managed-departments-block" @style(['display: none' => $currentRole !== 'manager'])>
             <label>Departments responsible for</label>
-            <div class="managed-dept-list" style="text-align:left;margin-top:8px;display:grid;gap:8px;">
-                @foreach(($departments ?? []) as $dept)
-                    @php
-                        $ownerId = $deptManagers[$dept]['manager_id'] ?? null;
-                        $ownerName = $deptManagers[$dept]['manager_name'] ?? null;
-                        $ownedByOther = $ownerId && (int) $ownerId !== (int) $employee->id;
-                    @endphp
-                    <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:normal;font-size:15px;font-weight:600;color:#334155;margin:0;">
-                        <input type="checkbox" name="managed_departments[]" value="{{ $dept }}" class="managed-dept-checkbox"
-                               {{ in_array($dept, $selectedManaged, true) ? 'checked' : '' }}
-                               style="width:18px;height:18px;accent-color:#138056;">
-                        <span>{{ $dept }}@if($ownedByOther)<span style="color:#64748b;font-weight:500;"> — currently {{ $ownerName }}</span>@endif</span>
-                    </label>
-                @endforeach
-            </div>
+            <div class="dept-dropdown" id="deptDropdown">
+    <button type="button" class="dept-dropdown-btn" id="deptDropdownBtn" aria-expanded="false">
+        <span id="deptDropdownText">Select departments</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="dept-dropdown-panel" id="deptDropdownPanel">
+        @foreach(($departments ?? []) as $dept)
+            @php
+                $ownerId = $deptManagers[$dept]['manager_id'] ?? null;
+                $ownerName = $deptManagers[$dept]['manager_name'] ?? null;
+                $ownedByOther = $ownerId && (int) $ownerId !== (int) $employee->id;
+            @endphp
+            <label class="dept-option">
+                <input type="checkbox" name="managed_departments[]" value="{{ $dept }}" class="managed-dept-checkbox"
+                       {{ in_array($dept, $selectedManaged, true) ? 'checked' : '' }}>
+                <span>{{ $dept }}@if($ownedByOther) <small>— currently {{ $ownerName }}</small>@endif</span>
+            </label>
+        @endforeach
+    </div>
+</div>
             <p class="field-hint" style="text-align:left;margin-top:6px;color:#64748b;font-size:0.85rem;">
                 Select one or more departments. Employees registered in these departments will be assigned to this manager automatically.
             </p>
@@ -468,4 +535,32 @@
         syncRoleFields();
     });
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const wrap = document.getElementById('deptDropdown');
+    const btn = document.getElementById('deptDropdownBtn');
+    const text = document.getElementById('deptDropdownText');
+    if (!wrap || !btn) return;
+    const boxes = wrap.querySelectorAll('.managed-dept-checkbox');
+
+    function refresh() {
+        const picked = Array.from(boxes).filter(b => b.checked).map(b => b.value);
+        text.textContent = picked.length === 0 ? 'Select departments'
+            : picked.length <= 2 ? picked.join(', ')
+            : picked.length + ' departments selected';
+    }
+    btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const open = wrap.classList.toggle('open');
+        btn.setAttribute('aria-expanded', open);
+    });
+    document.addEventListener('click', function (e) {
+        if (!wrap.contains(e.target)) wrap.classList.remove('open');
+    });
+    boxes.forEach(b => b.addEventListener('change', refresh));
+    refresh();
+});
+</script>
+
 @endsection

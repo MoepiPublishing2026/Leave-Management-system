@@ -48,7 +48,7 @@
             background: transparent !important;
         }
         .navbar-logo img {
-            height: 56px;
+            height: 70px;
             width: auto;
             max-width: 280px;
             object-fit: contain;
@@ -358,6 +358,18 @@
             width: 38px;
             height: 38px;
         }
+        /* remove link underline and colour */
+html body nav.navbar .navbar-logo,
+html body nav.navbar .navbar-logo:hover { text-decoration:none !important; color:#fff !important; }
+html body nav.navbar .logo-text { color:#fff !important; text-decoration:none !important; }
+
+/* crop the empty space to the right of the ring */
+html body nav.navbar .navbar-logo img {
+    width:76px !important; height:76px !important; min-width:0 !important;
+    object-fit:cover !important; object-position:left center !important;
+}
+html body nav.navbar .navbar-logo { gap:0 !important; letter-spacing:0 !important; }
+html body nav.navbar .logo-text { margin-left:-40px !important; }
     </style>
 
     <!-- Bootstrap CSS -->
@@ -387,15 +399,23 @@
     @stack('styles')
     @include('partials.dashboard-status-card-styles')
     @yield('head')
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20260902n" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261006s"/>
+    <style>
+       html body nav.navbar .navbar-logo { flex:0 0 auto !important; width:auto !important; }
+html body nav.navbar .navbar-logo img {
+    height:70px !important; width:auto !important; min-width:70px !important;
+    max-width:none !important; flex-shrink:0 !important; object-fit:contain !important;
+}
+html body nav.navbar .logo-text { flex:0 0 auto !important; margin-left:8px !important; white-space:nowrap; }
+    </style>
 </head>
 <body>
     <nav class="navbar" role="navigation" aria-label="Main Navigation">
         <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
 
-        <a class="navbar-logo" href="{{ route('manager.dashboard') }}" aria-label="Go to dashboard">
-            <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
-        </a>
+    <a class="navbar-logo" href="{{ route('manager.dashboard') }}" aria-label="Go to dashboard">
+    <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Logo" />
+    <span class="logo-text">MOEPI</span></a>
 
         @php
             $unreadMessageCount = auth()->check()
@@ -484,8 +504,12 @@
     </aside>
 
     <main class="content" role="main">
-        @yield('content')
-    </main>
+    <div id="pageFit">@yield('content')</div>
+
+    <footer class="site-footer">
+        © 2026 MOEPI | Leave Management System | All Rights Reserved
+    </footer>
+</main>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -520,7 +544,38 @@
     </script>
 
     @include('partials.session-flash-swal')
+    <script>
+(function () {
+    var MIN_SCALE = 0.6;   // smallest size before the page scrolls
+    var timer;
 
+    function fit() {
+        var main = document.querySelector('main.content');
+        var box = document.getElementById('pageFit');
+        var foot = document.querySelector('.site-footer');
+        if (!main || !box || !foot) return;
+
+        box.style.zoom = 1;
+        main.style.setProperty('padding-bottom', foot.offsetHeight + 'px', 'important');
+
+        if (window.innerWidth < 900) return;   // phones and tablets scroll normally
+
+        var top = box.getBoundingClientRect().top + window.scrollY;
+        var avail = window.innerHeight - top - foot.offsetHeight - 6;
+        var need = box.scrollHeight;
+        var scale = Math.max(MIN_SCALE, Math.min(1, avail / need));
+        box.style.zoom = scale;
+    }
+
+    function later() { clearTimeout(timer); timer = setTimeout(fit, 120); }
+
+    window.addEventListener('load', function () { fit(); setTimeout(fit, 400); setTimeout(fit, 1200); });
+    window.addEventListener('resize', later);
+    new MutationObserver(function (list) {
+        if (list.some(function (m) { return m.target.id !== 'pageFit'; })) later();
+    }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class', 'hidden'] });
+})();
+</script>
     @stack('scripts')
     @include('partials.layout-scroll')
 </body>

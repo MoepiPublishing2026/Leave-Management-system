@@ -4,6 +4,148 @@
 
 @section('content')
 @include('partials.requests-page-styles')
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+html body .team-requests-page { font-family:'Poppins',sans-serif; }
+html body .team-requests-page h1 { color:#263248; font-weight:700; }
+
+/* toolbar */
+html body .team-requests-page .requests-toolbar {
+    background:#d8e3e1 !important; border:0 !important; border-radius:14px !important;
+    padding:14px 16px !important; box-shadow:none !important; align-items:center;
+}
+html body .team-requests-page .requests-btn--primary,
+html body .team-requests-page .requests-btn--search,
+html body .team-requests-page .requests-btn--secondary {
+    background:#a2b222 !important; color:#000 !important; border:0 !important;
+    border-radius:14px !important; padding:14px 30px !important; font-weight:700 !important;
+}
+html body .team-requests-page .requests-search-form input[type="text"] {
+    background:#fff !important; border:0 !important; border-radius:12px !important; padding:14px 18px !important; min-width:260px;
+}
+
+/* tabs and payment filter */
+html body .team-requests-page .requests-filter-bar {
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;
+    background:transparent !important; border:0 !important; box-shadow:none !important; padding:0 !important;
+}
+html body .team-requests-page .requests-filters {
+    display:inline-flex; gap:20px; background:#d8e3e1 !important; border:0 !important;
+    border-radius:14px; padding:12px 20px;
+}
+html body .team-requests-page .requests-filter {
+    background:transparent !important; color:#263248 !important; font-weight:700 !important;
+    padding:0 !important; border:0 !important; box-shadow:none !important;
+}
+html body .team-requests-page .requests-filter.is-active { color:#2379b0 !important; }
+html body .team-requests-page .requests-filter-bar select { background:#fff !important; border:0 !important; border-radius:12px !important; font-weight:700; }
+
+/* each row becomes a card */
+html body .team-requests-page .requests-table-wrap { background:transparent !important; border:0 !important; box-shadow:none !important; overflow:visible !important; }
+html body .team-requests-page .requests-table,
+html body .team-requests-page .requests-table tbody { display:block; width:100%; min-width:0 !important; }
+html body .team-requests-page .requests-table thead { display:none; }
+html body .team-requests-page .requests-table tr.row-click {
+    position:relative; display:grid; grid-template-columns:auto auto 1fr; column-gap:0; row-gap:4px;
+    background:#fff !important; border:1px solid #ddd; border-radius:14px; padding:18px 24px 18px 30px;
+    margin:0 0 26px; box-shadow:6px 8px 14px rgba(0,0,0,.22); cursor:pointer;
+}
+html body .team-requests-page .requests-table tr.row-click td {
+    display:block; border:0 !important; background:transparent !important; padding:2px 0 !important; text-align:left !important; color:#444;
+}
+html body .team-requests-page .requests-table td:nth-child(1) { position:absolute; top:6px; left:12px; padding:0 !important; font-size:.8rem; font-weight:700; color:#2379b0; }
+html body .team-requests-page .requests-table td:nth-child(2) { grid-column:1 / 3; grid-row:1; font-size:1.5rem; font-weight:700; color:#555; }
+html body .team-requests-page .requests-table td:nth-child(7) { grid-column:3; grid-row:1; justify-self:end; }
+html body .team-requests-page .requests-table td:nth-child(3) { grid-column:1 / -1; grid-row:2; font-weight:700; }
+html body .team-requests-page .requests-table td:nth-child(3)::before { content:'Requested by: '; font-weight:400; }
+html body .team-requests-page .requests-table td:nth-child(6) { grid-column:1 / -1; grid-row:3; }
+html body .team-requests-page .requests-table td:nth-child(6)::before { content:'Submitted '; }
+html body .team-requests-page .requests-table td:nth-child(4) { grid-column:1; grid-row:4; }
+html body .team-requests-page .requests-table td:nth-child(4)::after { content:'\00a0–\00a0'; }
+html body .team-requests-page .requests-table td:nth-child(5) { grid-column:2; grid-row:4; }
+html body .team-requests-page .requests-table td:nth-child(8) { grid-column:3; grid-row:4; justify-self:end; }
+html body .team-requests-page .requests-table tr:not(.row-click),
+html body .team-requests-page .requests-table tr:not(.row-click) td { display:block; }
+
+/* action buttons */
+html body .team-requests-page .request-actions,
+html body .team-requests-page .request-actions-inline { display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:flex-end; }
+html body .team-requests-page .request-btn--approve,
+html body .team-requests-page .request-actions-submitted {
+    background:#dfe98c !important; color:#3b7a1e !important; border:2px solid #a2b222 !important;
+    border-radius:14px !important; padding:10px 22px !important; font-weight:700 !important;
+}
+html body .team-requests-page .request-btn--reject {
+    background:#e41e3f !important; color:#fff !important; border:2px solid #e41e3f !important;
+    border-radius:14px !important; padding:10px 22px !important; font-weight:700 !important;
+}
+html body .team-requests-page .request-link {
+    color:#2379b0 !important; font-weight:700; text-decoration:none !important;
+    border-bottom:3px solid #8fa4f5; padding-bottom:2px;
+}
+html body .team-requests-page .requests-hint { color:#777 !important; font-size:.75rem; }
+/* card title shadow */
+html body .team-requests-page .requests-table td:nth-child(2) { text-shadow:1px 2px 3px rgba(0,0,0,.35); }
+
+/* icons */
+html body .team-requests-page .requests-table td:nth-child(3)::before {
+    content:'Requested by: '; display:inline-block; padding-left:28px; font-weight:400;
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='1.8' stroke-linecap='round'><circle cx='12' cy='8' r='4'/><path d='M4 21c0-4 4-6 8-6s8 2 8 6'/></svg>") no-repeat left center / 20px 20px;
+}
+html body .team-requests-page .requests-table td:nth-child(6)::before {
+    content:'Submitted '; display:inline-block; padding-left:28px;
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='1.8' stroke-linecap='round'><rect x='3' y='5' width='18' height='16' rx='2'/><path d='M3 10h18M8 3v4M16 3v4'/></svg>") no-repeat left center / 20px 20px;
+}
+html body .team-requests-page .requests-table td:nth-child(4)::before {
+    content:''; display:inline-block; width:20px; height:20px; margin-right:8px; vertical-align:-4px;
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='1.8' stroke-linecap='round'><circle cx='12' cy='12' r='9'/><path d='M12 7v5l3 2'/></svg>") no-repeat center / 20px 20px;
+}
+html body .team-requests-page .requests-table td:nth-child(4)::after { content:'\00a0-\00a0'; }
+
+/* status pills */
+html body .team-requests-page .request-badge {
+    border:2px solid #666; border-radius:14px; padding:4px 14px; font-weight:700; font-size:.8rem;
+}
+html body .team-requests-page .request-badge--approved { background:#a9c0f7 !important; border-color:#3b6fd8; color:#1f3f8f !important; }
+html body .team-requests-page .request-badge--pending { background:#d8b8ef !important; border-color:#9b3a96; color:#7a2a7a !important; }
+
+/* search box magnifier */
+html body .team-requests-page .requests-search-form input[type="text"] {
+    padding-left:44px !important;
+    background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M16 16l5 5'/></svg>") no-repeat 14px center / 20px 20px !important;
+}
+html body .team-requests-page .requests-table td.requests-empty {
+    position:static !important; display:block !important; padding:26px 0 !important;
+    font-size:1rem !important; font-weight:700 !important; font-style:italic !important;
+    color:#263248 !important; text-align:left !important;
+}
+html body .team-requests-page .requests-filter-bar label { white-space:nowrap !important; }
+/* remove green strip + teal tint */
+html body .team-requests-page .requests-table-wrap,
+html body .team-requests-page .requests-table,
+html body .team-requests-page .requests-table tbody {
+    border: 0 !important;
+    border-image: none !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+html body .team-requests-page .requests-table-wrap::before,
+html body .team-requests-page .requests-table-wrap::after,
+html body .team-requests-page .requests-table::before,
+html body .team-requests-page .requests-table::after,
+html body .team-requests-page .requests-table tbody::before,
+html body .team-requests-page .requests-table tbody::after {
+    content: none !important;
+    display: none !important;
+}
+html body .team-requests-page .requests-table tr:not(.row-click),
+html body .team-requests-page .requests-table td.requests-empty {
+    background: transparent !important;
+    border: 0 !important;
+}
+
+</style>
 
 @php
     use App\Support\LeaveProofRules;
@@ -33,18 +175,18 @@
         body.overdue-reason-locked .overdue-reason-lock-overlay {
             display: block;
         }
+
     </style>
     <script>document.body.classList.add('overdue-reason-locked');</script>
 @endif
 
-<div class="requests-page" @if($overdueReasonCount > 0) data-overdue-reason-lock="1" @endif>
-    <div class="mgr-page-header">
+<div class="requests-page team-requests-page" @if($overdueReasonCount > 0) data-overdue-reason-lock="1" @endif>    <div class="mgr-page-header">
         <div class="mgr-page-header__main">
-            <h1>Team Leave Requests</h1>
+            <h1>Team Requests</h1>
             <p class="requests-page-lead">
                 Showing <strong>{{ ucfirst($status) }}</strong>
                 @if ($requests->total() > 0)
-                    · {{ $requests->total() }} {{ Str::plural('request', $requests->total()) }}
+                    • {{ $requests->total() }} {{ Str::plural('request', $requests->total()) }}
                 @endif
             </p>
         </div>
@@ -157,9 +299,9 @@
                     <td>{{ $requests->firstItem() + $index }}</td>
                     <td>{{ $req->leave_type }}</td>
                     <td>{{ $employeeFull }}</td>
-                    <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M Y') }}</td>
-                    <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>
-                    <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y H:i') : '—' }}</td>
+                    <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M') }}</td>
+                    <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y') : '—' }}</td>
                     <td class="request-status-cell">
                         @php
                             $statusLabel = \App\Support\LeaveStatusLabels::display($rowStatus, $req->isOverdue());

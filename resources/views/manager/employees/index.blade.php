@@ -1,10 +1,10 @@
-@extends($layout ?? 'layouts.manager')
+@extends('layouts.manager')
 
 @section('title', 'Employees List')
 
 @section('content')
 <style>
-    .employees-page {
+employees-page {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         max-width: 1200px;
         margin: 0 auto;
@@ -66,7 +66,7 @@
         position: relative;
         overflow-x: auto;
         border: 2px solid #8fb3a8;
-        border-radius: 18px;
+        border-radius: 0px;
         box-shadow:
             0 18px 45px rgba(15, 61, 46, 0.10),
             0 2px 8px rgba(15, 23, 42, 0.05);
@@ -80,11 +80,11 @@
         right: 0;
         height: 4px;
         z-index: 3;
-        background: linear-gradient(90deg, #0f766e 0%, #16a085 45%, #b2cd16 100%);
+       
     }
     .employees-table {
         width: 100%;
-        border-collapse: separate;
+        border-collapse: collapse;
         border-spacing: 0;
         font-size: 0.92rem;
         min-width: 880px;
@@ -93,10 +93,11 @@
     .employees-table td {
         padding: 14px 16px;
         text-align: left;
-        border-bottom: 1px solid #a9c6bc;
-        border-right: 1px solid #a9c6bc;
+        border-bottom: 1px solid #A4B4F6;
+        border-right: 1px solid #A4B4F6;
         vertical-align: middle;
-        color: #1e293b;
+        color: #000;
+        background-color: #ffff;
     }
     .employees-table th:last-child,
     .employees-table td:last-child {
@@ -106,15 +107,15 @@
         position: sticky;
         top: 0;
         z-index: 2;
-        background: linear-gradient(135deg, #123f3a 0%, #0f766e 100%);
+        background-color: #2A6FA1;
         font-weight: 800;
         color: #fff;
         font-size: 0.72rem;
         text-transform: uppercase;
         letter-spacing: 0.075em;
         white-space: nowrap;
-        border-bottom-color: #0b5f58;
-        border-right-color: rgba(255, 255, 255, 0.22);
+        border-bottom-color: #A4B4F6;
+        border-right-color: #A4B4F6;
         box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
     }
     .employees-table th:first-child,
@@ -123,7 +124,7 @@
     }
     .employees-table td:first-child,
     .employees-table td:nth-child(2) {
-        color: #0f766e;
+        color: #000;
         font-weight: 700;
         white-space: nowrap;
     }
@@ -161,7 +162,7 @@
         letter-spacing: 0.01em;
     }
     .employee-status--active {
-        background: #0f766e;
+        background: #C6D300;
     }
     .employee-status--inactive {
         background: #64748b;
@@ -172,6 +173,7 @@
         gap: 8px;
         align-items: center;
     }
+    
     .edit-button,
     .delete-button {
         min-width: 84px;
@@ -229,6 +231,22 @@
             width: 100%;
         }
     }
+    html body .employees-page .employees-table td .employee-actions a.edit-button,
+html body .employees-page .employees-table td .employee-actions button.delete-button {
+    background:#fff !important; background-color:#fff !important; background-image:none !important;
+    border:1.5px solid #333 !important; color:#222 !important;
+    border-radius:9px !important; width:34px !important; height:34px !important;
+    min-width:0 !important; padding:0 !important; box-shadow:none !important;
+    display:inline-flex !important; align-items:center; justify-content:center;
+}
+html body .employees-page .employees-table td .employee-actions a.edit-button:hover,
+html body .employees-page .employees-table td .employee-actions button.delete-button:hover {
+    background:#eef1f6 !important; color:#000 !important;
+}
+html body .employees-page .employees-table td .employee-actions svg { stroke:#222 !important; }
+
+/* header text slightly larger like the prototype */
+html body .employees-page .employees-table th { font-size:.78rem !important; }
 </style>
 
 <div class="employees-page">
@@ -255,7 +273,7 @@
                     <th>Assigned to / Manages</th>
                     <th>Role</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -287,13 +305,17 @@
                         </td>
                         <td>
                             <div class="employee-actions">
-                                <a href="{{ route('manager.employees.edit', $employee->id) }}" class="edit-button">Edit</a>
-                                <form id="delete-form-{{ $employee->id }}" action="{{ route('manager.employees.destroy', $employee->id) }}" method="POST" style="display:none;">
-                                    @csrf
-                                    @method('DELETE')
-                                </form>
-                                <button type="button" class="delete-button delete-employee-btn" data-employee-id="{{ $employee->id }}">Delete</button>
-                            </div>
+    <a href="{{ route('manager.employees.edit', $employee->id) }}" class="edit-button" title="Edit" aria-label="Edit employee">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg>
+    </a>
+    <form id="delete-form-{{ $employee->id }}" action="{{ route('manager.employees.destroy', $employee->id) }}" method="POST" style="display:none;">
+        @csrf
+        @method('DELETE')
+    </form>
+    <button type="button" class="delete-button delete-employee-btn" data-employee-id="{{ $employee->id }}" title="Delete" aria-label="Delete employee">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+    </button>
+</div>
                         </td>
                     </tr>
                 @empty
