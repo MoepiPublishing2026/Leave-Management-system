@@ -381,7 +381,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20260902n" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261016o" />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -417,11 +417,10 @@
     <header class="navbar" role="banner">
         <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
 
-        <div class="logo">
-            <a href="{{ route('admin.dashboard') }}">
-                <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo">
-            </a>
-        </div>
+        <a class="navbar-logo" href="{{ route('admin.dashboard') }}" aria-label="Go to dashboard">
+            <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
+            <span class="logo-text">MOEPI</span>
+        </a>
 
         @php
             $unreadMessageCount = auth()->check()
@@ -435,14 +434,12 @@
 
         <nav class="menu" role="navigation" aria-label="Primary Navigation">
             @include('partials.nav-links-admin')
-        </nav>
 
-        @auth
-        @php
-            $user = auth()->user();
-            $notifications = \App\Support\UserNotifications::unreadForDropdown($user, 10);
-        @endphp
-        <div class="navbar-utilities">
+            @auth
+            @php
+                $user = auth()->user();
+                $notifications = \App\Support\UserNotifications::unreadForDropdown($user, 10);
+            @endphp
             <div class="nav-item dropdown">
                 <a href="#" id="notificationsDropdown" class="nav-link position-relative dropdown-toggle"
                    role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
@@ -477,8 +474,8 @@
                     </form>
                 </div>
             </div>
-        </div>
-        @endauth
+            @endauth
+        </nav>
     </header>
 
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
@@ -508,6 +505,7 @@
     <main class="content" role="main">
         @yield('content')
     </main>
+    @include('partials.site-footer')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @stack('scripts')

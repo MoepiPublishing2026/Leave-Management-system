@@ -1,4 +1,4 @@
-@extends('layouts.manager')
+@extends($layout ?? 'layouts.manager')
 
 @section('title', 'Add Employee')
 
@@ -13,10 +13,6 @@
     label { display: block; margin-top: 20px; font-weight: 600; font-size: 14px; color: #4a4a4a; text-transform: uppercase; letter-spacing: 1.6px; text-align: left; }
     input[type="text"], input[type="email"], input[type="password"], select { width: 100%; margin-top: 7px; padding: 13px 17px; font-size: 16px; border-radius: 8px; border: 1px solid #9ef755ff; color: #0f172a; background: #ffffff; box-sizing: border-box; transition: border-color 0.3s ease; }
     input:focus, select:focus { outline: none; border-color: #8d9c1c; box-shadow: none; }
-    .input-wrapper { position: relative; display: block; width: 100%; min-height: 52px; }
-    .input-wrapper input[type="password"], .input-wrapper input[type="text"] { padding-right: 48px; }
-    .toggle-password { position: absolute; top: 50%; right: 14px; transform: translateY(-50%); cursor: pointer; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; }
-    .toggle-password svg { width: 22px; height: 22px; stroke: #a2b222; }
     .autofill-trap { position: absolute; left: -10000px; top: 0; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
     .error { color: #ff1e5a; font-size: 13px; margin-top: 5px; text-align: left; }
     .field-hint { color: #64748b; font-size: 12px; margin-top: 5px; text-align: left; font-weight: 500; text-transform: none; letter-spacing: normal; }
@@ -163,33 +159,11 @@
         @error('email')<div class="error">{{ $message }}</div>@enderror
 
         <label for="password">Password</label>
-        <div class="input-wrapper">
-            <input type="password" name="password" id="password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
-            <span class="toggle-password" id="togglePasswordAdd" role="button" tabindex="0" aria-label="Show or hide password">
-                <svg id="eyeOpenAdd" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" />
-                    <circle cx="12" cy="12" r="3" stroke-width="2" />
-                </svg>
-                <svg id="eyeClosedAdd" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" style="display:none;">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5a10.6 10.6 0 00-4.9 1.2" />
-                </svg>
-            </span>
-        </div>
+        <input type="password" name="password" id="password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
         @error('password')<div class="error">{{ $message }}</div>@enderror
 
         <label for="password_confirmation">Confirm Password</label>
-        <div class="input-wrapper">
-            <input type="password" name="password_confirmation" id="password_confirmation" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
-            <span class="toggle-password" id="togglePasswordAddConfirm" role="button" tabindex="0" aria-label="Show or hide confirm password">
-                <svg id="eyeOpenAddConfirm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" />
-                    <circle cx="12" cy="12" r="3" stroke-width="2" />
-                </svg>
-                <svg id="eyeClosedAddConfirm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" style="display:none;">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5a10.6 10.6 0 00-4.9 1.2" />
-                </svg>
-            </span>
-        </div>
+        <input type="password" name="password_confirmation" id="password_confirmation" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
 
         <div class="button-group">
             <button type="submit" class="btn-form-action">Add Employee</button>
@@ -205,26 +179,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        function setupPasswordToggle(toggleEl, inputId, openId, closedId) {
-            const input = document.getElementById(inputId);
-            const eyeOpen = document.getElementById(openId);
-            const eyeClosed = document.getElementById(closedId);
-            if (!toggleEl || !input || !eyeOpen || !eyeClosed) return;
-            function flip() {
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                eyeOpen.style.display = isPassword ? 'none' : 'block';
-                eyeClosed.style.display = isPassword ? 'block' : 'none';
-            }
-            toggleEl.addEventListener('click', function (e) { e.preventDefault(); flip(); });
-            toggleEl.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); }
-            });
-        }
-
-        setupPasswordToggle(document.getElementById('togglePasswordAdd'), 'password', 'eyeOpenAdd', 'eyeClosedAdd');
-        setupPasswordToggle(document.getElementById('togglePasswordAddConfirm'), 'password_confirmation', 'eyeOpenAddConfirm', 'eyeClosedAddConfirm');
-
         function clearBrowserAutofill() {
             const email = document.getElementById('employee_email');
             const password = document.getElementById('password');

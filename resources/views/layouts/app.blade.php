@@ -366,7 +366,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20260902n" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261016o" />
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -411,6 +411,7 @@
 
         <a class="navbar-logo" href="{{ route('dashboard') }}" aria-label="Go to dashboard">
             <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
+            <span class="logo-text">MOEPI</span>
         </a>
 
         @auth
@@ -432,7 +433,7 @@
             @auth
             <div class="nav-item dropdown">
                 <a href="#" id="notificationsDropdown" class="nav-link dropdown-toggle position-relative" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="#5e920a" viewBox="0 0 24 24" style="margin-right: 6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="#5e920a" viewBox="0 0 24 24">
                         <path d="M12 2C8.134 2 5 5.134 5 9v7l-1.707 1.707a1 1 0 0 0 .707 1.707h16a1 1 0 0 0 .707-1.707L19 16V9c0-3.866-3.134-7-7-7zM7 9a5 5 0 0 1 10 0v8H7V9zm5 13a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2z"/>
                     </svg>
                     @if($notificationCount > 0)
@@ -442,32 +443,28 @@
                 @include('partials.navbar-notifications-dropdown', ['showViewAll' => true])
             </div>
 
+            <div class="navbar-profile" id="profileMenu">
+                @if($user->profile_picture)
+                    <img src="{{ route('users.profile_picture', ['user' => $user->id]) }}?v={{ optional($user->updated_at)->timestamp }}" alt="Profile Picture" class="profile-image" />
+                @else
+                    <div class="profile-circle" title="{{ $user->first_name }} {{ $user->last_name }}">
+                        {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
+                    </div>
+                @endif
+
+                <div class="profile-dropdown" id="profileDropdown">
+                    @include('partials.external-app-links')
+                    <a href="{{ route('logout') }}"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                       Logout
+                    </a>
+                    <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">
+                        @csrf
+                    </form>
+                </div>
+            </div>
             @endauth
         </nav>
-
-        @auth
-        @php $user = auth()->user(); @endphp
-        <div class="navbar-profile" id="profileMenu">
-            @if($user->profile_picture)
-                <img src="{{ route('users.profile_picture', ['user' => $user->id]) }}?v={{ optional($user->updated_at)->timestamp }}" alt="Profile Picture" class="profile-image" />
-            @else
-                <div class="profile-circle" title="{{ $user->first_name }} {{ $user->last_name }}">
-                    {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
-                </div>
-            @endif
-
-            <div class="profile-dropdown" id="profileDropdown">
-                @include('partials.external-app-links')
-                <a href="{{ route('logout') }}"
-                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                   Logout
-                </a>
-                <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">
-                    @csrf
-                </form>
-            </div>
-        </div>
-        @endauth
     </nav>
 
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
@@ -497,6 +494,7 @@
     <main role="main">
         @yield('content')
     </main>
+    @include('partials.site-footer')
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

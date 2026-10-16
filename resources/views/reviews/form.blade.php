@@ -21,7 +21,7 @@
 
 <div class="pr-page">
     <div class="pr-toolbar">
-        <a class="pr-btn pr-btn--ghost" href="{{ route(PerformanceReviews::routeName($user, 'index')) }}">Back to list</a>
+        <a class="pr-btn pr-btn--ghost" href="{{ route(PerformanceReviews::routeName($user, 'index'), $indexParams ?? []) }}">Back to list</a>
     </div>
 
     @if ($errors->any() || session('error'))
@@ -114,7 +114,25 @@
             <textarea name="areas_for_improvement" required placeholder="Add areas for improvement">{{ old('areas_for_improvement', $review->areas_for_improvement) }}</textarea>
         </div>
 
-        <p class="pr-submit-hint">All four sections must be filled in before you submit. You can still save a draft if something is incomplete.</p>
+        <table class="pr-legend" style="max-width:280px;margin:22px 0 12px;">
+            <tr><th colspan="2">Numerical values</th></tr>
+            @foreach ($scoreLabels as $value => $label)
+                <tr><th>{{ $value }}</th><td>{{ $label }}</td></tr>
+            @endforeach
+        </table>
+
+        <div class="pr-score-block">
+            <h2>Self-rating</h2>
+            @include('reviews.partials.score-table', [
+                'name' => 'self_scores',
+                'values' => old('self_scores', $review->self_scores ?? []),
+                'editable' => true,
+                'criteria' => $criteria,
+                'scoreLabels' => $scoreLabels,
+            ])
+        </div>
+
+        <p class="pr-submit-hint">Complete every written section and rate yourself on every criterion before you submit. You can still save a draft if something is incomplete.</p>
 
         <div class="pr-actions">
             <button type="submit" name="intent" value="draft" class="pr-btn pr-btn--draft" formnovalidate>Save draft</button>

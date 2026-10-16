@@ -83,6 +83,15 @@ html body .pr-reviews-page .requests-table tbody td,
 html body .pr-reviews-page .requests-table td.requests-empty {
     background:#fff !important; background-image:none !important;
 }
+html body .pr-reviews-page .pr-reviews-scope-header {
+    max-width: none;
+    margin: 0 0 10px;
+    padding: 0;
+    align-items: flex-start;
+}
+html body .pr-reviews-page .pr-reviews-scope-header h1 {
+    margin: 0;
+}
 </style>
 
 @php
@@ -100,17 +109,48 @@ html body .pr-reviews-page .requests-table td.requests-empty {
         ? 'No reviews have been sent yet.'
         : 'No performance reviews yet.';
     $search = $search ?? '';
-    $clearParams = ['status' => $status];
+    $reviewScope = $reviewScope ?? 'all';
+    $isManagerList = in_array($reviewScope, ['mine', 'team'], true);
+    $scopeQuery = $isManagerList ? ['scope' => $reviewScope] : [];
+    $clearParams = array_filter(['status' => $status] + $scopeQuery);
+    if ($reviewScope === 'team') {
+        $lead = 'Reviews your team has sent. Use My reviews to write and submit your own.';
+        $empty = 'No team reviews yet.';
+    } elseif ($reviewScope === 'mine') {
+        $lead = 'Fill in your monthly performance review, then submit it.';
+        $empty = 'No performance reviews yet.';
+    }
 @endphp
 
 <div class="requests-page pr-reviews-page">
-    <h1>Monthly Performance Reviews</h1>
-    <p class="requests-page-lead">
-        {{ $lead }}
-        @if ($reviews->total() > 0)
-            · Showing <strong>{{ $reviews->total() }}</strong> {{ Str::plural('review', $reviews->total()) }}
-        @endif
-    </p>
+    @if ($isManagerList)
+        <div class="mgr-page-header pr-reviews-scope-header">
+            <div class="mgr-page-header__main">
+                <h1>Monthly Performance Reviews</h1>
+                <p class="requests-page-lead">
+                    {{ $lead }}
+                    @if ($reviews->total() > 0)
+                        · Showing <strong>{{ $reviews->total() }}</strong> {{ Str::plural('review', $reviews->total()) }}
+                    @endif
+                </p>
+            </div>
+            @include('partials.manager-scope-switch', [
+                'scope' => $reviewScope === 'mine' ? 'personal' : 'team',
+                'personalUrl' => route($indexRoute, array_filter(['scope' => 'mine', 'status' => $status, 'search' => $search])),
+                'teamUrl' => route($indexRoute, array_filter(['scope' => 'team', 'status' => $status, 'search' => $search])),
+                'personalLabel' => 'My reviews',
+                'teamLabel' => 'Team reviews',
+            ])
+        </div>
+    @else
+        <h1>Monthly Performance Reviews</h1>
+        <p class="requests-page-lead">
+            {{ $lead }}
+            @if ($reviews->total() > 0)
+                · Showing <strong>{{ $reviews->total() }}</strong> {{ Str::plural('review', $reviews->total()) }}
+            @endif
+        </p>
+    @endif
 
     <div class="requests-toolbar">
         <div class="requests-toolbar-left">
@@ -121,6 +161,9 @@ html body .pr-reviews-page .requests-table td.requests-empty {
         <div class="requests-toolbar-right">
             <form method="GET" action="{{ route($indexRoute) }}" class="requests-search-form">
                 <input type="hidden" name="status" value="{{ $status }}" />
+                @if ($isManagerList)
+                    <input type="hidden" name="scope" value="{{ $reviewScope }}" />
+                @endif
                 <input type="text" name="search" placeholder="Search employee, reviewer, status..." value="{{ $search }}" aria-label="Search reviews" />
                 <button type="submit" class="requests-btn requests-btn--search">Search</button>
                 <a href="{{ route($indexRoute, $clearParams) }}" class="requests-btn requests-btn--secondary">Clear</a>
@@ -131,7 +174,7 @@ html body .pr-reviews-page .requests-table td.requests-empty {
     <div class="requests-filter-bar">
         <div class="requests-filters" role="tablist" aria-label="Filter by status">
             @foreach ($filters as $key => $label)
-                <a href="{{ route($indexRoute, array_filter(['status' => $key, 'search' => $search])) }}"
+                <a href="{{ route($indexRoute, array_filter(['status' => $key, 'search' => $search] + $scopeQuery)) }}"
                    class="requests-filter requests-filter--{{ $key }} {{ $status === $key ? 'is-active' : '' }}"
                    role="tab"
                    aria-selected="{{ $status === $key ? 'true' : 'false' }}">

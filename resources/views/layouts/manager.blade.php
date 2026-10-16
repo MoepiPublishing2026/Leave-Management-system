@@ -363,13 +363,8 @@ html body nav.navbar .navbar-logo,
 html body nav.navbar .navbar-logo:hover { text-decoration:none !important; color:#fff !important; }
 html body nav.navbar .logo-text { color:#fff !important; text-decoration:none !important; }
 
-/* crop the empty space to the right of the ring */
-html body nav.navbar .navbar-logo img {
-    width:76px !important; height:76px !important; min-width:0 !important;
-    object-fit:cover !important; object-position:left center !important;
-}
-html body nav.navbar .navbar-logo { gap:0 !important; letter-spacing:0 !important; }
-html body nav.navbar .logo-text { margin-left:-40px !important; }
+html body nav.navbar .navbar-logo { gap:6px !important; letter-spacing:0 !important; }
+html body nav.navbar .logo-text { margin-left:0 !important; }
     </style>
 
     <!-- Bootstrap CSS -->
@@ -399,15 +394,7 @@ html body nav.navbar .logo-text { margin-left:-40px !important; }
     @stack('styles')
     @include('partials.dashboard-status-card-styles')
     @yield('head')
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261006s"/>
-    <style>
-       html body nav.navbar .navbar-logo { flex:0 0 auto !important; width:auto !important; }
-html body nav.navbar .navbar-logo img {
-    height:70px !important; width:auto !important; min-width:70px !important;
-    max-width:none !important; flex-shrink:0 !important; object-fit:contain !important;
-}
-html body nav.navbar .logo-text { flex:0 0 auto !important; margin-left:8px !important; white-space:nowrap; }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261016o"/>
 </head>
 <body>
     <nav class="navbar" role="navigation" aria-label="Main Navigation">
@@ -450,33 +437,29 @@ html body nav.navbar .logo-text { flex:0 0 auto !important; margin-left:8px !imp
 
                 @include('partials.navbar-notifications-dropdown')
             </div>
-            @endauth
 
-        </nav>
+            <div class="navbar-profile" id="profileMenu" tabindex="0" aria-haspopup="true" aria-expanded="false" aria-label="User menu">
+                @if($user->profile_picture)
+                    <img src="{{ route('users.profile_picture', ['user' => $user->id]) }}?v={{ optional($user->updated_at)->timestamp }}" alt="Profile Picture" class="profile-image" />
+                @else
+                    <div class="profile-circle" title="{{ $user->first_name }} {{ $user->last_name }}">
+                        {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
+                    </div>
+                @endif
 
-        @auth
-        @php $user = auth()->user(); @endphp
-        <div class="navbar-profile" id="profileMenu" tabindex="0" aria-haspopup="true" aria-expanded="false" aria-label="User menu">
-            @if($user->profile_picture)
-                <img src="{{ route('users.profile_picture', ['user' => $user->id]) }}?v={{ optional($user->updated_at)->timestamp }}" alt="Profile Picture" class="profile-image" />
-            @else
-                <div class="profile-circle" title="{{ $user->first_name }} {{ $user->last_name }}">
-                    {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
+                <div class="profile-dropdown" id="profileDropdown" role="menu" aria-hidden="true">
+                    @include('partials.external-app-links')
+                    <a href="{{ route('logout') }}"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                       Logout
+                    </a>
+                    <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">
+                        @csrf
+                    </form>
                 </div>
-            @endif
-
-            <div class="profile-dropdown" id="profileDropdown" role="menu" aria-hidden="true">
-                @include('partials.external-app-links')
-                <a href="{{ route('logout') }}"
-                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                   Logout
-                </a>
-                <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">
-                    @csrf
-                </form>
             </div>
-        </div>
-        @endauth
+            @endauth
+        </nav>
     </nav>
 
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
@@ -504,12 +487,9 @@ html body nav.navbar .logo-text { flex:0 0 auto !important; margin-left:8px !imp
     </aside>
 
     <main class="content" role="main">
-    <div id="pageFit">@yield('content')</div>
-
-    <footer class="site-footer">
-        © 2026 MOEPI | Leave Management System | All Rights Reserved
-    </footer>
-</main>
+        @yield('content')
+    </main>
+    @include('partials.site-footer')
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -544,38 +524,6 @@ html body nav.navbar .logo-text { flex:0 0 auto !important; margin-left:8px !imp
     </script>
 
     @include('partials.session-flash-swal')
-    <script>
-(function () {
-    var MIN_SCALE = 0.6;   // smallest size before the page scrolls
-    var timer;
-
-    function fit() {
-        var main = document.querySelector('main.content');
-        var box = document.getElementById('pageFit');
-        var foot = document.querySelector('.site-footer');
-        if (!main || !box || !foot) return;
-
-        box.style.zoom = 1;
-        main.style.setProperty('padding-bottom', foot.offsetHeight + 'px', 'important');
-
-        if (window.innerWidth < 900) return;   // phones and tablets scroll normally
-
-        var top = box.getBoundingClientRect().top + window.scrollY;
-        var avail = window.innerHeight - top - foot.offsetHeight - 6;
-        var need = box.scrollHeight;
-        var scale = Math.max(MIN_SCALE, Math.min(1, avail / need));
-        box.style.zoom = scale;
-    }
-
-    function later() { clearTimeout(timer); timer = setTimeout(fit, 120); }
-
-    window.addEventListener('load', function () { fit(); setTimeout(fit, 400); setTimeout(fit, 1200); });
-    window.addEventListener('resize', later);
-    new MutationObserver(function (list) {
-        if (list.some(function (m) { return m.target.id !== 'pageFit'; })) later();
-    }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class', 'hidden'] });
-})();
-</script>
     @stack('scripts')
     @include('partials.layout-scroll')
 </body>

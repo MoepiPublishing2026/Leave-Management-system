@@ -538,21 +538,27 @@
         box-shadow: 0 0 0 2px rgba(160, 181, 27, 0.15);
     }
     .compose-form button[type="submit"] {
-        width: 36px;
-        height: 30px;
-        padding: 0;
-        border-radius: 50%;
-        border: none;
+        width: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        height: 40px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        border: none !important;
+        flex-shrink: 0;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
         font-weight: 700;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         line-height: 1;
-        background: #a0b51b;
-        color: #fff;
+        background: #a0b51b !important;
+        color: #fff !important;
         cursor: pointer;
         box-shadow: none;
     }
     .compose-form button[type="submit"]:hover {
-        background: #8d9f16;
+        background: #8d9f16 !important;
     }
     .compose-voice-btn {
         width: auto;

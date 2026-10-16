@@ -57,9 +57,9 @@ html body .team-requests-page .requests-table td:nth-child(1) { position:absolut
 html body .team-requests-page .requests-table td:nth-child(2) { grid-column:1 / 3; grid-row:1; font-size:1.5rem; font-weight:700; color:#555; }
 html body .team-requests-page .requests-table td:nth-child(7) { grid-column:3; grid-row:1; justify-self:end; }
 html body .team-requests-page .requests-table td:nth-child(3) { grid-column:1 / -1; grid-row:2; font-weight:700; }
-html body .team-requests-page .requests-table td:nth-child(3)::before { content:'Requested by: '; font-weight:400; }
+html body .team-requests-page .requests-table td:nth-child(3)::before { content:'Requested by:\00a0'; font-weight:400; }
 html body .team-requests-page .requests-table td:nth-child(6) { grid-column:1 / -1; grid-row:3; }
-html body .team-requests-page .requests-table td:nth-child(6)::before { content:'Submitted '; }
+html body .team-requests-page .requests-table td:nth-child(6)::before { content:'Submitted\00a0'; }
 html body .team-requests-page .requests-table td:nth-child(4) { grid-column:1; grid-row:4; }
 html body .team-requests-page .requests-table td:nth-child(4)::after { content:'\00a0–\00a0'; }
 html body .team-requests-page .requests-table td:nth-child(5) { grid-column:2; grid-row:4; }
@@ -89,11 +89,11 @@ html body .team-requests-page .requests-table td:nth-child(2) { text-shadow:1px 
 
 /* icons */
 html body .team-requests-page .requests-table td:nth-child(3)::before {
-    content:'Requested by: '; display:inline-block; padding-left:28px; font-weight:400;
+    content:'Requested by:\00a0'; display:inline-block; padding-left:28px; margin-right:4px; font-weight:400;
     background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='1.8' stroke-linecap='round'><circle cx='12' cy='8' r='4'/><path d='M4 21c0-4 4-6 8-6s8 2 8 6'/></svg>") no-repeat left center / 20px 20px;
 }
 html body .team-requests-page .requests-table td:nth-child(6)::before {
-    content:'Submitted '; display:inline-block; padding-left:28px;
+    content:'Submitted\00a0'; display:inline-block; padding-left:28px; margin-right:4px;
     background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='1.8' stroke-linecap='round'><rect x='3' y='5' width='18' height='16' rx='2'/><path d='M3 10h18M8 3v4M16 3v4'/></svg>") no-repeat left center / 20px 20px;
 }
 html body .team-requests-page .requests-table td:nth-child(4)::before {

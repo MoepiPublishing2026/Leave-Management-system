@@ -1,4 +1,4 @@
-@extends('layouts.manager')
+@extends($layout ?? 'layouts.manager')
 
 @section('title', 'Edit Employee')
 
@@ -62,32 +62,6 @@
         outline: none;
         border-color: #138056;
         box-shadow: 0 0 0 3px rgba(19, 128, 86, 0.12);
-    }
-    .input-wrapper {
-        position: relative;
-        width: 100%;
-    }
-    .input-wrapper input[type="password"],
-    .input-wrapper input[type="text"] {
-        padding-right: 48px;
-    }
-    .toggle-password {
-        position: absolute;
-        top: 50%;
-        right: 14px;
-        transform: translateY(-50%);
-        cursor: pointer;
-        color: #a0aec0;
-        width: 22px;
-        height: 22px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .toggle-password svg {
-        width: 22px;
-        height: 22px;
-        stroke: #b2cd16;
     }
     .error {
         color: #ff1e5a;
@@ -367,42 +341,6 @@ html body .employee-create-page .branding { font-size:11px !important; margin-to
             <div class="error">{{ $message }}</div>
         @enderror
 
-        <label for="password">New Password</label>
-        <div class="input-wrapper">
-            <input type="password" name="password" id="password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" />
-            <span class="toggle-password" id="togglePasswordEdit" role="button" tabindex="0" aria-label="Show or hide password">
-                <svg id="eyeOpenEdit" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" />
-                    <circle cx="12" cy="12" r="3" stroke-width="2" />
-                </svg>
-                <svg id="eyeClosedEdit" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" style="display:none;">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5a10.6 10.6 0 00-4.9 1.2" />
-                </svg>
-            </span>
-        </div>
-        <p class="field-hint">Leave blank to keep the current password.</p>
-        @error('password')
-            <div class="error">{{ $message }}</div>
-        @enderror
-
-        <label for="password_confirmation">Confirm New Password</label>
-        <div class="input-wrapper">
-            <input type="password" name="password_confirmation" id="password_confirmation" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" />
-            <span class="toggle-password" id="togglePasswordEditConfirm" role="button" tabindex="0" aria-label="Show or hide confirm password">
-                <svg id="eyeOpenEditConfirm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" />
-                    <circle cx="12" cy="12" r="3" stroke-width="2" />
-                </svg>
-                <svg id="eyeClosedEditConfirm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" style="display:none;">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5a10.6 10.6 0 00-4.9 1.2" />
-                </svg>
-            </span>
-        </div>
-
         <div class="checkbox-row">
             <input type="checkbox" name="is_active" id="is_active" value="1" {{ old('is_active', $employee->is_active) ? 'checked' : '' }} />
             <label for="is_active">Account is active</label>
@@ -425,44 +363,12 @@ html body .employee-create-page .branding { font-size:11px !important; margin-to
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        function setupPasswordToggle(toggleEl, inputId, openId, closedId) {
-            const input = document.getElementById(inputId);
-            const eyeOpen = document.getElementById(openId);
-            const eyeClosed = document.getElementById(closedId);
-            if (!toggleEl || !input || !eyeOpen || !eyeClosed) return;
-
-            function flip() {
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                eyeOpen.style.display = isPassword ? 'none' : 'block';
-                eyeClosed.style.display = isPassword ? 'block' : 'none';
-            }
-
-            toggleEl.addEventListener('click', function (e) {
-                e.preventDefault();
-                flip();
-            });
-            toggleEl.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    flip();
-                }
-            });
-        }
-
-        setupPasswordToggle(document.getElementById('togglePasswordEdit'), 'password', 'eyeOpenEdit', 'eyeClosedEdit');
-        setupPasswordToggle(document.getElementById('togglePasswordEditConfirm'), 'password_confirmation', 'eyeOpenEditConfirm', 'eyeClosedEditConfirm');
-
         function clearBrowserAutofill() {
             const email = document.getElementById('employee_email');
-            const password = document.getElementById('password');
-            const confirm = document.getElementById('password_confirmation');
             const expectedEmail = email ? (email.getAttribute('data-expected') || '') : '';
             if (email && email.value !== expectedEmail) {
                 email.value = expectedEmail;
             }
-            if (password) password.value = '';
-            if (confirm) confirm.value = '';
         }
         window.addEventListener('load', function () {
             clearBrowserAutofill();

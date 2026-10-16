@@ -252,7 +252,6 @@ class EmployeeController extends Controller
             'first_name' => ['required', 'string', 'max:15', 'regex:/^[a-zA-Z]+$/'],
             'last_name' => ['required', 'string', 'max:15', 'regex:/^[a-zA-Z]+$/'],
             'email' => 'required|email:rfc|max:255|unique:users,email,'.$employee->id,
-            'password' => 'nullable|string|min:6|confirmed',
             'role' => 'required|in:employee,manager,admin',
         ];
 
@@ -355,10 +354,6 @@ class EmployeeController extends Controller
 
         if ($employee->isDirty('department')) {
             $employee->designation = $department ?? $employee->designation;
-        }
-
-        if ($request->filled('password')) {
-            $employee->password = Hash::make($request->password);
         }
 
         $departmentsChanged = $role === 'manager'

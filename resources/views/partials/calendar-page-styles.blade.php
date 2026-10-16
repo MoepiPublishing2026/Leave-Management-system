@@ -15,7 +15,7 @@
     }
     .calendar-page .calendar-shell {
         width: 100%;
-        max-width: 725px;
+        max-width: 1180px;
         margin: 0 auto;
         padding: 0 0 24px;
     }
@@ -24,7 +24,7 @@
         border: 1px solid #cfd5da;
         border-radius: 12px;
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-        padding: 7px;
+        padding: 14px;
     }
     .calendar-page .calendar-meta {
         display: block;
@@ -106,7 +106,7 @@
     .calendar-page .calendar {
         display: grid;
         grid-template-columns: repeat(7, minmax(0, 1fr));
-        gap: 4px;
+        gap: 8px;
         align-items: stretch;
     }
     .calendar-page .calendar-spacer {
@@ -118,17 +118,17 @@
         text-align: center;
         background: #0c5b83;
         color: #fff;
-        padding: 10px 4px;
+        padding: 12px 4px;
         border-radius: 10px;
-        font-size: 0.70rem;
+        font-size: 0.85rem;
         letter-spacing: 0.02em;
         text-transform: uppercase;
     }
     .calendar-page .day {
         border: none;
         border-radius: 11px;
-        padding: 7px 7px 6px;
-        min-height: 69px;
+        padding: 10px 8px 8px;
+        min-height: 96px;
         background:  #c8d1da;
         position: relative;
         box-sizing: border-box;
@@ -140,10 +140,10 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-width: 1.25rem;
-        height: 1.25rem;
+        min-width: 1.5rem;
+        height: 1.5rem;
         font-weight: 700;
-        font-size: 0.62rem;
+        font-size: 0.9rem;
         color: #53606b;
         line-height: 1;
     }
@@ -228,7 +228,7 @@
         bottom: 8px;
         font-weight: 700;
         color: #fff;
-        font-size: 0.60rem;
+        font-size: 0.72rem;
         background:  #ae3b8e;
         border: none;
         border-radius: 999px;

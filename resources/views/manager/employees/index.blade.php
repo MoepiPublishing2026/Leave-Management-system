@@ -1,15 +1,26 @@
-@extends('layouts.manager')
+@extends($layout ?? 'layouts.manager')
 
 @section('title', 'Employees List')
 
 @section('content')
 <style>
-employees-page {
+    html body main:has(.employees-page) {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .employees-page {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         max-width: 1200px;
         margin: 0 auto;
-        padding: 0 4px 32px;
+        padding: 0 4px;
         color: #1e293b;
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
     }
     .employees-header {
         display: flex;
@@ -18,6 +29,9 @@ employees-page {
         gap: 12px;
         flex-wrap: wrap;
         margin-bottom: 18px;
+        flex: 0 0 auto;
+        background: #fff;
+        z-index: 5;
     }
     .employees-page h1 {
         font-weight: 700;
@@ -51,6 +65,7 @@ employees-page {
         margin-bottom: 16px;
         font-weight: 600;
         font-size: 0.92rem;
+        flex: 0 0 auto;
     }
     .flash-message--success {
         background: #ecfdf5;
@@ -64,7 +79,9 @@ employees-page {
     }
     .employees-table-wrap {
         position: relative;
-        overflow-x: auto;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: auto;
         border: 2px solid #8fb3a8;
         border-radius: 0px;
         box-shadow:
@@ -84,7 +101,7 @@ employees-page {
     }
     .employees-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
         border-spacing: 0;
         font-size: 0.92rem;
         min-width: 880px;
@@ -103,10 +120,15 @@ employees-page {
     .employees-table td:last-child {
         border-right: none;
     }
+    .employees-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 4;
+    }
     .employees-table th {
         position: sticky;
         top: 0;
-        z-index: 2;
+        z-index: 4;
         background-color: #2A6FA1;
         font-weight: 800;
         color: #fff;
@@ -116,7 +138,7 @@ employees-page {
         white-space: nowrap;
         border-bottom-color: #A4B4F6;
         border-right-color: #A4B4F6;
-        box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+        box-shadow: 0 2px 0 #2A6FA1;
     }
     .employees-table th:first-child,
     .employees-table td:first-child {
@@ -247,6 +269,18 @@ html body .employees-page .employees-table td .employee-actions svg { stroke:#22
 
 /* header text slightly larger like the prototype */
 html body .employees-page .employees-table th { font-size:.78rem !important; }
+html body .employees-page .employees-table-wrap { overflow: auto !important; }
+html body .employees-page .employees-table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+html body .employees-page .employees-table thead,
+html body .employees-page .employees-table th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 4 !important;
+    background: #2379b0 !important;
+}
 </style>
 
 <div class="employees-page">
