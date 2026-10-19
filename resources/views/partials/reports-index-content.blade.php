@@ -15,11 +15,11 @@
                 <option value="this_quarter" {{ ($monthFilter ?? '') === 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
                 <option value="this_month" {{ ($monthFilter ?? '') === 'this_month' ? 'selected' : '' }}>This Month</option>
                 @foreach(($years ?? []) as $y)
-                    <option value="{{ $y }}" {{ (string) ($monthFilter ?? '') === (string) $y ? 'selected' : '' }}>{{ \App\Support\LeaveYear::label((int) $y) }}</option>
+                    <option value="{{ $y }}" {{ (string) ($monthFilter ?? '') === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
                 @endforeach
             </select>
-            <input type="text" name="start_date" id="reports_start_date" class="reports-date-input" value="{{ request('start_date') }}" placeholder="Start date" autocomplete="off" aria-label="Start date" />
-            <input type="text" name="end_date" id="reports_end_date" class="reports-date-input" value="{{ request('end_date') }}" placeholder="End date" autocomplete="off" aria-label="End date" />
+            <input type="text" name="start_date" id="reports_start_date" class="reports-date-input" value="{{ request('start_date') }}" placeholder="Start Date" autocomplete="off" aria-label="Start Date" />
+            <input type="text" name="end_date" id="reports_end_date" class="reports-date-input" value="{{ request('end_date') }}" placeholder="End Date" autocomplete="off" aria-label="End Date" />
             <button type="submit" class="reports-btn reports-btn--primary">Filter</button>
             <a href="{{ route($filterRoute) }}" class="reports-btn reports-btn--secondary">Clear</a>
         </form>

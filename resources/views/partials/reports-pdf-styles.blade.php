@@ -1,25 +1,25 @@
 <style>
     body, .pdf-content, table, td, th, p, div {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, DejaVu Sans, sans-serif;
-        color: #1e293b;
+        font-family:  "Poppins", "Segoe UI", sans-serif;
+        color: var(--ma-text);
     }
     .header { margin-bottom: 12px; }
     .title {
         font-size: 22px;
         font-weight: 700;
         margin: 0;
-        color: #2c3e50;
+        color: var(--ma-primary);
         letter-spacing: 0.04em;
     }
     .subtitle {
         margin: 4px 0 0;
-        color: #64748b;
+        color: var(--ma-muted);
         font-size: 11px;
         font-weight: 400;
     }
     .meta {
         margin-top: 4px;
-        color: #64748b;
+        color: var(--ma-muted);
         font-size: 10px;
     }
     .pdf-cards {
@@ -32,7 +32,7 @@
         width: 20%;
         text-align: center;
         vertical-align: middle;
-        color: #ffffff;
+        color: var(--ma-text);
         padding: 14px 8px;
         border-radius: 12px;
         height: 70px;
@@ -40,14 +40,14 @@
     .pdf-card-title {
         font-size: 11px;
         font-weight: 600;
-        color: #ffffff;
+        color: var(--ma-text);
         margin: 0 0 6px;
         line-height: 1.3;
     }
     .pdf-card-value {
         font-size: 22px;
         font-weight: 700;
-        color: #ffffff;
+        color: var(--ma-text);
         line-height: 1.1;
     }
     table.data {
@@ -59,8 +59,8 @@
         background: #f8fafc;
         text-align: left;
         padding: 10px 12px;
-        border-bottom: 1px solid #e2e8f0;
-        color: #334155;
+         border-bottom: 1px solid #cbd5e1;
+        color: var(--ma-text);
         font-weight: 700;
         font-size: 9px;
         text-transform: uppercase;
@@ -68,9 +68,15 @@
     }
     table.data td {
         padding: 8px 12px;
-        border-bottom: 1px solid #e2e8f0;
+           border-bottom: 1px solid #cbd5e1;
         vertical-align: middle;
-        color: #1e293b;
+        color: var(--ma-text);
     }
-    .muted { color: #64748b; }
+    table.data th,
+table.data td {
+    border: 1px solid #cbd5e1;
+}
+    .muted { color: var(--ma-muted); }
+    
+    
 </style>

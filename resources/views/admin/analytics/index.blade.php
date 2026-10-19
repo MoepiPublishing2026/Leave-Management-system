@@ -13,8 +13,10 @@
     }
     .page-header {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        gap: 16px;
         margin-bottom: 20px;
         padding-bottom: 10px;
         border-bottom: 2px solid #e4e7ec;
@@ -26,6 +28,41 @@
         margin: 0;
         letter-spacing: 0.04em;
     }
+    .admin-analytics-page .filter-form {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: center;
+        align-self: flex-start;
+        gap: 16px;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    .admin-analytics-page .filter-form .filter-select {
+        box-sizing: border-box;
+        min-width: 0;
+        width: 252px;
+        max-width: 100%;
+        padding: 12px 40px 12px 16px;
+        background-color: white;
+        border: 1px solid #91bf14;
+        border-radius: 10px;
+        box-shadow: none;
+        color: #1e293b;
+        font: inherit;
+        font-weight: 700;
+        text-align: left;
+    }
+    .admin-analytics-page .filter-form .filter-select:focus {
+        outline: 2px solid #91bf14;
+        outline-offset: 2px;
+    }
+    
     .filter-form .filter-clear {
         margin-left: 0;
         padding: 10px 16px;
@@ -246,6 +283,9 @@
         .filter-form {
             width: 100%;
         }
+        .admin-analytics-page .filter-form .filter-select {
+            width: 100%;
+        }
         .filter-form .filter-clear {
             width: 100%;
             text-align: center;
@@ -299,10 +339,12 @@
             padding: 8px 10px;
             font-size: 0.85rem;
         }
+        
         .table-scroll-x th:last-child,
         .table-scroll-x td:last-child {
             min-width: 8.5rem;
         }
+        
     }
 </style>
 
@@ -316,7 +358,7 @@
                 <option value="this_quarter" {{ $monthFilter == 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
                 <option value="this_month" {{ $monthFilter == 'this_month' ? 'selected' : '' }}>This Month</option>
                 @foreach(($years ?? []) as $year)
-                    <option value="{{ $year }}" {{ (string) $monthFilter === (string) $year ? 'selected' : '' }}>{{ \App\Support\LeaveYear::label((int) $year) }}</option>
+                    <option value="{{ $year }}" {{ (string) $monthFilter === (string) $year ? 'selected' : '' }}>{{ $year }}</option>
                 @endforeach
             </select>
             <select name="staff" class="filter-select" onchange="document.getElementById('monthFilterForm').submit()">

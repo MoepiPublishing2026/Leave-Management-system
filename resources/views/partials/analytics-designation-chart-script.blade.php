@@ -21,11 +21,11 @@
                     callbacks: {
                         label: (ctx) => {
                             const pct = (designationPct[ctx.label] ?? 0).toFixed(1);
-                            return `${ctx.label}: ${ctx.parsed} (${pct}%)`;
+                            return `${ctx.label}: ${ctx.parsed}`;
                         }
                     }
                 }
             }
         })
     });
-    renderChartHtmlLegend('designationPieLegend', designationLabels, designationColors, designationPct);
+    renderChartHtmlLegend('designationPieLegend', designationLabels, designationColors);

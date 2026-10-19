@@ -1,10 +1,10 @@
 @php
     $colors = config('leave_status_colors.colors', []);
-    $cardAll = $colors['all'] ?? '#00C0A3';
-    $cardPending = $colors['pending'] ?? '#C291A4';
-    $cardOverdue = $colors['overdue'] ?? '#C154C1';
-    $cardApproved = $colors['approved'] ?? '#E27A53';
-    $cardRejected = $colors['rejected'] ?? '#87AFC7';
+    $cardAll = $colors['all'] ?? '#4ee5c5';
+    $cardPending = $colors['pending'] ?? '#f3b86b';
+    $cardOverdue = $colors['overdue'] ?? '#ae8df5';
+    $cardApproved = $colors['approved'] ?? '#a33d86';
+    $cardRejected = $colors['rejected'] ?? '#8fc4c7';
 @endphp
 <table class="pdf-cards" cellpadding="0" cellspacing="8">
     <tr>
