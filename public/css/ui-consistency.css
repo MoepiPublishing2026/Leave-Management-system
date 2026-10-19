@@ -923,16 +923,16 @@ main form a.btn,
 main form .btn,
 main form .btn-secondary,
 main form .back-link {
-    background: var(--form-olive) !important;
-    border: 2px solid var(--form-olive) !important;
-    color: #263041 !important;
+    background: #d4e514;
+    color: #000000;
+    
     font-weight: 700;
 }
 main form:not(.compose-form):not(.reports-filter-form):not(.reports-toolbar-forms):not(#leavePoliciesForm):not(.balance-year-form) button[type="submit"]:hover,
 main form a.btn:hover,
 main form .btn:hover {
-    background: var(--form-olive-dark) !important;
-    border-color: var(--form-olive-dark) !important;
+    background: #d4e514;
+    color: #000000;
 }
 
 /* eye icon and checkboxes */
@@ -1035,16 +1035,20 @@ main form:not(.compose-form):not(.reports-filter-form):not(.reports-toolbar-form
 main form a.btn,
 main form .btn,
 main form .back-link {
-    min-width: 186px;
-    height: 40px;
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: 0 24px;
-    font-size: 15px; font-weight: 700;
-    color: #263041 !important;
-    background: var(--form-olive) !important;
-    border: 2px solid var(--form-olive) !important;
-    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 17px 30px;
+    min-height: 64px;
+    font-weight: 700;
+    font-size: 25px;
+    border-radius: 14px;
+    cursor: pointer;
+    border: 1px solid #d4e500;
     text-decoration: none;
+    background: #d4e514;
+    color: #000000;
+    transition: background-color 0.15s ease;
 }
 main form:not(.compose-form):not(.reports-filter-form):not(.reports-toolbar-forms):not(#leavePoliciesForm):not(.balance-year-form) button[type="submit"]:hover,
 main form a.btn:hover,
