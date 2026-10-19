@@ -7,15 +7,18 @@
 <style>
     .policy-card h2 {
         margin: 0 0 10px;
-        font-size: 1.25rem;
+        font-size: 2.15rem;
+        line-height: 1.25;
         font-weight: 800;
-        color: #138056;
+        color: #273345;
+        letter-spacing: 0.015em;
     }
     .policy-card p {
         margin: 0;
-        color: #475569;
-        line-height: 1.65;
-        font-size: 0.95rem;
+        color: #080808;
+        line-height: 1.4;
+        font-size: 1.5rem;
+        font-weight: 400;
     }
 </style>
 
@@ -53,8 +56,8 @@
             @endif
         </article>
     @endforeach
-
-    <div class="app-page-panel">
+<div class="leave-info-grid">
+    <div class="app-page-panel-1">
         <h2 class="app-page-section-title">Leave application process</h2>
         <div class="app-info-box">
             <ul>
@@ -65,11 +68,13 @@
         </div>
     </div>
 
-    <div class="app-page-panel">
+    <div class="app-page-panel-1">
         <h2 class="app-page-section-title">Return to work</h2>
         <div class="app-info-box">
             <p>Upon return from extended leave, employees must provide certification if applicable and coordinate with HR for any necessary updates.</p>
         </div>
     </div>
+</div>
+
 </div>
 @endsection

@@ -1,31 +1,32 @@
 @once
 <style>
     .app-page {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        max-width: 1200px;
+        font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;
+        max-width: 1450px;
+        width: 100%;
         margin: 0 auto;
-        padding: 0 4px 32px;
-        color: #1e293b;
+        padding: 0 8px 36px;
+        color: #273345;
+        box-sizing: border-box;
     }
     .app-page-header {
         display: flex;
         flex-wrap: wrap;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
         gap: 12px;
-        margin-bottom: 8px;
+        margin-bottom: 0;
     }
     .app-page h1 {
-        font-weight: 700;
-        font-size: 40px;
-        color: #2c3e50;
-        margin: 0;
-        letter-spacing: 0.04em;
+        font-size: 2.75rem;
+        font-weight: 800;
+        color: #273345;
+        letter-spacing: 0.025em;
     }
     .app-page-lead {
-        margin: 0 0 20px;
-        color: #64748b;
-        font-size: 0.92rem;
+        margin: 4px 0 58px;
+        color: #666;
+        font-size: 1.15rem;
         line-height: 1.5;
     }
     .app-page-flash {
@@ -47,11 +48,27 @@
     }
     .app-page-panel {
         background: #fff;
-        border: none;
-        border-radius: 14px;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-        padding: 22px 24px;
-        margin-bottom: 18px;
+        border: 1px solid #d4d4d4;
+        border-radius: 21px;
+        box-shadow: 12px 17px 24px rgba(0, 0, 0, 0.22);
+        padding: 18px 23px;
+        margin-bottom: 24px;
+    }
+    .app-page-panel-1 {
+        background: #fff;
+        border: 4px solid #d4e510;
+        border-radius: 7px;
+        box-shadow: 12px 17px 24px rgba(0, 0, 0, 0.28);
+        padding: 18px 28px 24px;
+        margin-bottom: 24px;
+        box-sizing: border-box;
+    }
+    .leave-info-grid {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 42px;
+        align-items: start;
+        width: 100%;
     }
     .app-page-section-title {
         font-size: 1rem;
@@ -65,22 +82,23 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 9px 18px;
+        padding: 15px 17px;
+        min-height: 64px;
+        font-size: 1.55rem;
         font-weight: 700;
-        font-size: 0.88rem;
-        border-radius: 8px;
+        border-radius: 15px;
         cursor: pointer;
-        border: 1px solid #91bf14;
+        border: none;
         text-decoration: none;
-        background: #b2cd16;
-        color: #0a1347;
+        background: #d4e510;
+        color: #080808;
         transition: background-color 0.15s ease, color 0.15s ease;
     }
     .app-page-btn:hover,
     .app-page-btn--primary:hover,
     .app-page-btn--secondary:hover {
-        background: #9eb812;
-        color: #0a1347;
+        background: #c3d500;
+        color: #080808;
     }
     .app-form-grid {
         display: grid;
@@ -169,43 +187,44 @@
     .app-badge-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 12px;
+        gap: 10px 19px;
+        margin-bottom: 27px;
     }
     .app-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 5px 11px;
-        border-radius: 8px;
-        font-size: 0.72rem;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        background: #ecfdf5;
-        color: #047857;
+        padding: 9px 24px;
+        min-height: 41px;
+        border-radius: 9px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        background: #d4e510;
+        color: #273345;
         border: none;
     }
     .app-badge--muted {
-        background: #e2e8f0;
-        color: #475569;
+        background: #cecece;
+        color: #273345;
     }
     .app-info-box {
-        background: #eef2f6;
+        background: #fff;
         border: none;
-        border-radius: 12px;
-        padding: 16px 18px;
-        margin-top: 8px;
-        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+        border-radius: 0;
+        padding: 0 10px;
+        margin-top: 0;
+        box-shadow: none;
     }
     .app-info-box ul {
-        margin: 8px 0 0;
+        margin: 0;
         padding-left: 20px;
-        color: #475569;
-        line-height: 1.6;
+        color: #080808;
+        font-size: 1.75rem;
+        line-height: 1.35;
     }
     .app-info-box p {
         margin: 0;
-        color: #475569;
-        line-height: 1.6;
+        color: #080808;
+        font-size: 1.75rem;
+        line-height: 1.35;
     }
 </style>
 @endonce
