@@ -12,217 +12,204 @@
 @section('content')
 @include('partials.content-page-styles')
 <style>
-    .profile-picture-row {
+    .app-page.profile-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px 4px 32px;
+        color: #243044;
+        font-family: "Poppins", "Segoe UI", sans-serif;
+        box-sizing: border-box;
+    }
+    html body main .profile-page h1 {
+        margin: 0 0 6px;
+        color: #243044;
+        font-size: 36px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        font-family: "Poppins", "Segoe UI", sans-serif;
+    }
+    .profile-page .app-page-lead {
+        margin: 0 0 22px;
+        color: #6b7280;
+        font-size: 14px;
+        line-height: 1.5;
+        font-weight: 400;
+    }
+    .profile-page > form {
+        display: grid;
+        gap: 18px;
+    }
+    .profile-page .app-page-panel {
+        padding: 22px 24px;
+        border: 1px solid #d5dbe3;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: none;
+        margin-bottom: 0;
+    }
+    .profile-page .app-page-section-title {
+        margin: 0 0 14px;
+        color: #243044;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+    .profile-page .app-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px 20px;
+    }
+    html body main .profile-page .app-form-group label {
+        display: block;
+        margin: 0 0 8px;
+        color: #243044;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+    html body main .profile-page .app-form-group input,
+    html body main .profile-page .app-password-wrap,
+    html body main .profile-page .app-password-wrap input,
+    html body main .profile-page .app-form-group input:focus,
+    html body main .profile-page .app-password-wrap input:focus {
+        border: 0 !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    html body main .profile-page .app-form-group input,
+    html body main .profile-page .app-password-wrap input {
+        width: 100%;
+        height: 46px !important;
+        min-height: 46px !important;
+        padding: 0 16px !important;
+        border-radius: 10px;
+        background: #e6f2f2 !important;
+        color: #6b7280 !important;
+        font-family: inherit;
+        font-size: 15px !important;
+        font-weight: 500;
+        box-sizing: border-box;
+    }
+    html body main .profile-page .app-password-wrap {
+        background: #e6f2f2;
+        border-radius: 10px;
+        position: relative;
+    }
+    html body main .profile-page .app-password-wrap input {
+        padding-right: 42px !important;
+        background: transparent !important;
+    }
+    .profile-page .app-password-toggle {
+        right: 10px;
+        background: transparent !important;
+        border: 0 !important;
+        min-width: 0 !important;
+        width: auto !important;
+        height: auto !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    .profile-page .profile-picture-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 20px;
         align-items: center;
+        gap: 20px 32px;
     }
-    .app-page {
-    width: 100%;
-   
-    margin: 0 auto;
-    color: #263143;
-    font-family: "Poppins", "Segoe UI", sans-serif;
-    box-sizing: border-box;
-}
-.app-page h1 {
-    margin: 0 0 4px;
-    color: #263143;
-    font-size: 56px;
-    font-weight: 700;
-}
-
-/* .app-page .app-page-lead {
-    margin: 0 0 34px;
-    color: #777;
-    font-size: 19px;
-} */
-/* Separate the Account, Security, and Profile picture panels */
-.app-page > form {
-    display: grid;
-    gap: 36px;
-}
-.app-page .app-page-panel {
-    padding: 28px 38px;
-    border: 1px solid #c9c9c9;
-    border-radius: 16px;
-    background: #fff;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-}
-.app-page .app-page-section-title {
-    margin: 0 0 16px;
-    color: #263143;
-    font-size: 21px;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-/* Two columns for names and password fields */
-.app-page .app-form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px 22px;
-}
-.app-page .app-form-group label {
-    display: block;
-    margin: 0 0 10px;
-    color: #263143;
-    font-size: 16px;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-    .profile-picture-preview,
-    .profile-picture-placeholder {
-        width: 120px;
-        height: 120px;
+    .profile-page .profile-picture-preview-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    .profile-page .profile-picture-preview,
+    .profile-page .profile-picture-placeholder {
+        width: 104px;
+        height: 104px;
         border-radius: 50%;
-        border: 4px solid #2641cbc2;
+        border: 3px solid #287fb1;
+        box-sizing: border-box;
     }
-    .profile-picture-preview {
+    .profile-page .profile-picture-preview {
         object-fit: cover;
         display: block;
     }
-    .profile-picture-preview-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-}
-.app-page .app-form-group input,
-.app-page .app-password-wrap,
-.app-page .app-password-wrap input,
-.app-page .app-form-group input:focus,
-.app-page .app-password-wrap input:focus {
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-}
-    .profile-picture-placeholder {
-        background: #cbcaca;
+    .profile-page .profile-picture-placeholder {
+        background: #c8d3dc;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 800;
-        color: #138071;
-        font-size: 2rem;
+        color: #287fb1;
+        font-size: 32px;
     }
-    .profile-picture-actions {
+    .profile-page .profile-picture-actions {
         flex: 1;
-        min-width: 220px;
+        min-width: 200px;
     }
-    /* //////////////// */
-    .app-page .app-form-group input {
-    width: 100%;
-    min-height: 62px;
-    padding: 14px 22px;
-    /* border: 0; */
-    border-radius: 12px;
-    background: #e6f2f2;
-    color: #777;
-    font-family: inherit;
-    font-size: 18px;
-    box-sizing: border-box;
-}
-/* Profile photo beside the upload controls */
-.app-page .profile-picture-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 96px;
-}
-.app-page .profile-picture-preview,
-.app-page .profile-picture-placeholder {
-    width: 134px;
-    height: 134px;
-    border: 5px solid #287fb1;
-    box-sizing: border-box;
-}
-.app-page .profile-picture-placeholder {
-    background: #c8d3dc;
-    color: #287fb1;
-    font-size: 32px;
-}
-
-.app-page .profile-picture-buttons {
-    margin-bottom: 26px;
-}
-    .profile-picture-input {
-        display: none;
-    }
-    .profile-picture-buttons {
+    .profile-picture-input { display: none; }
+    .profile-page .profile-picture-buttons {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 8px;
         margin-bottom: 8px;
     }
-    .app-page-btn--danger {
-        background: #dc2626;
-        border: 1px solid #b91c1c;
-        color: #fff;
+    html body main .profile-page .app-page-btn,
+    html body main .profile-page form button.app-page-btn,
+    html body main .profile-page form button[type="submit"].app-page-btn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        min-width: 0 !important;
+        width: auto !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        padding: 0 18px !important;
+        border: 0 !important;
+        border-radius: 8px !important;
+        background: #b2cd16 !important;
+        color: #0a1347 !important;
+        font-family: inherit;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        box-shadow: none !important;
+        text-decoration: none !important;
     }
-    .app-page-btn--danger:hover {
-        background: #b91c1c;
-        color: #fff;
+    html body main .profile-page .app-page-btn:hover,
+    html body main .profile-page form button.app-page-btn:hover {
+        background: #9eb812 !important;
+        color: #0a1347 !important;
+    }
+    html body main .profile-page .app-page-btn--danger {
+        background: #dc2626 !important;
+        color: #fff !important;
+    }
+    .profile-page .app-form-hint {
+        color: #6b7280;
+        font-size: 13px;
+        margin: 0;
     }
     .profile-flash {
-        padding: 12px 16px;
+        padding: 10px 14px;
         border-radius: 10px;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
         background: #dcfce7;
-        color: #1f81d1;
+        color: #166534;
         font-weight: 600;
-        font-size: 0.92rem;
+        font-size: 0.88rem;
     }
-    /* /// */
-    .app-page .app-page-btn {
-    min-width: 222px;
-    min-height: 71px;
-    padding: 18px 32px;
-    border: 0;
-    border-radius: 14px;
-    background: #a3b323;
-    color: #000;
-    font-family: inherit;
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.app-page .app-form-hint {
-    color: #777;
-    font-size: 17px;
-}
-
-@media (max-width: 768px) {
-    .app-page {
-        padding: 0 16px;
+    @media (max-width: 768px) {
+        .profile-page { padding: 16px 4px 24px; }
+        html body main .profile-page h1 { font-size: 28px; }
+        .profile-page .app-page-panel { padding: 16px 14px; }
+        .profile-page .app-form-grid { grid-template-columns: 1fr; }
+        html body main .profile-page .app-page-btn { width: 100% !important; }
     }
-
-    .app-page h1 {
-        font-size: 38px;
-    }
-
-    .app-page .app-page-panel {
-        padding: 24px 20px;
-    }
-
-    .app-page .app-form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .app-page .profile-picture-row {
-        gap: 24px;
-    }
-
-    .app-page .app-page-btn {
-        width: 100%;
-    }
-  
-    
-}
 </style>
 
-<div class="app-page">
+<div class="app-page profile-page">
     <h1>Profile</h1>
     <p class="app-page-lead">Update your password and profile picture. Name and email are managed by your senior manager or manager.</p>
 
@@ -255,7 +242,7 @@
             <h2 class="app-page-section-title">Security</h2>
             <div class="app-form-grid">
                 <div class="app-form-group" style="grid-column: 1 / -1;">
-                    <label for="current_password">Current password</label>
+                    <label for="current_password">Current security</label>
                     <div class="app-password-wrap">
                         <input id="current_password" name="current_password" type="password" placeholder="Required to change password" autocomplete="current-password" />
                         <button type="button" class="app-password-toggle" id="toggleCurrentPassword" aria-label="Show or hide current password">
@@ -300,10 +287,8 @@
                             {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}
                         </div>
                         <img id="profilePreview" alt="Profile picture preview" class="profile-picture-preview" style="display:none;" />
-                            <button type="submit" class="app-page-btn app-page-btn--primary">
-                Save changes
-            </button>
                     @endif
+                    <button type="submit" class="app-page-btn app-page-btn--primary">Save changes</button>
                 </div>
                 <div class="profile-picture-actions">
                     <input id="profile_picture" name="profile_picture" type="file" accept="image/*" class="profile-picture-input" />
@@ -311,17 +296,13 @@
                         <button type="button" class="app-page-btn app-page-btn--secondary" id="profilePictureChooseBtn">
                             {{ $user->profile_picture ? 'Replace photo' : 'Upload photo' }}
                         </button>
-                        
                         @if ($user->profile_picture)
                             <button type="button" class="app-page-btn app-page-btn--danger" id="profilePictureRemoveBtn">Remove photo</button>
                         @endif
                     </div>
-                 
                     <span class="app-form-hint">JPG, PNG, or WebP up to 10 MB. Large photos are resized automatically.</span>
                 </div>
-                
             </div>
-            
         </div>
 
     </form>

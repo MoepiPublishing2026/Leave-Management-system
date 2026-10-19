@@ -158,5 +158,6 @@
     'showHandledMeta' => false,
     'enableWithdraw' => false,
     'enableProofUpload' => false,
+    'backLabel' => '← Back to requests',
 ])
 @endsection

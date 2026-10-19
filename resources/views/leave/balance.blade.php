@@ -125,7 +125,7 @@
             </form>
             <div class="balance-toolbar-right">
                 @if(!$isTypeDisabled)
-                    <a href="{{ route($applyRoute ?? \App\Support\LeaveApplicant::applyRoute(auth()->user()), ['leave_type' => $selectedType]) }}" class="balance-btn balance-btn--apply">+ Apply for {{ $selectedType }}</a>
+                    <a href="{{ route($applyRoute ?? \App\Support\LeaveApplicant::applyRoute(auth()->user()), ['leave_type' => $selectedType]) }}" class="balance-btn balance-btn--apply">+Apply</a>
                 @endif
                 <a href="{{ route($myRequestsRoute ?? \App\Support\LeaveApplicant::myRequestsRoute(auth()->user())) }}" class="balance-btn balance-btn--secondary">My Requests</a>
                 <a href="{{ route($balanceRoute ?? \App\Support\LeaveApplicant::balanceRoute(), ['year' => $year]) }}" class="balance-btn balance-btn--secondary">Change type</a>

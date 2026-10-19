@@ -394,7 +394,7 @@ html body nav.navbar .logo-text { margin-left:0 !important; }
     @stack('styles')
     @include('partials.dashboard-status-card-styles')
     @yield('head')
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261016o"/>
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261019q"/>
 </head>
 <body>
     <nav class="navbar" role="navigation" aria-label="Main Navigation">

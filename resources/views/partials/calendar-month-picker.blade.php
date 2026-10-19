@@ -19,28 +19,29 @@
 <style>
     .calendar-nav-bar {
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
         align-items: center;
-        gap: 14px;
-        margin: 14px auto 18px;
-        flex-wrap: wrap;
+        gap: 12px;
+        width: 100%;
+        margin: 6px auto 16px;
+        flex-wrap: nowrap;
     }
     .cal-nav-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 42px;
-        width: 42px;
-        height: 42px;
+        flex: 0 0 46px;
+        width: 46px;
+        height: 34px;
         padding: 0;
-        border-radius: 50%;
-        border: 1px solid #e2e8f0;
+        border-radius: 999px;
+        border: 1.5px solid #c5ced6;
         background: #fff;
-        color: #5c7212;
+        color: #263041;
         text-decoration: none;
         line-height: 0;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
-        transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+        box-shadow: none;
+        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
         user-select: none;
     }
     .cal-nav-btn svg {
@@ -49,33 +50,32 @@
         height: 18px;
     }
     .cal-nav-btn:hover {
-        background: rgba(178, 205, 22, 0.18);
-        border-color: #b2cd16;
-        box-shadow: 0 4px 14px rgba(74, 92, 18, 0.15);
-        transform: translateY(-1px);
-        color: #0a1347;
+        background: #f4f7f8;
+        border-color: #0c5b83;
+        color: #0c5b83;
     }
     .cal-nav-picker {
         position: relative;
+        flex: 1 1 auto;
+        display: flex;
+        justify-content: center;
     }
     .cal-nav-current {
         display: flex;
         align-items: center;
-        gap: 12px;
-        min-width: 220px;
-        padding: 10px 18px;
-        border: 1px solid #cbd5e1;
+        gap: 10px;
+        min-width: 168px;
+        padding: 8px 16px 8px 18px;
+        border: 1.5px solid #c5ced6;
         border-radius: 999px;
         background: #fff;
-        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+        box-shadow: none;
         cursor: pointer;
-        transition: border-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s ease;
+        transition: border-color 0.15s ease;
     }
     .cal-nav-current:hover,
     .cal-nav-current[aria-expanded="true"] {
-        border-color: #b2cd16;
-        box-shadow: 0 0 0 3px rgba(178, 205, 22, 0.28), 0 8px 24px rgba(74, 92, 18, 0.12);
-        transform: translateY(-1px);
+        border-color: #0c5b83;
     }
     .cal-nav-current-text {
         display: flex;
@@ -87,21 +87,21 @@
         flex: 1;
     }
     .cal-nav-current-month {
-        font-size: 1.24rem;
+        font-size: 1.05rem;
         font-weight: 700;
         color: #2c3e50;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.01em;
     }
     .cal-nav-current-year {
-        font-size: 0.9rem;
-        font-weight: 800;
-        color: #C5D931;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #b2cd16;
     }
     .cal-nav-chevron {
         margin-left: auto;
-        width: 18px;
-        height: 18px;
-        color: #5c7212;
+        width: 16px;
+        height: 16px;
+        color: #b2cd16;
         transition: transform 0.2s ease;
     }
     .cal-nav-current[aria-expanded="true"] .cal-nav-chevron {
@@ -228,10 +228,13 @@
             min-width: 0;
             padding: 8px 10px;
         }
+        .calendar-nav-bar {
+            gap: 8px;
+        }
         .cal-nav-btn {
-            width: 34px;
-            height: 34px;
-            flex-basis: 34px;
+            width: 38px;
+            height: 30px;
+            flex-basis: 38px;
         }
     }
 </style>

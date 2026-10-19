@@ -82,7 +82,7 @@
                         'rejectionReason' => (string) ($req->rejection_reason ?? ''),
                         'approvalComment' => (string) ($req->approval_comment ?? ''),
                     ];
-                    $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req));
+                    $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req), $req->popupMeta());
                 @endphp
                 <tr class="row-click {{ $req->isOverdue() ? 'overdue-row' : '' }}" data-details='@json($details)'>
                     <td>{{ $requests->firstItem() + $index }}</td>
@@ -152,6 +152,7 @@
     'showEmployee' => true,
     'showDays' => true,
     'showHandledMeta' => true,
+    'backLabel' => '← Back to requests',
 ])
 
 <script>

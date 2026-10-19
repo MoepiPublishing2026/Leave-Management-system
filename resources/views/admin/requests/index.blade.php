@@ -111,7 +111,7 @@
                         'managerRecommendation' => $recLabel,
                         'managerRecommendationComment' => (string) ($req->manager_recommendation_comment ?? ''),
                     ];
-                    $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req));
+                    $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req), $req->popupMeta());
 
                     if ($canDecide || LeaveProofRules::requiresProof($req->leave_type)) {
                         $details['proofDeferred'] = LeaveProofRules::allowsDeferredProof($req->leave_type) && LeaveProofRules::requiresProof($req->leave_type);
@@ -197,6 +197,7 @@
     'showEmployee' => true,
     'showDays' => true,
     'showHandledMeta' => true,
+    'backLabel' => '← Back to requests',
     'deleteWarning' => 'It will be permanently removed, including messages and attachments.',
 ])
 

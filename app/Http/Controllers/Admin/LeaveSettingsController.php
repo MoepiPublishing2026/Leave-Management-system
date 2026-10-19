@@ -57,6 +57,6 @@ class LeaveSettingsController extends Controller
             );
         }
 
-        return back()->with('saved', 1);
+        return back()->with('success', 'Leave policies saved successfully.');
     }
 }

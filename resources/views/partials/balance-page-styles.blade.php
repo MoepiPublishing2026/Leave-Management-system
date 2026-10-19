@@ -7,7 +7,7 @@
     $balanceHeadingTealSoft = '#d3e5df';
     $balanceApplyGreen = '#b2cd16';
     $balanceApplyGreenBorder = '#91bf14';
-    $balanceApplyGreenText = '#0a1347';
+    $balanceApplyGreenText = '#111';
     $balanceColorPending = $balanceStatusColors['pending'] ?? '#C291A4';
     $balanceColorApproved = $balanceStatusColors['approved'] ?? '#E27A53';
     $balanceColorRejected = $balanceStatusColors['rejected'] ?? '#87AFC7';
@@ -64,71 +64,99 @@
         margin-left: auto;
     }
     .balance-year-form {
-        padding: 9px 12px;
-        background: #dce8e8;
-        border-radius: 8px;
-        gap: 8px;
+        display: flex;
+        align-items: center;
+        padding: 0;
+        background: transparent;
+        border-radius: 0;
+        gap: 10px;
     }
-    .balance-year-form label {
-        font-weight: 500;
-        font-size: 0.85rem;
-        color: #263548;
-        text-transform: none;
-        letter-spacing: normal;
-        margin: 0;
+    .balance-page .balance-year-form label {
+        display: inline-flex !important;
+        align-items: center;
+        font-weight: 600 !important;
+        font-size: 0.92rem !important;
+        color: #263548 !important;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+        margin: 0 !important;
     }
-    .balance-year-form select {
-        border: none;
-        border-radius: 7px;
-        padding: 8px 10px;
-        font-size: 0.82rem;
+    .balance-page .balance-year-form select {
+        width: auto !important;
+        min-width: 148px;
+        height: 38px;
+        border: 1.5px solid #c5cdd4 !important;
+        border-radius: 10px;
+        padding: 6px 12px;
+        font-size: 0.88rem;
         font-weight: 600;
         color: #263548;
         background: #fff;
-        min-width: 122px;
     }
     .balance-year-form select:focus {
         outline: none;
-        border-color: {{ $balanceMaroon }};
-        box-shadow: 0 0 0 3px rgba(133, 6, 33, 0.12);
+        border-color: {{ $balanceApplyGreen }};
+        box-shadow: 0 0 0 3px rgba(178, 205, 22, 0.22);
     }
     .balance-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 9px 18px;
+        padding: 8px 18px;
+        min-height: 38px;
         font-weight: 700;
-        font-size: 0.82rem;
-        border-radius: 7px;
+        font-size: 0.88rem;
+        border-radius: 999px;
         cursor: pointer;
-        border: 1px solid transparent;
+        border: 2px solid {{ $balanceApplyGreen }};
         text-decoration: none;
-        background: #b2d43b;
-        color: #243000;
-        transition: background-color 0.15s ease;
+        background: #fff;
+        color: #111;
+        transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
         white-space: nowrap;
         box-shadow: none;
     }
     .balance-btn:hover {
-        background: #a5c92f;
-        color: #243000;
+        background: #f6fadf;
+        color: #111;
+        border-color: #8a9f12;
     }
-    .balance-btn--secondary,
-    .balance-btn--primary {
-        background: #b2d43b;
-        border-color: #b2d43b;
-        color: #243000;
+    .balance-page .balance-btn--primary {
+        background: #fff !important;
+        border: 1.5px solid #c5cdd4 !important;
+        border-radius: 10px !important;
+        color: #263548 !important;
+        min-width: 0 !important;
+        height: 38px;
+        padding: 6px 16px !important;
+        font-weight: 600;
+    }
+    .balance-page .balance-btn--primary:hover {
+        background: #f8fafc !important;
+        color: #263548 !important;
+        border-color: #94a3b8 !important;
+    }
+    .balance-btn--secondary {
+        background: #fff;
+        border-color: {{ $balanceApplyGreen }};
+        color: #111;
         box-shadow: none;
     }
-    .balance-btn--apply {
-        background: {{ $balanceApplyGreen }};
-        border-color: {{ $balanceApplyGreenBorder }};
-        color: {{ $balanceApplyGreenText }};
-        box-shadow: 0 4px 14px rgba(178, 205, 22, 0.2);
+    .balance-page .balance-btn--apply {
+        background: {{ $balanceApplyGreen }} !important;
+        border-color: {{ $balanceApplyGreen }} !important;
+        color: #111 !important;
+        box-shadow: none;
     }
-    .balance-btn--apply:hover {
-        background: #9eb812;
-        color: {{ $balanceApplyGreenText }};
+    .balance-btn--secondary:hover {
+        background: #f6fadf;
+        color: #111;
+        border-color: #8a9f12;
+    }
+    .balance-page .balance-btn--apply:hover {
+        background: #a2b222 !important;
+        border-color: #a2b222 !important;
+        color: #111 !important;
     }
 
     /* Top summary row — 4 cards */
@@ -227,8 +255,15 @@
         align-items: center;
         justify-content: center;
     }
+    .balance-summary-card--remaining-meter {
+        background: {{ $balanceApplyGreen }} !important;
+        border-color: {{ $balanceApplyGreenBorder }};
+    }
+    .balance-summary-card--remaining-meter .balance-summary-k {
+        color: {{ $balanceApplyGreenText }};
+    }
     .balance-summary-card--remaining-meter .balance-summary-meter {
-        background: #cbd5e1;
+        background: transparent;
     }
     .balance-summary-meter-fill {
         height: 100%;
@@ -262,6 +297,10 @@
         font-weight: 400;
         line-height: 1.2;
         text-align: center;
+    }
+    .balance-summary-card--remaining-meter .balance-summary-meter-fill {
+        background: transparent;
+        color: {{ $balanceApplyGreenText }};
     }
 
     .balance-status-bars {

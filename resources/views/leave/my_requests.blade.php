@@ -297,6 +297,7 @@ html body .my-requests-page .leave-card__actions { justify-content:flex-end; gap
                     'convertedToUnpaidAt' => $req->converted_to_unpaid_at?->format('d M Y H:i') ?? '',
                     'conversionReason' => (string) ($req->converted_to_unpaid_reason ?? ''),
                 ];
+                $details = array_merge($details, $req->popupMeta());
             @endphp
 
             <div class="leave-card row-click {{ $req->isOverdue() ? 'overdue-row' : '' }}" data-details='@json($details)'>

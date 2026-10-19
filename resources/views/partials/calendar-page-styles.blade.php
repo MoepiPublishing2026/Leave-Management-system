@@ -1,5 +1,31 @@
 @once
 <style>
+    html body .mgr-page-header.calendar-page-header {
+        align-items: center;
+        margin-bottom: 8px;
+        max-width: 1180px;
+        padding: 0;
+    }
+    html body .mgr-page-header.calendar-page-header h1,
+    html body .mgr-page-header.calendar-page-header .mgr-page-header__main h1 {
+        font-size: 34px;
+        color: #263041 !important;
+    }
+    html body .mgr-page-header.calendar-page-header a.mgr-scope-switch {
+        background: #e5394d !important;
+        color: #fff !important;
+        border: 0 !important;
+        border-radius: 14px !important;
+        padding: 12px 22px !important;
+        min-width: 148px;
+        font-size: 0.95rem !important;
+        font-weight: 700 !important;
+        box-shadow: none !important;
+    }
+    html body .mgr-page-header.calendar-page-header a.mgr-scope-switch:hover {
+        background: #d32f43 !important;
+        color: #fff !important;
+    }
     .calendar-page {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         color: #1e293b;

@@ -366,7 +366,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261016o" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261019q" />
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />

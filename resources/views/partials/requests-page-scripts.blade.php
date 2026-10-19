@@ -5,6 +5,7 @@
     $enableWithdraw = $enableWithdraw ?? false;
     $enableProofUpload = $enableProofUpload ?? false;
     $deleteWarning = $deleteWarning ?? 'This request will be permanently removed.';
+    $backLabel = $backLabel ?? '← Back to My requests';
 @endphp
 @include('partials.request-details-modal-styles')
 <script>
@@ -13,6 +14,7 @@
         showEmployee: @json($showEmployee),
         showDays: @json($showDays),
         showHandledMeta: @json($showHandledMeta),
+        backLabel: @json($backLabel),
     };
 
     const fileIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2 5 5h-4a1 1 0 0 1-1-1V4zM8 13h8v2H8v-2zm0-4h8v2H8V9z"/></svg>';
@@ -267,139 +269,197 @@
         `;
     }
 
-    window.openRequestDetails = function (details) {
-        const isOverdue = !!details.isOverdue;
-        const statusKey = isOverdue ? 'overdue' : String(details.status || '').toLowerCase();
-        const statusLabel = statusDisplayLabel(details.status, isOverdue);
+    function shortDate(value, fallback) {
+        if (hasText(fallback)) return escapeHtml(fallback);
+        const stripped = String(value || '').replace(/\s+\d{4}$/, '').trim();
+        return escapeHtml(stripped || 'N/A');
+    }
 
-        function row(label, valueHtml) {
-            if (!valueHtml) return '';
-            return `<div class="rd-row">
-                <div class="rd-row-label">${escapeHtml(label)}</div>
-                <div class="rd-row-value">${valueHtml}</div>
-            </div>`;
+    function chip(label, valueHtml, extraClass) {
+        return `<div class="rd-chip${extraClass ? ' ' + extraClass : ''}">
+            <span class="rd-chip-k">${escapeHtml(label)} :</span>
+            <span class="rd-chip-v">${valueHtml}</span>
+        </div>`;
+    }
+
+    function renderTimeline(details) {
+        const status = String(details.status || '').toLowerCase();
+        const submittedAt = details.submittedAt || '';
+        const reviewedAt = details.reviewedAt || '';
+        const outcomeAt = details.outcomeAt || details.handledAt || '';
+        const reviewedDone = hasText(reviewedAt) || (['approved', 'rejected'].includes(status) && hasText(outcomeAt));
+        const reviewedDate = reviewedAt || (reviewedDone ? outcomeAt : '');
+
+        let third = { label: 'Pending', date: '', tone: 'empty' };
+        if (status === 'withdrawn') {
+            third = { label: 'Withdrawn', date: outcomeAt, tone: 'orange' };
+        } else if (status === 'approved') {
+            third = { label: 'Approved', date: outcomeAt, tone: 'lime' };
+        } else if (status === 'rejected') {
+            third = { label: 'Rejected', date: outcomeAt, tone: 'red' };
         }
 
-        let employeeHtml = '';
-        if (pageConfig.showEmployee) {
-            const employeeLine = [details.department, details.email].filter(Boolean).join(' · ');
-            employeeHtml = `
-                <div class="rd-employee">
-                    <p class="rd-employee-name">${escapeHtml(details.employee || 'Employee')}</p>
-                    <p class="rd-employee-meta">${escapeHtml(employeeLine || 'N/A')}</p>
+        const steps = [
+            { label: 'Submitted', date: submittedAt, tone: hasText(submittedAt) ? 'lime' : 'empty' },
+            { label: 'Reviewed', date: reviewedDate, tone: reviewedDone ? 'lime' : 'empty' },
+            third,
+        ];
+
+        const parts = [];
+        steps.forEach((step, i) => {
+            if (i > 0) {
+                const prevDone = steps[i - 1].tone !== 'empty';
+                const thisDone = step.tone !== 'empty';
+                parts.push(`<div class="rd-tl-line${prevDone && thisDone ? '' : ' rd-tl-line--muted'}"></div>`);
+            }
+            parts.push(`
+                <div class="rd-tl-step">
+                    <div class="rd-tl-dot rd-tl-dot--${step.tone}"></div>
+                    <div class="rd-tl-label">${escapeHtml(step.label)}</div>
+                    <div class="rd-tl-date${hasText(step.date) ? '' : ' rd-tl-date--empty'}">${hasText(step.date) ? escapeHtml(step.date) : '&nbsp;'}</div>
                 </div>
-            `;
-        }
+            `);
+        });
 
-        const rows = [];
-        rows.push(row('Leave type', `<span class="rd-row-value--type">${escapeHtml(details.type || 'N/A')}</span>`));
-        rows.push(row('Start date', escapeHtml(details.start || 'N/A')));
-        rows.push(row('End date', escapeHtml(details.end || 'N/A')));
-        if (pageConfig.showDays && details.days !== '' && details.days !== null && details.days !== undefined) {
-            const daysLabel = details.isHalfDay ? `${escapeHtml(String(details.days))} (half day)` : escapeHtml(String(details.days));
-            rows.push(row('Working days', daysLabel));
-        }
+        return `<div class="rd-timeline">${parts.join('')}</div>`;
+    }
 
-        if (pageConfig.showHandledMeta) {
-            if (hasText(details.handledBy)) rows.push(row('Handled by', escapeHtml(details.handledBy)));
-            if (hasText(details.handledAt)) rows.push(row('Handled at', escapeHtml(details.handledAt)));
-            if (hasText(details.handledAction)) rows.push(row('Action', escapeHtml(details.handledAction)));
-            if (hasText(details.lateReasonBy)) rows.push(row('Late reason by', escapeHtml(details.lateReasonBy)));
-        }
-
-        if (hasText(details.comment)) {
-            rows.push(row('Comment', `<span class="rd-row-value--block">${escapeHtml(details.comment)}</span>`));
-        }
-
+    function renderAttachmentChip(details) {
         const files = Array.isArray(details.files) ? details.files : [];
-        rows.push(row(
-            'Attachments',
-            files.length
-                ? `<ul class="rd-files">${files.map(renderFileActions).join('')}</ul>`
-                : '<span class="rd-row-value--muted">None</span>'
-        ));
+        if (!files.length) {
+            return chip('Attachment', '<span class="rd-chip-muted">None</span>', 'rd-chip--full');
+        }
 
-        if (details.proofDeferred) {
-            const proofStatus = details.proofAttached
-                ? 'Doctor\'s letter uploaded'
-                : (details.certificateNote || details.proofStatusLabel || 'Doctor\'s letter required after approval');
-            let extra = escapeHtml(proofStatus);
-            if (details.proofOpensAt && !details.canUploadProofNow && !details.proofAttached) {
-                extra += `<div class="rd-row-note">Upload from ${escapeHtml(details.proofOpensAt)} via Actions.</div>`;
+        const names = files.map((file) => {
+            const name = escapeHtml(file.name || file.label || 'Attachment');
+            const previewUrl = escapeHtml(file.url || '');
+            const downloadUrl = escapeHtml(file.downloadUrl || file.url || '');
+            const extension = escapeHtml(file.extension || '');
+            const label = escapeHtml(file.label || 'File');
+            return `<button type="button" class="rd-chip-file attachment-preview-btn" data-preview-url="${previewUrl}" data-download-url="${downloadUrl}" data-extension="${extension}" data-label="${label}" data-filename="${name}" data-previewable="1">${name}</button>`;
+        }).join('<span class="rd-chip-sep">, </span>');
+
+        return chip('Attachment', names, 'rd-chip--full');
+    }
+
+    window.openRequestDetails = function (details) {
+        let daysText = 'N/A';
+        if (details.days !== '' && details.days !== null && details.days !== undefined) {
+            daysText = details.isHalfDay
+                ? `${escapeHtml(String(details.days))} Days (half day)`
+                : `${escapeHtml(String(details.days))} Days`;
+        }
+
+        const extraChips = [];
+        if (pageConfig.showEmployee) {
+            const employeeLine = [details.employee, details.department, details.email].filter(Boolean).join(' · ');
+            extraChips.push(chip('Employee', escapeHtml(employeeLine || 'N/A'), 'rd-chip--full'));
+
+            if (pageConfig.showHandledMeta) {
+                if (hasText(details.handledBy)) extraChips.push(chip('Handled by', escapeHtml(details.handledBy)));
+                if (hasText(details.handledAction)) extraChips.push(chip('Action', escapeHtml(details.handledAction)));
+                if (hasText(details.lateReasonBy)) extraChips.push(chip('Late reason by', escapeHtml(details.lateReasonBy)));
             }
-            if (details.proofDeadline) {
-                extra += `<div class="rd-row-note">Deadline: ${escapeHtml(details.proofDeadline)}</div>`;
+
+            if (details.proofDeferred) {
+                const proofStatus = details.proofAttached
+                    ? 'Doctor\'s letter uploaded'
+                    : (details.certificateNote || details.proofStatusLabel || 'Doctor\'s letter required after approval');
+                let extra = escapeHtml(proofStatus);
+                if (details.proofOpensAt && !details.canUploadProofNow && !details.proofAttached) {
+                    extra += `<div class="rd-chip-note">Upload from ${escapeHtml(details.proofOpensAt)} via Actions.</div>`;
+                }
+                if (details.proofDeadline) {
+                    extra += `<div class="rd-chip-note">Deadline: ${escapeHtml(details.proofDeadline)}</div>`;
+                }
+                extraChips.push(chip('Doctor\'s letter', extra, 'rd-chip--full'));
             }
-            rows.push(row('Doctor\'s letter', extra));
-        }
 
-        if (details.convertedToUnpaidAt) {
-            rows.push(row(
-                'Converted',
-                `<strong>${escapeHtml(details.originalLeaveType || 'Sick')} → Unpaid</strong>` +
-                `<div class="rd-row-note">${escapeHtml(details.convertedToUnpaidAt)}</div>` +
-                `<div class="rd-row-note">${escapeHtml(details.conversionReason || 'Required documents were not submitted by the deadline.')}</div>`
-            ));
-        }
+            if (details.convertedToUnpaidAt) {
+                extraChips.push(chip(
+                    'Converted',
+                    `<strong>${escapeHtml(details.originalLeaveType || 'Sick')} → Unpaid</strong>` +
+                    `<div class="rd-chip-note">${escapeHtml(details.convertedToUnpaidAt)}</div>` +
+                    `<div class="rd-chip-note">${escapeHtml(details.conversionReason || 'Required documents were not submitted by the deadline.')}</div>`,
+                    'rd-chip--full'
+                ));
+            }
 
-        if (hasText(details.managerRecommendation)) {
-            rows.push(row(
-                'Recommendation',
-                `<strong>${escapeHtml(details.managerRecommendation)}</strong>` +
-                (hasText(details.managerRecommendationComment)
-                    ? `<div class="rd-row-note">${escapeHtml(details.managerRecommendationComment)}</div>`
-                    : '')
-            ));
-        }
+            if (hasText(details.managerRecommendation)) {
+                extraChips.push(chip(
+                    'Recommendation',
+                    `<strong>${escapeHtml(details.managerRecommendation)}</strong>` +
+                    (hasText(details.managerRecommendationComment)
+                        ? `<div class="rd-chip-note">${escapeHtml(details.managerRecommendationComment)}</div>`
+                        : ''),
+                    'rd-chip--full'
+                ));
+            }
 
-        if (details.lateReasonSent && hasText(details.lateReason)) {
-            rows.push(row('Late reason', `<span class="rd-row-value--block">${escapeHtml(details.lateReason)}</span>`));
-        }
+            if (details.lateReasonSent && hasText(details.lateReason)) {
+                extraChips.push(chip('Late reason', escapeHtml(details.lateReason), 'rd-chip--full'));
+            }
 
-        if (hasText(details.rejectionReason)) {
-            rows.push(row('Rejection', `<span class="rd-row-value--block">${escapeHtml(details.rejectionReason)}</span>`));
-        }
+            if (hasText(details.rejectionReason)) {
+                extraChips.push(chip('Rejection', escapeHtml(details.rejectionReason), 'rd-chip--full'));
+            }
 
-        if (hasText(details.approvalComment)) {
-            rows.push(row('Approval note', `<span class="rd-row-value--block">${escapeHtml(details.approvalComment)}</span>`));
+            if (hasText(details.approvalComment)) {
+                extraChips.push(chip('Approval note', escapeHtml(details.approvalComment), 'rd-chip--full'));
+            }
+        } else if (hasText(details.rejectionReason)) {
+            extraChips.push(chip('Rejection', escapeHtml(details.rejectionReason), 'rd-chip--full'));
         }
 
         let messagesHtml = '';
         if (details.messagesUrl) {
-            messagesHtml += `<div class="rd-messages"><a href="${escapeHtml(details.messagesUrl)}">Open messages</a></div>`;
+            messagesHtml = `<div class="rd-messages"><a href="${escapeHtml(details.messagesUrl)}">Open messages</a></div>`;
         }
 
         const reviewHtml = renderReviewChecklist(details.review);
+        const extraHtml = extraChips.length
+            ? `<div class="rd-fields rd-fields--extra">${extraChips.join('')}</div>`
+            : '';
 
         const html = `
-            <div class="rd-modal">
-                <div class="rd-header">
-                    <div class="rd-header-id">Request <span>#${escapeHtml(details.id)}</span></div>
-                    <span class="request-badge ${statusBadgeClass(statusKey, isOverdue)}">${escapeHtml(statusLabel)}</span>
+            <div class="rd-modal rd-modal--proto">
+                <button type="button" class="rd-back" onclick="Swal.close()">${escapeHtml(pageConfig.backLabel)}</button>
+                <h2 class="rd-title">Request #${escapeHtml(details.id)}</h2>
+                ${renderTimeline(details)}
+                <div class="rd-fields">
+                    ${chip('Leave Type', escapeHtml(details.type || 'N/A'), 'rd-chip--full')}
+                    <div class="rd-chip-row">
+                        ${chip('Start Date', shortDate(details.start, details.startShort))}
+                        ${chip('End Date', shortDate(details.end, details.endShort))}
+                    </div>
+                    <div class="rd-chip-row">
+                        ${chip('Number of days', daysText)}
+                        ${chip('Comment', hasText(details.comment) ? escapeHtml(details.comment) : '<span class="rd-chip-muted">None</span>')}
+                    </div>
+                    ${renderAttachmentChip(details)}
                 </div>
-                ${employeeHtml}
+                ${extraHtml}
                 ${reviewHtml}
-                <div class="rd-body">
-                    ${rows.join('')}
-                    ${messagesHtml}
-                </div>
+                ${messagesHtml}
             </div>
         `;
 
         const isMobile = window.matchMedia('(max-width: 768px)').matches;
         Swal.fire({
-            width: isMobile ? 'auto' : (reviewHtml ? 680 : 620),
+            width: isMobile ? 'auto' : (reviewHtml ? 680 : 580),
             position: 'center',
             showCloseButton: false,
             showIcon: false,
             customClass: {
-                popup: 'request-details-popup',
+                popup: 'request-details-popup request-details-popup--leave',
                 container: 'request-details-container',
             },
             html: html,
-            showConfirmButton: true,
-            confirmButtonText: 'Close',
+            showConfirmButton: false,
             focusConfirm: false,
+            didOpen: (popup) => {
+                popup.querySelector('.rd-back')?.addEventListener('click', () => Swal.close());
+            },
         });
     };
 
@@ -534,7 +594,7 @@
     document.addEventListener('click', (e) => {
         const interactive = e.target.closest('a,button,form,input,textarea,select,label');
         if (interactive) return;
-        const row = e.target.closest('tr[data-details]');
+        const row = e.target.closest('[data-details]');
         if (!row) return;
         const raw = row.getAttribute('data-details');
         if (!raw) return;
@@ -549,7 +609,7 @@
         const requestId = params.get('request_id');
         if (!requestId) return;
 
-        const rows = document.querySelectorAll('tr[data-details]');
+        const rows = document.querySelectorAll('[data-details]');
         for (const row of rows) {
             try {
                 const details = JSON.parse(row.getAttribute('data-details') || '{}');
