@@ -381,7 +381,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261016o" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261019q" />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

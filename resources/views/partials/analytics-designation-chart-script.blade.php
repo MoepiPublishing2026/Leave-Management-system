@@ -10,7 +10,7 @@
                 data: @json($designationData),
                 backgroundColor: designationColors,
                 borderColor: '#fff',
-                borderWidth: 2
+                borderWidth: designationLabels.length > 1 ? 2 : 0
             }]
         },
         options: mergeChartOptions({

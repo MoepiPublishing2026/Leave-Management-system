@@ -918,7 +918,7 @@ main textarea:focus {
 }
 
 /* Save Changes / Back to List */
-main form:not(.compose-form) button[type="submit"],
+main form:not(.compose-form):not(.reports-filter-form):not(.reports-toolbar-forms):not(#leavePoliciesForm):not(.balance-year-form) button[type="submit"],
 main form a.btn,
 main form .btn,
 main form .btn-secondary,
@@ -928,7 +928,7 @@ main form .back-link {
     color: #263041 !important;
     font-weight: 700;
 }
-main form:not(.compose-form) button[type="submit"]:hover,
+main form:not(.compose-form):not(.reports-filter-form):not(.reports-toolbar-forms):not(#leavePoliciesForm):not(.balance-year-form) button[type="submit"]:hover,
 main form a.btn:hover,
 main form .btn:hover {
     background: var(--form-olive-dark) !important;
@@ -981,7 +981,7 @@ main form input[type="password"] {
 }
 
 /* dropdowns: grey border, bold */
-main form select {
+main form:not(.filter-form):not(.balance-year-form) select {
     width: 100%;
     height: 42px;
     padding: 0 20px;
@@ -1031,7 +1031,7 @@ main form .button-row,
 main form .actions {
     display: flex; justify-content: center; gap: 20px; margin-top: 14px;
 }
-main form:not(.compose-form) button[type="submit"],
+main form:not(.compose-form):not(.reports-filter-form):not(.reports-toolbar-forms):not(#leavePoliciesForm):not(.balance-year-form) button[type="submit"],
 main form a.btn,
 main form .btn,
 main form .back-link {
@@ -1046,7 +1046,7 @@ main form .back-link {
     border-radius: 10px;
     text-decoration: none;
 }
-main form:not(.compose-form) button[type="submit"]:hover,
+main form:not(.compose-form):not(.reports-filter-form):not(.reports-toolbar-forms):not(#leavePoliciesForm):not(.balance-year-form) button[type="submit"]:hover,
 main form a.btn:hover,
 main form .btn:hover {
     background: var(--form-olive-dark) !important;
@@ -1102,7 +1102,7 @@ main form label:has(input[type="checkbox"]) {
 }
 
 /* dropdowns, including Assign to Senior Manager */
-main form select {
+main form:not(.filter-form):not(.balance-year-form) select {
     height: 44px; padding: 0 16px;
     font-size: 14px; font-weight: 700; color: #263041;
     background-color: #fff;
@@ -1159,17 +1159,31 @@ html body .employee-create-page .signup-container .dept-option:hover { backgroun
     font-family: 'Poppins', 'Segoe UI', sans-serif !important;
 }
 
-/* success icon: solid green circle, white tick */
+/* success icon: solid green circle, proper white check (not SweetAlert's split lines) */
 .swal2-icon.swal2-success {
-    width: 100px !important; height: 100px !important;
+    position: relative !important;
+    width: 100px !important;
+    height: 100px !important;
     margin: 0 auto 18px !important;
     border: 0 !important;
+    border-radius: 50% !important;
     background: #00cc00 !important;
+    overflow: hidden !important;
+    color: transparent !important;
+    animation: none !important;
 }
-.swal2-icon.swal2-success .swal2-success-ring { display: none !important; }
+.swal2-icon.swal2-success .swal2-success-ring,
 .swal2-icon.swal2-success [class^='swal2-success-circular-line'],
-.swal2-icon.swal2-success .swal2-success-fix { background: transparent !important; }
-.swal2-icon.swal2-success [class^='swal2-success-line'] { background: #fff !important; }
+.swal2-icon.swal2-success .swal2-success-fix,
+.swal2-icon.swal2-success [class^='swal2-success-line'] {
+    display: none !important;
+}
+.swal2-icon.swal2-success::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4.6 4.6L19 8'/%3E%3C/svg%3E") center / 66% no-repeat !important;
+}
 
 /* title and message */
 .swal2-title {
@@ -1182,10 +1196,20 @@ html body .employee-create-page .signup-container .dept-option:hover { backgroun
 .swal2-confirm {
     background: #a2b222 !important; color: #263041 !important;
     font-weight: 700 !important; font-size: 18px !important;
-    border-radius: 10px !important; padding: 12px 36px !important;
+    border-radius: 10px !important; padding: 10px 22px !important; min-width: 0 !important;
     box-shadow: none !important;
 }
 .swal2-confirm:hover { background: #8d9c1c !important; }
+
+.swal2-popup:not(:has(.swal2-icon.swal2-warning)):not(.request-details-popup):not(.attachment-preview-popup):not(.swal-approve-popup) .swal2-confirm {
+    border-width: 3px !important;
+    border-style: solid !important;
+    border-top-color: #00ffff !important;
+    border-left-color: #00ffff !important;
+    border-right-color: #ff40d4 !important;
+    border-bottom-color: #ff40d4 !important;
+    outline: none !important;
+}
 
 /* ===== Alert / notice banners: match prototype ===== */
 .alert,

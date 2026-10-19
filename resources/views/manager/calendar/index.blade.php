@@ -10,7 +10,7 @@
     $calQuery = array_filter(['month' => request('month'), 'year' => request('year')]);
 @endphp
 
-<div class="mgr-page-header">
+<div class="mgr-page-header calendar-page-header">
     <div class="mgr-page-header__main">
         <h1 id="calendar-heading">{{ $calendarTitle }}</h1>
     </div>

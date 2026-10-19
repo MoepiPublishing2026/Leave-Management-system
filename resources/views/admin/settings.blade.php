@@ -187,11 +187,7 @@
     <h1>Leave Policies</h1>
     <p class="app-page-lead">Configure default days, carry-over limits, and rules for each leave type. Changes apply to new requests immediately.</p>
 
-    @if (session('saved'))
-        <div class="settings-flash" role="status">Leave policies saved successfully.</div>
-    @endif
-
-    <form action="{{ route($formRoute ?? 'admin.settings.save') }}" method="POST" novalidate>
+    <form id="leavePoliciesForm" action="{{ route($formRoute ?? 'admin.settings.save') }}" method="POST" novalidate>
         @csrf
 
         @foreach($leaveTypes as $type)
@@ -233,25 +229,24 @@
             </section>
         @endforeach
 
-       
-    </form>
+        <div class="settings-footer-row">
+            <div class="app-page-panel settings-notes settings-notes-panel">
+                <h2 class="app-page-section-title">Important notes</h2>
+                <div class="app-info-box">
+                    <ul>
+                        <li>Policy changes apply immediately to new leave requests.</li>
+                        <li>Existing leave balances are not automatically adjusted.</li>
+                        <li>To update individual balances, use User Management.</li>
+                        <li>All changes are logged in the audit trail.</li>
+                    </ul>
+                </div>
+            </div>
 
-   <div class="settings-footer-row">
-    <div class="app-page-panel settings-notes settings-notes-panel">
-        <h2 class="app-page-section-title">Important notes</h2>
-        <div class="app-info-box">
-            <ul>
-                <li>Policy changes apply immediately to new leave requests.</li>
-                <li>Existing leave balances are not automatically adjusted.</li>
-                <li>To update individual balances, use User Management.</li>
-                <li>All changes are logged in the audit trail.</li>
-            </ul>
+            <div class="settings-actions">
+                <button type="submit" class="app-page-btn app-page-btn--primary"
+                        aria-label="Save leave policies">Save policies</button>
+            </div>
         </div>
-    </div>
-
-    <div class="settings-actions">
-        <button type="submit" class="app-page-btn app-page-btn--primary"
-                aria-label="Save leave policies">Save policies</button>
-    </div>
+    </form>
 </div>
 @endsection

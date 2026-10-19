@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\LeaveDaysFormatter;
+use App\Support\LeaveWorkingDays;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -184,5 +186,37 @@ class LeaveRequest extends Model
         }
 
         return false;
+    }
+
+    /** Dates and short labels for the request-details popup timeline. */
+    public function popupMeta(): array
+    {
+        $stamp = static function ($value): string {
+            if (! $value) {
+                return '';
+            }
+
+            return Carbon::parse($value)->format('j M, H:i');
+        };
+
+        $status = strtolower(trim((string) ($this->status ?? '')));
+        $outcomeAt = $this->handled_at;
+        if (! $outcomeAt && in_array($status, ['withdrawn', 'approved', 'rejected'], true)) {
+            $outcomeAt = $this->updated_at;
+        }
+
+        return [
+            'submittedAt' => $stamp($this->created_at),
+            'reviewedAt' => $stamp($this->recommended_at),
+            'outcomeAt' => $stamp($outcomeAt),
+            'startShort' => $this->start_date ? Carbon::parse($this->start_date)->format('j M') : '',
+            'endShort' => $this->end_date ? Carbon::parse($this->end_date)->format('j M') : '',
+            'days' => LeaveDaysFormatter::format(
+                ($this->days !== null && $this->days !== '')
+                    ? $this->days
+                    : (($this->start_date && $this->end_date) ? LeaveWorkingDays::count($this) : '')
+            ),
+            'isHalfDay' => (bool) $this->is_half_day,
+        ];
     }
 }

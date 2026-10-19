@@ -293,7 +293,7 @@ html body .team-requests-page .requests-table td.requests-empty {
                         },
                         'managerRecommendationComment' => (string) ($req->manager_recommendation_comment ?? ''),
                     ];
-                    $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req));
+                    $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req), $req->popupMeta());
                 @endphp
                 <tr class="row-click {{ $req->isOverdue() ? 'overdue-row' : '' }}" data-details='@json($details)'>
                     <td>{{ $requests->firstItem() + $index }}</td>
@@ -390,6 +390,7 @@ html body .team-requests-page .requests-table td.requests-empty {
     'showEmployee' => true,
     'showDays' => true,
     'showHandledMeta' => false,
+    'backLabel' => '← Back to requests',
     'deleteWarning' => 'It will be permanently removed, including messages and attachments.',
 ])
 

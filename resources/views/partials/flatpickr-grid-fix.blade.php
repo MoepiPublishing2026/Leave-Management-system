@@ -68,7 +68,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #123f3a 0%, #0f766e 100%);
+        background: #0c5b83;
         color: #fff !important;
         font-size: 0.62rem;
         font-weight: 700;
@@ -91,62 +91,68 @@
         box-sizing: border-box;
         border: none;
         border-radius: 10px;
-        background: #e2e8f0;
-        color: #334155;
+        background: #c8d1da;
+        color: #53606b;
         font-weight: 700;
         font-size: 0.86rem;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
     }
+    .flatpickr-calendar .flatpickr-day:nth-child(7n+1),
+    .flatpickr-calendar .flatpickr-day:nth-child(7n) {
+        background: #a9c3c5;
+        color: #53686b;
+    }
     .flatpickr-calendar .flatpickr-day.prevMonthDay,
     .flatpickr-calendar .flatpickr-day.nextMonthDay {
-        background: #f1f5f9;
+        background: #dce3e8;
         color: #94a3b8;
         box-shadow: none;
     }
     .flatpickr-calendar .flatpickr-day:hover,
     .flatpickr-calendar .flatpickr-day:focus {
-        background: #b8dfc8;
+        background: #b7c4ce;
         border-color: transparent;
-        color: #0f3d2e;
+        color: #3d4a54;
     }
     .flatpickr-calendar .flatpickr-day.today {
-        background: #d3e5df;
-        color: #0f766e;
-        box-shadow: inset 0 0 0 2px #0f766e, 0 2px 10px rgba(15, 118, 110, 0.12);
+        background: #8fc7cd;
+        color: #1776a5;
+        box-shadow: none;
         font-weight: 800;
     }
     .flatpickr-calendar .flatpickr-day.today:hover,
     .flatpickr-calendar .flatpickr-day.today:focus {
-        background: #c5ddd6;
-        color: #123f3a;
+        background: #7fbcc4;
+        color: #0c5b83;
     }
     .flatpickr-calendar .flatpickr-day.selected,
     .flatpickr-calendar .flatpickr-day.startRange,
     .flatpickr-calendar .flatpickr-day.endRange,
     .flatpickr-calendar .flatpickr-day.selected:hover,
     .flatpickr-calendar .flatpickr-day.selected:focus {
-        background: #0f766e !important;
+        background: #0c5b83 !important;
         color: #fff !important;
-        border-color: #0f766e !important;
-        box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25);
+        border-color: #0c5b83 !important;
+        box-shadow: none;
     }
     .flatpickr-calendar .flatpickr-day.selected.today {
-        box-shadow: inset 0 0 0 2px #123f3a, 0 2px 6px rgba(15, 118, 110, 0.25);
+        background: #0c5b83 !important;
+        color: #fff !important;
     }
     .flatpickr-calendar .flatpickr-day.flatpickr-disabled,
     .flatpickr-calendar .flatpickr-day.flatpickr-disabled:hover {
         background: #cbd5e1 !important;
         color: #64748b !important;
         cursor: not-allowed;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        box-shadow: none;
     }
     .flatpickr-calendar .flatpickr-day.inRange,
     .flatpickr-calendar .flatpickr-day.prevMonthDay.inRange,
     .flatpickr-calendar .flatpickr-day.nextMonthDay.inRange {
-        background: #dcfce7;
+        background: #b8ddec;
         box-shadow: none;
         border-color: transparent;
-        color: #0f3d2e;
+        color: #0c5b83;
     }
 
     .flatpickr-months {
@@ -178,16 +184,16 @@
         border-radius: 50%;
         border: 1px solid #e2e8f0;
         background: #fff;
-        color: #0f766e;
-        fill: #0f766e;
+        color: #0c5b83;
+        fill: #0c5b83;
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
     }
     .flatpickr-months .flatpickr-prev-month:hover,
     .flatpickr-months .flatpickr-next-month:hover {
-        background: rgba(15, 118, 110, 0.12);
-        border-color: #0f766e;
-        color: #123f3a;
-        fill: #123f3a;
+        background: rgba(12, 91, 131, 0.12);
+        border-color: #0c5b83;
+        color: #0c5b83;
+        fill: #0c5b83;
     }
     .flatpickr-months .flatpickr-prev-month {
         left: 4px;
@@ -237,8 +243,8 @@
     .flatpickr-current-month input.cur-year:hover,
     .flatpickr-current-month .flatpickr-monthDropdown-months:focus,
     .flatpickr-current-month input.cur-year:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.22);
+        border-color: #0c5b83;
+        box-shadow: 0 0 0 3px rgba(12, 91, 131, 0.22);
         outline: none;
         background: #fff;
     }

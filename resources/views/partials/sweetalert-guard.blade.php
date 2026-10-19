@@ -6,16 +6,17 @@
     }
     .swal2-container.swal2-backdrop-show,
     .swal2-container.swal2-noanimation {
-        background: none !important;
-        border: 3px solid #b2cd16 !important;
-        box-shadow: inset 0 0 0 2px #0f766e !important;
+        background: rgba(15, 23, 42, 0.45) !important;
+        border: 0 !important;
+        box-shadow: none !important;
         box-sizing: border-box;
-        
     }
-    .swal2-container .swal2-popup,
-    .swal2-container .swal2-popup.request-details-popup {
+    .swal2-container .swal2-popup {
         border: none !important;
         outline: none !important;
+    }
+    .swal2-container .swal2-popup.request-details-popup,
+    .swal2-container .swal2-popup.attachment-preview-popup {
         box-shadow: 0 28px 70px rgba(0, 0, 0, 0.58) !important;
     }
     /* Never show custom filter dropdown UI inside alert popups */
