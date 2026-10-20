@@ -4,56 +4,84 @@
 
 @section('content')
 @include('partials.dashboard-status-card-styles')
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-    body, html { margin: 0; padding: 0; }
-    .manager-container {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        max-width: 1200px;
-        padding: 16px 18px 28px;
-        min-height: 100vh;
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 6px 20px rgba(163, 71, 71, 0.08);
-        margin: 0 auto;
+    html body { font-family: 'Poppins', 'Segoe UI', sans-serif; }
+
+    .mgr-page-header { width: 100%; align-items: center; margin-bottom: 22px; padding: 0 30px; box-sizing: border-box; }
+    .mgr-page-header .mgr-page-header__main h1 {
+        font-family: 'Century Gothic', 'Poppins', sans-serif;
+        font-size: 38px;
+        color: #253141;
     }
+    .mgr-page-header .mgr-scope-switch {
+        background: #d9253f;
+        border-color: #d9253f;
+        border-radius: 14px;
+        padding: 12px 28px;
+        font-size: 12px;
+    }
+    .manager-container {
+        font-family: 'Poppins', 'Segoe UI', sans-serif;
+        width: 100%;
+        max-width: 1200px;
+        box-sizing: border-box;
+        padding: 12px 12px 14px;
+        background: white;
+        border: 1px solid #d3d8de;
+        border-radius: 14px;
+        box-shadow: 0 0 14px rgba(0, 0, 0, 0.16);
+        margin: 0 auto 56px;
+    }
+
     h1 {
         font-weight: 700;
         font-size: 36px;
-        color: #0f172a;
+        color: #253141;
         margin-bottom: 24px;
         padding: 0;
         border: none;
         letter-spacing: 0.04em;
     }
+
+    /* Coloured stat cards */
     .cards {
         display: flex;
         flex-wrap: nowrap;
         gap: 12px;
-        margin-bottom: 40px;
+        margin-bottom: 32px;
         width: 100%;
         overflow-x: auto;
         padding-bottom: 8px;
     }
-    .card {
-        background: #f8fafc;
-        border-radius: 16px;
-        padding: 11px 8px 10px;
-        box-shadow: 0 6px 16px rgba(8, 8, 8, 0.15);
-        border: 1px solid #e5e7eb;
-        cursor: pointer;
-        transition: box-shadow 0.3s ease;
+   .manager-container .cards .card {
+        flex: 1 1 0;
+        min-width: 0;
+        height: 92px;
+        min-height: 92px;
+        border: none !important;
+        border-radius: 20px;
+        box-shadow: none !important;
+        padding: 10px 6px;
         text-align: center;
         text-decoration: none;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        flex: 1 1 0;
-        min-width: 0;
-        height: 94px;
-        min-height: 94px;
         color: #fff;
         box-sizing: border-box;
+        opacity: 1;
     }
+    .manager-container .cards .card:hover { 
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); 
+    }
+    .manager-container .cards .card.card-all      { background: #4fe6c5 !important; }
+    .manager-container .cards .card.card-pending  { background: #f2b96b !important; }
+    .manager-container .cards .card.card-overdue  { background: #ab8cf5 !important; }
+    .manager-container .cards .card.card-approved { background: #a03d85 !important; }
+    .manager-container .cards .card.card-rejected { background: #94c4c8 !important; }
+    .manager-container .cards .card.card-onleave  { background: #b9d84a !important; }
+    .card .card-title svg, .card .card-title .icon { display: none; }
     .card:hover {
         box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     }
@@ -66,8 +94,8 @@
         text-align: center;
     }
     .card-title {
-        font-size: 1rem;
-        font-weight: 600;
+        font-size: 0.85rem;
+        font-weight: 400;
         margin: 2px 0 6px 0;
         display: flex;
         align-items: center;
@@ -76,38 +104,62 @@
     }
     .card-value {
         font-weight: bold;
-        font-size: 1.65rem;
+        font-size: 1.4rem;
         margin-top: 0;
     }
     .charts-container {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 16px;
+        gap: 12px;
         margin-top: 10px;
         align-items: stretch;
     }
     .chart-card {
         background: white;
-        padding: 10px 10px;
-        border-radius: 24px;
-        box-shadow: 0 6px 22px rgba(67, 83, 255, 0.12);
-        border: 1px solid #dbe3f0;
+        padding: 12px 12px;
+        border-radius: 14px;
+        box-shadow: 0 3px 9px rgba(0, 0, 0, 0.18);
+        border: 1px solid #d6dbe0;
         color: #222;
         display: flex;
         flex-direction: column;
-        min-height: 240px;
+        min-height: 236px;
     }
     .chart-card h3 {
         margin: 0 0 10px 0;
         font-weight: 700;
-        font-size: 1rem;
-        color: #0f172a;
+        font-size: 0.95rem;
+        color: #253141;
     }
     .chart-body {
         position: relative;
         width: 100%;
         overflow: visible;
     }
+    
+    .manager-container .chart-body--ring { height: 214px; }
+    .manager-container .chart-body--ring canvas { max-height: 214px; }
+    .manager-container .chart-body--plot { height: 186px; }
+    .manager-container .chart-html-legend li,
+    .manager-container .chart-html-legend span { font-size: 0.68rem !important; font-weight: 400 !important; }
+
+    .manager-container .dashboard-period-filter__form {
+        background: #d9e5e4;
+        border: none;
+        border-radius: 14px;
+        box-shadow: none;
+    }
+    .manager-container .dashboard-period-filter__label { font-size: 0.72rem; font-weight: 400; color: #4b5563; }
+    .manager-container .dashboard-period-filter .filter-select__trigger {
+        border: none;
+        border-radius: 14px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        box-shadow: none;
+    }
+    .manager-container .dashboard-period-filter .filter-select__option { text-align: center; font-weight: 700; }
+    .manager-container .dashboard-period-filter .filter-select__option.is-selected { background: #a2b224; color: #1f2937; }
+
     @media (max-width: 1200px) {
         .charts-container {
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -139,7 +191,7 @@
     @include('partials.manager-scope-switch', [
         'scope' => 'team',
         'personalUrl' => route('manager.personal'),
-        'personalLabel' => 'My leave dashboard',
+        'personalLabel' => 'My Leave Dashboard',
     ])
 </div>
 
@@ -191,14 +243,12 @@
             <div class="chart-body chart-body--ring">
                 <canvas id="leaveDoughnut"></canvas>
             </div>
-            <ul class="chart-html-legend" id="leaveDoughnutLegend" aria-label="Leave types legend"></ul>
         </div>
         <div class="chart-card">
             <h3>Leave Requests by Status</h3>
             <div class="chart-body chart-body--ring">
                 <canvas id="statusPie"></canvas>
             </div>
-            <ul class="chart-html-legend" id="statusPieLegend" aria-label="Leave status legend"></ul>
         </div>
         <div class="chart-card">
             <h3>Monthly Applications Submitted ({{ \App\Support\LeaveYear::label((int) ($chartYear ?? now()->year)) }})</h3>
@@ -228,7 +278,6 @@
             <div class="chart-body chart-body--ring">
                 <canvas id="payStatusPolar"></canvas>
             </div>
-            <ul class="chart-html-legend" id="payStatusPolarLegend" aria-label="Paid and unpaid leave legend"></ul>
         </div>
     </div>
 </div>
@@ -296,10 +345,69 @@ document.addEventListener('DOMContentLoaded', () => {
     window.applyBoldChartDefaults();
     window.finalizeChartDefaults();
 
-    const leaveTypeLabels = @json($leaveTypeCounts->keys()->toArray());
-    const leaveTypeData = @json($leaveTypeCounts->values()->toArray());
+    window.chartBoldFontSpec = { family: "'Poppins', sans-serif", size: 9, weight: '400', style: 'normal' };
+    window.chartAxisTicksBold = { color: window.chartTextColor, font: window.chartBoldFontSpec };
+
+    const protoColors = ['#4a7ff7', '#b08cf5', '#f5b96b', '#ffdc50', '#4fe6c5', '#94c4c8', '#a03d85', '#b9d84a'];
+    const blue = '#4a7ff7';
+
+    const sliceLabels = {
+        id: 'sliceLabels',
+        afterDatasetsDraw: function (chart) {
+            const ctx = chart.ctx;
+            const values = chart.data.datasets[0].data;
+            const names = chart.data.labels;
+            const slices = chart.getDatasetMeta(0).data;
+
+            let total = 0;
+            for (let i = 0; i < values.length; i++) {
+                total = total + Number(values[i]);
+            }
+            if (total === 0) {
+                return;
+            }
+
+            ctx.save();
+            ctx.font = '9px Poppins, sans-serif';
+            ctx.fillStyle = '#253141';
+            ctx.textBaseline = 'middle';
+
+            for (let i = 0; i < slices.length; i++) {
+                if (Number(values[i]) === 0) {
+                    continue;
+                }
+                const slice = slices[i];
+                const middleAngle = (slice.startAngle + slice.endAngle) / 2;
+                const x = slice.x + Math.cos(middleAngle) * (slice.outerRadius + 8);
+                const y = slice.y + Math.sin(middleAngle) * (slice.outerRadius + 20);
+
+                if (Math.cos(middleAngle) > 0.25) {
+                    ctx.textAlign = 'left';
+                } else if (Math.cos(middleAngle) < -0.25) {
+                    ctx.textAlign = 'right';
+                } else {
+                    ctx.textAlign = 'center';
+                }
+
+                let lines = [names[i]];
+                if (names[i].length > 11 && names[i].indexOf(' ') > -1) {
+                    lines = names[i].split(' ');
+                }
+                lines.push((Math.round(values[i] / total * 1000) / 10) + '%');
+
+                for (let n = 0; n < lines.length; n++) {
+                    ctx.fillText(lines[n], x, y + (n - (lines.length - 1) / 2) * 11);
+                }
+            }
+            ctx.restore();
+        }
+    };
+    const roomForLabels = { padding: { top: 34, bottom: 34, left: 56, right: 56 } };
+
+    const leaveTypeLabels = @json($leaveTypeCounts->sortDesc()->keys()->toArray());
+    const leaveTypeData = @json($leaveTypeCounts->sortDesc()->values()->toArray());
     const leaveTypePct = @json($leaveTypePercentages ?? []);
-    const leaveTypeColors = leaveTypeLabels.map((t) => getColorForType(t));
+    const leaveTypeColors = leaveTypeLabels.map((t, i) => protoColors[i % protoColors.length]);
 
     new Chart(document.getElementById('leaveDoughnut'), {
         type: 'doughnut',
@@ -308,11 +416,13 @@ document.addEventListener('DOMContentLoaded', () => {
             datasets: [{
                 data: leaveTypeData,
                 backgroundColor: leaveTypeColors,
-                borderColor: '#fff',
-                borderWidth: 2
+                borderWidth: 0
             }]
         },
+        plugins: [sliceLabels],
         options: mergeChartOptions({
+            cutout: '50%',
+            layout: roomForLabels,
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -326,63 +436,63 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
     });
-    renderChartHtmlLegend('leaveDoughnutLegend', leaveTypeLabels, leaveTypeColors, leaveTypePct);
 
-    const payStatusLabels = ['Paid', 'Unpaid'];
-    const payStatusData = @json(array_values($payStatusCounts ?? ['Paid' => 0, 'Unpaid' => 0]));
-    const payStatusPct = @json($payStatusPercentages ?? []);
-    const payStatusColors = [chartPalette.green, chartPalette.orange];
-    const payStatusSegments = buildPolarAreaSegments(payStatusLabels, payStatusData, payStatusColors);
+    const deptPieLabels = @json($departmentLabels);
+    const deptPieData = @json($departmentData);
+    const deptPieColors = deptPieLabels.map((name, i) => protoColors[i % protoColors.length]);
 
     new Chart(document.getElementById('payStatusPolar'), {
-        type: 'polarArea',
+        type: 'pie',
         data: {
-            labels: payStatusSegments.labels,
+            labels: deptPieLabels,
             datasets: [{
-                data: payStatusSegments.data,
-                backgroundColor: payStatusSegments.colors,
-                borderColor: '#fff',
-                borderWidth: 2
+                data: deptPieData,
+                backgroundColor: deptPieColors,
+                borderWidth: 0
             }]
         },
+        plugins: [sliceLabels],
         options: mergeChartOptions({
-            scales: window.polarAreaChartScales,
+            layout: roomForLabels,
             plugins: {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        label: (ctx) => {
-                            const pct = (payStatusPct[ctx.label] ?? 0).toFixed(1);
-                            return `${ctx.label}: ${ctx.raw} (${pct}%)`;
-                        }
+                        label: (ctx) => `${ctx.label}: ${ctx.raw} requests`
                     }
                 }
             }
         })
     });
-    renderChartHtmlLegend('payStatusPolarLegend', payStatusLabels, payStatusColors, payStatusPct);
 
     const statusPct = @json($statusPercentages ?? []);
-    const statusPieLabels = window.leaveStatusPieLabels;
-    const statusPieColors = window.statusColorsForLabels(statusPieLabels);
+
+    let statusList = [
+        { label: 'Pending',  value: {{ $statusCounts['Pending'] ?? 0 }} },
+        { label: 'Overdue',  value: {{ $statusCounts['Overdue'] ?? 0 }} },
+        { label: 'Rejected', value: {{ $statusCounts['Rejected'] ?? 0 }} },
+        { label: 'Approved', value: {{ $statusCounts['Approved'] ?? 0 }} }
+    ];
+    statusList.sort(function (a, b) {
+        return b.value - a.value;
+    });
+    const statusPieLabels = statusList.map(function (item) { return item.label; });
+    const statusPieData = statusList.map(function (item) { return item.value; });
+    const statusPieColors = statusPieLabels.map((label, i) => protoColors[i % protoColors.length]);
 
     new Chart(document.getElementById('statusPie'), {
         type: 'pie',
         data: {
             labels: statusPieLabels,
             datasets: [{
-                data: [
-                    {{ $statusCounts['Pending'] ?? 0 }},
-                    {{ $statusCounts['Overdue'] ?? 0 }},
-                    {{ $statusCounts['Rejected'] ?? 0 }},
-                    {{ $statusCounts['Approved'] ?? 0 }}
-                ],
+                data: statusPieData,
                 backgroundColor: statusPieColors,
-                borderColor: '#fff',
-                borderWidth: 2
+                borderWidth: 0
             }]
         },
+        plugins: [sliceLabels],
         options: mergeChartOptions({
+            layout: roomForLabels,
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -396,7 +506,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
     });
-    renderChartHtmlLegend('statusPieLegend', statusPieLabels, statusPieColors, statusPct);
 
     const allMonthLabels = @json($barLabels ?? \App\Support\LeaveYear::barLabels());
     const padMonthlySeries = (values) => {
@@ -412,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthlyPending = padMonthlySeries(@json($monthlyPendingData));
     const monthlyOverdue = padMonthlySeries(@json($monthlyOverdueData));
     const monthlyRejected = padMonthlySeries(@json($monthlyRejectedData));
-    const monthlyColor = window.leaveMonthlyApplicationsColor;
+    const monthlyColor = blue;
     const monthlyLineChart = new Chart(document.getElementById('monthlyLine'), {
         type: 'line',
         data: {
@@ -422,18 +531,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 data: monthlyTotals,
                 backgroundColor: hexToRgba(monthlyColor, 0.2),
                 borderColor: monthlyColor,
-                tension: 0.3,
-                fill: true,
-                pointRadius: 5,
-                pointHoverRadius: 7
+                borderWidth: 1.5,
+                tension: 0.4,
+                fill: false,
+                pointRadius: 2,
+                pointHoverRadius: 4
             }]
         },
         options: mergeChartOptions({
             layout: window.getMonthChartLayout(),
             plugins: { legend: { display: false } },
             scales: {
-                x: { ticks: window.getMonthAxisTicks() },
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                x: { grid: { display: false }, ticks: window.getMonthAxisTicks() },
+                y: { beginAtZero: true, grid: { color: '#d9d9d9' }, border: { display: false }, ticks: { precision: 0 } }
             }
         })
     });
@@ -450,13 +560,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 datasets: [{
                     label: 'Requests',
                     data: deptData,
-                    backgroundColor: deptLabels.map((label) => hexToRgba(colorForGroupLabel(label), 0.8)),
-                    borderColor: deptLabels.map((label) => colorForGroupLabel(label)),
-                    borderWidth: 2,
-                    borderRadius: 8
+                    backgroundColor: blue,
+                    borderWidth: 0,
+                    borderRadius: 5,
+                    maxBarThickness: 48
                 }]
             },
-            options: window.categoryBarChartOptions({ precision: 0 }),
+            options: mergeChartOptions({
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: window.chartAxisTicksBold },
+                    y: { beginAtZero: true, grid: { color: '#d9d9d9' }, border: { display: false }, ticks: { precision: 0 } }
+                }
+            }),
         });
     }
 
@@ -464,8 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     label: 'Approved',
                     data: monthlyApproved,
-                    backgroundColor: colorForStatus('Approved'),
-                    borderColor: colorForStatus('Approved'),
+                    backgroundColor: '#a03d85',
                     borderWidth: 1,
                     borderRadius: 4,
                     stack: 'status'
@@ -473,28 +588,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     label: 'Pending',
                     data: monthlyPending,
-                    backgroundColor: colorForStatus('Pending'),
-                    borderColor: colorForStatus('Pending'),
-                    borderWidth: 1,
-                    borderRadius: 4,
+                    backgroundColor: '#f2b96b',
+                    borderWidth: 0,
+                    borderRadius: 3,
                     stack: 'status'
                 },
                 {
                     label: 'Overdue',
                     data: monthlyOverdue,
-                    backgroundColor: colorForStatus('Overdue'),
-                    borderColor: colorForStatus('Overdue'),
-                    borderWidth: 1,
-                    borderRadius: 4,
+                    backgroundColor: '#ab8cf5',
+                    borderWidth: 0,
+                    borderRadius: 3,
                     stack: 'status'
                 },
                 {
                     label: 'Rejected',
                     data: monthlyRejected,
-                    backgroundColor: colorForStatus('Rejected'),
-                    borderColor: colorForStatus('Rejected'),
-                    borderWidth: 1,
-                    borderRadius: 4,
+                    backgroundColor: '#94c4c8',
+                    borderWidth: 0,
+                    borderRadius: 3,
                     stack: 'status'
                 }
             ];
@@ -503,12 +615,39 @@ document.addEventListener('DOMContentLoaded', () => {
         type: 'bar',
         data: {
             labels: monthlyLabels,
-            datasets: monthlyStatusDatasets
+            datasets: [{
+                label: 'Total Requests',
+                data: monthlyTotals,
+                backgroundColor: blue,
+                borderWidth: 0,
+                borderRadius: 4,
+                maxBarThickness: 40
+            }]
         },
-        options: window.statusStackedBarChartOptions()
+        options: mergeChartOptions({
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        afterBody: function (items) {
+                            const i = items[0].dataIndex;
+                            return [
+                                'Approved: ' + monthlyApproved[i],
+                                'Pending: ' + monthlyPending[i],
+                                'Overdue: ' + monthlyOverdue[i],
+                                'Rejected: ' + monthlyRejected[i]
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: window.getMonthAxisTicks() },
+                y: { beginAtZero: true, grid: { color: '#d9d9d9' }, border: { display: false }, ticks: { precision: 0 } }
+            }
+        })
     });
     window.registerMonthAxisChart(monthlyStatusChart);
-    window.renderDatasetLegend('monthlyStatusStackedBarLegend', monthlyStatusDatasets);
 
 });
 </script>
