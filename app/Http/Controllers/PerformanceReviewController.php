@@ -7,8 +7,10 @@ use App\Models\User;
 use App\Notifications\PerformanceReviewSubmittedNotification;
 use App\Support\ManagerTeam;
 use App\Support\PerformanceReviews;
+use App\Support\RunsArtisanInBackground;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -87,9 +89,16 @@ class PerformanceReviewController extends Controller
 
         if ($existing) {
             if (! $this->canEdit($user, $existing)) {
+                $alreadySubmitted = $existing->isSubmitted() || $existing->isReviewed();
+
                 return redirect()
                     ->route(PerformanceReviews::routeName($user, 'show'), $existing)
-                    ->with('error', 'A review for this person and month already exists.');
+                    ->with(
+                        $alreadySubmitted ? 'success' : 'error',
+                        $alreadySubmitted
+                            ? 'Monthly performance review submitted.'
+                            : 'A review for this person and month already exists.'
+                    );
             }
             $this->fillReview($existing, $validated, $user, $employee);
             $existing->save();
@@ -216,24 +225,35 @@ class PerformanceReviewController extends Controller
         $review->senior_id = $raters->first()->id;
         $review->save();
 
-        $freshReview = $review->fresh(['employee', 'reviewer']);
+        $freshReview = $review->fresh(['employee', 'reviewer']) ?? $review;
+        $this->notifyRatersOfSubmission($freshReview, $raters);
+
+        return redirect()
+            ->route(PerformanceReviews::routeName($user, 'show'), $review)
+            ->with('success', 'Monthly performance review submitted.');
+    }
+
+    private function notifyRatersOfSubmission(PerformanceReview $review, Collection $raters): void
+    {
         foreach ($raters as $rater) {
             try {
-                $rater->notifyNow(new PerformanceReviewSubmittedNotification($freshReview), ['database']);
-            } catch (\Throwable $e) {
-                report($e);
-            }
-
-            try {
-                $rater->notifyNow(new PerformanceReviewSubmittedNotification($freshReview), ['mail']);
+                $rater->notifyNow(new PerformanceReviewSubmittedNotification($review), ['database']);
             } catch (\Throwable $e) {
                 report($e);
             }
         }
 
-        return redirect()
-            ->route(PerformanceReviews::routeName($user, 'show'), $review)
-            ->with('success', 'Monthly performance review submitted.');
+        $raterIds = $raters->pluck('id')->filter()->implode(',');
+        if ($raterIds === '') {
+            return;
+        }
+
+        // Gmail SMTP can hang until PHP's 60s limit; send mail in another process.
+        RunsArtisanInBackground::call(
+            'reviews:send-submitted-mail',
+            (string) $review->id,
+            $raterIds
+        );
     }
 
     private function validated(Request $request, User $user, ?PerformanceReview $review = null): array

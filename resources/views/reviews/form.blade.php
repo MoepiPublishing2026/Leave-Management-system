@@ -12,11 +12,6 @@
     $action = $editing
         ? route(PerformanceReviews::routeName($user, 'update'), $review)
         : route(PerformanceReviews::routeName($user, 'store'));
-    $monthNames = [
-        1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
-        5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
-        9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December',
-    ];
 @endphp
 
 <div class="pr-page">
@@ -52,47 +47,13 @@
         <div class="lh-doc-body">
         <div class="pr-title">Monthly Performance Review</div>
 
-
-        <div class="pr-card">
-    <h2>Employee Information</h2>
-    <div class="pr-row">
-        <div class="pr-label">Employee</div>
-        <input type="hidden" name="employee_id" value="{{ $user->id }}">
-        <input type="text" value="{{ PerformanceReviews::displayName($user) }}" readonly>
-    </div>
-    <div class="pr-row">
-        <div class="pr-label">Reviewer</div>
-        <input type="text" value="{{ $reviewerName }}" readonly>
-    </div>
-</div>
-
-<div class="pr-card">
-    <h2>Review Details</h2>
-    <div class="pr-row">
-        <div class="pr-label">Review Period</div>
-        <input type="text" name="review_period" value="{{ old('review_period', $review->review_period ?: '1 Month') }}" required>
-    </div>
-    <div class="pr-row">
-        <div class="pr-label">Date of Review</div>
-        <input type="date" name="review_date" value="{{ old('review_date', optional($review->review_date)->format('Y-m-d') ?: now()->format('Y-m-d')) }}" required>
-    </div>
-    <div class="pr-row">
-        <div class="pr-label">Month</div>
-        <select name="period_month" required>
-            @foreach ($monthNames as $num => $label)
-                <option value="{{ $num }}" @selected((int) old('period_month', $review->period_month) === $num)>{{ $label }}</option>
-            @endforeach
-        </select>
-    </div>
-    <div class="pr-row">
-        <div class="pr-label">Year</div>
-        <select name="period_year" required>
-            @for ($year = now()->year - 1; $year <= now()->year + 1; $year++)
-                <option value="{{ $year }}" @selected((int) old('period_year', $review->period_year) === $year)>{{ $year }}</option>
-            @endfor
-        </select>
-    </div>
-</div>
+        @include('reviews.partials.review-header-cards', [
+            'editable' => true,
+            'review' => $review,
+            'employeeName' => PerformanceReviews::displayName($user),
+            'employeeId' => $user->id,
+            'reviewerName' => $reviewerName,
+        ])
 
         <div class="pr-section">
             <h2>Goals achieved</h2>

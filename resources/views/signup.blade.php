@@ -90,10 +90,11 @@
             margin-top: 30px;
         }
         button, .btn-login {
-            padding: 15px 40px;
-            font-weight: 600;
-            font-size: 18px;
-            border-radius: 12px;
+            padding: 8px 16px;
+            font-weight: 700;
+            font-size: 13px;
+            line-height: 1.2;
+            border-radius: 8px;
             cursor: pointer;
             border: none;
             background: linear-gradient(135deg, #b2cd16 0%, #9ef755 100%);

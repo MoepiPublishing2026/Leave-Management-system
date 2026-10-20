@@ -97,7 +97,8 @@ html body .my-requests-page .requests-btn--primary,
 html body .my-requests-page .requests-btn--search,
 html body .my-requests-page .requests-btn--secondary {
     background:#a2b222 !important; color:#000 !important; border:0 !important;
-    border-radius:14px !important; padding:14px 30px !important; font-weight:700 !important;
+    border-radius:8px !important; padding:8px 14px !important; font-weight:700 !important;
+    min-height:0 !important; font-size:13px !important;
 }
 html body .my-requests-page .requests-search-form input[type="text"] {
     background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M16 16l5 5'/></svg>") no-repeat 14px center / 20px 20px !important;
@@ -164,7 +165,7 @@ html body .my-requests-page .leave-card .request-btn--delete:hover { background:
 html body .my-requests-page .requests-btn--primary,
 html body .my-requests-page .requests-btn--search,
 html body .my-requests-page .requests-btn--secondary {
-    padding:10px 30px !important; font-size:14px !important; line-height:1.2 !important; min-height:0 !important;
+    padding:8px 14px !important; font-size:13px !important; line-height:1.2 !important; min-height:0 !important;
 }
 html body .my-requests-page .requests-search-form input[type="text"] {
     padding-top:11px !important; padding-bottom:11px !important; font-size:13px !important; min-width:250px;

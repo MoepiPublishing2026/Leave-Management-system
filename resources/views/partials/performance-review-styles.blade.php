@@ -49,6 +49,50 @@
         margin: 0 0 22px;
         letter-spacing: 0.02em;
     }
+    .pr-card {
+        background: #fff;
+        margin: 22px 0;
+        border-radius: 4px;
+        overflow: visible;
+        border: 2px solid #d6e21c;
+        box-shadow: 5px 5px 0 #d6e21c;
+    }
+    .pr-card h2 {
+        background: #fff;
+        color: #263041;
+        font-size: 12px;
+        font-weight: 700;
+        margin: 0;
+        padding: 12px 16px;
+        border: 0;
+        border-bottom: 1px solid #d6e21c;
+    }
+    .pr-row {
+        display: grid;
+        grid-template-columns: 130px 1fr;
+        align-items: center;
+        gap: 12px;
+        padding: 5px 16px;
+    }
+    .pr-row:last-child { padding-bottom: 14px; }
+    .pr-card h2 + .pr-row { padding-top: 14px; }
+    .pr-label { font-size: 11px; font-weight: 700; color: #263041; }
+    .pr-row input,
+    .pr-row select {
+        width: 100%;
+        background: #d6e21c;
+        color: #263041;
+        border: 2px solid #91a30a;
+        border-radius: 12px;
+        padding: 6px 14px;
+        font-size: 11px;
+        font-family: inherit;
+        box-sizing: border-box;
+        height: auto;
+        min-height: 0;
+        color-scheme: light;
+    }
+    .pr-row select option { color: #263041; background: #fff; }
     .pr-meta {
         width: 100%;
         border-collapse: collapse;
@@ -62,7 +106,7 @@
     }
     .pr-meta th {
         width: 22%;
-        background: #4F81BD;
+        background: #263041;
         color: #fff;
         font-weight: 700;
         font-size: 14px;
@@ -91,7 +135,7 @@
     }
     .pr-section h2 {
         margin: 0;
-        background: #4F81BD;
+        background: #263041;
         color: #fff;
         font-size: 16px;
         font-weight: 700;
@@ -133,7 +177,7 @@
     }
     .pr-id-table th,
     .pr-legend th {
-        background: #4F81BD;
+        background: #263041;
         color: #fff;
         font-weight: 700;
         text-align: left;
@@ -148,7 +192,7 @@
     }
     .pr-score-block h2 {
         margin: 0 0 10px;
-        background: #4F81BD;
+        background: #263041;
         color: #fff;
         font-size: 16px;
         font-weight: 700;
@@ -167,7 +211,7 @@
         font-size: 13px;
     }
     .pr-score-table th {
-        background: #4F81BD;
+        background: #263041;
         color: #fff;
         font-weight: 700;
     }
@@ -180,7 +224,7 @@
     .pr-score-table input[type="radio"] {
         width: 18px;
         height: 18px;
-        accent-color: #1e3a5f;
+        accent-color: #263041;
         cursor: pointer;
     }
     .pr-score-readonly {
@@ -189,7 +233,7 @@
     }
     .pr-score-readonly input[type="radio"] {
         cursor: default;
-        accent-color: #1e3a5f;
+        accent-color: #263041;
         opacity: 1;
         filter: none;
         color-scheme: light;
@@ -213,9 +257,13 @@
         justify-content: center;
         border: 0;
         border-radius: 8px;
-        padding: 10px 16px;
+        padding: 8px 14px;
+        min-height: 0;
+        min-width: 0;
+        height: auto;
         font-weight: 700;
-        font-size: 14px;
+        font-size: 13px;
+        line-height: 1.2;
         text-decoration: none;
         cursor: pointer;
         color: #fff;
@@ -310,6 +358,11 @@
         .pr-split { grid-template-columns: 1fr; }
         .pr-title { font-size: 22px; }
         .pr-brand img { height: 48px; max-width: min(200px, 70vw); }
+        .pr-row {
+            grid-template-columns: 1fr;
+            gap: 4px;
+            align-items: stretch;
+        }
         .pr-meta,
         .pr-meta tbody { display: block; width: 100%; }
         .pr-meta tr {

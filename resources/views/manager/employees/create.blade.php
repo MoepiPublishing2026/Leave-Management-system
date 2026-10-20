@@ -42,7 +42,7 @@
     html body .employee-create-page .checkbox-row label { margin-top:0 !important; font-size:13px !important; text-transform:none !important; }
     html body .employee-create-page input[type="checkbox"] { accent-color:#a2b222 !important; }
     html body .employee-create-page .field-hint { font-size:11px !important; font-weight:400 !important; color:#767672 !important; }
-    html body .employee-create-page .button-group .btn-form-action { background:#a2b222 !important; color:#000 !important; border:0 !important; border-radius:12px !important; padding:12px 38px !important; font-size:15px !important; min-height:0 !important; }
+    html body .employee-create-page .button-group .btn-form-action { background:#a2b222 !important; color:#000 !important; border:0 !important; border-radius:8px !important; padding:8px 16px !important; font-size:13px !important; min-height:0 !important; height:auto !important; }
     html body .employee-create-page .button-group .btn-form-action:hover { background:#8d9c1c !important; }
     html body .employee-create-page .branding { font-size:11px !important; margin-top:20px !important; }
 

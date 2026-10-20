@@ -2,6 +2,10 @@
 
 @section('title', 'Monthly Performance Review — '.$review->employee_name)
 
+@section('styles')
+@include('partials.performance-review-styles')
+@endsection
+
 @section('content')
 @php
     $awaiting = $awaiting ?? false;
@@ -19,13 +23,14 @@
         <div class="lh-flash lh-flash--err">Please score every criterion (1–5) before submitting.</div>
     @endif
 
-    <table class="lh-meta">
-        <tr><th>Employee</th><td>{{ $review->employee_name }}</td></tr>
-        <tr><th>Reviewer</th><td>{{ $reviewerName ?: '—' }}</td></tr>
-        <tr><th>Review period</th><td>{{ $review->review_period }} ({{ $review->periodLabel() }})</td></tr>
-        <tr><th>Date of the review</th><td>{{ $review->review_date?->format('d M Y') ?: '—' }}</td></tr>
-        <tr><th>Status</th><td>{{ $awaiting ? 'Awaiting review' : 'Reviewed' }}</td></tr>
-    </table>
+    @include('reviews.partials.review-header-cards', [
+        'editable' => false,
+        'review' => $review,
+        'employeeName' => $review->employee_name,
+        'reviewerName' => $reviewerName,
+        'showStatus' => true,
+        'statusLabel' => $awaiting ? 'Awaiting review' : 'Reviewed',
+    ])
 
     <div class="lh-section"><h2>Goals achieved</h2><div class="lh-section-body">{{ $review->goals_achieved ?: '—' }}</div></div>
     <div class="lh-section"><h2>Quality of work</h2><div class="lh-section-body">{{ $review->quality_of_work ?: '—' }}</div></div>

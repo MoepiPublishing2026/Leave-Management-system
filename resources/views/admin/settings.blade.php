@@ -104,9 +104,9 @@
         font-weight: 600;
     }
     .settings-notes .app-page-section-title {
-    margin: 0 0 40px;
+    margin: 0 0 16px;
     color: #b45309;
-    font-size: 2rem;
+    font-size: 1rem;
     font-weight: 800;
     text-transform: uppercase;
 }
@@ -135,13 +135,13 @@
 }
 
 .settings-actions .app-page-btn {
-    min-width: 222px;
-    min-height: 71px;
+    min-width: 0;
+    min-height: 0;
     border: 0;
-    border-radius: 14px;
+    border-radius: 8px;
     background: #a3b323;
     color: #000;
-    font-size: 1.1rem;
+    font-size: 13px;
     font-weight: 700;
 }
 

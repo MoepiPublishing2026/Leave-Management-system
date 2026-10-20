@@ -18,7 +18,7 @@
         }
 
         /* Navbar */
-        nav.navbar {
+        header.navbar {
             position: fixed;
             top: 0; left: 0; right: 0;
             height: 90px;
@@ -294,7 +294,7 @@
         }
 
         @media (max-width: 1200px) {
-            nav.navbar {
+            header.navbar {
                 height: 64px;
                 padding: 8px 16px;
                 flex-wrap: nowrap;
@@ -359,12 +359,12 @@
             height: 38px;
         }
         /* remove link underline and colour */
-html body nav.navbar .navbar-logo,
-html body nav.navbar .navbar-logo:hover { text-decoration:none !important; color:#fff !important; }
-html body nav.navbar .logo-text { color:#fff !important; text-decoration:none !important; }
+html body header.navbar .navbar-logo,
+html body header.navbar .navbar-logo:hover { text-decoration:none !important; color:#fff !important; }
+html body header.navbar .logo-text { color:#fff !important; text-decoration:none !important; }
 
-html body nav.navbar .navbar-logo { gap:6px !important; letter-spacing:0 !important; }
-html body nav.navbar .logo-text { margin-left:0 !important; }
+html body header.navbar .navbar-logo { gap:6px !important; letter-spacing:0 !important; }
+html body header.navbar .logo-text { margin-left:0 !important; }
     </style>
 
     <!-- Bootstrap CSS -->
@@ -394,15 +394,16 @@ html body nav.navbar .logo-text { margin-left:0 !important; }
     @stack('styles')
     @include('partials.dashboard-status-card-styles')
     @yield('head')
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261019q"/>
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261020cal3"/>
 </head>
 <body>
-    <nav class="navbar" role="navigation" aria-label="Main Navigation">
+    <header class="navbar" role="banner">
         <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
 
-    <a class="navbar-logo" href="{{ route('manager.dashboard') }}" aria-label="Go to dashboard">
-    <img src="{{ asset('images/logo_trimmed.png') }}" alt="Moepi Logo" />
-    <span class="logo-text">MOEPI</span></a>
+        <a class="navbar-logo" href="{{ route('manager.dashboard') }}" aria-label="Go to dashboard">
+            <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
+            <span class="logo-text">MOEPI</span>
+        </a>
 
         @php
             $unreadMessageCount = auth()->check()
@@ -460,13 +461,14 @@ html body nav.navbar .logo-text { margin-left:0 !important; }
             </div>
             @endauth
         </nav>
-    </nav>
+    </header>
 
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
     <aside id="mobileSidebar" class="mobile-sidebar" aria-label="Mobile Navigation">
         <div class="mobile-sidebar-header">
             <a class="mobile-sidebar-brand" href="{{ route('manager.dashboard') }}" aria-label="Go to dashboard">
                 <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
+                <span class="logo-text">MOEPI</span>
             </a>
             @auth
                 @php $user = auth()->user(); @endphp

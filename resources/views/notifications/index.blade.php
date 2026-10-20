@@ -10,7 +10,7 @@
 @endphp
 
 <div class="notifications-page">
-    <h1>Notificationsr</h1>
+    <h1>Notifications</h1>
     <p class="notifications-lead">
         @if($notifications->total() > 0)
             Showing {{ $notifications->total() }} {{ \Illuminate\Support\Str::plural('notification', $notifications->total()) }}
@@ -62,7 +62,7 @@
         </ul>
 
         <div class="notifications-pagination">
-            {{ $notifications->links() }}
+            {{ $notifications->links('pagination::bootstrap-5') }}
         </div>
     @endif
 </div>

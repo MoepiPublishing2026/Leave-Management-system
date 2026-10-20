@@ -29,14 +29,31 @@ class PerformanceReviewSubmittedNotification extends Notification
         $employee = $this->review->employee_name ?: 'an employee';
         $managerName = PerformanceReviews::displayName($this->review->employee?->manager);
 
+        try {
+            $reviewUrl = PerformanceReviews::signedReviewUrl($this->review);
+        } catch (\Throwable $e) {
+            report($e);
+            $reviewUrl = url('/login');
+        }
+
+        try {
+            $appUrl = route(
+                PerformanceReviews::routeName($notifiable instanceof \App\Models\User ? $notifiable : null, 'show'),
+                $this->review
+            );
+        } catch (\Throwable $e) {
+            report($e);
+            $appUrl = url('/login');
+        }
+
         return (new MailMessage)
             ->subject('Monthly performance review — '.$employee)
             ->view('emails.performance_review_submitted', [
                 'review' => $this->review,
                 'reviewerName' => PerformanceReviews::displayName(PerformanceReviews::finalRater($this->review->employee))
                     ?: $this->review->reviewer_name,
-                'reviewUrl' => PerformanceReviews::signedReviewUrl($this->review),
-                'appUrl' => route(PerformanceReviews::routeName($notifiable instanceof \App\Models\User ? $notifiable : null, 'show'), $this->review),
+                'reviewUrl' => $reviewUrl,
+                'appUrl' => $appUrl,
                 'recipientFirstName' => EmailGreeting::displayName($notifiable),
                 'managerName' => $managerName,
             ]);

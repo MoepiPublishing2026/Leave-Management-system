@@ -20,7 +20,8 @@ html body .pr-reviews-page .requests-btn--primary,
 html body .pr-reviews-page .requests-btn--search,
 html body .pr-reviews-page .requests-btn--secondary {
     background:#c5d931 !important; color:#111 !important; border:0 !important;
-    border-radius:14px !important; padding:12px 26px !important; font-weight:700 !important;
+    border-radius:8px !important; padding:8px 14px !important; font-weight:700 !important;
+    min-height:0 !important; font-size:13px !important;
 }
 html body .pr-reviews-page .requests-search-form input[type="text"] {
     background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M16 16l5 5'/></svg>") no-repeat 14px center / 20px 20px !important;
@@ -185,9 +186,11 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
         <div class="pr-review-cards">
             @foreach ($reviews as $item)
                 @php
-                    $openUrl = route(PerformanceReviews::routeName($user, 'show'), $item);
-                    $editUrl = route(PerformanceReviews::routeName($user, 'edit'), $item);
                     $canEditCard = $item->isDraft() && ! $isSenior && (int) $item->employee_id === (int) $user->id;
+                    $openUrl = route(PerformanceReviews::routeName($user, 'show'), $item);
+                    $editUrl = $canEditCard
+                        ? route(PerformanceReviews::routeName($user, 'edit'), $item)
+                        : $openUrl;
                     $reviewer = PerformanceReviews::displayName(PerformanceReviews::finalRater($item->employee))
                         ?: ($item->reviewer_name ?: '—');
                     $statusKey = strtolower(trim((string) $item->status));
@@ -221,7 +224,7 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
                         </span>
                         <a class="pr-card-btn" href="{{ $canEditCard ? $editUrl : $openUrl }}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-                            Edit
+                            {{ $canEditCard ? 'Edit' : 'View' }}
                         </a>
                     </div>
                 </article>
@@ -230,7 +233,7 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
     @endif
 
     @if ($reviews->hasPages())
-        <div class="requests-pagination">{{ $reviews->links() }}</div>
+        <div class="requests-pagination">{{ $reviews->links('pagination::bootstrap-5') }}</div>
     @endif
 </div>
 @endsection

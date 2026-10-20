@@ -60,7 +60,10 @@
         background-color: #b2cd16;
         color: #0a1347;
         font-weight: 700;
-        padding: 12px 30px;
+        padding: 8px 16px;
+        min-height: 0;
+        font-size: 13px;
+        line-height: 1.2;
         border: 1px solid #91bf14;
         border-radius: 8px;
         cursor: pointer;

@@ -14,16 +14,17 @@
     .request-badge,
     .rd-badge {
         display: inline-block;
-        min-width: 5.5rem;
-        padding: 5px 10px;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.78rem;
+        min-width: 0;
+        padding: 4px 14px;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 0.8rem;
         text-align: center;
-        border: 1px solid transparent;
-        letter-spacing: 0.01em;
+        border: 2px solid #666;
+        letter-spacing: 0;
         line-height: 1.25;
-        color: #fff;
+        color: #263248;
+        box-shadow: none;
     }
     .card.card-all,
     a.card.card-all,
@@ -105,43 +106,29 @@
         color: #fff !important;
     }
     .request-badge--pending,
-    .reports-page .request-badge--pending,
+    .request-badge--overdue,
     .rd-badge--pending,
-    .requests-filter--pending.is-active {
-        background: {{ $statusCardColors['pending'] ?? '#C291A4' }} !important;
-        color: #fff !important;
-        border-color: {{ $statusCardColors['pending'] ?? '#C291A4' }} !important;
+    .rd-badge--overdue {
+        background: #cebaf6 !important;
+        border-color: #a33d86 !important;
+        color: #7a2a7a !important;
     }
     .request-badge--approved,
-    .reports-page .request-badge--approved,
-    .rd-badge--approved,
-    .requests-filter--approved.is-active {
-        background: {{ $statusCardColors['approved'] ?? '#E27A53' }} !important;
-        color: #fff !important;
-        border-color: {{ $statusCardColors['approved'] ?? '#E27A53' }} !important;
+    .rd-badge--approved {
+        background: #9db4ff !important;
+        border-color: #2a6fc0 !important;
+        color: #1f3f8f !important;
     }
     .request-badge--rejected,
-    .reports-page .request-badge--rejected,
-    .rd-badge--rejected,
-    .requests-filter--rejected.is-active {
-        background: {{ $statusCardColors['rejected'] ?? '#87AFC7' }} !important;
-        color: #fff !important;
-        border-color: {{ $statusCardColors['rejected'] ?? '#87AFC7' }} !important;
+    .rd-badge--rejected {
+        background: #f9c3c9 !important;
+        border-color: #d5253a !important;
+        color: #a31b2e !important;
     }
     .request-badge--withdrawn,
-    .reports-page .request-badge--withdrawn,
-    .rd-badge--withdrawn,
-    .requests-filter--withdrawn.is-active {
-        background: {{ $statusCardColors['withdrawn'] ?? '#D2B55B' }} !important;
-        color: #fff !important;
-        border-color: {{ $statusCardColors['withdrawn'] ?? '#D2B55B' }} !important;
-    }
-    .request-badge--overdue,
-    .reports-page .request-badge--overdue,
-    .rd-badge--overdue,
-    .requests-filter--overdue.is-active {
-        background: {{ $statusCardColors['overdue'] ?? '#C154C1' }} !important;
-        color: #fff !important;
-        border-color: {{ $statusCardColors['overdue'] ?? '#C154C1' }} !important;
+    .rd-badge--withdrawn {
+        background: #e2e2e2 !important;
+        border-color: #767672 !important;
+        color: #555 !important;
     }
 </style>

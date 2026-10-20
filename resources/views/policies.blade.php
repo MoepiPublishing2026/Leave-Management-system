@@ -7,17 +7,17 @@
 <style>
     .policy-card h2 {
         margin: 0 0 10px;
-        font-size: 2.15rem;
-        line-height: 1.25;
-        font-weight: 800;
+        font-size: 1.2rem;
+        line-height: 1.3;
+        font-weight: 700;
         color: #273345;
-        letter-spacing: 0.015em;
+        letter-spacing: 0;
     }
     .policy-card p {
         margin: 0;
         color: #080808;
-        line-height: 1.4;
-        font-size: 1.5rem;
+        line-height: 1.5;
+        font-size: 0.95rem;
         font-weight: 400;
     }
 </style>

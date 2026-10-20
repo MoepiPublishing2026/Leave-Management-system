@@ -18,7 +18,8 @@ html body .team-requests-page .requests-btn--primary,
 html body .team-requests-page .requests-btn--search,
 html body .team-requests-page .requests-btn--secondary {
     background:#a2b222 !important; color:#000 !important; border:0 !important;
-    border-radius:14px !important; padding:14px 30px !important; font-weight:700 !important;
+    border-radius:8px !important; padding:8px 14px !important; font-weight:700 !important;
+    min-height:0 !important; font-size:13px !important;
 }
 html body .team-requests-page .requests-search-form input[type="text"] {
     background:#fff !important; border:0 !important; border-radius:12px !important; padding:14px 18px !important; min-width:260px;
@@ -106,8 +107,10 @@ html body .team-requests-page .requests-table td:nth-child(4)::after { content:'
 html body .team-requests-page .request-badge {
     border:2px solid #666; border-radius:14px; padding:4px 14px; font-weight:700; font-size:.8rem;
 }
-html body .team-requests-page .request-badge--approved { background:#a9c0f7 !important; border-color:#3b6fd8; color:#1f3f8f !important; }
-html body .team-requests-page .request-badge--pending { background:#d8b8ef !important; border-color:#9b3a96; color:#7a2a7a !important; }
+html body .team-requests-page .request-badge--approved { background:#9db4ff !important; border-color:#2a6fc0; color:#1f3f8f !important; }
+html body .team-requests-page .request-badge--pending,
+html body .team-requests-page .request-badge--overdue { background:#cebaf6 !important; border-color:#a33d86; color:#7a2a7a !important; }
+html body .team-requests-page .request-badge--rejected { background:#f9c3c9 !important; border-color:#d5253a; color:#a31b2e !important; }
 
 /* search box magnifier */
 html body .team-requests-page .requests-search-form input[type="text"] {
@@ -160,6 +163,7 @@ html body .team-requests-page .requests-table td.requests-empty {
             overflow: hidden;
         }
         body.overdue-reason-locked nav.navbar,
+        body.overdue-reason-locked header.navbar,
         body.overdue-reason-locked main.content {
             pointer-events: none;
             user-select: none;

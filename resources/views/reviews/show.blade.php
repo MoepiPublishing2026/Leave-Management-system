@@ -28,24 +28,14 @@
         <div class="lh-doc-body">
         <div class="pr-title">Monthly Performance Review</div>
 
-        <table class="pr-meta">
-            <tr>
-                <th>Employee</th>
-                <td style="padding:10px 12px;">{{ $review->employee_name }}</td>
-                <th>Reviewer</th>
-                <td style="padding:10px 12px;">{{ $reviewerName ?: '—' }}</td>
-            </tr>
-            <tr>
-                <th>Review period</th>
-                <td style="padding:10px 12px;">{{ $review->review_period }} ({{ $review->periodLabel() }})</td>
-                <th>Date of the review</th>
-                <td style="padding:10px 12px;">{{ $review->review_date?->format('d M Y') ?: '—' }}</td>
-            </tr>
-            <tr>
-                <th>Status</th>
-                <td style="padding:10px 12px;" colspan="3">{{ $review->statusLabelFor($user) }}</td>
-            </tr>
-        </table>
+        @include('reviews.partials.review-header-cards', [
+            'editable' => false,
+            'review' => $review,
+            'employeeName' => $review->employee_name,
+            'reviewerName' => $reviewerName,
+            'showStatus' => true,
+            'statusLabel' => $review->statusLabelFor($user),
+        ])
 
         <div class="pr-section">
             <h2>Goals achieved</h2>

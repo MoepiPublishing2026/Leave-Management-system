@@ -381,7 +381,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261019q" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261020cal3" />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -483,6 +483,7 @@
         <div class="mobile-sidebar-header">
             <a class="mobile-sidebar-brand" href="{{ route('admin.dashboard') }}" aria-label="Moepi Publishing senior manager dashboard">
                 <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
+                <span class="logo-text">MOEPI</span>
             </a>
             @auth
                 @php $user = auth()->user(); @endphp

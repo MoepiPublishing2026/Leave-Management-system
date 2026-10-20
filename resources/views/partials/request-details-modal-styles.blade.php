@@ -280,6 +280,127 @@
     .request-details-popup--leave .swal2-html-container {
         overflow: visible !important;
     }
+    html body .swal2-popup.calendar-day-popup,
+    html body .swal2-popup:has(.cal-day-modal) {
+        width: 560px !important;
+        max-width: calc(100vw - 32px) !important;
+        padding: 20px 26px 16px !important;
+        border: 0 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 16px 44px rgba(15, 23, 42, 0.2) !important;
+        background: #fff !important;
+    }
+    html body .swal2-popup.calendar-day-popup .swal2-title,
+    html body .swal2-popup:has(.cal-day-modal) .swal2-title,
+    html body .swal2-popup.calendar-day-popup .swal2-icon,
+    html body .swal2-popup.calendar-day-popup .swal2-close {
+        display: none !important;
+    }
+    html body .swal2-popup.calendar-day-popup .swal2-html-container,
+    html body .swal2-popup:has(.cal-day-modal) .swal2-html-container {
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        max-height: none !important;
+        text-align: left !important;
+        color: inherit !important;
+        font-size: inherit !important;
+        line-height: inherit !important;
+    }
+    html body .cal-day-title {
+        width: 100%;
+        margin: 0 !important;
+        padding: 2px 2px 14px !important;
+        border-bottom: 1px solid #d0d0d0 !important;
+        color: #3b7ec4 !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        text-align: left !important;
+        text-transform: none !important;
+        line-height: 1.35 !important;
+        letter-spacing: 0 !important;
+    }
+    html body .swal2-popup.calendar-day-popup .cal-day-content {
+        margin: 0;
+        padding: 22px 8px;
+        border-bottom: 1px solid #d0d0d0;
+        text-align: center;
+    }
+    html body .swal2-popup.calendar-day-popup .cal-day-content--leave {
+        text-align: left;
+        padding: 16px 8px 18px;
+    }
+    html body .swal2-popup.calendar-day-popup .cal-day-empty {
+        color: #8b8b8b;
+        font-size: 14px;
+        font-style: italic;
+        font-weight: 400;
+    }
+    html body .swal2-popup.calendar-day-popup .cal-day-group {
+        margin: 0 0 12px;
+    }
+    html body .swal2-popup.calendar-day-popup .cal-day-group:last-child {
+        margin-bottom: 0;
+    }
+    html body .swal2-popup.calendar-day-popup .cal-day-group-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin: 0 0 6px;
+    }
+    html body .swal2-popup.calendar-day-popup .cal-day-list {
+        margin: 0;
+        padding-left: 1.2rem;
+        color: #334155;
+        font-size: 14px;
+        font-style: normal;
+    }
+    html body .swal2-popup.calendar-day-popup .swal2-actions {
+        display: flex !important;
+        justify-content: center !important;
+        margin: 0 !important;
+        padding: 16px 0 2px !important;
+        border: 0 !important;
+        background: transparent !important;
+        width: 100%;
+    }
+    html body .swal2-popup.calendar-day-popup .swal2-confirm,
+    html body .swal2-popup:has(.cal-day-modal) .swal2-confirm,
+    html body .swal2-popup.calendar-day-popup button.swal2-confirm.calendar-day-close,
+    html body button.swal2-confirm.calendar-day-close {
+        background: #f1ec3c !important;
+        color: #111 !important;
+        border: 0 !important;
+        border-width: 0 !important;
+        border-style: none !important;
+        border-color: transparent !important;
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom-color: transparent !important;
+        outline: none !important;
+        border-radius: 999px !important;
+        padding: 8px 26px !important;
+        min-height: 0 !important;
+        min-width: 0 !important;
+        height: auto !important;
+        width: auto !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        text-transform: none !important;
+        box-shadow: none !important;
+    }
+    html body .swal2-popup.calendar-day-popup .swal2-confirm:hover,
+    html body .swal2-popup:has(.cal-day-modal) .swal2-confirm:hover,
+    html body .swal2-popup.calendar-day-popup button.swal2-confirm.calendar-day-close:hover,
+    html body button.swal2-confirm.calendar-day-close:hover {
+        background: #e4df2e !important;
+        color: #111 !important;
+        border: 0 !important;
+    }
     .rd-modal--proto {
         font-family: "Poppins", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         color: #1e293b;

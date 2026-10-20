@@ -106,12 +106,12 @@
     }
     .button-group .btn-form-action {
         box-sizing: border-box;
-        min-height: 52px;
-        padding: 15px 40px;
+        min-height: 0;
+        padding: 8px 16px;
         font-weight: 700;
-        font-size: 18px;
-        line-height: 1.25;
-        border-radius: 12px;
+        font-size: 13px;
+        line-height: 1.2;
+        border-radius: 8px;
         cursor: pointer;
         border: 1px solid #91bf14;
         background-color: #b2cd16;
@@ -206,8 +206,8 @@ html body .employee-create-page .button-group .btn-form-action,
 html body .employee-create-page .button-group a.btn-form-action,
 html body .employee-create-page .button-group button.btn-form-action {
     background:#a2b222 !important; color:#000 !important; border:0 !important;
-    border-radius:12px !important; padding:12px 38px !important;
-    font-size:15px !important; min-height:0 !important;
+    border-radius:8px !important; padding:8px 16px !important;
+    font-size:13px !important; min-height:0 !important; height:auto !important;
 }
 html body .employee-create-page .button-group .btn-form-action:hover { background:#8d9c1c !important; }
 

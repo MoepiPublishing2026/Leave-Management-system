@@ -1,11 +1,11 @@
 @once
 <style>
     .app-page {
-        font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;
-        max-width: 1450px;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        max-width: none;
         width: 100%;
-        margin: 0 auto;
-        padding: 0 8px 36px;
+        margin: 0;
+        padding: 0 0 36px;
         color: #273345;
         box-sizing: border-box;
     }
@@ -18,15 +18,16 @@
         margin-bottom: 0;
     }
     .app-page h1 {
-        font-size: 2.75rem;
-        font-weight: 800;
+        font-size: 34px;
+        font-weight: 700;
         color: #273345;
-        letter-spacing: 0.025em;
+        letter-spacing: 0.02em;
+        margin: 0;
     }
     .app-page-lead {
-        margin: 4px 0 58px;
+        margin: 8px 0 22px;
         color: #666;
-        font-size: 1.15rem;
+        font-size: 0.95rem;
         line-height: 1.5;
     }
     .app-page-flash {
@@ -78,15 +79,20 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
-    .app-page-btn {
+    html body main .app-page-btn,
+    html body main form .app-page-btn,
+    html body main form button.app-page-btn[type="submit"] {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 15px 17px;
-        min-height: 64px;
-        font-size: 1.55rem;
+        padding: 8px 14px !important;
+        min-height: 0 !important;
+        min-width: 0 !important;
+        height: auto !important;
+        font-size: 13px !important;
+        line-height: 1.2 !important;
         font-weight: 700;
-        border-radius: 15px;
+        border-radius: 8px !important;
         cursor: pointer;
         border: none;
         text-decoration: none;
@@ -191,10 +197,10 @@
         margin-bottom: 27px;
     }
     .app-badge {
-        padding: 9px 24px;
-        min-height: 41px;
-        border-radius: 9px;
-        font-size: 1.2rem;
+        padding: 5px 12px;
+        min-height: 0;
+        border-radius: 8px;
+        font-size: 0.8rem;
         font-weight: 700;
         letter-spacing: 0;
         background: #d4e510;
@@ -217,14 +223,14 @@
         margin: 0;
         padding-left: 20px;
         color: #080808;
-        font-size: 1.75rem;
-        line-height: 1.35;
+        font-size: 0.95rem;
+        line-height: 1.5;
     }
     .app-info-box p {
         margin: 0;
         color: #080808;
-        font-size: 1.75rem;
-        line-height: 1.35;
+        font-size: 0.95rem;
+        line-height: 1.5;
     }
 </style>
 @endonce

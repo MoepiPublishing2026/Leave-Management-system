@@ -3,8 +3,6 @@
     $today = $today ?? now()->toDateString();
 @endphp
 
-@include('partials.request-details-modal-styles')
-
 @once
 <style>
     .calendar-details-container.swal2-container {
@@ -12,10 +10,51 @@
         padding: 16px 12px !important;
         align-items: center !important;
         justify-content: center !important;
-        border: 0 !important;
     }
-    .calendar-details-container .swal2-popup.request-details-popup {
-        margin: 0 auto !important;
+    html body .swal2-popup.calendar-day-popup,
+    html body .swal2-popup:has(.cal-day-modal) {
+        width: 560px !important;
+        max-width: calc(100vw - 32px) !important;
+        padding: 20px 26px 16px !important;
+        border: 0 !important;
+        border-radius: 16px !important;
+        background: #fff !important;
+        box-shadow: 0 16px 44px rgba(15, 23, 42, 0.2) !important;
+    }
+    html body .swal2-popup.calendar-day-popup .swal2-title,
+    html body .swal2-popup.calendar-day-popup .swal2-icon,
+    html body .swal2-popup.calendar-day-popup .swal2-actions,
+    html body .swal2-popup.calendar-day-popup .swal2-footer,
+    html body .calendar-day-actions-hidden {
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+    html body .swal2-popup.calendar-day-popup .swal2-html-container {
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        text-align: left !important;
+        color: inherit !important;
+        font-size: inherit !important;
+    }
+    .cal-day-group { margin: 0 0 12px; }
+    .cal-day-group:last-child { margin-bottom: 0; }
+    .cal-day-group-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin: 0 0 6px;
+    }
+    .cal-day-list {
+        margin: 0;
+        padding-left: 1.2rem;
+        color: #334155;
+        font-size: 14px;
     }
 </style>
 <script>
@@ -30,14 +69,6 @@
             .replace(/'/g, '&#039;');
     }
 
-    function calendarSectionBlock(title, innerHtml, boxClass) {
-        const boxCls = boxClass ? ' rd-box--' + boxClass : '';
-        return '<div class="rd-section">'
-            + '<h4 class="rd-section-title">' + escapeCalendarHtml(title) + '</h4>'
-            + '<div class="rd-box' + boxCls + '">' + innerHtml + '</div>'
-            + '</div>';
-    }
-
     window.showCalendarDetails = function (date) {
         if (!window.Swal) {
             return;
@@ -45,34 +76,22 @@
 
         const events = window.calendarLeaveEvents || {};
         const showUser = @json($showUserInModal);
-        const todayDate = @json($today);
 
-        const formatted = new Date(date + 'T12:00:00').toLocaleDateString(undefined, {
-            weekday: 'long',
+        const dayDate = new Date(date + 'T12:00:00');
+        const weekday = dayDate.toLocaleDateString('en-US', { weekday: 'long' });
+        const rest = dayDate.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
         });
+        const formatted = weekday + ', ' + rest;
 
         const dayEvents = events[date] || [];
         const hasLeave = dayEvents.length > 0;
-        const headerLabel = showUser ? 'People on Leave' : 'My Leave';
-        let badgeHtml = '';
-
-        if (hasLeave) {
-            const badgeText = showUser
-                ? (dayEvents.length === 1 ? '1 on leave' : dayEvents.length + ' on leave')
-                : 'On leave';
-            badgeHtml = '<span class="rd-badge rd-badge--approved">' + escapeCalendarHtml(badgeText) + '</span>';
-        }
-
-        let bodyHtml = '';
+        let contentHtml = '';
 
         if (!hasLeave) {
-            const emptyText = date === todayDate
-                ? 'No leave today.'
-                : 'No approved leave on this day.';
-            bodyHtml = '<div class="rd-box rd-box--muted">' + escapeCalendarHtml(emptyText) + '</div>';
+            contentHtml = '<div style="color:#8b8b8b;font-size:14px;font-style:italic;font-weight:400;">No leave on this day</div>';
         } else if (showUser) {
             const grouped = {};
             dayEvents.forEach(function (entry) {
@@ -83,63 +102,69 @@
                 grouped[type].push(entry.user || 'Unknown');
             });
 
-            const typeCount = Object.keys(grouped).length;
-            bodyHtml = '<div class="rd-stats" style="margin-bottom:14px;">'
-                + '<div class="rd-stat"><span class="rd-stat-label">People</span>'
-                + '<span class="rd-stat-value">' + dayEvents.length + '</span></div>'
-                + '<div class="rd-stat"><span class="rd-stat-label">Leave types</span>'
-                + '<span class="rd-stat-value rd-stat-value--type">' + typeCount + '</span></div>'
-                + '</div>';
-
             Object.keys(grouped).sort().forEach(function (type) {
-                const list = '<ul class="leave-details-list" style="margin:0;padding-left:1.25rem;">'
+                contentHtml += '<div class="cal-day-group">'
+                    + '<div class="cal-day-group-title">' + escapeCalendarHtml(type) + ' leave</div>'
+                    + '<ul class="cal-day-list">'
                     + grouped[type].map(function (name) {
                         return '<li>' + escapeCalendarHtml(name) + '</li>';
                     }).join('')
-                    + '</ul>';
-                bodyHtml += calendarSectionBlock(type + ' leave', list);
+                    + '</ul></div>';
             });
         } else {
-            const list = '<ul class="leave-details-list" style="margin:0;padding-left:1.25rem;">'
+            contentHtml = '<ul class="cal-day-list">'
                 + dayEvents.map(function (entry) {
                     return '<li>' + escapeCalendarHtml(entry.type || 'Leave') + ' leave</li>';
                 }).join('')
                 + '</ul>';
-            bodyHtml = calendarSectionBlock('Approved leave', list);
         }
 
-        const html = '<div class="rd-modal">'
-            + '<div class="rd-header">'
-            + '<div class="rd-header-id">' + escapeCalendarHtml(headerLabel) + ' <span>' + escapeCalendarHtml(formatted) + '</span></div>'
-            + badgeHtml
+        const html = '<div class="cal-day-modal">'
+            + '<div style="color:#3b7ec4;font-size:15px;font-weight:600;text-align:left;line-height:1.35;padding:0 0 14px;margin:0;border-bottom:1px solid #d0d0d0;">'
+            + 'Selected Day - ' + escapeCalendarHtml(formatted)
             + '</div>'
-            + '<div class="rd-body">' + bodyHtml + '</div>'
+            + '<div style="padding:22px 8px;border-bottom:1px solid #d0d0d0;text-align:' + (hasLeave ? 'left' : 'center') + ';">'
+            + contentHtml
+            + '</div>'
+            + '<div style="display:flex;justify-content:center;padding:16px 0 2px;">'
+            + '<button type="button" class="cal-day-close" style="background:#f1ec3c;color:#111;border:0 none;outline:none;box-shadow:none;border-radius:999px;padding:8px 26px;font-size:14px;font-weight:700;line-height:1.2;cursor:pointer;min-width:0;height:auto;width:auto;">Close</button>'
+            + '</div>'
             + '</div>';
 
         const isMobile = window.matchMedia('(max-width: 768px)').matches;
         Swal.fire({
-            width: isMobile ? 'auto' : 640,
+            width: isMobile ? 'auto' : 560,
             position: 'center',
             showCloseButton: false,
-            showIcon: false,
+            showConfirmButton: false,
+            showDenyButton: false,
+            showCancelButton: false,
+            buttonsStyling: false,
             customClass: {
-                popup: 'request-details-popup',
+                popup: 'calendar-day-popup',
                 container: 'calendar-details-container',
+                htmlContainer: 'calendar-day-html',
+                actions: 'calendar-day-actions-hidden',
             },
             html: html,
-            showConfirmButton: true,
-            confirmButtonText: 'Close',
-            focusConfirm: false,
             didOpen: function (popup) {
-                const container = popup?.closest('.swal2-container');
+                popup.classList.add('calendar-day-popup');
+                const container = popup.closest('.swal2-container');
                 if (container) {
+                    container.classList.add('calendar-details-container');
                     container.style.zIndex = '10150';
-                    container.scrollTop = 0;
                 }
-                const htmlContainer = Swal.getHtmlContainer();
-                if (htmlContainer) {
-                    htmlContainer.scrollTop = 0;
+                const actions = popup.querySelector('.swal2-actions');
+                if (actions) {
+                    actions.style.setProperty('display', 'none', 'important');
                 }
+                const swalTitle = popup.querySelector('.swal2-title');
+                if (swalTitle) {
+                    swalTitle.style.setProperty('display', 'none', 'important');
+                }
+                popup.querySelector('.cal-day-close')?.addEventListener('click', function () {
+                    Swal.close();
+                });
             },
         });
     };

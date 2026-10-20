@@ -18,7 +18,7 @@
         }
 
         /* Navbar */
-        nav.navbar {
+        header.navbar {
             position: fixed;
             top: 0; left: 0; right: 0;
             height: 90px;
@@ -305,7 +305,7 @@
         }
 
         @media (max-width: 1200px) {
-            nav.navbar {
+            header.navbar {
                 height: 64px;
                 padding: 8px 16px;
                 flex-wrap: nowrap;
@@ -366,10 +366,8 @@
         }
     </style>
 
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261019q" />
-
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261020cal3" />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -406,7 +404,7 @@
     @yield('head')
 </head>
 <body>
-    <nav class="navbar" role="navigation" aria-label="Main Navigation">
+    <header class="navbar" role="banner">
         <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
 
         <a class="navbar-logo" href="{{ route('dashboard') }}" aria-label="Go to dashboard">
@@ -465,13 +463,14 @@
             </div>
             @endauth
         </nav>
-    </nav>
+    </header>
 
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
     <aside id="mobileSidebar" class="mobile-sidebar" aria-label="Mobile Navigation">
         <div class="mobile-sidebar-header">
             <a class="mobile-sidebar-brand" href="{{ route('dashboard') }}" aria-label="Go to dashboard">
                 <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
+                <span class="logo-text">MOEPI</span>
             </a>
             @auth
                 @php $user = auth()->user(); @endphp

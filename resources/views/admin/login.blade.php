@@ -3,152 +3,100 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Senior Manager Login - Leave Management</title>
+    <title>Login - Leave Management</title>
     <link rel="icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" sizes="192x192" />
     <link rel="icon" href="{{ asset('images/favicon-48.png') }}?v=3" type="image/png" sizes="48x48" />
     <link rel="shortcut icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" />
     <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}?v=3" sizes="180x180" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html,
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #ffffff;
-            min-height: 100vh;
-        }
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .login-container {
-            max-width: 600px;
-            width: 100%;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 0 10px #a7bd8dff;
-            position: relative;
-            overflow: hidden;
-        }
-        .login-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #b2cd16 0%, #9ef755 100%);
-        }
-        .login-logo {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        .login-logo img {
-            height: 160px;
-            width: auto;
-            max-width: 100%;
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 22px;
-            font-size: 24px;
-            color: #2d3748;
-            font-weight: 600;
-        }
-        .form-group { margin-bottom: 18px; }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 13px;
-            color: #4a5568;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px 14px;
-            font-size: 15px;
-            border-radius: 10px;
-            border: 2px solid #e2e8f0;
-            color: #2d3748;
-            background: #ffffff;
-            transition: all 0.3s ease;
-        }
-        input:focus {
-            outline: none;
-            border-color: #b2cd16;
-            box-shadow: 0 0 0 3px rgba(178, 205, 22, 0.1);
-        }
-        .error {
-            color: #e53e3e;
-            font-size: 13px;
-            margin-top: 6px;
-        }
-        button {
-            width: 100%;
-            padding: 14px;
-            font-weight: 600;
-            font-size: 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            border: none;
-            background: linear-gradient(135deg, #b2cd16 0%, #9ef755 100%);
-            color: #fff;
-            margin-top: 10px;
-        }
-        .extra-links {
-            margin-top: 18px;
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-        }
-        .extra-links a {
-            color: #b2cd16;
-            font-weight: 600;
-            text-decoration: none;
-            font-size: 14px;
-        }
-    </style>
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/auth-design.css') }}?v=1" />
 </head>
-<body>
-    <div class="login-container">
-        <div class="login-logo">
+<body class="auth-page auth-login-page">
+    <main class="auth-shell login-shell">
+        <div class="auth-logo">
             <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
         </div>
 
-        <h2>Senior Manager Login</h2>
+        <h1 class="auth-title">Login</h1>
+        <div class="auth-mobile-divider" aria-hidden="true"></div>
 
-        <form method="POST" action="{{ route('admin.login.post') }}">
+        <form method="POST" action="{{ route('admin.login.post') }}" class="auth-form login-form">
             @csrf
-            <div class="form-group">
-                <label for="admin_number">Senior Manager Number</label>
-                <input type="text" name="admin_number" id="admin_number" value="{{ old('admin_number') }}" required autofocus />
+
+            <div class="auth-form-group email-group">
+                <label class="auth-label" for="admin_number">
+                    <span class="label-desktop">Senior Manager Number</span>
+                    <span class="label-mobile">Number</span>
+                </label>
+                <div class="auth-input-wrap">
+                    <input
+                        class="auth-input"
+                        type="text"
+                        name="admin_number"
+                        id="admin_number"
+                        value="{{ old('admin_number') }}"
+                        placeholder="Enter your senior manager number"
+                        required
+                        autofocus
+                        autocomplete="username"
+                    />
+                </div>
                 @error('admin_number')
-                    <div class="error">{{ $message }}</div>
+                    <div class="auth-error">{{ $message }}</div>
                 @enderror
             </div>
 
-            <div class="form-group">
-                <label for="admin_password">Password</label>
-                <input type="password" name="admin_password" id="admin_password" required />
+            <div class="auth-form-group password-group">
+                <label class="auth-label" for="admin_password">Password</label>
+                <div class="auth-input-wrap">
+                    <input
+                        class="auth-input password-input"
+                        type="password"
+                        name="admin_password"
+                        id="admin_password"
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    />
+                    <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password" aria-pressed="false">
+                        <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" aria-hidden="true" style="display:none;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5a10.6 10.6 0 00-4.9 1.2" />
+                        </svg>
+                    </button>
+                </div>
                 @error('admin_password')
-                    <div class="error">{{ $message }}</div>
+                    <div class="auth-error">{{ $message }}</div>
                 @enderror
             </div>
 
-            <button type="submit">Login</button>
+            <a class="auth-link forgot-link" href="{{ route('login') }}">Employee / Manager login</a>
+            <button class="auth-primary login-button" type="submit">Login</button>
         </form>
 
-        <div class="extra-links">
-            <a href="{{ route('login') }}">Employee / Manager login</a>
-        </div>
-    </div>
+        <footer class="auth-footer">
+            <p class="auth-copyright">&copy;{{ date('Y') }} Moepi Publishing.All rights reserved</p>
+        </footer>
+    </main>
+
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const passwordField = document.querySelector('#admin_password');
+        const eyeOpen = document.querySelector('#eyeOpen');
+        const eyeClosed = document.querySelector('#eyeClosed');
+
+        togglePassword.addEventListener('click', () => {
+            const isPassword = passwordField.type === 'password';
+            passwordField.type = isPassword ? 'text' : 'password';
+            eyeOpen.style.display = isPassword ? 'none' : 'block';
+            eyeClosed.style.display = isPassword ? 'block' : 'none';
+            togglePassword.setAttribute('aria-pressed', String(isPassword));
+            togglePassword.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+        });
+    </script>
 
     @if ($errors->any())
         <script>
@@ -157,7 +105,7 @@
                 title: 'Login Failed',
                 html: '<ul style="text-align:left; list-style-position: inside;">' + @json($errors->all()).map(e => '<li>' + e + '</li>').join('') + '</ul>',
                 confirmButtonText: 'OK',
-                confirmButtonColor: '#b2cd16'
+                confirmButtonColor: '#29374c'
             });
         </script>
     @endif

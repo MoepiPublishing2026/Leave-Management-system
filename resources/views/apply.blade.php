@@ -59,7 +59,7 @@
           margin-top: 20px;
       }
       form.leave-form .button-group button {
-          width: 100%;
+          width: 100% !important;
       }
   }
   .main-content h1 {
@@ -289,12 +289,17 @@
       gap: 20px;
       justify-content: flex-start;
   }
+  html body main form.leave-form .button-group button,
   form.leave-form .button-group button {
-      padding: 12px 30px;
-      border-radius: 10px;
+      padding: 8px 16px !important;
+      min-height: 0 !important;
+      height: auto !important;
+      width: auto !important;
+      border-radius: 8px !important;
       border: none;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 13px !important;
+      line-height: 1.2 !important;
       cursor: pointer;
       user-select: none;
   }

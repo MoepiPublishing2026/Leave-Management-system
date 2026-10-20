@@ -44,9 +44,16 @@ use App\Http\Controllers\PerformanceReviewController;
 use App\Http\Controllers\PerformanceReviewEmailController;
 
 
-// Public welcome route
 Route::get('/', function () {
-    return view('welcome');
+    if (auth()->check()) {
+        return match (strtolower((string) (auth()->user()->role ?? ''))) {
+            'admin' => redirect()->route('admin.dashboard'),
+            'manager' => redirect()->route('manager.dashboard'),
+            default => redirect()->route('dashboard'),
+        };
+    }
+
+    return redirect()->route('login');
 });
 
 Route::get('/signup', [SignupController::class, 'showSignupForm'])->name('signup');
