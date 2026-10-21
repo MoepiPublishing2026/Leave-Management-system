@@ -5,22 +5,20 @@
 @section('content')
 <style>
     html body main:has(.employees-page) {
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
+        display: block;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
     .employees-page {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         max-width: 1200px;
         margin: 0 auto;
-        padding: 0 4px;
+        padding: 0 4px 28px;
         color: #1e293b;
-        flex: 1 1 auto;
-        min-height: 0;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
+        height: auto;
+        display: block;
         width: 100%;
+        box-sizing: border-box;
     }
     .employees-header {
         display: flex;
@@ -29,7 +27,6 @@
         gap: 12px;
         flex-wrap: wrap;
         margin-bottom: 18px;
-        flex: 0 0 auto;
         background: #fff;
         z-index: 5;
     }
@@ -59,29 +56,10 @@
         background-color: #9eb812;
         color: #0a1347;
     }
-    .flash-message {
-        padding: 12px 16px;
-        border-radius: 10px;
-        margin-bottom: 16px;
-        font-weight: 600;
-        font-size: 0.92rem;
-        flex: 0 0 auto;
-    }
-    .flash-message--success {
-        background: #ecfdf5;
-        color: #065f46;
-        border: 1px solid #86efac;
-    }
-    .flash-message--error {
-        background: #fef2f2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-    }
     .employees-table-wrap {
         position: relative;
-        flex: 1 1 auto;
-        min-height: 0;
-        overflow: auto;
+        overflow-x: auto;
+        overflow-y: visible;
         border: 2px solid #8fb3a8;
         border-radius: 0px;
         box-shadow:
@@ -157,7 +135,7 @@
         background: #bfd9d0;
     }
     .employees-table tbody tr:last-child td {
-        border-bottom: none;
+        border-bottom: 1px solid #A4B4F6;
     }
     .employees-email {
         overflow-wrap: anywhere;
@@ -269,7 +247,10 @@ html body .employees-page .employees-table td .employee-actions svg { stroke:#22
 
 /* header text slightly larger like the prototype */
 html body .employees-page .employees-table th { font-size:.78rem !important; }
-html body .employees-page .employees-table-wrap { overflow: auto !important; }
+html body .employees-page .employees-table-wrap {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+}
 html body .employees-page .employees-table {
     border-collapse: separate !important;
     border-spacing: 0 !important;
@@ -288,13 +269,6 @@ html body .employees-page .employees-table th {
         <h1>Employees List</h1>
         <a href="{{ route('manager.employees.create') }}" class="add-employee-button">+ Add Employee</a>
     </div>
-
-    @if(session('success'))
-        <div class="flash-message flash-message--success">{{ session('success') }}</div>
-    @endif
-    @if(session('error'))
-        <div class="flash-message flash-message--error">{{ session('error') }}</div>
-    @endif
 
     <div class="employees-table-wrap">
         <table class="employees-table">

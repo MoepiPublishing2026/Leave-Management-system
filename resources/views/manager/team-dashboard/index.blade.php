@@ -141,7 +141,12 @@
     .manager-container .chart-body--ring canvas { max-height: 214px; }
     .manager-container .chart-body--plot { height: 186px; }
     .manager-container .chart-html-legend li,
-    .manager-container .chart-html-legend span { font-size: 0.68rem !important; font-weight: 400 !important; }
+    .manager-container .chart-html-legend span,
+    .manager-container .chart-html-legend-label {
+        font-size: 0.78rem !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+    }
 
     .manager-container .dashboard-period-filter__form {
         background: #d9e5e4;
@@ -258,20 +263,15 @@
         </div>
         <div class="chart-card">
             <h3>Requests by Department</h3>
-            @if(empty($departmentLabels))
-                <p style="margin:0; color:#64748b; font-size:14px;">No leave requests by department for this period.</p>
-            @else
-                <div class="chart-body chart-body--plot">
-                    <canvas id="departmentBar"></canvas>
-                </div>
-            @endif
+            <div class="chart-body chart-body--plot">
+                <canvas id="departmentBar"></canvas>
+            </div>
         </div>
         <div class="chart-card">
             <h3>Monthly Requests by Status ({{ \App\Support\LeaveYear::label((int) ($chartYear ?? now()->year)) }})</h3>
             <div class="chart-body chart-body--plot">
                 <canvas id="monthlyStatusStackedBar"></canvas>
             </div>
-            <ul class="chart-html-legend" id="monthlyStatusStackedBarLegend" aria-label="Monthly status legend"></ul>
         </div>
         <div class="chart-card">
             <h3>Paid vs Unpaid Leave</h3>
@@ -342,11 +342,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return fixedTypeColors[key] || hashToColor(key);
     };
 
+    window.chartBoldFontSpec = { family: "'Poppins', sans-serif", size: 12, weight: 'bold', style: 'normal' };
+    window.chartAxisTicksBold = { color: window.chartTextColor, font: { ...window.chartBoldFontSpec } };
     window.applyBoldChartDefaults();
     window.finalizeChartDefaults();
-
-    window.chartBoldFontSpec = { family: "'Poppins', sans-serif", size: 9, weight: '400', style: 'normal' };
-    window.chartAxisTicksBold = { color: window.chartTextColor, font: window.chartBoldFontSpec };
 
     const protoColors = ['#4a7ff7', '#b08cf5', '#f5b96b', '#ffdc50', '#4fe6c5', '#94c4c8', '#a03d85', '#b9d84a'];
     const blue = '#4a7ff7';
@@ -368,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             ctx.save();
-            ctx.font = '9px Poppins, sans-serif';
+            ctx.font = 'bold 11px Poppins, sans-serif';
             ctx.fillStyle = '#253141';
             ctx.textBaseline = 'middle';
 
@@ -393,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (names[i].length > 11 && names[i].indexOf(' ') > -1) {
                     lines = names[i].split(' ');
                 }
-                lines.push((Math.round(values[i] / total * 1000) / 10) + '%');
+                lines.push(String(values[i]) + ' (' + (Math.round(values[i] / total * 1000) / 10) + '%)');
 
                 for (let n = 0; n < lines.length; n++) {
                     ctx.fillText(lines[n], x, y + (n - (lines.length - 1) / 2) * 11);
@@ -404,8 +403,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const roomForLabels = { padding: { top: 34, bottom: 34, left: 56, right: 56 } };
 
-    const leaveTypeLabels = @json($leaveTypeCounts->sortDesc()->keys()->toArray());
-    const leaveTypeData = @json($leaveTypeCounts->sortDesc()->values()->toArray());
+    const leaveTypeLabels = @json(array_keys($leaveTypeCounts));
+    const leaveTypeData = @json(array_values($leaveTypeCounts));
     const leaveTypePct = @json($leaveTypePercentages ?? []);
     const leaveTypeColors = leaveTypeLabels.map((t, i) => protoColors[i % protoColors.length]);
 
@@ -437,28 +436,49 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     });
 
-    const deptPieLabels = @json($departmentLabels);
-    const deptPieData = @json($departmentData);
-    const deptPieColors = deptPieLabels.map((name, i) => protoColors[i % protoColors.length]);
+    const payStatusLabels = ['Paid', 'Unpaid'];
+    const payStatusData = @json(array_values($payStatusCounts ?? ['Paid' => 0, 'Unpaid' => 0]));
+    const payStatusPct = @json($payStatusPercentages ?? []);
+    const payStatusColors = [protoColors[0], protoColors[1]];
 
     new Chart(document.getElementById('payStatusPolar'), {
-        type: 'pie',
+        type: 'polarArea',
         data: {
-            labels: deptPieLabels,
+            labels: payStatusLabels,
             datasets: [{
-                data: deptPieData,
-                backgroundColor: deptPieColors,
+                data: payStatusData,
+                backgroundColor: payStatusColors,
                 borderWidth: 0
             }]
         },
-        plugins: [sliceLabels],
         options: mergeChartOptions({
-            layout: roomForLabels,
+            layout: { padding: 10 },
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: false,
+                        backdropColor: 'transparent',
+                        showLabelBackdrop: false,
+                    },
+                    grid: { color: 'rgba(148, 163, 184, 0.35)', circular: true },
+                    angleLines: { color: 'rgba(148, 163, 184, 0.35)' },
+                    pointLabels: {
+                        display: true,
+                        color: '#253141',
+                        font: { family: "'Poppins', sans-serif", size: 11, weight: 'bold' },
+                        padding: 6,
+                    },
+                },
+            },
             plugins: {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        label: (ctx) => `${ctx.label}: ${ctx.raw} requests`
+                        label: (ctx) => {
+                            const pct = (payStatusPct[ctx.label] ?? 0).toFixed(1);
+                            return `${ctx.label}: ${ctx.raw} (${pct}%)`;
+                        }
                     }
                 }
             }
@@ -580,33 +600,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     label: 'Approved',
                     data: monthlyApproved,
-                    backgroundColor: '#a03d85',
-                    borderWidth: 1,
-                    borderRadius: 4,
+                    backgroundColor: protoColors[6],
+                    borderWidth: 0,
+                    borderRadius: 5,
+                    maxBarThickness: 40,
                     stack: 'status'
                 },
                 {
                     label: 'Pending',
                     data: monthlyPending,
-                    backgroundColor: '#f2b96b',
+                    backgroundColor: protoColors[2],
                     borderWidth: 0,
-                    borderRadius: 3,
+                    borderRadius: 5,
+                    maxBarThickness: 40,
                     stack: 'status'
                 },
                 {
                     label: 'Overdue',
                     data: monthlyOverdue,
-                    backgroundColor: '#ab8cf5',
+                    backgroundColor: protoColors[1],
                     borderWidth: 0,
-                    borderRadius: 3,
+                    borderRadius: 5,
+                    maxBarThickness: 40,
                     stack: 'status'
                 },
                 {
                     label: 'Rejected',
                     data: monthlyRejected,
-                    backgroundColor: '#94c4c8',
+                    backgroundColor: protoColors[5],
                     borderWidth: 0,
-                    borderRadius: 3,
+                    borderRadius: 5,
+                    maxBarThickness: 40,
                     stack: 'status'
                 }
             ];
@@ -615,39 +639,26 @@ document.addEventListener('DOMContentLoaded', () => {
         type: 'bar',
         data: {
             labels: monthlyLabels,
-            datasets: [{
-                label: 'Total Requests',
-                data: monthlyTotals,
-                backgroundColor: blue,
-                borderWidth: 0,
-                borderRadius: 4,
-                maxBarThickness: 40
-            }]
+            datasets: monthlyStatusDatasets
         },
         options: mergeChartOptions({
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        afterBody: function (items) {
-                            const i = items[0].dataIndex;
-                            return [
-                                'Approved: ' + monthlyApproved[i],
-                                'Pending: ' + monthlyPending[i],
-                                'Overdue: ' + monthlyOverdue[i],
-                                'Rejected: ' + monthlyRejected[i]
-                            ];
-                        }
-                    }
-                }
-            },
+            plugins: { legend: { display: false } },
             scales: {
-                x: { grid: { display: false }, ticks: window.getMonthAxisTicks() },
-                y: { beginAtZero: true, grid: { color: '#d9d9d9' }, border: { display: false }, ticks: { precision: 0 } }
+                x: { stacked: true, grid: { display: false }, ticks: window.getMonthAxisTicks() },
+                y: { stacked: true, beginAtZero: true, grid: { color: '#d9d9d9' }, border: { display: false }, ticks: { precision: 0 } }
             }
         })
     });
     window.registerMonthAxisChart(monthlyStatusChart);
+
+    window.replaceEmptyDashboardCharts([
+        { id: 'leaveDoughnut', values: leaveTypeData, message: 'No leave requests by type for this filter.' },
+        { id: 'statusPie', values: statusPieData, message: 'No leave requests by status for this filter.' },
+        { id: 'monthlyLine', values: monthlyTotals, message: 'No applications submitted in this leave year.' },
+        { id: 'departmentBar', values: @json($departmentData ?? []), message: 'No leave requests by department for this filter.' },
+        { id: 'monthlyStatusStackedBar', values: monthlyStatusDatasets, message: 'No monthly status data for this leave year.' },
+        { id: 'payStatusPolar', values: payStatusData, message: 'No paid or unpaid leave for this filter.' },
+    ]);
 
 });
 </script>

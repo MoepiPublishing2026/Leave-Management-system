@@ -509,16 +509,6 @@
         font-size: 0.7rem;
         padding: 12px 16px !important;
     }
-    .balance-back { margin-top: 8px; }
-    .balance-back a {
-        font-weight: 700;
-        color: #d91f3d;
-        text-decoration: none;
-    }
-    .balance-back a:hover { 
-        color: #b91831;
-        text-decoration: none; 
-    }
 
     @media (max-width: 1100px) {
         .balance-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

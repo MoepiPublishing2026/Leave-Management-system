@@ -54,7 +54,7 @@ html body .team-requests-page .requests-table tr.row-click {
 html body .team-requests-page .requests-table tr.row-click td {
     display:block; border:0 !important; background:transparent !important; padding:2px 0 !important; text-align:left !important; color:#444;
 }
-html body .team-requests-page .requests-table td:nth-child(1) { position:absolute; top:6px; left:12px; padding:0 !important; font-size:.8rem; font-weight:700; color:#2379b0; }
+html body .team-requests-page .requests-table td:nth-child(1) { position:absolute; top:6px; left:12px; padding:0 !important; font-size:.8rem; font-weight:800 !important; color:#2379b0 !important; }
 html body .team-requests-page .requests-table td:nth-child(2) { grid-column:1 / 3; grid-row:1; font-size:1.5rem; font-weight:700; color:#555; }
 html body .team-requests-page .requests-table td:nth-child(7) { grid-column:3; grid-row:1; justify-self:end; }
 html body .team-requests-page .requests-table td:nth-child(3) { grid-column:1 / -1; grid-row:2; font-weight:700; }
@@ -108,8 +108,8 @@ html body .team-requests-page .request-badge {
     border:2px solid #666; border-radius:14px; padding:4px 14px; font-weight:700; font-size:.8rem;
 }
 html body .team-requests-page .request-badge--approved { background:#9db4ff !important; border-color:#2a6fc0; color:#1f3f8f !important; }
-html body .team-requests-page .request-badge--pending,
-html body .team-requests-page .request-badge--overdue { background:#cebaf6 !important; border-color:#a33d86; color:#7a2a7a !important; }
+html body .team-requests-page .request-badge--pending { background:#cebaf6 !important; border-color:#a33d86; color:#7a2a7a !important; }
+html body .team-requests-page .request-badge--overdue { background:#cebaf6 !important; border-color:#a33d86; color:#fff !important; }
 html body .team-requests-page .request-badge--rejected { background:#f9c3c9 !important; border-color:#d5253a; color:#a31b2e !important; }
 
 /* search box magnifier */

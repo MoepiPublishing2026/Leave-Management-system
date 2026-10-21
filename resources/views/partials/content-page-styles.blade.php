@@ -30,23 +30,6 @@
         font-size: 0.95rem;
         line-height: 1.5;
     }
-    .app-page-flash {
-        margin-bottom: 16px;
-        padding: 12px 16px;
-        border-radius: 10px;
-        font-weight: 600;
-        font-size: 0.92rem;
-    }
-    .app-page-flash--success {
-        background: #ecfdf5;
-        border: 1px solid #86efac;
-        color: #065f46;
-    }
-    .app-page-flash--error {
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        color: #991b1b;
-    }
     .app-page-panel {
         background: #fff;
         border: 1px solid #d4d4d4;

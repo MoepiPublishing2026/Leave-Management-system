@@ -38,6 +38,17 @@
     html body .employee-create-page .signup-container input[type="text"],
     html body .employee-create-page .signup-container input[type="email"],
     html body .employee-create-page .signup-container input[type="password"] { border:2px solid #a2b222 !important; border-radius:14px !important; padding:13px 16px !important; font-size:14px !important; }
+    html body .employee-create-page .password-toggle { position: relative; margin-top: 7px; }
+    html body .employee-create-page .password-toggle input { margin-top: 0 !important; padding-right: 46px !important; width: 100%; }
+    html body .employee-create-page .password-toggle input::-ms-reveal,
+    html body .employee-create-page .password-toggle input::-ms-clear { display: none; }
+    html body .employee-create-page .password-toggle .toggle-password {
+        position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 0; border: 0; background: transparent; cursor: pointer;
+        color: #a2b222; line-height: 0;
+    }
+    html body .employee-create-page .password-toggle .toggle-password svg { width: 22px; height: 22px; stroke: #a2b222; }
     html body .employee-create-page .signup-container select { border:2px solid #777 !important; border-radius:14px !important; padding:11px 16px !important; font-size:14px !important; font-weight:700 !important; color:#263248 !important; box-shadow:none !important; background-color:#fff !important; }
     html body .employee-create-page .checkbox-row label { margin-top:0 !important; font-size:13px !important; text-transform:none !important; }
     html body .employee-create-page input[type="checkbox"] { accent-color:#a2b222 !important; }
@@ -159,11 +170,23 @@
         @error('email')<div class="error">{{ $message }}</div>@enderror
 
         <label for="password">Password</label>
-        <input type="password" name="password" id="password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
+        <div class="password-toggle">
+            <input type="password" name="password" id="password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
+            <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password" aria-pressed="false">
+                <svg id="eyeOpenPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" /><circle cx="12" cy="12" r="3" /></svg>
+                <svg id="eyeClosedPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true" style="display:none;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5a10.6 10.6 0 00-4.9 1.2" /></svg>
+            </button>
+        </div>
         @error('password')<div class="error">{{ $message }}</div>@enderror
 
         <label for="password_confirmation">Confirm Password</label>
-        <input type="password" name="password_confirmation" id="password_confirmation" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
+        <div class="password-toggle">
+            <input type="password" name="password_confirmation" id="password_confirmation" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
+            <button type="button" class="toggle-password" id="togglePasswordConfirmation" aria-label="Show password" aria-pressed="false">
+                <svg id="eyeOpenPasswordConfirmation" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" /><circle cx="12" cy="12" r="3" /></svg>
+                <svg id="eyeClosedPasswordConfirmation" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true" style="display:none;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5a10.6 10.6 0 00-4.9 1.2" /></svg>
+            </button>
+        </div>
 
         <div class="button-group">
             <button type="submit" class="btn-form-action">Add Employee</button>
@@ -249,6 +272,24 @@
         departmentSelect?.addEventListener('change', updateDepartmentHint);
         roleSelect?.addEventListener('change', syncRoleFields);
         syncRoleFields();
+
+        function setupPasswordToggle(inputId, toggleId, openId, closedId) {
+            const input = document.getElementById(inputId);
+            const toggle = document.getElementById(toggleId);
+            const eyeOpen = document.getElementById(openId);
+            const eyeClosed = document.getElementById(closedId);
+            if (!input || !toggle || !eyeOpen || !eyeClosed) return;
+            toggle.addEventListener('click', function () {
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                eyeOpen.style.display = isPassword ? 'none' : 'block';
+                eyeClosed.style.display = isPassword ? 'block' : 'none';
+                toggle.setAttribute('aria-pressed', String(isPassword));
+                toggle.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+            });
+        }
+        setupPasswordToggle('password', 'togglePassword', 'eyeOpenPassword', 'eyeClosedPassword');
+        setupPasswordToggle('password_confirmation', 'togglePasswordConfirmation', 'eyeOpenPasswordConfirmation', 'eyeClosedPasswordConfirmation');
     });
 </script>
 

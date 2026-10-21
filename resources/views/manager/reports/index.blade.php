@@ -3,6 +3,7 @@
 @section('title', 'Leave Reports')
 
 @section('content')
+@include('partials.dashboard-status-card-styles')
 @include('partials.reports-page-styles')
 @include('partials.reports-index-content', [
     'filterRoute' => 'manager.reports',

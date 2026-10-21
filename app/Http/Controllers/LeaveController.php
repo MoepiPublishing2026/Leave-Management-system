@@ -16,7 +16,6 @@ use App\Notifications\NewLeaveRequestNotification;
 use App\Notifications\LeaveWithdrawnNotification;
 use App\Notifications\LeaveSubmittedNotification;
 use App\Notifications\ProofUploadedNotification;
- use Yasumi\Yasumi;
 use Illuminate\Support\Facades\Storage;
 use App\Support\AnnualLeaveRules;
 use App\Support\LeaveProofRules;
@@ -31,6 +30,7 @@ use App\Support\OverdueLeaveNotifier;
 use App\Support\ParentalLeaveRules;
 use App\Support\LeaveYear;
 use App\Support\PersonalLeaveDashboardData;
+use App\Services\PublicHolidayService;
 
 
 class LeaveController extends Controller
@@ -47,15 +47,7 @@ private function yearWindow(int $year): array
 
 private function buildPublicHolidaysByYear(int $startYear, int $endYear): array
 {
-    $holidaysByYear = [];
-    for ($year = $startYear; $year <= $endYear; $year++) {
-        $holidaysByYear[$year] = [];
-        $yearHolidays = Yasumi::create('SouthAfrica', $year);
-        foreach ($yearHolidays as $holiday) {
-            $holidaysByYear[$year][] = $holiday->format('Y-m-d');
-        }
-    }
-    return $holidaysByYear;
+    return PublicHolidayService::datesByYear($startYear, $endYear);
 }
 
 private function countWorkingDaysInYear(Carbon $start, Carbon $end, array $publicHolidaysForYear, int $year): int
@@ -430,14 +422,7 @@ public function leaveBalance(Request $request)
 
 public function generateHolidaysRange($startYear, $endYear)
 {
-    $holidays = [];
-    for ($year = $startYear; $year <= $endYear; $year++) {
-        $yearHolidays = Yasumi::create('SouthAfrica', $year);
-        foreach ($yearHolidays as $holiday) {
-            $holidays[] = $holiday->format('Y-m-d');
-        }
-    }
-    return $holidays;
+    return PublicHolidayService::datesForYearRange((int) $startYear, (int) $endYear);
 }
 
 public function applyForm()
@@ -1045,14 +1030,7 @@ private function calculateWorkingDaysForLeave(LeaveRequest $leave): float
 {
     $startYear = (int) Carbon::parse($leave->start_date)->year;
     $endYear = (int) Carbon::parse($leave->end_date)->year;
-    $publicHolidays = [];
-
-    for ($year = $startYear; $year <= $endYear; $year++) {
-        $holidays = Yasumi::create('SouthAfrica', $year);
-        foreach ($holidays as $holiday) {
-            $publicHolidays[] = $holiday->format('Y-m-d');
-        }
-    }
+    $publicHolidays = PublicHolidayService::datesForYearRange($startYear, $endYear);
 
     $start = Carbon::parse($leave->start_date);
     $end = Carbon::parse($leave->end_date);

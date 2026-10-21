@@ -312,13 +312,21 @@
         margin: 0 !important;
         padding: 2px 2px 14px !important;
         border-bottom: 1px solid #d0d0d0 !important;
-        color: #3b7ec4 !important;
+        color: #111 !important;
         font-size: 15px !important;
         font-weight: 600 !important;
         text-align: left !important;
         text-transform: none !important;
         line-height: 1.35 !important;
         letter-spacing: 0 !important;
+    }
+    html body .cal-day-label {
+        color: #111 !important;
+        font-weight: 600 !important;
+    }
+    html body .cal-day-date {
+        color: #3b7ec4 !important;
+        font-weight: 800 !important;
     }
     html body .swal2-popup.calendar-day-popup .cal-day-content {
         margin: 0;
@@ -369,37 +377,38 @@
     html body .swal2-popup.calendar-day-popup .swal2-confirm,
     html body .swal2-popup:has(.cal-day-modal) .swal2-confirm,
     html body .swal2-popup.calendar-day-popup button.swal2-confirm.calendar-day-close,
-    html body button.swal2-confirm.calendar-day-close {
-        background: #f1ec3c !important;
-        color: #111 !important;
-        border: 0 !important;
-        border-width: 0 !important;
-        border-style: none !important;
-        border-color: transparent !important;
-        border-top-color: transparent !important;
-        border-left-color: transparent !important;
-        border-right-color: transparent !important;
-        border-bottom-color: transparent !important;
-        outline: none !important;
-        border-radius: 999px !important;
-        padding: 8px 26px !important;
+    html body button.swal2-confirm.calendar-day-close,
+    html body .cal-day-close,
+    html body button.cal-day-close {
+        background: #a2b222 !important;
+        color: #263041 !important;
+        font-weight: 700 !important;
+        font-size: 18px !important;
+        border-radius: 10px !important;
+        padding: 10px 22px !important;
         min-height: 0 !important;
         min-width: 0 !important;
         height: auto !important;
         width: auto !important;
-        font-size: 14px !important;
-        font-weight: 700 !important;
         line-height: 1.2 !important;
         text-transform: none !important;
         box-shadow: none !important;
+        outline: none !important;
+        border-width: 3px !important;
+        border-style: solid !important;
+        border-top-color: #00ffff !important;
+        border-left-color: #00ffff !important;
+        border-right-color: #ff40d4 !important;
+        border-bottom-color: #ff40d4 !important;
     }
     html body .swal2-popup.calendar-day-popup .swal2-confirm:hover,
     html body .swal2-popup:has(.cal-day-modal) .swal2-confirm:hover,
     html body .swal2-popup.calendar-day-popup button.swal2-confirm.calendar-day-close:hover,
-    html body button.swal2-confirm.calendar-day-close:hover {
-        background: #e4df2e !important;
-        color: #111 !important;
-        border: 0 !important;
+    html body button.swal2-confirm.calendar-day-close:hover,
+    html body .cal-day-close:hover,
+    html body button.cal-day-close:hover {
+        background: #8d9c1c !important;
+        color: #263041 !important;
     }
     .rd-modal--proto {
         font-family: "Poppins", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -573,7 +582,7 @@
     .rd-badge--approved { background: #138056 !important; }
     .rd-badge--rejected { background: #b91c1c !important; }
     .rd-badge--withdrawn { background: #D2B55B !important; }
-    .rd-badge--overdue { background: #C154C1 !important; }
+    .rd-badge--overdue { background: #cebaf6 !important; border: 2px solid #a33d86; color: #fff !important; }
     .rd-stats {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));

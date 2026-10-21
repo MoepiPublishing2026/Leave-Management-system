@@ -23,10 +23,6 @@
         <h1 class="auth-title mobile-title">Two-Factor Authentication</h1>
         <p class="auth-copy mobile-copy">A verification code has been sent to your email.Please<br>enter it below to continue</p>
 
-        @if (session('status'))
-            <div class="auth-status" role="status">{{ session('status') }}</div>
-        @endif
-
         <form method="POST" action="{{ route('login.verify.post') }}" class="auth-form verify-form" id="verificationForm">
             @csrf
 
@@ -154,6 +150,18 @@
                 html: '<ul style="text-align:left;">' + @json($errors->all()).map(e => '<li>' + e + '</li>').join('') + '</ul>',
                 confirmButtonText: 'OK',
                 width: '30em',
+                confirmButtonColor: '#29374c'
+            });
+        </script>
+    @endif
+
+    @if (session('status'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: @json(session('status')),
+                confirmButtonText: 'OK',
                 confirmButtonColor: '#29374c'
             });
         </script>

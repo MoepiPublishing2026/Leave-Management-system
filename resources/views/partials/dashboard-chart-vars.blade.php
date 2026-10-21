@@ -344,5 +344,58 @@
         const colors = labels.map((label) => window.colorForStatus(label));
         window.renderChartHtmlLegend(listElementId, labels, colors);
     };
+
+    window.chartHasValues = (values) => {
+        const walk = (item) => {
+            if (Array.isArray(item)) {
+                return item.some(walk);
+            }
+            if (item && typeof item === 'object' && Array.isArray(item.data)) {
+                return walk(item.data);
+            }
+            return Number(item) > 0;
+        };
+        return walk(values);
+    };
+
+    window.mountChartEmptyState = (canvas, message) => {
+        if (!canvas) {
+            return;
+        }
+        const existing = window.Chart ? Chart.getChart(canvas) : null;
+        if (existing) {
+            window.monthAxisCharts = (window.monthAxisCharts || []).filter((chart) => chart !== existing);
+            existing.destroy();
+        }
+        const body = canvas.closest('.chart-body') || canvas.parentElement;
+        if (!body) {
+            return;
+        }
+        canvas.style.display = 'none';
+        if (body.querySelector('.chart-empty')) {
+            return;
+        }
+        const empty = document.createElement('div');
+        empty.className = 'chart-empty';
+        empty.innerHTML = '<div class="chart-empty-icon" aria-hidden="true">'
+            + '<svg viewBox="0 0 24 24" fill="none">'
+            + '<rect x="3" y="13" width="4" height="8" rx="1" fill="#c4d82e"></rect>'
+            + '<rect x="10" y="8" width="4" height="13" rx="1" fill="#c4d82e"></rect>'
+            + '<rect x="17" y="4" width="4" height="17" rx="1" fill="#c4d82e"></rect>'
+            + '</svg></div>'
+            + '<p class="chart-empty-title">Nothing to show yet</p>'
+            + '<p class="chart-empty-copy"></p>';
+        empty.querySelector('.chart-empty-copy').textContent = message || 'No leave requests for this filter.';
+        body.appendChild(empty);
+    };
+
+    window.replaceEmptyDashboardCharts = (entries) => {
+        (entries || []).forEach((entry) => {
+            if (window.chartHasValues(entry.values)) {
+                return;
+            }
+            window.mountChartEmptyState(document.getElementById(entry.id), entry.message);
+        });
+    };
 </script>
 @endonce

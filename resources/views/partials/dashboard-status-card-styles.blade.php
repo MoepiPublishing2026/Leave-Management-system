@@ -106,12 +106,16 @@
         color: #fff !important;
     }
     .request-badge--pending,
-    .request-badge--overdue,
-    .rd-badge--pending,
-    .rd-badge--overdue {
+    .rd-badge--pending {
         background: #cebaf6 !important;
         border-color: #a33d86 !important;
         color: #7a2a7a !important;
+    }
+    .request-badge--overdue,
+    .rd-badge--overdue {
+        background: #cebaf6 !important;
+        border-color: #a33d86 !important;
+        color: #fff !important;
     }
     .request-badge--approved,
     .rd-badge--approved {

@@ -5,8 +5,8 @@ namespace App\Support;
 use App\Models\LeavePolicy;
 use App\Models\LeaveRequest;
 use Carbon\Carbon;
+use App\Services\PublicHolidayService;
 use Illuminate\Support\Facades\DB;
-use Yasumi\Yasumi;
 
 class PersonalLeaveDashboardData
 {
@@ -34,14 +34,30 @@ class PersonalLeaveDashboardData
         $pendingCount = max(0, $pendingTotalCount - $overduePendingCount);
 
         $allRequestsCount = LeaveRequest::where('user_id', $userId)->count();
+        $activeRequestsQuery = LeaveRequest::where('user_id', $userId)
+            ->whereRaw('LOWER(TRIM(status)) != ?', ['withdrawn']);
 
-        $leaveTypeCounts = LeaveRequest::where('user_id', $userId)
-            ->select('leave_type', DB::raw('count(*) as total'))
-            ->groupBy('leave_type')
-            ->pluck('total', 'leave_type')
-            ->toArray();
+        $payStatusCounts = LeaveTypeChartCounts::payStatusFromQuery($activeRequestsQuery);
+        $payStatusPercentages = PercentageDistribution::oneDecimalPercents($payStatusCounts);
+
+        $user = \App\Models\User::find($userId);
+        $departmentName = trim((string) ($user->department ?? '')) ?: 'Unknown';
+        $departmentLabels = [$departmentName];
+        $departmentData = [(clone $activeRequestsQuery)->count()];
+
+        $today = Carbon::today();
+        $isTodayDisabled = $today->isWeekend() || PublicHolidayService::isHoliday($today);
+        $onLeaveTodayCount = 0;
+        if (! $isTodayDisabled) {
+            $onLeaveTodayCount = LeaveRequest::where('user_id', $userId)
+                ->whereRaw('LOWER(TRIM(status)) = ?', ['approved'])
+                ->whereDate('start_date', '<=', $today)
+                ->whereDate('end_date', '>=', $today)
+                ->count();
+        }
+
+        $leaveTypeCounts = LeaveTypeChartCounts::fromQuery($activeRequestsQuery);
         $leaveTypeCounts = self::filterChartLeaveTypes($leaveTypeCounts, $userId);
-        arsort($leaveTypeCounts, SORT_NUMERIC);
         $leaveTypePercentages = PercentageDistribution::oneDecimalPercents($leaveTypeCounts);
 
         $dashboardYear = LeaveYear::current();
@@ -154,6 +170,11 @@ class PersonalLeaveDashboardData
             'rejectedCount',
             'withdrawnCount',
             'overduePendingCount',
+            'onLeaveTodayCount',
+            'payStatusCounts',
+            'payStatusPercentages',
+            'departmentLabels',
+            'departmentData',
             'statusPercentages',
             'leaveTypeCounts',
             'leaveTypePercentages',
@@ -182,15 +203,7 @@ class PersonalLeaveDashboardData
 
     private static function generateHolidaysRange(int $startYear, int $endYear): array
     {
-        $holidays = [];
-        for ($y = $startYear; $y <= $endYear; $y++) {
-            $yearHolidays = Yasumi::create('SouthAfrica', $y);
-            foreach ($yearHolidays as $holiday) {
-                $holidays[] = $holiday->format('Y-m-d');
-            }
-        }
-
-        return $holidays;
+        return PublicHolidayService::datesForYearRange($startYear, $endYear);
     }
 
     private static function countWorkingDaysInLeaveYear(Carbon $start, Carbon $end, array $publicHolidaysForYear, int $year): int

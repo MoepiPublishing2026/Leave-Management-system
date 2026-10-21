@@ -688,10 +688,6 @@
 
 <h1 class="messages-page-title">Messages</h1>
 
-@if(session('error'))
-    <p style="color:#b91c1c;font-weight:700;margin:0 0 12px;">{{ session('error') }}</p>
-@endif
-
 <div class="messages-wrap {{ $activeConversation ? 'is-mobile-thread' : '' }}">
     <aside class="messages-sidebar" aria-label="Chats">
         <div class="messages-sidebar-head">Chats</div>

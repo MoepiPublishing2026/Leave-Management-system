@@ -66,6 +66,49 @@
         font-weight: 700 !important;
         color: #0f172a;
     }
+    .chart-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 100%;
+        min-height: 168px;
+        margin: 0;
+        padding: 18px 16px;
+        border: 1.5px dashed #c5ccd6;
+        border-radius: 14px;
+        background: linear-gradient(180deg, #f7f9fb 0%, #eef2f6 100%);
+        text-align: center;
+        box-sizing: border-box;
+    }
+    .chart-empty-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #263041;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .chart-empty-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+    .chart-empty-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #263041;
+    }
+    .chart-empty-copy {
+        margin: 0;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #64748b;
+        max-width: 16rem;
+        line-height: 1.4;
+    }
     @media (max-width: 768px) {
         .chart-card {
             min-height: auto !important;

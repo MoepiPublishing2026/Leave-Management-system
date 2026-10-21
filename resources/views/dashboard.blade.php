@@ -12,21 +12,24 @@
     $applyRoute = \App\Support\LeaveApplicant::applyRoute($user);
     $calendarRoute = \App\Support\LeaveApplicant::personalCalendarRoute($user);
 @endphp
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  html body { font-family: 'Poppins', 'Segoe UI', sans-serif; }
   body, html {
     margin: 0;
     padding: 0;
   }
   .dashboard-container {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
     width: 100%;
     max-width: 1200px;
-    padding: 16px 18px 28px;
-    min-height: 100vh;
+    box-sizing: border-box;
+    padding: 20px 22px 18px;
     background: white;
-    border-radius: 20px;
-    box-shadow: 0 6px 20px rgba(163, 71, 71, 0.08);
-    margin: 0 auto;
+    border: 1px solid #d3d8de;
+    border-radius: 14px;
+    box-shadow: 0 0 14px rgba(0, 0, 0, 0.16);
+    margin: 0 auto 56px;
   }
   @media (max-width: 768px) {
     .dashboard-container {
@@ -38,19 +41,19 @@
       margin-bottom: 18px;
     }
     .leave-balance-card {
-      padding: 16px 14px;
+      padding: 18px 16px 20px;
     }
     .leave-balance-title {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
     }
     .leave-balance-list.open {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
+      gap: 14px;
     }
     .leave-balance-item {
-      padding: 12px 10px;
-      font-size: 0.92rem;
-      min-height: 76px;
+      padding: 16px 12px;
+      font-size: 0.95rem;
+      min-height: 82px;
     }
     .dash-charts-grid {
       grid-template-columns: 1fr;
@@ -75,40 +78,42 @@
   }
   h1 {
     font-weight: 700;
-    font-size: 36px;
-    color: #0f172a;
-    margin: 0 0 24px 0;
-    padding-left: 15px;
+    font-size: 38px;
+    font-family: 'Century Gothic', 'Poppins', sans-serif;
+    color: #253141;
+    margin: 0 0 22px 0;
+    padding: 0;
     letter-spacing: 0.04em;
   }
 
   .leave-balance-card {
-    background: white;
-    border-radius: 16px;
-    padding: 20px 24px;
-    box-shadow: 0 6px 20px rgba(32, 50, 93, 0.1);
-    color: #123f3a;
+    background: #e6ecef;
+    border-radius: 22px;
+    padding: 22px 24px 26px;
+    box-shadow: none;
+    color: #4d5d68;
     cursor: pointer;
     max-width: 1200px;
-    margin-bottom: 24px;
-    transition: box-shadow 0.3s ease;
-    border-left: 5px solid #0f766e;
-    border-top: 1px solid #0f766e;
-    border-right: 1px solid #0f766e;
-    border-bottom: 1px solid #0f766e;
+    margin-bottom: 22px;
+    border: none;
   }
   .leave-balance-card:hover {
-    box-shadow: 0 10px 40px rgba(32, 80, 110, 0.2);
-    position: relative;
-    z-index: 1;
+    box-shadow: none;
   }
   .leave-balance-title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-bottom: 8px;
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin-bottom: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    color: #5a6a74;
+    letter-spacing: 0;
+  }
+  .leave-balance-title .expand-icon {
+    font-size: 1.2rem;
+    color: #263041;
+    line-height: 1;
   }
   .leave-balance-list {
     max-height: 0;
@@ -119,20 +124,20 @@
     margin: 0;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 18px 20px;
+    gap: 18px 16px;
     align-items: stretch;
     grid-auto-rows: 1fr;
   }
   .leave-balance-list.open {
-    max-height: 800px;
-    margin-top: 12px;
+    max-height: 1200px;
+    margin-top: 18px;
     overflow: visible;
-    padding-top: 4px;
+    padding-top: 2px;
   }
   .leave-balance-item {
-    background-color: #d3e5df;
+    background-color: #fff;
     border-radius: 16px;
-    padding: 14px 12px;
+    padding: 20px 14px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -140,42 +145,53 @@
     min-height: 88px;
     height: 100%;
     box-sizing: border-box;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #050505ff;
-    box-shadow: 0 0 10px rgba(167, 189, 141, 0.85);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border-left: 5px solid #0f766e;
-    border-top: 1px solid #0f766e;
-    border-right: 1px solid #0f766e;
-    border-bottom: 1px solid #0f766e;
+    font-size: 0.98rem;
+    font-weight: 500;
+    color: #4a5560;
+    box-shadow: 0 10px 22px rgba(90, 110, 125, 0.16);
+    border: 1px solid #c5ccd4;
   }
   .leave-balance-item:hover {
-    box-shadow: 0 8px 20px rgba(13, 59, 53, 0.25);
+    box-shadow: 0 12px 24px rgba(90, 110, 125, 0.2);
   }
   .leave-balance-item.disabled {
-    opacity: 0.55;
-    filter: grayscale(0.25);
+    background: #d4dbe0;
+    color: #6b767e;
+    box-shadow: 0 4px 10px rgba(90, 110, 125, 0.08);
+    border: 1px solid #b7c0c8;
     cursor: not-allowed;
   }
   .leave-balance-item.disabled:hover {
     cursor: not-allowed;
-    box-shadow: 0 0 10px rgba(167, 189, 141, 0.85);
+    box-shadow: 0 4px 10px rgba(90, 110, 125, 0.08);
     transform: none;
   }
   .leave-type {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     text-align: center;
     white-space: normal;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-    line-height: 1.3;
+    overflow-wrap: break-word;
+    word-break: normal;
+    line-height: 1.35;
     hyphens: auto;
     max-width: 100%;
+    padding: 0 4px;
+  }
+  .leave-type-unavailable {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #8a5a5a;
+    letter-spacing: 0.02em;
   }
   @media (max-width: 1100px) {
     .leave-balance-list.open {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
+      gap: 14px;
     }
   }
 
@@ -184,39 +200,40 @@
     flex-wrap: nowrap;
     align-items: stretch;
     gap: 12px;
-    margin-bottom: 40px;
+    margin-bottom: 18px;
     width: 100%;
     overflow-x: auto;
     overflow-y: visible;
-    padding: 4px 2px 8px;
+    padding: 0 0 8px;
   }
-  .card {
-    background: #f8fafc;
-    border-radius: 16px;
-    padding: 14px 10px 12px;
-    box-shadow: 0 0 10px rgba(167, 189, 141, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
+  .dashboard-container .cards .card {
     flex: 1 1 0;
     min-width: 0;
-    min-height: 110px;
-    height: auto;
-    align-self: stretch;
-    cursor: move;
-    position: relative;
-    transition: box-shadow 0.3s ease, transform 0.2s ease;
+    height: 92px;
+    min-height: 92px;
+    border: none !important;
+    border-radius: 20px;
+    box-shadow: none !important;
+    padding: 10px 6px;
+    text-align: center;
     text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #fff;
     box-sizing: border-box;
+    cursor: pointer;
   }
-  .card:hover {
-    box-shadow: 0 0 14px rgba(167, 189, 141, 1);
-    transform: translateY(-1px);
-    z-index: 2;
+  .dashboard-container .cards .card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    transform: none;
   }
+  .dashboard-container .cards .card.card-all      { background: #4fe6c5 !important; }
+  .dashboard-container .cards .card.card-pending  { background: #f2b96b !important; }
+  .dashboard-container .cards .card.card-overdue  { background: #ab8cf5 !important; }
+  .dashboard-container .cards .card.card-approved { background: #a03d85 !important; }
+  .dashboard-container .cards .card.card-rejected  { background: #94c4c8 !important; }
+  .dashboard-container .cards .card.card-withdrawn { background: #b9d84a !important; }
   .card .card-title svg,
   .card .card-title .icon {
     display: none;
@@ -226,10 +243,10 @@
     text-align: center;
   }
   .card-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin: 0;
-    min-height: 2.4em;
+    font-size: 0.85rem;
+    font-weight: 400;
+    margin: 2px 0 6px 0;
+    min-height: 0;
     line-height: 1.2;
     display: flex;
     align-items: center;
@@ -238,8 +255,8 @@
     gap: 8px;
   }
   .card-value {
-    font-weight: 700;
-    font-size: 1.75rem;
+    font-weight: bold;
+    font-size: 1.4rem;
     line-height: 1;
     margin: 0;
   }
@@ -247,21 +264,24 @@
   .dash-charts-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
+    gap: 12px;
     margin-top: 10px;
     align-items: stretch;
   }
   .chart-card {
     background: white;
     padding: 12px 12px;
-    border-radius: 24px;
-    box-shadow: 0 6px 22px rgba(67, 83, 255, 0.12);
-    border: 1px solid #dbe3f0;
+    border-radius: 14px;
+    box-shadow: 0 3px 9px rgba(0, 0, 0, 0.18);
+    border: 1px solid #d6dbe0;
     color: #222;
     display: flex;
     flex-direction: column;
-    min-height: 280px;
+    min-height: 236px;
   }
+  .dashboard-container .chart-body--ring { height: 214px; }
+  .dashboard-container .chart-body--ring canvas { max-height: 214px; }
+  .dashboard-container .chart-body--plot { height: 186px; }
   @media (max-width: 1200px) {
     .dash-charts-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -275,8 +295,8 @@
   .chart-card h3 {
     margin: 0 0 10px 0;
     font-weight: 700;
-    font-size: 1rem;
-    color: #0f172a;
+    font-size: 0.95rem;
+    color: #253141;
   }
   .chart-body {
     position: relative;
@@ -364,13 +384,14 @@
   }
   .dashboard-top-bar {
     max-width: 1200px;
-    margin: 0 auto 12px;
-    padding: 0 18px;
+    margin: 0 auto 22px;
+    padding: 0 30px;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    box-sizing: border-box;
   }
   .dashboard-top-bar h1 {
     margin: 0;
@@ -404,12 +425,12 @@
     </nav>
   @endif
 
-  <div id="leaveBalanceCard" class="leave-balance-card" role="button" tabindex="0" aria-expanded="false" aria-controls="leaveBalanceList">
+  <div id="leaveBalanceCard" class="leave-balance-card open" role="button" tabindex="0" aria-expanded="true" aria-controls="leaveBalanceList">
     <div class="leave-balance-title">
       Your Leave Balances
-      <span class="expand-icon">&#9660;</span>
+      <span class="expand-icon">&#9650;</span>
     </div>
-    <ul id="leaveBalanceList" class="leave-balance-list" aria-hidden="true">
+    <ul id="leaveBalanceList" class="leave-balance-list open" aria-hidden="false">
       @php
         $annualKey = array_key_exists('Annual', $leaveBalances) ? 'Annual' : (array_key_exists('Annual Leave', $leaveBalances) ? 'Annual Leave' : 'Annual');
         $annualBalance = $leaveBalances[$annualKey] ?? 0;
@@ -420,17 +441,21 @@
           $isTypeExhausted = (float) $daysLeft <= 0;
           $isAnnualDisabled = $annualBalance <= 0 && \App\Support\AnnualLeaveRules::countsAgainstAnnual((string) $type);
           $isDisabled = $isTypeExhausted || $isAnnualDisabled || $isParentalBlocked;
-          $disabledLabel = $isParentalBlocked
-              ? ' (Unavailable)'
-              : ($isTypeExhausted ? ' (No balance)' : ($isAnnualDisabled ? ' (Annual pool exhausted)' : ''));
+          $typeName = trim((string) $type);
+          $displayType = preg_match('/\bleave\s*$/i', $typeName) ? $typeName : $typeName.' Leave';
         @endphp
         <li class="leave-balance-item {{ $isDisabled ? 'disabled' : '' }}"
-            title="{{ $type }} Leave — {{ $daysLeft }} day{{ $daysLeft == 1 ? '' : 's' }} remaining{{ $disabledLabel }}"
-            aria-label="{{ $type }} Leave, {{ $daysLeft }} days remaining{{ $isDisabled ? ', unavailable' : '' }}"
+            title="{{ $displayType }} — {{ $daysLeft }} day{{ $daysLeft == 1 ? '' : 's' }} remaining{{ $isDisabled ? ' (Unavailable)' : '' }}"
+            aria-label="{{ $displayType }}, {{ $daysLeft }} days remaining{{ $isDisabled ? ', unavailable' : '' }}"
             @if($isDisabled) aria-disabled="true" @endif
             onclick="{{ $isDisabled ? 'event.stopPropagation(); return false;' : 'event.stopPropagation(); window.location=\'' . route($balanceRoute, ['type' => $type]) . '\'' }}"
             style="cursor: {{ $isDisabled ? 'not-allowed' : 'pointer' }};">
-          <span class="leave-type">{{ $type }} Leave{{ $disabledLabel }}</span>
+          <span class="leave-type">
+            {{ $displayType }}
+            @if($isDisabled)
+              <span class="leave-type-unavailable">Unavailable</span>
+            @endif
+          </span>
         </li>
       @endforeach
     </ul>
@@ -442,28 +467,28 @@
       <div class="card-value">{{ $allRequestsCount ?? 0 }}</div>
     </a>
 
-    <a href="{{ route($statusRoute, ['status' => 'pending']) }}" role="listitem" aria-label="Pending Leaves count" class="card card-pending">
-      <div class="card-title">Pending Leaves</div>
+    <a href="{{ route($statusRoute, ['status' => 'pending']) }}" role="listitem" aria-label="Pending requests count" class="card card-pending">
+      <div class="card-title">Pending Requests</div>
       <div class="card-value">{{ $pendingCount }}</div>
     </a>
 
-    <a href="{{ route($statusRoute, ['status' => 'overdue']) }}" role="listitem" aria-label="Overdue Leaves count" class="card card-overdue">
-      <div class="card-title">Overdue Leaves</div>
+    <a href="{{ route($statusRoute, ['status' => 'overdue']) }}" role="listitem" aria-label="Overdue requests count" class="card card-overdue">
+      <div class="card-title">Overdue Requests</div>
       <div class="card-value">{{ $overduePendingCount ?? 0 }}</div>
     </a>
 
-    <a href="{{ route($statusRoute, ['status' => 'approved']) }}" role="listitem" aria-label="Approved Leaves count" class="card card-approved">
-      <div class="card-title">Approved Leaves</div>
+    <a href="{{ route($statusRoute, ['status' => 'approved']) }}" role="listitem" aria-label="Approved requests count" class="card card-approved">
+      <div class="card-title">Approved Requests</div>
       <div class="card-value">{{ $approvedCount }}</div>
     </a>
 
-    <a href="{{ route($statusRoute, ['status' => 'rejected']) }}" role="listitem" aria-label="Rejected Leaves count" class="card card-rejected">
-      <div class="card-title">Rejected Leaves</div>
+    <a href="{{ route($statusRoute, ['status' => 'rejected']) }}" role="listitem" aria-label="Rejected requests count" class="card card-rejected">
+      <div class="card-title">Rejected Requests</div>
       <div class="card-value">{{ $rejectedCount }}</div>
     </a>
 
-    <a href="{{ route($statusRoute, ['status' => 'withdrawn']) }}" role="listitem" aria-label="Withdrawn Leaves count" class="card card-withdrawn">
-      <div class="card-title">Withdrawn Leaves</div>
+    <a href="{{ route($statusRoute, ['status' => 'withdrawn']) }}" role="listitem" aria-label="Withdrawn requests count" class="card card-withdrawn">
+      <div class="card-title">Withdrawn Requests</div>
       <div class="card-value">{{ $withdrawnCount ?? 0 }}</div>
     </a>
   </div>
@@ -474,7 +499,12 @@
       <div class="chart-body chart-body--ring">
         <canvas id="leaveDoughnut"></canvas>
       </div>
-      <ul class="chart-html-legend" id="leaveDoughnutLegend" aria-label="Leave types legend"></ul>
+    </div>
+    <div class="chart-card">
+      <h3>Leave Requests by Status</h3>
+      <div class="chart-body chart-body--ring">
+        <canvas id="statusPie"></canvas>
+      </div>
     </div>
     <div class="chart-card">
       <h3>Monthly Applications Submitted ({{ \App\Support\LeaveYear::label((int) ($year ?? now()->year)) }})</h3>
@@ -483,23 +513,15 @@
       </div>
     </div>
     <div class="chart-card">
+      <h3>Paid vs Unpaid Leave</h3>
+      <div class="chart-body chart-body--ring">
+        <canvas id="payStatusPolar"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
       <h3>Monthly Requests by Status ({{ \App\Support\LeaveYear::label((int) ($year ?? now()->year)) }})</h3>
       <div class="chart-body chart-body--plot">
         <canvas id="monthlyStatusStackedBar"></canvas>
-      </div>
-      <ul class="chart-html-legend" id="monthlyStatusStackedBarLegend" aria-label="Monthly status legend"></ul>
-    </div>
-    <div class="chart-card">
-      <h3>Leave Requests by Status</h3>
-      <div class="chart-body chart-body--ring">
-        <canvas id="statusPie"></canvas>
-      </div>
-      <ul class="chart-html-legend" id="statusPieLegend" aria-label="Leave status legend"></ul>
-    </div>
-    <div class="chart-card">
-      <h3>Leave Utilization by Type</h3>
-      <div class="chart-body chart-body--plot">
-        <canvas id="utilizationBar"></canvas>
       </div>
     </div>
     <div class="chart-card">
@@ -509,12 +531,6 @@
         <div id="leaveBalancePyramidLegend" class="pyramid-legend" aria-label="Leave balances legend"></div>
       </div>
     </div>
-    <!-- <div class="chart-card">
-      <h3>Leave Balance Share</h3>
-      <div class="chart-body">
-        <canvas id="balanceSharePie"></canvas>
-      </div>
-    </div> -->
   </div>
 </div>
 
@@ -573,13 +589,65 @@
       return fixedTypeColors[key] || hashToColor(key);
     };
 
+    window.chartBoldFontSpec = { family: "'Poppins', sans-serif", size: 12, weight: 'bold', style: 'normal' };
+    window.chartAxisTicksBold = { color: window.chartTextColor, font: { ...window.chartBoldFontSpec } };
     window.applyBoldChartDefaults();
     window.finalizeChartDefaults();
+
+    const protoColors = ['#4a7ff7', '#b08cf5', '#f5b96b', '#ffdc50', '#4fe6c5', '#94c4c8', '#a03d85', '#b9d84a'];
+    const blue = '#4a7ff7';
+
+    const sliceLabels = {
+      id: 'sliceLabels',
+      afterDatasetsDraw: function (chart) {
+        const ctx = chart.ctx;
+        const values = chart.data.datasets[0].data;
+        const names = chart.data.labels;
+        const slices = chart.getDatasetMeta(0).data;
+        let total = 0;
+        for (let i = 0; i < values.length; i++) {
+          total = total + Number(values[i]);
+        }
+        if (total === 0) {
+          return;
+        }
+        ctx.save();
+        ctx.font = 'bold 11px Poppins, sans-serif';
+        ctx.fillStyle = '#253141';
+        ctx.textBaseline = 'middle';
+        for (let i = 0; i < slices.length; i++) {
+          if (Number(values[i]) === 0) {
+            continue;
+          }
+          const slice = slices[i];
+          const middleAngle = (slice.startAngle + slice.endAngle) / 2;
+          const x = slice.x + Math.cos(middleAngle) * (slice.outerRadius + 8);
+          const y = slice.y + Math.sin(middleAngle) * (slice.outerRadius + 20);
+          if (Math.cos(middleAngle) > 0.25) {
+            ctx.textAlign = 'left';
+          } else if (Math.cos(middleAngle) < -0.25) {
+            ctx.textAlign = 'right';
+          } else {
+            ctx.textAlign = 'center';
+          }
+          let lines = [names[i]];
+          if (names[i].length > 11 && names[i].indexOf(' ') > -1) {
+            lines = names[i].split(' ');
+          }
+          lines.push(String(values[i]) + ' (' + (Math.round(values[i] / total * 1000) / 10) + '%)');
+          for (let n = 0; n < lines.length; n++) {
+            ctx.fillText(lines[n], x, y + (n - (lines.length - 1) / 2) * 11);
+          }
+        }
+        ctx.restore();
+      }
+    };
+    const roomForLabels = { padding: { top: 34, bottom: 34, left: 56, right: 56 } };
 
     const leaveTypes = @json(array_keys($leaveTypeCounts));
     const leaveTypeData = @json(array_values($leaveTypeCounts));
     const leaveTypePct = @json($leaveTypePercentages ?? []);
-    const leaveTypeColors = leaveTypes.map(t => getColorForType(t));
+    const leaveTypeColors = leaveTypes.map((t, i) => protoColors[i % protoColors.length]);
 
     const allMonthLabels = @json($barLabels ?? \App\Support\LeaveYear::barLabels());
     const padMonthlySeries = (values) => {
@@ -604,11 +672,13 @@
         datasets: [{
           data: leaveTypeData,
           backgroundColor: leaveTypeColors,
-          borderColor: '#fff',
-          borderWidth: 2
+          borderWidth: 0
         }]
       },
+      plugins: [sliceLabels],
       options: mergeChartOptions({
+        cutout: '50%',
+        layout: roomForLabels,
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -622,12 +692,48 @@
         }
       })
     });
-    renderChartHtmlLegend('leaveDoughnutLegend', leaveTypes, leaveTypeColors, leaveTypePct);
 
-    const monthlyColor = window.leaveMonthlyApplicationsColor;
-    const statusPieLabels = window.leaveStatusPieLabels;
-    const statusPieColors = window.statusColorsForLabels(statusPieLabels);
     const statusPct = @json($statusPercentages ?? []);
+    let statusList = [
+      { label: 'Pending',  value: {{ (int) $pendingCount }} },
+      { label: 'Overdue',  value: {{ (int) ($overduePendingCount ?? 0) }} },
+      { label: 'Rejected', value: {{ (int) $rejectedCount }} },
+      { label: 'Approved', value: {{ (int) $approvedCount }} }
+    ];
+    statusList.sort(function (a, b) {
+      return b.value - a.value;
+    });
+    const statusPieLabels = statusList.map(function (item) { return item.label; });
+    const statusPieData = statusList.map(function (item) { return item.value; });
+    const statusPieColors = statusPieLabels.map((label, i) => protoColors[i % protoColors.length]);
+
+    new Chart(document.getElementById('statusPie'), {
+      type: 'pie',
+      data: {
+        labels: statusPieLabels,
+        datasets: [{
+          data: statusPieData,
+          backgroundColor: statusPieColors,
+          borderWidth: 0
+        }]
+      },
+      plugins: [sliceLabels],
+      options: mergeChartOptions({
+        layout: roomForLabels,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const perc = (statusPct[ctx.label] ?? 0).toFixed(1);
+                return `${ctx.label}: ${ctx.parsed} (${perc}%)`;
+              }
+            }
+          }
+        }
+      })
+    });
+
     const monthlyLineChart = new Chart(document.getElementById('monthlyLine'), {
       type: 'line',
       data: {
@@ -635,69 +741,110 @@
         datasets: [{
           label: 'Total Requests',
           data: monthlyTotals,
-          backgroundColor: hexToRgba(monthlyColor, 0.2),
-          borderColor: monthlyColor,
-          tension: 0.3,
-          fill: true,
-          pointRadius: 5,
-          pointHoverRadius: 7
+          backgroundColor: hexToRgba(blue, 0.2),
+          borderColor: blue,
+          borderWidth: 1.5,
+          tension: 0.4,
+          fill: false,
+          pointRadius: 2,
+          pointHoverRadius: 4
         }]
       },
       options: mergeChartOptions({
         layout: window.getMonthChartLayout(),
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: window.getMonthAxisTicks() },
-          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+          x: { grid: { display: false }, ticks: window.getMonthAxisTicks() },
+          y: { beginAtZero: true, grid: { color: '#d9d9d9' }, border: { display: false }, ticks: { precision: 0 } }
         }
       })
     });
     window.registerMonthAxisChart(monthlyLineChart);
 
+    const payStatusLabels = ['Paid', 'Unpaid'];
+    const payStatusData = @json(array_values($payStatusCounts ?? ['Paid' => 0, 'Unpaid' => 0]));
+    const payStatusPct = @json($payStatusPercentages ?? []);
+    const payStatusColors = [protoColors[0], protoColors[1]];
+
+    new Chart(document.getElementById('payStatusPolar'), {
+      type: 'polarArea',
+      data: {
+        labels: payStatusLabels,
+        datasets: [{
+          data: payStatusData,
+          backgroundColor: payStatusColors,
+          borderWidth: 0
+        }]
+      },
+      options: mergeChartOptions({
+        layout: { padding: 10 },
+        scales: {
+          r: {
+            beginAtZero: true,
+            ticks: {
+              display: false,
+              backdropColor: 'transparent',
+              showLabelBackdrop: false,
+            },
+            grid: { color: 'rgba(148, 163, 184, 0.35)', circular: true },
+            angleLines: { color: 'rgba(148, 163, 184, 0.35)' },
+            pointLabels: {
+              display: true,
+              color: '#253141',
+              font: { family: "'Poppins', sans-serif", size: 11, weight: 'bold' },
+              padding: 6,
+            },
+          },
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const perc = (payStatusPct[ctx.label] ?? 0).toFixed(1);
+                return `${ctx.label}: ${ctx.raw} (${perc}%)`;
+              }
+            }
+          }
+        }
+      })
+    });
+
     const monthlyStatusDatasets = [
           {
             label: 'Approved',
             data: monthlyApproved,
-            backgroundColor: colorForStatus('Approved'),
-            borderColor: colorForStatus('Approved'),
-            borderWidth: 1,
-            borderRadius: 4,
+            backgroundColor: protoColors[6],
+            borderWidth: 0,
+            borderRadius: 5,
+            maxBarThickness: 40,
             stack: 'status'
           },
           {
             label: 'Pending',
             data: monthlyPending,
-            backgroundColor: colorForStatus('Pending'),
-            borderColor: colorForStatus('Pending'),
-            borderWidth: 1,
-            borderRadius: 4,
+            backgroundColor: protoColors[2],
+            borderWidth: 0,
+            borderRadius: 5,
+            maxBarThickness: 40,
             stack: 'status'
           },
           {
             label: 'Overdue',
             data: monthlyOverdue,
-            backgroundColor: colorForStatus('Overdue'),
-            borderColor: colorForStatus('Overdue'),
-            borderWidth: 1,
-            borderRadius: 4,
+            backgroundColor: protoColors[1],
+            borderWidth: 0,
+            borderRadius: 5,
+            maxBarThickness: 40,
             stack: 'status'
           },
           {
             label: 'Rejected',
             data: monthlyRejected,
-            backgroundColor: colorForStatus('Rejected'),
-            borderColor: colorForStatus('Rejected'),
-            borderWidth: 1,
-            borderRadius: 4,
-            stack: 'status'
-          },
-          {
-            label: 'Withdrawn',
-            data: monthlyWithdrawn,
-            backgroundColor: colorForStatus('Withdrawn'),
-            borderColor: colorForStatus('Withdrawn'),
-            borderWidth: 1,
-            borderRadius: 4,
+            backgroundColor: protoColors[5],
+            borderWidth: 0,
+            borderRadius: 5,
+            maxBarThickness: 40,
             stack: 'status'
           }
         ];
@@ -708,78 +855,15 @@
         labels: monthlyLabels,
         datasets: monthlyStatusDatasets
       },
-      options: window.statusStackedBarChartOptions()
+      options: mergeChartOptions({
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { stacked: true, grid: { display: false }, ticks: window.getMonthAxisTicks() },
+          y: { stacked: true, beginAtZero: true, grid: { color: '#d9d9d9' }, border: { display: false }, ticks: { precision: 0 } }
+        }
+      })
     });
     window.registerMonthAxisChart(monthlyStatusChart);
-    window.renderDatasetLegend('monthlyStatusStackedBarLegend', monthlyStatusDatasets);
-
-    new Chart(document.getElementById('statusPie'), {
-      type: 'pie',
-      data: {
-        labels: statusPieLabels,
-        datasets: [{
-          data: [
-            {{ $pendingCount }},
-            {{ $overduePendingCount ?? 0 }},
-            {{ $rejectedCount }},
-            {{ $approvedCount }}
-          ],
-          backgroundColor: statusPieColors,
-          borderColor: '#fff',
-          borderWidth: 2
-        }]
-      },
-      options: mergeChartOptions({
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: (ctx) => {
-                const pct = (statusPct[ctx.label] ?? 0).toFixed(1);
-                return `${ctx.label}: ${ctx.parsed} (${pct}%)`;
-              }
-            }
-          }
-        }
-      })
-    });
-    renderChartHtmlLegend('statusPieLegend', statusPieLabels, statusPieColors, statusPct);
-
-    const leaveUtilization = @json($leaveUtilization ?? []);
-    const utilEntries = Array.isArray(leaveUtilization) ? leaveUtilization : [];
-
-    const utilizationLabels = utilEntries.map(x => x.type);
-    const utilizationUsed = utilEntries.map(x => Number(x.used) || 0);
-    const utilizationRemaining = utilEntries.map(x => Number(x.remaining) || 0);
-    const utilColors = utilizationLabels.map(t => getColorForType(t));
-
-    new Chart(document.getElementById('utilizationBar'), {
-      type: 'bar',
-      data: {
-        labels: utilizationLabels,
-        datasets: [
-          {
-            label: 'Used',
-            data: utilizationUsed,
-            backgroundColor: utilColors.map(c => hexToRgba(c, 0.75)),
-            borderWidth: 1
-          },
-          {
-            label: 'Remaining',
-            data: utilizationRemaining,
-            backgroundColor: utilColors.map(c => hexToRgba(c, 0.35)),
-            borderWidth: 1
-          }
-        ]
-      },
-      options: mergeChartOptions({
-        plugins: { legend: { position: 'bottom' } },
-        scales: {
-          x: { stacked: true },
-          y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
-        }
-      })
-    });
 
     const leaveBalances = @json($chartLeaveBalances ?? $leaveBalances);
     const balanceEntries = Object.entries(leaveBalances).map(([type, days]) => ({
@@ -791,79 +875,75 @@
     const pyramidRoot = document.getElementById('leaveBalancePyramid');
     const pyramidLegendRoot = document.getElementById('leaveBalancePyramidLegend');
 
-    balanceEntries.sort((a, b) => b.days - a.days).forEach((it) => {
-      const widthPct = Math.max(12, Math.round((it.days / maxDays) * 100));
-      const color = getColorForType(it.type);
+    if (pyramidRoot && pyramidLegendRoot) {
+      balanceEntries.sort((a, b) => b.days - a.days).forEach((it) => {
+        const widthPct = Math.max(12, Math.round((it.days / maxDays) * 100));
+        const color = getColorForType(it.type);
 
-      const row = document.createElement('div');
-      row.className = 'pyramid-row';
-      row.style.width = `${widthPct}%`;
-      row.style.background = color;
-      row.title = `${it.type} Leave: ${it.days} days`;
-      row.setAttribute('aria-label', `${it.type} Leave: ${it.days} days`);
-      pyramidRoot.appendChild(row);
+        const row = document.createElement('div');
+        row.className = 'pyramid-row';
+        row.style.width = `${widthPct}%`;
+        row.style.background = color;
+        row.title = `${it.type} Leave: ${it.days} days`;
+        row.setAttribute('aria-label', `${it.type} Leave: ${it.days} days`);
+        pyramidRoot.appendChild(row);
 
-      const item = document.createElement('div');
-      item.className = 'pyramid-legend-item';
+        const item = document.createElement('div');
+        item.className = 'pyramid-legend-item';
 
-      const swatch = document.createElement('span');
-      swatch.className = 'pyramid-swatch';
-      swatch.style.background = color;
-      item.appendChild(swatch);
+        const swatch = document.createElement('span');
+        swatch.className = 'pyramid-swatch';
+        swatch.style.background = color;
+        item.appendChild(swatch);
 
-      const text = document.createElement('div');
-      text.className = 'pyramid-legend-text';
+        const text = document.createElement('div');
+        text.className = 'pyramid-legend-text';
 
-      const type = document.createElement('span');
-      type.className = 'pyramid-legend-type';
-      type.textContent = it.type;
-      text.appendChild(type);
+        const type = document.createElement('span');
+        type.className = 'pyramid-legend-type';
+        type.textContent = it.type;
+        text.appendChild(type);
 
-      const value = document.createElement('span');
-      value.className = 'pyramid-legend-value';
-      value.textContent = String(it.days);
-      text.appendChild(value);
+        const value = document.createElement('span');
+        value.className = 'pyramid-legend-value';
+        value.textContent = String(it.days);
+        text.appendChild(value);
 
-      item.appendChild(text);
-      pyramidLegendRoot.appendChild(item);
-    });
+        item.appendChild(text);
+        pyramidLegendRoot.appendChild(item);
+      });
+    }
 
-    const balanceShareLabels = balanceEntries.map(x => x.type);
-    const balanceShareData = balanceEntries.map(x => x.days);
-
-    new Chart(document.getElementById('balanceSharePie'), {
-      type: 'pie',
-      data: {
-        labels: balanceShareLabels,
-        datasets: [{
-          data: balanceShareData,
-          backgroundColor: balanceShareLabels.map(t => hexToRgba(getColorForType(t), 0.85)),
-          borderColor: '#ffffff',
-          borderWidth: 2
-        }]
-      },
-      options: mergeChartOptions({
-        plugins: { legend: { position: 'bottom' } },
-      })
-    });
+    window.replaceEmptyDashboardCharts([
+      { id: 'leaveDoughnut', values: leaveTypeData, message: 'No leave requests by type yet.' },
+      { id: 'statusPie', values: statusPieData, message: 'No leave requests by status yet.' },
+      { id: 'monthlyLine', values: monthlyTotals, message: 'No applications submitted in this leave year.' },
+      { id: 'payStatusPolar', values: payStatusData, message: 'No paid or unpaid leave yet.' },
+      { id: 'monthlyStatusStackedBar', values: monthlyStatusDatasets, message: 'No monthly status data for this leave year.' },
+    ]);
 
     const leaveBalanceCard = document.getElementById('leaveBalanceCard');
     const leaveBalanceList = document.getElementById('leaveBalanceList');
 
-    leaveBalanceCard.addEventListener('click', () => {
-      const isOpen = leaveBalanceList.classList.toggle('open');
+    const expandIcon = leaveBalanceCard.querySelector('.expand-icon');
+    const syncBalanceToggle = (isOpen) => {
       leaveBalanceCard.classList.toggle('open', isOpen);
       leaveBalanceCard.setAttribute('aria-expanded', isOpen);
       leaveBalanceList.setAttribute('aria-hidden', !isOpen);
+      if (expandIcon) {
+        expandIcon.innerHTML = isOpen ? '&#9650;' : '&#9660;';
+      }
+    };
+    leaveBalanceCard.addEventListener('click', () => {
+      const isOpen = leaveBalanceList.classList.toggle('open');
+      syncBalanceToggle(isOpen);
     });
 
     leaveBalanceCard.addEventListener('keydown', (event) => {
       if(event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         const isOpen = leaveBalanceList.classList.toggle('open');
-        leaveBalanceCard.classList.toggle('open', isOpen);
-        leaveBalanceCard.setAttribute('aria-expanded', isOpen);
-        leaveBalanceList.setAttribute('aria-hidden', !isOpen);
+        syncBalanceToggle(isOpen);
       }
     });
   });

@@ -307,10 +307,6 @@
                 </table>
             </div>
         </div>
-
-        <div class="balance-back">
-            <a href="{{ route($balanceRoute ?? \App\Support\LeaveApplicant::balanceRoute(), ['year' => $year]) }}">← Choose another leave type</a>
-        </div>
     @endif
 </div>
 @endsection

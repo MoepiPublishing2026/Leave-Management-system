@@ -131,7 +131,7 @@ html body .my-requests-page .leave-card {
     box-shadow:6px 8px 14px rgba(0,0,0,.22);
     padding:18px 24px 16px 34px;
 }
-html body .my-requests-page .leave-card__num { color:#2379b0; }
+html body .my-requests-page .leave-card__num { color:#2379b0 !important; font-weight:800 !important; }
 html body .my-requests-page .leave-card__title {
     color:#555; font-size:1.5rem; text-shadow:1px 2px 3px rgba(0,0,0,.35);
 }
@@ -142,7 +142,7 @@ html body .my-requests-page .request-badge {
 }
 html body .my-requests-page .request-badge--approved { background:#9db4ff !important; border-color:#2a6fc0; color:#1f3f8f !important; }
 html body .my-requests-page .request-badge--pending { background:#cebaf6 !important; border-color:#a33d86; color:#7a2a7a !important; }
-html body .my-requests-page .request-badge--overdue { background:#cebaf6 !important; border-color:#a33d86; color:#7a2a7a !important; }
+html body .my-requests-page .request-badge--overdue { background:#cebaf6 !important; border-color:#a33d86; color:#fff !important; }
 html body .my-requests-page .request-badge--rejected { background:#f9c3c9 !important; border-color:#d5253a; color:#a31b2e !important; }
 html body .my-requests-page [class*="request-badge--withdrawn"] { background:#e2e2e2 !important; border-color:#767672; color:#555 !important; }
 

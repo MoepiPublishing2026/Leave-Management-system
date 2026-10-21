@@ -9,8 +9,8 @@ use App\Support\LeaveYear;
 use App\Support\ManagerTeam;
 use App\Support\PdfDocuments;
 use Illuminate\Http\Request;
+use App\Services\PublicHolidayService;
 use Carbon\Carbon;
-use Yasumi\Yasumi;
 
 class ReportController extends Controller
 {
@@ -40,15 +40,9 @@ class ReportController extends Controller
         $approvedLeaves = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['approved'])->get();
 
         // Generate all public holidays within year range of filter
-        $publicHolidays = [];
         $startYear = $startDate ? Carbon::parse($startDate)->year : Carbon::now()->year;
         $endYear = $endDate ? Carbon::parse($endDate)->year : Carbon::now()->year;
-        for ($year = $startYear; $year <= $endYear; $year++) {
-            $yearHolidays = Yasumi::create('SouthAfrica', $year);
-            foreach ($yearHolidays as $holiday) {
-                $publicHolidays[] = $holiday->format('Y-m-d');
-            }
-        }
+        $publicHolidays = PublicHolidayService::datesForYearRange($startYear, $endYear);
 
         // Calculate total approved leave days excluding weekends and public holidays
         // (half-day requests count as 0.5 day)
@@ -222,13 +216,7 @@ class ReportController extends Controller
 
         $startYear = $startDate ? Carbon::parse($startDate)->year : Carbon::now()->year;
         $endYear = $endDate ? Carbon::parse($endDate)->year : Carbon::now()->year;
-        $publicHolidays = [];
-        for ($year = $startYear; $year <= $endYear; $year++) {
-            $yearHolidays = Yasumi::create('SouthAfrica', $year);
-            foreach ($yearHolidays as $holiday) {
-                $publicHolidays[] = $holiday->format('Y-m-d');
-            }
-        }
+        $publicHolidays = PublicHolidayService::datesForYearRange($startYear, $endYear);
 
         $leavesForPdf = $leaves->take(200)->values()->map(function ($leave) use ($publicHolidays) {
             $days = 0.0;

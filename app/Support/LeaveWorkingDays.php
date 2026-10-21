@@ -3,8 +3,8 @@
 namespace App\Support;
 
 use App\Models\LeaveRequest;
+use App\Services\PublicHolidayService;
 use Carbon\Carbon;
-use Yasumi\Yasumi;
 
 class LeaveWorkingDays
 {
@@ -13,13 +13,7 @@ class LeaveWorkingDays
         $start = Carbon::parse($leaveRequest->start_date);
         $end = Carbon::parse($leaveRequest->end_date);
 
-        $publicHolidays = [];
-        for ($year = $start->year; $year <= $end->year; $year++) {
-            $holidays = Yasumi::create('SouthAfrica', $year);
-            foreach ($holidays as $holiday) {
-                $publicHolidays[] = $holiday->format('Y-m-d');
-            }
-        }
+        $publicHolidays = PublicHolidayService::datesForYearRange($start->year, $end->year);
 
         if (! empty($leaveRequest->is_half_day)) {
             if (! $start->isWeekend() && ! in_array($start->toDateString(), $publicHolidays, true)) {

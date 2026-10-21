@@ -191,15 +191,6 @@
         font-size: 13px;
         margin: 0;
     }
-    .profile-flash {
-        padding: 10px 14px;
-        border-radius: 10px;
-        margin-bottom: 14px;
-        background: #dcfce7;
-        color: #166534;
-        font-weight: 600;
-        font-size: 0.88rem;
-    }
     @media (max-width: 768px) {
         .profile-page { padding: 16px 4px 24px; }
         html body main .profile-page h1 { font-size: 28px; }
@@ -212,10 +203,6 @@
 <div class="app-page profile-page">
     <h1>Profile</h1>
     <p class="app-page-lead">Update your password and profile picture. Name and email are managed by your senior manager or manager.</p>
-
-    @if(session('success'))
-        <div class="profile-flash">{{ session('success') }}</div>
-    @endif
 
     <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
         @csrf

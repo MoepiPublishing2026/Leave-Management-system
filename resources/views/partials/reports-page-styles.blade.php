@@ -328,9 +328,34 @@
         text-align: center;
         letter-spacing: 0.01em;
         font-family: inherit;
-        background-color: #740755;
-        color: #fff;
-        border: 2px solid #4a0336;
+        background-color: #e2e2e2;
+        color: #555;
+        border: 2px solid #767672;
+    }
+    html body main .reports-page .request-badge--pending {
+        background: #cebaf6 !important;
+        border-color: #a33d86 !important;
+        color: #7a2a7a !important;
+    }
+    html body main .reports-page .request-badge--overdue {
+        background: #cebaf6 !important;
+        border-color: #a33d86 !important;
+        color: #fff !important;
+    }
+    html body main .reports-page .request-badge--approved {
+        background: #9db4ff !important;
+        border-color: #2a6fc0 !important;
+        color: #1f3f8f !important;
+    }
+    html body main .reports-page .request-badge--rejected {
+        background: #f9c3c9 !important;
+        border-color: #d5253a !important;
+        color: #a31b2e !important;
+    }
+    html body main .reports-page .request-badge--withdrawn {
+        background: #e2e2e2 !important;
+        border-color: #767672 !important;
+        color: #555 !important;
     }
 
     @media (max-width: 768px) {

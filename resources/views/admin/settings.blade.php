@@ -94,15 +94,6 @@
     border-radius: 14px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
-    .settings-flash {
-        margin-bottom: 16px;
-        padding: 12px 16px;
-        border-radius: 10px;
-        background: #ecfdf5;
-        border: 1px solid #86efac;
-        color: #065f46;
-        font-weight: 600;
-    }
     .settings-notes .app-page-section-title {
     margin: 0 0 16px;
     color: #b45309;

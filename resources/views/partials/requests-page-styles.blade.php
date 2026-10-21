@@ -259,14 +259,14 @@
         color: #444;
         vertical-align: middle;
     }
-    .requests-table td:nth-child(1) {
+    html body .requests-page .requests-table tr.row-click td:nth-child(1) {
         position: absolute;
         top: 6px;
         left: 12px;
         padding: 0;
         font-size: 0.8rem;
-        font-weight: 700;
-        color: #2379b0;
+        font-weight: 800 !important;
+        color: #2379b0 !important;
     }
     .requests-table td:nth-child(2) {
         grid-column: 1 / 3;
@@ -387,11 +387,15 @@
         border-color: #2a6fc0 !important;
         color: #1f3f8f !important;
     }
-    .request-badge--pending,
-    .request-badge--overdue {
+    .request-badge--pending {
         background: #cebaf6 !important;
         border-color: #a33d86 !important;
         color: #7a2a7a !important;
+    }
+    .request-badge--overdue {
+        background: #cebaf6 !important;
+        border-color: #a33d86 !important;
+        color: #fff !important;
     }
     .request-badge--rejected {
         background: #f9c3c9 !important;

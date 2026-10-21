@@ -56,6 +56,56 @@
         color: #334155;
         font-size: 14px;
     }
+    html body .cal-day-title {
+        width: 100%;
+        margin: 0 !important;
+        padding: 2px 2px 14px !important;
+        border-bottom: 1px solid #d0d0d0 !important;
+        font-size: 15px !important;
+        text-align: left !important;
+        text-transform: none !important;
+        line-height: 1.35 !important;
+        letter-spacing: 0 !important;
+        color: #111 !important;
+        font-weight: 600 !important;
+    }
+    html body .cal-day-label {
+        color: #111 !important;
+        font-weight: 600 !important;
+    }
+    html body .cal-day-date {
+        color: #3b7ec4 !important;
+        font-weight: 800 !important;
+    }
+    html body .cal-day-close,
+    html body button.cal-day-close {
+        background: #a2b222 !important;
+        color: #263041 !important;
+        font-weight: 700 !important;
+        font-size: 18px !important;
+        border-radius: 10px !important;
+        padding: 10px 22px !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        height: auto !important;
+        width: auto !important;
+        line-height: 1.2 !important;
+        text-transform: none !important;
+        cursor: pointer;
+        box-shadow: none !important;
+        outline: none !important;
+        border-width: 3px !important;
+        border-style: solid !important;
+        border-top-color: #00ffff !important;
+        border-left-color: #00ffff !important;
+        border-right-color: #ff40d4 !important;
+        border-bottom-color: #ff40d4 !important;
+    }
+    html body .cal-day-close:hover,
+    html body button.cal-day-close:hover {
+        background: #8d9c1c !important;
+        color: #263041 !important;
+    }
 </style>
 <script>
     window.calendarLeaveEvents = window.calendarLeaveEvents || @json($events ?? []);
@@ -120,14 +170,15 @@
         }
 
         const html = '<div class="cal-day-modal">'
-            + '<div style="color:#3b7ec4;font-size:15px;font-weight:600;text-align:left;line-height:1.35;padding:0 0 14px;margin:0;border-bottom:1px solid #d0d0d0;">'
-            + 'Selected Day - ' + escapeCalendarHtml(formatted)
+            + '<div class="cal-day-title">'
+            + '<span class="cal-day-label">Selected Day - </span>'
+            + '<span class="cal-day-date">' + escapeCalendarHtml(formatted) + '</span>'
             + '</div>'
             + '<div style="padding:22px 8px;border-bottom:1px solid #d0d0d0;text-align:' + (hasLeave ? 'left' : 'center') + ';">'
             + contentHtml
             + '</div>'
             + '<div style="display:flex;justify-content:center;padding:16px 0 2px;">'
-            + '<button type="button" class="cal-day-close" style="background:#f1ec3c;color:#111;border:0 none;outline:none;box-shadow:none;border-radius:999px;padding:8px 26px;font-size:14px;font-weight:700;line-height:1.2;cursor:pointer;min-width:0;height:auto;width:auto;">Close</button>'
+            + '<button type="button" class="cal-day-close">Close</button>'
             + '</div>'
             + '</div>';
 

@@ -9,9 +9,10 @@ use App\Support\MonthlyLeaveStatusBreakdown;
 use App\Support\PercentageDistribution;
 use App\Support\LeaveRequestPeriodFilter;
 use App\Support\DashboardEmployeeFilter;
+use App\Support\LeaveTypeChartCounts;
 use App\Support\LeaveYear;
+use App\Services\PublicHolidayService;
 use Illuminate\Support\Carbon;
-use Yasumi\Yasumi;
 
 class AdminDashboardController extends Controller
 {
@@ -34,20 +35,9 @@ class AdminDashboardController extends Controller
 
         $allRequestsCount = (clone $baseQuery)->count();
 
-        $leaveTypeCounts = (clone $baseQuery)->select('leave_type', DB::raw('count(*) as total'))
-            ->groupBy('leave_type')
-            ->pluck('total', 'leave_type')
-            ->toArray();
-        arsort($leaveTypeCounts, SORT_NUMERIC);
+        $leaveTypeCounts = LeaveTypeChartCounts::fromQuery($baseQuery);
         $leaveTypePercentages = PercentageDistribution::oneDecimalPercents($leaveTypeCounts);
-        $payStatusCounts = [
-            'Paid' => (clone $baseQuery)
-                ->whereRaw("LOWER(TRIM(COALESCE(leave_type, ''))) != ?", ['unpaid'])
-                ->count(),
-            'Unpaid' => (clone $baseQuery)
-                ->whereRaw('LOWER(TRIM(leave_type)) = ?', ['unpaid'])
-                ->count(),
-        ];
+        $payStatusCounts = LeaveTypeChartCounts::payStatusFromQuery($baseQuery);
         $payStatusPercentages = PercentageDistribution::oneDecimalPercents($payStatusCounts);
 
         $pendingTotalCount = (clone $baseQuery)
@@ -61,15 +51,7 @@ class AdminDashboardController extends Controller
         $rejectedRequestsCount = (clone $baseQuery)->whereRaw('LOWER(TRIM(status)) = ?', ['rejected'])->count();
 
         $today = Carbon::today();
-        $isTodayDisabled = $today->isWeekend();
-        if (!$isTodayDisabled) {
-            $holidays = Yasumi::create('SouthAfrica', (int) $today->year);
-            $holidayDates = [];
-            foreach ($holidays as $holiday) {
-                $holidayDates[] = $holiday->format('Y-m-d');
-            }
-            $isTodayDisabled = in_array($today->toDateString(), $holidayDates, true);
-        }
+        $isTodayDisabled = $today->isWeekend() || PublicHolidayService::isHoliday($today);
 
         $onLeaveTodayCount = 0;
         if (!$isTodayDisabled) {
@@ -97,8 +79,8 @@ class AdminDashboardController extends Controller
 
         $monthlyData = (clone $monthlyApplicationsQuery)
             ->select(DB::raw('MONTH(created_at) as month'), DB::raw('COUNT(*) as total'))
-            ->groupBy('month')
-            ->orderBy('month')
+            ->groupByRaw('MONTH(created_at)')
+            ->orderByRaw('MONTH(created_at)')
             ->get();
 
         foreach ($monthlyData as $row) {

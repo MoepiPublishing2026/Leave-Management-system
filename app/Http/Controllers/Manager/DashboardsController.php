@@ -11,14 +11,15 @@ use App\Support\LeaveRequestPeriodFilter;
 use App\Support\DashboardEmployeeFilter;
 use App\Support\PersonalLeaveDashboardData;
 use App\Support\LeaveReminderService;
+use App\Support\LeaveTypeChartCounts;
 use App\Support\LeaveYear;
 use App\Support\ManagerTeam;
 use App\Support\OverdueLeaveNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\PublicHolidayService;
 use Illuminate\Support\Carbon;
-use Yasumi\Yasumi;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 class DashboardsController extends Controller
@@ -86,15 +87,7 @@ class DashboardsController extends Controller
         $rejectedRequestsCount = (clone $baseQuery)->whereRaw('LOWER(TRIM(status)) = ?', ['rejected'])->count();
 
         $today = Carbon::today();
-        $isTodayDisabled = $today->isWeekend();
-        if (!$isTodayDisabled) {
-            $holidays = Yasumi::create('SouthAfrica', (int) $today->year);
-            $holidayDates = [];
-            foreach ($holidays as $holiday) {
-                $holidayDates[] = $holiday->format('Y-m-d');
-            }
-            $isTodayDisabled = in_array($today->toDateString(), $holidayDates, true);
-        }
+        $isTodayDisabled = $today->isWeekend() || PublicHolidayService::isHoliday($today);
 
         $onLeaveTodayCount = 0;
         if (!$isTodayDisabled) {
@@ -109,20 +102,9 @@ class DashboardsController extends Controller
                 ->count('user_id');
         }
 
-        $leaveTypeCounts = (clone $baseQuery)->select('leave_type')
-            ->groupBy('leave_type')
-            ->selectRaw('count(*) as total')
-            ->pluck('total', 'leave_type')
-            ->sortDesc();
-        $leaveTypePercentages = PercentageDistribution::oneDecimalPercents($leaveTypeCounts->toArray());
-        $payStatusCounts = [
-            'Paid' => (clone $baseQuery)
-                ->whereRaw("LOWER(TRIM(COALESCE(leave_type, ''))) != ?", ['unpaid'])
-                ->count(),
-            'Unpaid' => (clone $baseQuery)
-                ->whereRaw('LOWER(TRIM(leave_type)) = ?', ['unpaid'])
-                ->count(),
-        ];
+        $leaveTypeCounts = LeaveTypeChartCounts::fromQuery($baseQuery);
+        $leaveTypePercentages = PercentageDistribution::oneDecimalPercents($leaveTypeCounts);
+        $payStatusCounts = LeaveTypeChartCounts::payStatusFromQuery($baseQuery);
         $payStatusPercentages = PercentageDistribution::oneDecimalPercents($payStatusCounts);
 
         $statusCounts = [
@@ -154,8 +136,8 @@ class DashboardsController extends Controller
 
         $monthlyData = (clone $monthlyApplicationsQuery)
             ->select(DB::raw('MONTH(created_at) as month'), DB::raw('COUNT(*) as total'))
-            ->groupBy('month')
-            ->orderBy('month')
+            ->groupByRaw('MONTH(created_at)')
+            ->orderByRaw('MONTH(created_at)')
             ->get();
 
         foreach ($monthlyData as $row) {

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Support\DashboardEmployeeFilter;
+use App\Support\LeaveTypeChartCounts;
 use App\Support\LeaveRequestPeriodFilter;
 use App\Support\LeaveYear;
 use App\Support\PercentageDistribution;
@@ -55,11 +56,8 @@ class AnalyticsController extends Controller
         $approvedCount = (clone $leaveQuery)->whereRaw('LOWER(status) = ?', ['approved'])->count();
         $approvalRate = $totalLeaves > 0 ? round(($approvedCount / $totalLeaves) * 100, 1) : 0;
 
-        $leavesByType = (clone $leaveQuery)
-            ->select('leave_type', DB::raw('count(*) as total'))
-            ->groupBy('leave_type')
-            ->orderByDesc('total')
-            ->get();
+        $typeCounts = LeaveTypeChartCounts::fromQuery($leaveQuery);
+        $leavesByType = LeaveTypeChartCounts::toRows($typeCounts);
 
         $leavesByDesignation = (clone $leaveQuery)
             ->join('users', 'leave_requests.user_id', '=', 'users.id')
@@ -115,11 +113,9 @@ class AnalyticsController extends Controller
             })->values();
         }
 
-        $typePercentages = [];
-        if ($totalLeaves > 0 && $leavesByType->isNotEmpty()) {
-            $typeCounts = $leavesByType->pluck('total', 'leave_type')->map(fn ($v) => (int) $v)->toArray();
-            $typePercentages = PercentageDistribution::oneDecimalPercents($typeCounts);
-        }
+        $typePercentages = $typeCounts !== []
+            ? PercentageDistribution::oneDecimalPercents($typeCounts)
+            : [];
 
         $designationPercentages = [];
         if (!empty($designationLabels) && !empty($designationData)) {

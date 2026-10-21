@@ -19,19 +19,14 @@
         <a class="pr-btn pr-btn--ghost" href="{{ route(PerformanceReviews::routeName($user, 'index'), $indexParams ?? []) }}">Back to list</a>
     </div>
 
-    @if ($errors->any() || session('error'))
+    @if ($errors->any())
         <div class="form-alert" style="margin-bottom:14px;padding:12px 14px;border-radius:8px;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;">
-            @if (session('error'))
-                <strong>{{ session('error') }}</strong>
-            @endif
-            @if ($errors->any())
-                <strong>Please fix the following:</strong>
-                <ul style="margin:6px 0 0; padding-left:18px;">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            @endif
+            <strong>Please fix the following:</strong>
+            <ul style="margin:6px 0 0; padding-left:18px;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
