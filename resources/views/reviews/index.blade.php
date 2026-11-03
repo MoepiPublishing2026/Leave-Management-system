@@ -12,19 +12,16 @@ html body .pr-reviews-page h1 { color:#263248; font-weight:700; letter-spacing:0
 html body .pr-reviews-page .requests-page-lead { color:#000; }
 html body .pr-reviews-page .requests-page-lead strong { color:#a2b222; }
 
-/* Toolbar / Search Bar */
 html body .pr-reviews-page .requests-toolbar {
     background:#d8e3e1 !important; border:0 !important; border-radius:14px !important;
     padding:14px 16px !important; box-shadow:none !important; align-items:center;
-    display: flex !important;
-    justify-content: space-between !important;
 }
 html body .pr-reviews-page .requests-btn--primary,
 html body .pr-reviews-page .requests-btn--search,
 html body .pr-reviews-page .requests-btn--secondary {
-    background:#c5d931 !important; color:#111 !important; border:0 !important;
+    background:#D5E11B !important; color:#111 !important; border:0 !important;
     border-radius:8px !important; padding:8px 14px !important; font-weight:700 !important;
-    min-height:0 !important; font-size:13px !important;
+    min-height: 54px !important; font-size:13px !important;
 }
 html body .pr-reviews-page .requests-search-form input[type="text"] {
     background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M16 16l5 5'/></svg>") no-repeat 14px center / 20px 20px !important;
@@ -32,7 +29,6 @@ html body .pr-reviews-page .requests-search-form input[type="text"] {
     padding:14px 18px 14px 44px !important; min-width:260px;
 }
 
-/* Filter Tabs */
 html body .pr-reviews-page .requests-filter-bar {
     display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;
     background:transparent !important; border:0 !important; box-shadow:none !important; padding:0 !important;
@@ -55,7 +51,6 @@ html body .pr-reviews-page .pr-reviews-scope-header {
 }
 html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
 
-/* Review Cards */
 .pr-review-cards { display:flex; flex-direction:column; gap:22px; margin-top:8px; }
 .pr-review-card {
     display:flex; align-items:center; gap:16px; flex-wrap:wrap;
@@ -95,8 +90,13 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
 .pr-card-btn:hover { background:#f6fadf; color:#5a6810; }
 .pr-card-btn svg { width:14px; height:14px; }
 .pr-reviews-empty {
-    text-align:center; padding:28px; color:#6b7280;
-    background:#fff; border:1px dashed #cfd6d4; border-radius:14px;
+    text-align: center;
+    padding: 80px;
+    color: #263248;
+    font-weight: 700;
+    background: #fff;
+    border: 2px solid #cfd6d4;
+    border-radius: 14px;
 }
 @media (max-width: 700px) {
     .pr-review-card { align-items:flex-start; }
@@ -153,14 +153,14 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
         <p class="requests-page-lead">{{ $lead }}</p>
     @endif
 
-    <div class="requests-toolbar">
-        <div class="requests-toolbar-left">
-            @if ($canCreate)
-                <a href="{{ route(PerformanceReviews::routeName($user, 'create')) }}" class="requests-btn requests-btn--primary">+ New Request</a>
-            @endif
+    <div class="requests-toolbar-1">
+        <div class="requests-toolbar-left-1">
+                @if ($canCreate)
+                    <a href="{{ route(PerformanceReviews::routeName($user, 'create')) }}" class="requests-btn requests-btn--primary">+ New Request</a>
+                @endif
         </div>
-        <div class="requests-toolbar-right">
-            <form method="GET" action="{{ route($indexRoute) }}" class="requests-search-form">
+        <div class="requests-toolbar-right-1">
+            <form method="GET" action="{{ route($indexRoute) }}" class="requests-search-form-1">
                 <input type="hidden" name="status" value="{{ $status }}" />
                 @if ($isManagerList)
                     <input type="hidden" name="scope" value="{{ $reviewScope }}" />

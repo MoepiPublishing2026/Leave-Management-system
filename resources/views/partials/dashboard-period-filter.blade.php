@@ -13,7 +13,7 @@
 
 <div class="dashboard-period-filter">
     <form method="GET" class="dashboard-period-filter__form">
-        <label class="dashboard-period-filter__label" for="dashboardEmployeeSelect">{{ $personLabel }}</label>
+       <!-- <label class="dashboard-period-filter__label-1" for="dashboardEmployeeSelect">{{ $personLabel }}</label> -->
         <select
             id="dashboardEmployeeSelect"
             name="employee"
@@ -21,7 +21,7 @@
             onchange="this.form.submit()"
             aria-label="Filter dashboard by {{ strtolower($personLabel) }}"
         >
-            <option value="" {{ empty($employeeFilter) ? 'selected' : '' }}>{{ $allPeopleLabel }}</option>
+            <option value="" {{ empty($employeeFilter) ? 'selected' : '' }}>{{ $personLabel }}</option>
             @foreach ($employees as $employee)
                 <option value="{{ $employee->id }}" {{ (int) $employeeFilter === (int) $employee->id ? 'selected' : '' }}>
                     {{ trim($employee->first_name . ' ' . $employee->last_name) }}
@@ -32,7 +32,7 @@
             @endforeach
         </select>
 
-        <label class="dashboard-period-filter__label" for="dashboardPeriodSelect">Period</label>
+       <!-- <label class="dashboard-period-filter__label-1" for="dashboardPeriodSelect">Period</label> -->
         <select
             id="dashboardPeriodSelect"
             name="month"
@@ -40,7 +40,7 @@
             onchange="this.form.submit()"
             aria-label="Filter dashboard by period"
         >
-            <option value="this_year" {{ $monthFilter === 'this_year' ? 'selected' : '' }}>This Year</option>
+            <option value="this_year" {{ $monthFilter === 'this_year' ? 'selected' : '' }}>Period</option>
             <option value="this_quarter" {{ $monthFilter === 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
             <option value="this_month" {{ $monthFilter === 'this_month' ? 'selected' : '' }}>This Month</option>
             @foreach ($yearOptions as $y)

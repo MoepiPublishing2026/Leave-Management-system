@@ -937,7 +937,7 @@ main input[type="text"],
 main input[type="email"],
 main input[type="password"],
 main textarea {
-    border: 2px solid var(--form-olive) !important;
+    
     box-shadow: none !important;
     outline: none !important;
 }
@@ -1006,7 +1006,7 @@ main form input[type="password"] {
     font-size: 14px;
     color: #263041;
     background: #fff;
-    border: 2px solid var(--form-olive) !important;
+    
     border-radius: 12px;
     box-shadow: none !important;
 }
@@ -1076,9 +1076,9 @@ main form .back-link {
     font-weight: 700;
     font-size: 13px;
     line-height: 1.2;
-    border-radius: 8px;
+    border-radius: 15px;
     cursor: pointer;
-    border: 1px solid #d4e500;
+    border: 2px solid #71781c;
     text-decoration: none;
     background: #d4e514;
     color: #000000;
@@ -1423,7 +1423,7 @@ html body main .employee-create-page .button-group .btn-form-action {
     min-width: 0 !important;
     font-size: 13px !important;
     line-height: 1.2 !important;
-    border-radius: 8px !important;
+    border-radius: 999px !important;
 }
 html body main .compose-form button[type="submit"] {
     width: 40px !important;

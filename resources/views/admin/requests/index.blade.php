@@ -14,9 +14,9 @@
     <h1>All Leave Requests</h1>
     <p class="requests-page-lead">
         Review all employee and manager leave requests. Final Senior Manager decisions can be submitted here or securely from email.
-        @if ($requests->total() > 0)
+        <!--@if ($requests->total() > 0)
             · {{ $requests->total() }} {{ Str::plural('request', $requests->total()) }}
-        @endif
+        @endif-->
     </p>
 
     @include('partials.requests-toolbar', [
@@ -111,7 +111,7 @@
                         'managerRecommendation' => $recLabel,
                         'managerRecommendationComment' => (string) ($req->manager_recommendation_comment ?? ''),
                     ];
-                    $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req), $req->popupMeta());
+                    $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req));
 
                     if ($canDecide || LeaveProofRules::requiresProof($req->leave_type)) {
                         $details['proofDeferred'] = LeaveProofRules::allowsDeferredProof($req->leave_type) && LeaveProofRules::requiresProof($req->leave_type);
@@ -148,12 +148,12 @@
                                             @csrf
                                             @method('PATCH')
                                             <input type="hidden" name="approval_comment" class="approval-comment-input" value="" />
-                                            <button type="submit" class="request-btn request-btn--approve">Approve</button>
+                                            <button type="submit" class="request-btn request-btn--approve">Recommend Approve</button>
                                         </form>
                                     @else
                                         <span class="request-actions-note" title="{{ $proofBlockReason }}">Awaiting proof</span>
                                     @endif
-                                    <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Reject</button>
+                                    <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Recommend Reject</button>
                                 </div>
                             @elseif ($canDecide && $req->isOverdue())
                                 <span class="request-actions-note">Start date has passed, so this request can no longer be approved or rejected.</span>
@@ -197,7 +197,6 @@
     'showEmployee' => true,
     'showDays' => true,
     'showHandledMeta' => true,
-    'backLabel' => '← Back to requests',
     'deleteWarning' => 'It will be permanently removed, including messages and attachments.',
 ])
 

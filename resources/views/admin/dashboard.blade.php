@@ -10,33 +10,110 @@
         margin: 0;
         padding: 0;
     }
+    
+    .menu-button {
+        position: absolute;
+        top: 45px;
+        right: 8.5%;
+        width: 60px;
+        height: 50px;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        background-color: #263445;
+        border: 2px solid #c5dc16;
+        border-radius: 16px;
+        cursor: pointer;
+        z-index: 1050;
+        box-sizing: border-box;
+    }
+
+    .menu-button span {
+        display: block;
+        width: 35px;
+        height: 4px;
+        background-color: #ffffff;
+        border-radius: 3px;
+        flex-shrink: 0;
+    }
+
+    .menu-button:hover {
+        background-color: #34465a;
+    }
+
+    .menu-button:focus-visible {
+        outline: 2px solid #263445;
+        outline-offset: 3px;
+    }
+
+    .dashboard-filter-position {
+        display: none;
+        position: absolute;
+        top: 45px;
+        right: 14.5%;
+        z-index: 1040;
+        width: 260px;
+    }
+    .dashboard-filter-position.show {
+        display: block;
+    }
+
+    .dashboard-filter-position .dashboard-period-filter__form {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background: #ffffff;
+        border: 4px solid #c5dc16;
+        border-radius: 25px;
+        padding: 8px 12px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .dashboard-filter-position .filter-select__trigger {
+        min-height: 54px;
+        width: 100%;
+        background: #ffffff;
+        border: none;
+        border-radius: 14px;
+        color: #30302d;
+        font-size: 18px;
+        font-weight: 600;
+        box-shadow: none;
+    }
     .admin-container {
         font-family: 'Poppins', 'Segoe UI', sans-serif;
         width: 100%;
-        max-width: 1200px;
+        max-width: 1410px;
         box-sizing: border-box;
-        padding: 12px 12px 14px;
+        padding: 80px 30px 20px;
         background: white;
         border: 1px solid #d3d8de;
         border-radius: 14px;
         box-shadow: 0 0 14px rgba(0, 0, 0, 0.16);
-        margin: 0 auto 56px;
+        margin: 60px auto 56px;
     }
     .admin-page-header {
-        max-width: 1200px;
+        width: 100%;
+        max-width: 1440px;
         margin: 0 auto 22px;
-        padding: 0 30px;
+        padding: 0 14px;
         box-sizing: border-box;
     }
+
     .admin-page-header h1 {
         font-family: 'Century Gothic', 'Poppins', sans-serif;
         font-weight: 700;
-        font-size: 38px;
+        font-size: 52px;
         color: #253141;
         margin: 0;
         padding: 0;
-        letter-spacing: 0.04em;
-        line-height: 1.15;
+        letter-spacing: 0;
+        line-height: 1.2;
+        margin-bottom: 50px;
     }
     .cards {
         display: flex;
@@ -155,15 +232,31 @@
 <div class="admin-page-header">
     <h1>Senior Manager Dashboard</h1>
 </div>
-<div class="admin-container">
-@include('partials.dashboard-period-filter', [
-    'monthFilter' => $monthFilter ?? 'this_year',
-    'employeeFilter' => $employeeFilter ?? null,
-    'employees' => $employees ?? collect(),
-])
+<div>
+<button class="menu-button" aria-label="Open navigation menu" aria-expanded="false">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<div class="dashboard-filter-position">
+    <div class="dashboard-filter-dropdown">
+        @include('partials.dashboard-period-filter', [
+            'monthFilter' => $monthFilter ?? 'this_year',
+            'employeeFilter' => $employeeFilter ?? null,
+            'employees' => $employees ?? collect(),
+        ])
+    </div>
+</div>
+</div>
+
 @php
     $cardFilters = $dashboardFilters ?? ['month' => $monthFilter ?? 'this_year'];
 @endphp
+
+
+<div class="admin-container">
+
     <div class="cards" id="cardsContainer" role="list">
 
         <a href="{{ route('admin.requests', array_merge(['status' => 'all'], $cardFilters)) }}" role="listitem" aria-label="All leave requests" class="card card-all">
@@ -232,7 +325,7 @@
         <div class="chart-card">
             <h3>Paid vs Unpaid Leave</h3>
             <div class="chart-body chart-body--ring">
-                <canvas id="payStatusPolar"></canvas>
+                <canvas id="leaveChart"></canvas>
             </div>
         </div>
     </div>
@@ -243,6 +336,27 @@
 @include('partials.dashboard-chart-vars')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const menuButton = document.querySelector('.menu-button');
+    const dashboardFilter = document.querySelector('.dashboard-filter-position');
+
+    menuButton.addEventListener('click', function () {
+        dashboardFilter.classList.toggle('show');
+
+        const isOpen = dashboardFilter.classList.contains('show');
+
+        menuButton.setAttribute('aria-expanded', isOpen);
+    });
+
+    
+    document.addEventListener('click', function (event) {
+        if (
+            !menuButton.contains(event.target) &&
+            !dashboardFilter.contains(event.target)
+        ) {
+            dashboardFilter.classList.remove('show');
+            menuButton.setAttribute('aria-expanded', 'false');
+        }
+    });
     const hslToHex = (h, s, l) => {
         s /= 100;
         l /= 100;
@@ -584,53 +698,69 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     window.registerMonthAxisChart(monthlyStatusChart);
 
-    const payStatusLabels = ['Paid', 'Unpaid'];
+    
     const payStatusData = @json(array_values($payStatusCounts ?? ['Paid' => 0, 'Unpaid' => 0]));
     const payStatusPct = @json($payStatusPercentages ?? []);
-    const payStatusColors = [protoColors[0], protoColors[1]];
 
-    new Chart(document.getElementById('payStatusPolar'), {
-        type: 'polarArea',
+    const paidPercentage = Number(payStatusPct['Paid'] ?? 0);
+    const unpaidPercentage = Number(payStatusPct['Unpaid'] ?? 0);
+
+    new Chart(document.getElementById('leaveChart'), {
+        type: 'bar',
         data: {
-            labels: payStatusLabels,
-            datasets: [{
-                data: payStatusData,
-                backgroundColor: payStatusColors,
-                borderWidth: 0
-            }]
-        },
-        options: mergeChartOptions({
-            layout: { padding: 10 },
-            scales: {
-                r: {
-                    beginAtZero: true,
-                    ticks: {
-                        display: false,
-                        backdropColor: 'transparent',
-                        showLabelBackdrop: false,
-                    },
-                    grid: { color: 'rgba(148, 163, 184, 0.35)', circular: true },
-                    angleLines: { color: 'rgba(148, 163, 184, 0.35)' },
-                    pointLabels: {
-                        display: true,
-                        color: '#253141',
-                        font: { family: "'Poppins', sans-serif", size: 11, weight: 'bold' },
-                        padding: 6,
-                    },
+            labels: ['Leave'],
+            datasets: [
+                {
+                    label: 'Paid',
+                    data: [paidPercentage],
+                    backgroundColor: '#4a7ff7',
+                    borderWidth: 0,
+                    stack: 'leave'
                 },
-            },
+                {
+                    label: 'Unpaid',
+                    data: [unpaidPercentage],
+                    backgroundColor: '#b08cf5',
+                    borderWidth: 0,
+                    stack: 'leave'
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: {
-                legend: { display: false },
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
                 tooltip: {
                     callbacks: {
-                        label: (ctx) => {
-                            const pct = (payStatusPct[ctx.label] ?? 0).toFixed(1);
-                            return `${ctx.label}: ${ctx.raw} (${pct}%)`;
-                        }
+                        label: ctx => `${ctx.dataset.label}: ${ctx.raw}%`
                     }
                 }
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                        stepSize: 20,
+                        callback: value => value + '%'
+                    }
+                },
+                y: {
+                    stacked: true,
+                    display: false
+                }
             }
-        })
+        }
     });
 
     window.replaceEmptyDashboardCharts([

@@ -9,7 +9,7 @@
     }
     .requests-page h1 {
         font-weight: 700;
-        font-size: 34px;
+        font-size: 52px;
         color: #263248;
         margin: 0 0 8px;
         letter-spacing: 0.02em;
@@ -42,14 +42,16 @@
     .requests-toolbar {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 14px;
-        padding: 14px 16px;
-        background: #d8e3e1;
+        gap: 16px;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 0 0 14px;
+        padding: 0;
+        background: none;
         border: none;
-        border-radius: 14px;
+        border-radius: 0;
         box-shadow: none;
     }
     .requests-toolbar-left {
@@ -57,37 +59,178 @@
         flex-wrap: wrap;
         gap: 10px;
         align-items: center;
+        flex-shrink: 0;
     }
+
     .requests-toolbar-right {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
         align-items: center;
         margin-left: auto;
+        min-width: 0;
     }
     .requests-search-form {
+        position: absolute;
+        top: 30px;
+        right: 200px;
+        z-index: 5;
         display: flex;
-        flex-wrap: nowrap;
-        gap: 8px;
         align-items: center;
+        width: 360px;
+        max-width: calc(100% - 40px);
+        margin: 0;
+        padding: 0;
+        gap: 0;
+        
     }
     .requests-search-form input[type="text"] {
-        border: none;
-        border-radius: 12px;
-        padding: 8px 14px 8px 40px;
-        font-size: 13px;
-        width: auto;
-        flex: 1 1 280px;
-        min-width: 220px;
-        height: 36px;
+        width: 100%;
+        min-width: 0;
+        height: 45px;
         box-sizing: border-box;
-        background: #fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M16 16l5 5'/></svg>") no-repeat 14px center / 20px 20px;
+        padding: 12px 18px 12px 68px;
+        border: none;
+        border-radius: 24px;
+        background-color: #e7f2f2;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M16 16l5 5'/></svg>");
+        background-repeat: no-repeat;
+        background-position: 24px center;
+        background-size: 28px 28px;
+        font-size: 18px;
+        line-height: 1.4;
     }
     .requests-search-form input[type="text"]:focus {
         outline: none;
-        border-color: #138056;
         box-shadow: 0 0 0 3px rgba(19, 128, 86, 0.12);
     }
+  
+    .requests-toolbar-1 {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        width: 100%;
+        min-height: 76px;
+        box-sizing: border-box;
+        padding: 10px 20px 10px 12px;
+        margin-bottom: 16px;
+        background: #d9e2e2;
+        border-radius: 15px;
+    }
+
+    .requests-toolbar-1 .requests-toolbar-left-1 {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        flex-shrink: 0;
+    }
+
+    .requests-toolbar-1 .requests-btn--primary-1 {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 176px;
+        height: 54px;
+        padding: 0 24px;
+        box-sizing: border-box;
+        background: #D5E11B;
+        color: #000;
+        border: none;
+        border-radius: 16px;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .requests-toolbar-right-1 {
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+        min-width: 0;
+    }
+
+    .requests-search-form-1 {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 15px;
+        width: 100%;
+        margin: 0;
+    }
+
+    .requests-search-form-1 input[type="text"] {
+        width: 316px;
+        height: 54px;
+        box-sizing: border-box;
+        padding: 0 14px;
+        border: none;
+        outline: none;
+        border-radius: 15px;
+        background: #fff;
+        color: #333;
+        font-family: inherit;
+        font-size: 16px;
+    }
+
+    .requests-search-form-1 input[type="text"]::placeholder {
+        color: #777;
+        opacity: 1;
+    }
+
+    .requests-search-form-1 input[type="text"]:focus {
+        box-shadow: 0 0 0 2px rgba(216, 230, 0, 0.45);
+    }
+
+    .requests-toolbar-1 .requests-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 54px;
+        box-sizing: border-box;
+        padding: 0 24px;
+        border: none;
+        border-radius: 16px;
+        background: #D5E11B;
+        color: #000;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .requests-toolbar-1 .requests-btn:hover {
+        background: #D5E11B;
+        color: #000;
+    }
+   
+    .requests-toolbar-1 .requests-btn--primary {
+        min-width: 176px;
+        height: 54px;;
+    }
+
+    .requests-toolbar-1 .requests-btn--search {
+        min-width: 120px;
+         height: 54px;
+    }
+
+    .requests-toolbar-1 .requests-btn--secondary {
+        min-width: 90px;
+         height: 54px;
+    }
+
+   
+    .requests-toolbar-1 .requests-btn:focus-visible {
+        outline: 2px solid #333;
+        outline-offset: 3px;
+    }
+    
+
+
     html body main .requests-btn,
     html body main form .requests-btn,
     html body main form button.requests-btn[type="submit"] {
@@ -95,7 +238,7 @@
         align-items: center;
         justify-content: center;
         padding: 8px 14px !important;
-        min-height: 0 !important;
+        min-height: 54px !important;
         min-width: 0 !important;
         height: auto !important;
         font-weight: 700;
@@ -172,7 +315,7 @@
         padding: 4px 4px 4px 12px;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
-        background: #f8fafc;
+        background: #d8e3e1;
     }
     .requests-pay-filter label {
         margin: 0;
@@ -506,8 +649,8 @@
         color: #0a1347;
     }
     .request-btn--reject {
-        background: #dc2626;
-        border: 1px solid #b91c1c;
+        background: #c91919;
+        border: 2px solid #f70606;
         color: #fff;
     }
     .request-btn--reject:hover {
@@ -666,6 +809,7 @@
             flex: 1;
             min-width: 0;
         }
+        
     }
 </style>
 @endonce
