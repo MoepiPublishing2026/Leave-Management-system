@@ -12,9 +12,12 @@ html body .pr-reviews-page h1 { color:#263248; font-weight:700; letter-spacing:0
 html body .pr-reviews-page .requests-page-lead { color:#000; }
 html body .pr-reviews-page .requests-page-lead strong { color:#a2b222; }
 
+/* Toolbar / Search Bar */
 html body .pr-reviews-page .requests-toolbar {
     background:#d8e3e1 !important; border:0 !important; border-radius:14px !important;
     padding:14px 16px !important; box-shadow:none !important; align-items:center;
+    display: flex !important;
+    justify-content: space-between !important;
 }
 html body .pr-reviews-page .requests-btn--primary,
 html body .pr-reviews-page .requests-btn--search,
@@ -29,6 +32,7 @@ html body .pr-reviews-page .requests-search-form input[type="text"] {
     padding:14px 18px 14px 44px !important; min-width:260px;
 }
 
+/* Filter Tabs */
 html body .pr-reviews-page .requests-filter-bar {
     display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;
     background:transparent !important; border:0 !important; box-shadow:none !important; padding:0 !important;
@@ -51,6 +55,7 @@ html body .pr-reviews-page .pr-reviews-scope-header {
 }
 html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
 
+/* Review Cards */
 .pr-review-cards { display:flex; flex-direction:column; gap:22px; margin-top:8px; }
 .pr-review-card {
     display:flex; align-items:center; gap:16px; flex-wrap:wrap;

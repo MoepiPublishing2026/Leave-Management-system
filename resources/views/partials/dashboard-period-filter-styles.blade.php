@@ -85,5 +85,85 @@
             min-width: 0;
         }
     }
+        /* ===== Prototype match: dashboard Employee / Period dropdowns ===== */
+    .dashboard-period-filter__form {
+        background: #d9e5e5;
+        border: 0;
+        border-radius: 20px;
+        box-shadow: none;
+        padding: 10px 14px;
+    }
+    .dashboard-period-filter__label {
+        color: #475569;
+        font-weight: 400;
+    }
+    .dashboard-period-filter .filter-select-wrap {
+        min-width: 170px;
+        flex: 0 0 auto;
+    }
+    .dashboard-period-filter .filter-select__trigger {
+        border: 0;
+        border-radius: 999px;
+        background: #fff;
+        padding: 9px 16px;
+        font-weight: 700;
+        color: #1e293b;
+        box-shadow: none;
+    }
+    .dashboard-period-filter .filter-select__trigger:hover {
+        background: #fff;
+        border: 0;
+    }
+    .dashboard-period-filter .filter-select-wrap.is-open .filter-select__trigger {
+        border: 0;
+        box-shadow: none;
+    }
+    .dashboard-period-filter .filter-select__menu {
+        top: calc(100% + 4px);
+        padding: 8px;
+        border: 0;
+        border-radius: 18px;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
+        max-height: 200px;
+        scrollbar-width: thin;
+        scrollbar-color: #9fbcbc #e6eeee;
+    }
+    .dashboard-period-filter .filter-select__menu::-webkit-scrollbar {
+        width: 8px;
+    }
+    .dashboard-period-filter .filter-select__menu::-webkit-scrollbar-track {
+        background: #e6eeee;
+        border-radius: 8px;
+    }
+    .dashboard-period-filter .filter-select__menu::-webkit-scrollbar-thumb {
+        background: #9fbcbc;
+        border-radius: 8px;
+    }
+    .dashboard-period-filter .filter-select__option {
+        text-align: center;
+        font-weight: 700;
+        color: #1e293b;
+        padding: 10px 12px;
+        border-radius: 10px;
+    }
+    .dashboard-period-filter .filter-select__option:hover,
+    .dashboard-period-filter .filter-select__option.is-focused {
+        background: rgba(212, 225, 24, 0.25);
+        color: #1e293b;
+    }
+    .dashboard-period-filter .filter-select__option.is-selected {
+        background: #d4e118;
+        color: #1e293b;
+    }
+    .dashboard-period-filter .filter-select__option.is-selected:hover {
+        background: #c8d614;
+    }
+        .manager-container .dashboard-period-filter .filter-select__option.is-selected {
+        background: #d4e118 !important;
+        color: #1e293b !important;
+    }
+    .manager-container .dashboard-period-filter .filter-select__option:hover {
+        background: rgba(212, 225, 24, 0.25) !important;
+    }
 </style>
 @endonce

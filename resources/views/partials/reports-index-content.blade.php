@@ -8,9 +8,10 @@
     <h1>{{ $pageTitle }}</h1>
     <p class="reports-page-lead">Summary and recent activity for the selected period.</p>
 
-    <div class="reports-toolbar">
-        <form id="reportsFilterForm" method="GET" action="{{ route($filterRoute) }}" class="reports-filter-form reports-toolbar-forms">
-            <select name="month" class="filter-select" aria-label="Period" onchange="this.form.submit()">
+    <div class="reports-toolbar" style="display: flex !important; flex-wrap: wrap !important; justify-content: flex-start !important; gap: 12px !important; margin-bottom: 24px !important; align-items: center !important; background: #dbe4e6 !important; padding: 12px 16px !important; border-radius: 12px !important; border: none !important; width: 100% !important; box-sizing: border-box !important;">
+        <form id="reportsFilterForm" method="GET" action="{{ route($filterRoute) }}" style="display: contents !important;">
+            
+            <select name="month" class="filter-select" aria-label="Period" onchange="this.form.submit()" style="border: none !important; border-radius: 8px !important; padding: 8px 12px !important; font-size: 14px !important; font-weight: 600 !important; color: #334155 !important; background: transparent !important; height: 38px !important; outline: none !important; min-width: 120px !important;">
                 <option value="this_year" {{ ($monthFilter ?? 'this_year') === 'this_year' ? 'selected' : '' }}>This Year</option>
                 <option value="this_quarter" {{ ($monthFilter ?? '') === 'this_quarter' ? 'selected' : '' }}>This Quarter</option>
                 <option value="this_month" {{ ($monthFilter ?? '') === 'this_month' ? 'selected' : '' }}>This Month</option>
@@ -18,16 +19,27 @@
                     <option value="{{ $y }}" {{ (string) ($monthFilter ?? '') === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
                 @endforeach
             </select>
-            <input type="text" name="start_date" id="reports_start_date" class="reports-date-input" value="{{ request('start_date') }}" placeholder="Start Date" autocomplete="off" aria-label="Start Date" />
-            <input type="text" name="end_date" id="reports_end_date" class="reports-date-input" value="{{ request('end_date') }}" placeholder="End Date" autocomplete="off" aria-label="End Date" />
-            <button type="submit" class="reports-btn reports-btn--primary">Filter</button>
-            <a href="{{ route($filterRoute) }}" class="reports-btn reports-btn--secondary">Clear</a>
+            
+            <input type="text" name="start_date" id="reports_start_date" class="reports-date-input" value="{{ request('start_date') }}" placeholder="Start Date" autocomplete="off" aria-label="Start Date" style="border: none !important; border-radius: 8px !important; padding: 8px 12px !important; font-size: 14px !important; font-weight: 500 !important; color: #334155 !important; background: #fff !important; height: 38px !important; outline: none !important; width: 120px !important;" />
+            
+            <input type="text" name="end_date" id="reports_end_date" class="reports-date-input" value="{{ request('end_date') }}" placeholder="End Date" autocomplete="off" aria-label="End Date" style="border: none !important; border-radius: 8px !important; padding: 8px 12px !important; font-size: 14px !important; font-weight: 500 !important; color: #334155 !important; background: #fff !important; height: 38px !important; outline: none !important; width: 120px !important;" />
+            
+            <button type="submit" class="reports-btn reports-btn--primary" style="background: #cbe212 !important; color: #0a1347 !important; border: none !important; border-radius: 6px !important; padding: 0 16px !important; font-weight: 700 !important; font-size: 14px !important; height: 38px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important;">Filter</button>
+            
+            <a href="{{ route($filterRoute) }}" class="reports-btn reports-btn--secondary" style="background: #cbe212 !important; color: #0a1347 !important; border: none !important; border-radius: 6px !important; padding: 0 16px !important; font-weight: 700 !important; font-size: 14px !important; height: 38px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; text-decoration: none !important;">Clear</a>
+        
+            <!-- Hidden inputs for Export -->
+            <input type="hidden" name="export_month" value="{{ $monthFilter ?? request('month', 'this_year') }}" />
+            <input type="hidden" name="export_start_date" value="{{ request('start_date') }}" />
+            <input type="hidden" name="export_end_date" value="{{ request('end_date') }}" />
         </form>
-        <form method="GET" action="{{ route($exportRoute) }}" class="reports-toolbar-forms">
+        
+        <!-- Export PDF pushed to the far right using margin-left: auto -->
+        <form method="GET" action="{{ route($exportRoute) }}" style="display: inline-flex !important; margin-left: auto !important;">
             <input type="hidden" name="month" value="{{ $monthFilter ?? request('month', 'this_year') }}" />
             <input type="hidden" name="start_date" value="{{ request('start_date') }}" />
             <input type="hidden" name="end_date" value="{{ request('end_date') }}" />
-            <button type="submit" class="reports-btn reports-btn--export">Export PDF</button>
+            <button type="submit" class="reports-btn reports-btn--export" style="background: #cbe212 !important; color: #0a1347 !important; border: none !important; border-radius: 6px !important; padding: 0 16px !important; font-weight: 700 !important; font-size: 14px !important; height: 38px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important;">Export PDF</button>
         </form>
     </div>
 

@@ -524,5 +524,140 @@
         .balance-summary-v,
         .balance-summary-v--black { font-size: 1.85rem; }
     }
+        /* ===== Prototype match: Annual Leave Page Buttons ===== */
+    .balance-page .balance-btn--apply {
+        background: {{ $balanceApplyGreen }} !important;
+        border: 1px solid {{ $balanceApplyGreenBorder }} !important;
+        color: {{ $balanceApplyGreenText }} !important;
+        border-radius: 6px !important; 
+        font-weight: 700 !important;
+        padding: 6px 16px !important;
+        box-shadow: none !important;
+    }
+    .balance-page .balance-btn--apply:hover {
+        background: #a2b222 !important;
+        border-color: #a2b222 !important;
+        color: #111 !important;
+    }
+
+    /* The red "Choose another leave type" link */
+    .balance-page .balance-btn--change-type {
+        background: transparent !important;
+        border: none !important;
+        color: #d9253c !important; 
+        font-weight: 700 !important;
+        padding: 6px 12px !important;
+        box-shadow: none !important;
+        font-size: 0.88rem;
+    }
+    .balance-page .balance-btn--change-type:hover {
+        background: transparent !important;
+        color: #b01d30 !important;
+        text-decoration: underline;
+    }
+
+        /* ===== Prototype Match: Year Filter Box ===== */
+    .balance-page .balance-toolbar-left {
+        background-color: #dbe4e6 !important; /* Grey background box */
+        padding: 8px 16px !important;
+        border-radius: 12px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+    
+    /* Make the Year text bolder and darker */
+    .balance-page .balance-year-form label {
+        font-weight: 700 !important;
+        color: #1e293b !important;
+    }
+
+    /* Make the Update button look like the prototype (white with border) */
+    .balance-page .balance-btn--primary {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        color: #0f172a !important;
+        font-weight: 600 !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+    }
+    .balance-page .balance-btn--primary:hover {
+        background: #f8fafc !important;
+    }
+
+    /* ===== Prototype Match: Full-width Table ===== */
+    .balance-panel {
+        width: 100% !important; /* Forces the table container to stretch */
+    }
+    .balance-table {
+        width: 100% !important;
+    }
+    .balance-table th, 
+    .balance-table td {
+        width: 25% !important; /* Spreads the columns evenly */
+    }
+
+    /* ===== Prototype Match: Vibrant Lime Green for Remaining ===== */
+    .balance-summary-card--remaining-meter {
+        background-color: #cbe212 !important; /* Brighter lime green */
+        border-color: #b5cb0e !important;
+    }
+
+        /* ===== Fix: Remaining Card Text and "days" label ===== */
+    .balance-page .balance-top-row .balance-summary-card--remaining-meter {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        background-color: #cbe212 !important; /* The bright lime green */
+        padding: 12px !important;
+    }
+
+    .balance-page .balance-top-row .balance-summary-card--remaining-meter .balance-summary-k {
+        color: #111 !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+        margin-bottom: 4px !important;
+        text-align: center !important;
+    }
+
+    .balance-page .balance-top-row .balance-summary-card--remaining-meter .balance-summary-body--meter {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        min-height: auto !important;
+    }
+
+    .balance-page .balance-top-row .balance-summary-card--remaining-meter .balance-summary-meter {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        background: transparent !important;
+    }
+
+    .balance-page .balance-top-row .balance-summary-card--remaining-meter .balance-summary-meter-fill {
+        background: transparent !important;
+        color: #000 !important;
+        font-size: 30px !important;
+        font-weight: 400 !important;
+        width: 100% !important;
+        padding: 0 !important;
+        line-height: 1.1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 4px !important; /* Space between number and 'days' */
+    }
+
+    /* Force the word "days" to show up right next to the number */
+    .balance-page .balance-top-row .balance-summary-card--remaining-meter .balance-summary-meter-fill::after {
+        content: " days" !important;
+        font-size: 1.2rem !important;
+        font-weight: 400 !important;
+        color: #000 !important;
+        display: inline-block !important;
+    }    
+
 </style>
 @endonce

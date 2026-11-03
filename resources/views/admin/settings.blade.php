@@ -17,39 +17,73 @@
         gap: 16px 28px;
         margin-bottom: 14px;
     }
- .app-page .app-page-lead {
-    font-size: 1.12rem;
-    color: #777;
-}
-.app-page .app-page-panel {
-    border: 1px solid #d1d5db;
-}
-.app-page .app-form-group label {
-    font-size: 15px;
-    color: #181c21;
-}
-.app-page .app-form-group input[type="number"]::-webkit-inner-spin-button,
-.app-page .app-form-group input[type="number"]::-webkit-outer-spin-button {
-    opacity: 1;
-    display: block;
-}
-.app-page .app-form-grid .app-form-group input[type="number"] {
-    background-color: #e6f3f2;
-}
-    .settings-checkbox-label {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 600;
+    .app-page .app-page-lead {
+        font-size: 1.12rem;
+        color: #777;
+    }
+    .app-page .app-page-panel {
+        border: 1px solid #d1d5db;
+    }
+    .app-page .app-form-group label {
+        font-size: 15px;
         color: #181c21;
-        cursor: pointer;
-        font-size: 0.92rem;
     }
-    .settings-checkbox-label input {
-        width: 16px;
-        height: 16px;
-        accent-color: #138056;
+    .app-page .app-form-group input[type="number"]::-webkit-inner-spin-button,
+    .app-page .app-form-group input[type="number"]::-webkit-outer-spin-button {
+        opacity: 1;
+        display: block;
     }
+    .app-page .app-form-grid .app-form-group input[type="number"] {
+        background-color: #e6f3f2;
+    }
+    
+    /* ===== Custom Green Checkbox Styling ===== */
+    .settings-checkbox-label {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        font-weight: 600 !important;
+        color: #181c21 !important;
+        cursor: pointer !important;
+        font-size: 0.92rem !important;
+    }
+
+    /* Hide the actual checkbox input */
+    .settings-checkbox-label input[type="checkbox"] {
+        display: none !important;
+    }
+
+    /* Draw the custom green box */
+    .custom-checkbox {
+        width: 18px !important;
+        height: 18px !important;
+        border: 2px solid #cbd5e1 !important;
+        border-radius: 4px !important;
+        background-color: #ffffff !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.15s ease !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* When checked, turn the box green */
+    .settings-checkbox-label input[type="checkbox"]:checked + .custom-checkbox {
+        background-color: #16a34a !important; /* The exact green from your screenshot */
+        border-color: #16a34a !important;
+    }
+
+    /* Draw the white checkmark */
+    .settings-checkbox-label input[type="checkbox"]:checked + .custom-checkbox::after {
+        content: "" !important;
+        width: 5px !important;
+        height: 10px !important;
+        border: solid white !important;
+        border-width: 0 2px 2px 0 !important;
+        transform: rotate(45deg) !important;
+        margin-bottom: 2px !important;
+    }
+
     .settings-summary {
         background: #e6f3f2;
         border: none;
@@ -60,118 +94,97 @@
         line-height: 1.55;
     }
     .settings-summary strong {
-    color: #369b55;
-}
+        color: #369b55;
+    }
     .settings-summary ul {
         margin: 8px 0 0;
         padding-left: 18px;
     }
     .settings-summary li { margin-bottom: 4px; }
+    
+    .settings-footer-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 120px;
+        margin-top: 130px;
+    }
+    .settings-notes {
+        min-height: 360px;
+        padding: 36px 30px;
+        background: #efc74f;
+    }
+    .settings-notes-panel {
+        box-sizing: border-box;
+        flex: 0 1 1088px;
+        width: 100%;
+        min-height: 360px;
+        padding: 36px 30px;
+        background: #f6e7ba;
+        border: 1px solid #d1c7ad;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .settings-notes .app-page-section-title {
+        margin: 0 0 16px;
+        color: #b45309;
+        font-size: 1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+    .settings-notes .app-info-box {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 0;
+        padding: 20px 28px;
+        border-radius: 12px;
+        background: #fff9e9;
+        color: #555;
+        font-size: 1.1rem;
+    }
+    .settings-notes .app-info-box ul {
+        margin: 0;
+    }
     .settings-actions {
         display: flex;
         justify-content: flex-end;
-        margin-top: 8px;
+        flex: 0 0 222px;
+        margin: 0 0 18px;
     }
-  .settings-footer-row {
-    display: flex;
-    align-items: flex-end;
-    gap: 120px;
-    margin-top: 130px;
-}
-.settings-notes {
-    min-height: 360px;
-    padding: 36px 30px;
-    background: #efc74f;
-}
-.settings-notes-panel {
-    box-sizing: border-box;
-    flex: 0 1 1088px;
-    width: 100%;
-    min-height: 360px;
-    padding: 36px 30px;
-    background: #f6e7ba;
-    border: 1px solid #d1c7ad;
-    border-radius: 14px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-    .settings-notes .app-page-section-title {
-    margin: 0 0 16px;
-    color: #b45309;
-    font-size: 1rem;
-    font-weight: 800;
-    text-transform: uppercase;
-}
-
-.settings-notes .app-info-box {
-    box-sizing: border-box;
-    width: 100%;
-    min-height: 0;
-    padding: 20px 28px;
-    border-radius: 12px;
-    background: #fff9e9;
-    color: #555;
-    font-size: 1.1rem;
-}
-
-.settings-notes .app-info-box ul {
-    margin: 0;
-    /* padding-left: 24px; */
-}
-
-.settings-actions {
-    display: flex;
-    justify-content: flex-end;
-    flex: 0 0 222px;
-    margin: 0 0 18px;
-}
-
-.settings-actions .app-page-btn {
-    min-width: 0;
-    min-height: 0;
-    border: 0;
-    border-radius: 8px;
-    background: #a3b323;
-    color: #000;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-@media (max-width: 900px) {
-    .settings-footer-row {
-        align-items: stretch;
-        flex-direction: column;
-        grid-template-columns: 1fr;
-        gap: 20px;
-        margin-bottom: 40px;
-    }
-  .settings-notes-panel {
-        flex-basis: auto;
+    .settings-actions .app-page-btn {
+        min-width: 0;
         min-height: 0;
-    }
-    .settings-notes {
-        min-height: 0;
-        /* max-width:none; */
-    }
-
-    .settings-notes .app-page-section-title {
-        margin-bottom: 20px;
+        border: 0;
+        border-radius: 8px;
+        background: #a3b323;
+        color: #000;
+        font-size: 13px;
+        font-weight: 700;
     }
 
-    .settings-actions {
-        justify-content: flex-start;
-        flex-basis:auto;
-        margin: 0;
+    @media (max-width: 900px) {
+        .settings-footer-row {
+            align-items: stretch;
+            flex-direction: column;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .settings-notes-panel {
+            flex-basis: auto;
+            min-height: 0;
+        }
+        .settings-notes {
+            min-height: 0;
+        }
+        .settings-notes .app-page-section-title {
+            margin-bottom: 20px;
+        }
+        .settings-actions {
+            justify-content: flex-start;
+            flex-basis:auto;
+            margin: 0;
+        }
     }
-    
-    /* .app-page .app-form-grid .app-form-group input[type="number"] {
-    background-color: #e6f3f2 !important;
-} */
-
-    /* .app-form-group input[name^="default_days"],
-.app-form-group input[name^="max_carry_over"] {
-    background-color: #e6f3f2;
-} */
-}
 </style>
 
 <div class="app-page">
@@ -200,10 +213,12 @@
                 <div class="settings-checkbox-row">
                     <label for="allow_half_days_{{ $type }}" class="settings-checkbox-label">
                         <input id="allow_half_days_{{ $type }}" type="checkbox" name="allow_half_days[{{ $type }}]" value="1" {{ !empty($policies[$type]) && $policies[$type]->allow_half_days ? 'checked' : '' }}>
+                        <span class="custom-checkbox"></span>
                         Allow half days
                     </label>
                     <label for="requires_proof_{{ $type }}" class="settings-checkbox-label">
                         <input id="requires_proof_{{ $type }}" type="checkbox" name="requires_proof[{{ $type }}]" value="1" {{ !empty($policies[$type]) && $policies[$type]->requires_proof ? 'checked' : '' }}>
+                        <span class="custom-checkbox"></span>
                         Requires proof (medical certificate or documentation)
                     </label>
                 </div>

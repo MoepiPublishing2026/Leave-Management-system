@@ -573,7 +573,7 @@
         </div>
     </div>
 
-    <h5 class="takers-title">Leaves by Type</h5>
+    <h5 class="takers-title">Top Leave Takers</h5>
     @forelse ($topLeaveTakers as $index => $taker)
         @php $percentage = $taker->percentage ?? 0; @endphp
         <div class="taker-row">

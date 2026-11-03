@@ -37,7 +37,8 @@ class LeaveYear
 
     public static function label(int $leaveYear): string
     {
-        return $leaveYear.'/'.substr((string) ($leaveYear + 1), -2);
+        // Changed to just return the single year instead of "2026/27"
+        return (string) $leaveYear;
     }
 
     public static function rangeLabel(int $leaveYear): string

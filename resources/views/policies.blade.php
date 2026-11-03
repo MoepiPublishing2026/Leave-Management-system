@@ -20,6 +20,113 @@
         font-size: 0.95rem;
         font-weight: 400;
     }
+
+    /* ===== Custom Checkbox Styling ===== */
+    .settings-checkbox-label {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        color: #334155 !important;
+        cursor: pointer !important;
+        margin-right: 16px !important;
+    }
+
+    /* Hide the default checkbox entirely */
+    .settings-checkbox-label input[type="checkbox"] {
+        display: none !important;
+    }
+
+    /* Draw the custom green checkbox box */
+    .custom-checkbox {
+        width: 18px !important;
+        height: 18px !important;
+        border: 2px solid #cbd5e1 !important;
+        border-radius: 4px !important;
+        background-color: #ffffff !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.15s ease !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* When the hidden input is checked, turn the box green */
+    .settings-checkbox-label input[type="checkbox"]:checked + .custom-checkbox {
+        background-color: #16a34a !important; /* The exact green */
+        border-color: #16a34a !important;
+    }
+
+    /* Draw the white checkmark inside */
+    .settings-checkbox-label input[type="checkbox"]:checked + .custom-checkbox::after {
+        content: "" !important;
+        width: 5px !important;
+        height: 10px !important;
+        border: solid white !important;
+        border-width: 0 2px 2px 0 !important;
+        transform: rotate(45deg) !important;
+        margin-bottom: 2px !important;
+    }
+
+    /* ===== Prototype Match: Leave Policies Grid ===== */
+    .app-page .leave-info-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 20px !important;
+        margin-top: 24px !important;
+    }
+    
+    .app-page .app-page-panel-1 {
+        background: #fff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        padding: 20px 24px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
+    }
+    
+    .app-page .app-page-panel-1 .app-page-section-title {
+        margin: 0 0 12px !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        color: #243044 !important;
+        letter-spacing: 0.05em !important;
+        text-transform: uppercase !important;
+    }
+    
+    .app-page .app-page-panel-1 .app-info-box ul {
+        margin: 0 !important;
+        padding-left: 20px !important;
+        color: #475569 !important;
+        font-size: 14px !important;
+        line-height: 1.6 !important;
+    }
+    
+    .app-page .app-page-panel-1 .app-info-box p {
+        margin: 0 !important;
+        color: #475569 !important;
+        font-size: 14px !important;
+        line-height: 1.6 !important;
+    }
+
+    .app-page .app-page-btn--secondary {
+        background: #cbe212 !important; 
+        color: #0a1347 !important; 
+        border: 1px solid #b5cb0e !important;
+        border-radius: 6px !important;
+        font-weight: 700 !important;
+        padding: 0 20px !important;
+        height: 40px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    @media (max-width: 768px) {
+        .app-page .leave-info-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
 </style>
 
 <div class="app-page">
@@ -56,25 +163,25 @@
             @endif
         </article>
     @endforeach
-<div class="leave-info-grid">
-    <div class="app-page-panel-1">
-        <h2 class="app-page-section-title">Leave application process</h2>
-        <div class="app-info-box">
-            <ul>
-                <li>Submit leave applications through the system with all required details.</li>
-                <li>Approvals are made by the employee's direct manager.</li>
-                <li>Leave balances are maintained and visible on your dashboard.</li>
-            </ul>
+    <div class="leave-info-grid">
+        <div class="app-page-panel-1">
+            <h2 class="app-page-section-title">Leave application process</h2>
+            <div class="app-info-box">
+                <ul>
+                    <li>Submit leave applications through the system with all required details.</li>
+                    <li>Approvals are made by the employee's direct manager.</li>
+                    <li>Leave balances are maintained and visible on your dashboard.</li>
+                </ul>
+            </div>
         </div>
-    </div>
 
-    <div class="app-page-panel-1">
-        <h2 class="app-page-section-title">Return to work</h2>
-        <div class="app-info-box">
-            <p>Upon return from extended leave, employees must provide certification if applicable and coordinate with HR for any necessary updates.</p>
+        <div class="app-page-panel-1">
+            <h2 class="app-page-section-title">Return to work</h2>
+            <div class="app-info-box">
+                <p>Upon return from extended leave, employees must provide certification if applicable and coordinate with HR for any necessary updates.</p>
+            </div>
         </div>
     </div>
-</div>
 
 </div>
 @endsection

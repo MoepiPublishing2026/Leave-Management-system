@@ -99,8 +99,8 @@
         transform: rotate(-135deg) translateY(1px);
     }
     .filter-select-wrap.is-open .filter-select__trigger {
-        border-color: #b2cd16;
-        box-shadow: 0 0 0 3px rgba(178, 205, 22, 0.28);
+        border-color: #d4e118;
+        box-shadow: 0 0 0 3px rgba(212, 225, 24, 0.28);
     }
     .filter-select__menu {
         position: absolute;
@@ -133,15 +133,16 @@
     }
     .filter-select__option:hover,
     .filter-select__option.is-focused {
-        background: rgba(178, 205, 22, 0.2);
-        color: #0a1347;
+        background: rgba(212, 225, 24, 0.25);
+        color: #1e293b;
     }
     .filter-select__option.is-selected {
-        background: #b2cd16;
-        color: #0a1347;
+        background: #d4e118;
+        color: #1e293b;
+        font-weight: 700;
     }
     .filter-select__option.is-selected:hover {
-        background: #9eb812;
+        background: #d4e118;
     }
     .filter-select__option.is-disabled {
         opacity: 0.45;

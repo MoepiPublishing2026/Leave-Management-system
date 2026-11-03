@@ -37,25 +37,7 @@
         margin: 0;
         letter-spacing: 0.04em;
     }
-    .add-employee-button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #b2cd16;
-        border: 1px solid #91bf14;
-        color: #0a1347;
-        padding: 9px 16px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 700;
-        font-size: 0.88rem;
-        white-space: nowrap;
-        transition: background-color 0.15s ease, color 0.15s ease;
-    }
-    .add-employee-button:hover {
-        background-color: #9eb812;
-        color: #0a1347;
-    }
+    
     .employees-table-wrap {
         position: relative;
         overflow-x: auto;
@@ -75,7 +57,6 @@
         right: 0;
         height: 4px;
         z-index: 3;
-       
     }
     .employees-table {
         width: 100%;
@@ -219,9 +200,6 @@
         .employees-page h1 {
             font-size: 1.75rem;
         }
-        .add-employee-button {
-            width: 100%;
-        }
         .employee-actions {
             flex-direction: column;
             align-items: stretch;
@@ -237,7 +215,7 @@ html body .employees-page .employees-table td .employee-actions button.delete-bu
     border:1.5px solid #333 !important; color:#222 !important;
     border-radius:9px !important; width:34px !important; height:34px !important;
     min-width:0 !important; padding:0 !important; box-shadow:none !important;
-    display:inline-flex !important; align-items:center; justify-content:center;
+    display:inline-flex !important; align-items:center !important; justify-content:center !important;
 }
 html body .employees-page .employees-table td .employee-actions a.edit-button:hover,
 html body .employees-page .employees-table td .employee-actions button.delete-button:hover {
@@ -267,7 +245,8 @@ html body .employees-page .employees-table th {
 <div class="employees-page">
     <div class="employees-header">
         <h1>Employees List</h1>
-        <a href="{{ route('manager.employees.create') }}" class="add-employee-button">+ Add Employee</a>
+       
+                <a href="{{ route('manager.employees.create') }}" class="add-employee-button" style="background-color: #cbe212 !important; border: 1px solid #b5cb0e !important; color: #0a1347 !important; border-radius: 6px !important; padding: 9px 16px !important; font-weight: 700 !important; font-size: 0.88rem !important; text-decoration: none !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; box-shadow: none !important; transition: background-color 0.15s ease !important;">+ Add Employee</a>
     </div>
 
     <div class="employees-table-wrap">

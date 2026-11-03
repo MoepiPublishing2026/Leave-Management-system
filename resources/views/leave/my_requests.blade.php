@@ -50,28 +50,6 @@
     .leave-card__actions form { margin: 0; display: inline-flex; }
     .leave-card__actions .request-existing-files { display: inline-flex; flex-wrap: wrap; gap: 8px; }
 
-    /* Outlined pill buttons to match the prototype */
-    .leave-card .request-btn {
-        background: #fff;
-        border: 1.5px solid #b9d44a;
-        color: #7d9a00;
-        border-radius: 999px;
-        padding: 6px 14px;
-        font-size: .85rem;
-        font-weight: 500;
-        box-shadow: none;
-        text-transform: none;
-    }
-    .leave-card .request-btn:hover { background: #f6fadf; }
-    .leave-card .request-btn--withdraw,
-    .leave-card .request-btn--delete {
-        background: #ffd9d9;
-        border-color: #e57373;
-        color: #c62828;
-    }
-    .leave-card .request-btn--withdraw:hover,
-    .leave-card .request-btn--delete:hover { background: #ffc7c7; }
-
     .requests-empty-card {
         text-align: center; padding: 28px; color: #6b7280;
         background: #fff; border: 1px dashed #cfd6d4; border-radius: 14px;
@@ -149,7 +127,12 @@ html body .my-requests-page [class*="request-badge--withdrawn"] { background:#e2
 /* buttons: outlined lime, Withdraw pink */
 html body .my-requests-page .leave-card .request-btn {
     background:#fff !important; border:2px solid #c5d931 !important; color:#8d9a1a !important;
-    border-radius:999px !important; padding:6px 16px !important; font-size:.85rem !important; font-weight:500 !important;
+    border-radius:999px !important; padding:6px 16px !important; font-size:.85rem !important; font-weight:600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: none !important;
+    line-height: 1 !important;
 }
 html body .my-requests-page .leave-card .request-btn:hover { background:#f6fadf !important; }
 html body .my-requests-page .leave-card .request-btn--withdraw,
@@ -197,6 +180,35 @@ html body .my-requests-page .leave-card__badges .request-badge:not(.request-badg
 
 /* card buttons: bottom right, same spacing as prototype */
 html body .my-requests-page .leave-card__actions { justify-content:flex-end; gap:10px; margin-top:12px; }
+
+/* ===== Fix: Payment Dropdown ===== */
+html body .my-requests-page .requests-pay-filter {
+    background: #dbe4e6 !important; /* Grey background box */
+    border: 0 !important; 
+    border-radius: 12px !important;
+    padding: 6px 16px !important; 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    box-shadow: none !important;
+}
+html body .my-requests-page .requests-pay-filter label {
+    font-size: 14px !important; 
+    font-weight: 500 !important; /* Not bold */
+    color: #475569 !important;
+    text-transform: none !important; /* Sentence case */
+    margin: 0 !important;
+}
+html body .my-requests-page .requests-pay-filter select {
+    background: #fff !important; 
+    border: 0 !important; 
+    border-radius: 20px !important; 
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    color: #1e293b !important;
+    padding: 8px 16px !important;
+    min-width: 140px !important;
+}    
 
 </style>
 
@@ -336,7 +348,10 @@ html body .my-requests-page .leave-card__actions { justify-content:flex-end; gap
 
                 <div class="leave-card__actions request-actions request-actions-cell" onclick="event.stopPropagation();">
                     @if ($canEdit)
-                        <a href="{{ route(\App\Support\LeaveApplicant::editRoute(auth()->user()), $req->id) }}" class="request-btn request-btn--edit">Edit</a>
+                        <a href="{{ route(\App\Support\LeaveApplicant::editRoute(auth()->user()), $req->id) }}" class="request-btn request-btn--edit">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg>
+                            Edit
+                        </a>
                     @endif
 
                     @if ($showAttachmentControls)
@@ -352,7 +367,10 @@ html body .my-requests-page .leave-card__actions { justify-content:flex-end; gap
                                         data-label="{{ $fileLink['label'] }}"
                                         data-filename="{{ $fileLink['name'] }}"
                                         data-previewable="1"
-                                    >View {{ $fileLink['label'] }}</button>
+                                    >
+                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        View {{ $fileLink['label'] }}
+                                    </button>
                                 @endforeach
                             </div>
                         @endif
@@ -369,7 +387,10 @@ html body .my-requests-page .leave-card__actions { justify-content:flex-end; gap
                                     data-opens-at="{{ $proofWindowOpens ? $proofWindowOpens->format('d M Y') : '' }}"
                                     data-deadline="{{ $proofDeadline ? $proofDeadline->format('d M Y') : '' }}"
                                     data-action-label="{{ $attachmentActionLabel }}"
-                                >{{ $attachmentActionLabel }}</button>
+                                >
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                    {{ $attachmentActionLabel }}
+                                </button>
                             </form>
                         @endif
                     @endif
@@ -382,7 +403,10 @@ html body .my-requests-page .leave-card__actions { justify-content:flex-end; gap
                                 type="button"
                                 class="request-btn request-btn--withdraw withdraw-request-btn"
                                 data-approved="{{ $rowStatus === 'approved' ? '1' : '0' }}"
-                            >Withdraw</button>
+                            >
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                Withdraw
+                            </button>
                         </form>
                     @endif
 
@@ -390,10 +414,13 @@ html body .my-requests-page .leave-card__actions { justify-content:flex-end; gap
                         <form class="delete-request-form" method="POST" action="{{ route('leave.destroy', $req) }}">
                             @csrf
                             @method('DELETE')
-                            <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">Delete</button>
+                            <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                Delete
+                            </button>
                         </form>
                     @endif
-                </div>
+                </div>            
             </div>
         @empty
             <div class="requests-empty-card requests-empty">No leave requests found for this filter.</div>

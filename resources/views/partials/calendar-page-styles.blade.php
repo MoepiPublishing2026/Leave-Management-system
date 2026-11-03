@@ -407,5 +407,42 @@
             gap: 4px;
         }
     }
+
+        /* ===== Clean up Month Picker Pill ===== */
+    
+    /* Hide the dropdown chevron arrow */
+    .calendar-page .cal-nav-chevron {
+        display: none !important;
+    }
+
+    /* Adjust the text container to sit side-by-side on one line */
+    .calendar-page .cal-nav-current-text {
+        flex-direction: row !important; 
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+    }
+
+    /* Style the Month text */
+    .calendar-page .cal-nav-current-month {
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        color: #1e293b !important;
+    }
+
+    /* Style the Year text to match the month (black, not green) */
+    .calendar-page .cal-nav-current-year {
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        color: #1e293b !important; /* Dark text instead of green */
+    }
+
+    /* Center the pill */
+    .calendar-page .cal-nav-current {
+        min-width: 160px !important;
+        padding: 8px 20px !important;
+        justify-content: center !important;
+    }
+    
 </style>
 @endonce

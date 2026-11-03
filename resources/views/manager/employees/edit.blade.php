@@ -349,9 +349,9 @@ html body .employee-create-page .branding { font-size:11px !important; margin-to
             <div class="error">{{ $message }}</div>
         @enderror
 
-        <div class="button-group">
-            <button type="submit" class="btn-form-action">Save Changes</button>
-            <a href="{{ route('manager.employees.index') }}" class="btn-form-action">Back to List</a>
+            <div class="button-group">
+            <button type="submit" class="btn-form-action" style="background: #cbe212 !important; color: #0a1347 !important; border: 1px solid #b5cb0e !important; border-radius: 6px !important; padding: 8px 24px !important; font-weight: 700 !important; font-size: 14px !important; min-height: 38px !important; box-shadow: none !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important;">Save Changes</button>
+            <a href="{{ route('manager.employees.index') }}" class="btn-form-action" style="background: #cbe212 !important; color: #0a1347 !important; border: 1px solid #b5cb0e !important; border-radius: 6px !important; padding: 8px 24px !important; font-weight: 700 !important; font-size: 14px !important; min-height: 38px !important; box-shadow: none !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; text-decoration: none !important;">Back to List</a>
         </div>
     </form>
 

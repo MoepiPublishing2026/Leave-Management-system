@@ -127,46 +127,61 @@
                 @if(!$isTypeDisabled)
                     <a href="{{ route($applyRoute ?? \App\Support\LeaveApplicant::applyRoute(auth()->user()), ['leave_type' => $selectedType]) }}" class="balance-btn balance-btn--apply">+Apply</a>
                 @endif
-                <a href="{{ route($myRequestsRoute ?? \App\Support\LeaveApplicant::myRequestsRoute(auth()->user())) }}" class="balance-btn balance-btn--secondary">My Requests</a>
-                <a href="{{ route($balanceRoute ?? \App\Support\LeaveApplicant::balanceRoute(), ['year' => $year]) }}" class="balance-btn balance-btn--secondary">Change type</a>
+                <a href="{{ route($myRequestsRoute ?? \App\Support\LeaveApplicant::myRequestsRoute(auth()->user())) }}" class="balance-btn balance-btn--apply">My Requests</a>
             </div>
         </div>
 
-        <div class="balance-summary-grid">
-            <div class="balance-summary-card">
-                <div class="balance-summary-k">{{ $selectedType }} remaining</div>
-                <div class="balance-summary-body">
-                    <div class="balance-summary-v">{{ $fmtDays($remaining) }}</div>
+        <!-- NEW WRAPPER START -->
+        <div class="balance-top-row">
+            <div class="balance-summary-grid">
+                <div class="balance-summary-card">
+                    <div class="balance-summary-k">{{ $selectedType }} remaining</div>
+                    <div class="balance-summary-body">
+                        <div class="balance-summary-v">{{ $fmtDays($remaining) }}</div>
+                    </div>
                 </div>
-            </div>
-            <div class="balance-summary-card balance-summary-card--used">
-                <div class="balance-summary-k">Used</div>
-                <div class="balance-summary-body balance-summary-body--meter">
-                    <div class="balance-summary-meter">
-                        <div class="balance-summary-meter-fill" > 
-                            {{ $fmtDays($taken) }}
+                <div class="balance-summary-card balance-summary-card--used">
+                    <div class="balance-summary-k">Used</div>
+                    <div class="balance-summary-body balance-summary-body--meter">
+                        <div class="balance-summary-meter">
+                            <div class="balance-summary-meter-fill" > 
+                                {{ $fmtDays($taken) }}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="balance-summary-card balance-summary-card--remaining-meter">
-                <div class="balance-summary-k">Remaining</div>
-                <div class="balance-summary-body balance-summary-body--meter">
-                    <div class="balance-summary-meter">
-                        <div class="balance-summary-meter-fill" style="width: {{ $remainingMeterWidth }}%;">
-                            {{ $fmtDays($remaining) }}
+                <div class="balance-summary-card balance-summary-card--remaining-meter">
+                    <div class="balance-summary-k">Remaining</div>
+                    <div class="balance-summary-body balance-summary-body--meter">
+                        <div class="balance-summary-meter">
+                            <div class="balance-summary-meter-fill" style="width: {{ $remainingMeterWidth }}%;">
+                                {{ $fmtDays($remaining) }}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="balance-summary-card balance-summary-card--allocated">
-                <div class="balance-summary-k">Allocated</div>
-                <div class="balance-summary-body">
-                    <div class="balance-summary-v">{{ $fmtDays($allocated) }}</div>
-                    <div class="balance-summary-cap balance-summary-cap--spacer" aria-hidden="true">&nbsp;</div>
+                <div class="balance-summary-card balance-summary-card--allocated">
+                    <div class="balance-summary-k">Allocated</div>
+                    <div class="balance-summary-body">
+                        <div class="balance-summary-v">{{ $fmtDays($allocated) }}</div>
+                        <div class="balance-summary-cap balance-summary-cap--spacer" aria-hidden="true">&nbsp;</div>
+                    </div>
                 </div>
             </div>
+
+            @if($allocated > 0)
+                <div class="balance-usage-panel">
+                    <div class="balance-usage-label">
+                        <span>Usage in {{ $yearLabel ?? $year }}</span>
+                        <span>{{ $usagePct }}% · {{ $fmtDays($taken) }} / {{ $fmtDays($allocated) }} days</span>
+                    </div>
+                    <div class="balance-usage-track">
+                        <div class="balance-usage-fill" style="width: {{ max($usagePct, 2) }}%;"></div>
+                    </div>
+                </div>
+            @endif
         </div>
+        <!-- NEW WRAPPER END -->
 
         @if($isTypeDisabled)
             <div class="balance-alert balance-alert--danger">
@@ -185,18 +200,6 @@
         @if($pendingDaysTotal > 0)
             <div class="balance-alert balance-alert--info">
                 <strong>{{ $fmtDays($pendingDaysTotal) }}</strong> day(s) pending approval — not deducted until approved.
-            </div>
-        @endif
-
-        @if($allocated > 0)
-            <div class="balance-usage-panel">
-                <div class="balance-usage-label">
-                    <span>Usage in {{ $yearLabel ?? $year }}</span>
-                    <span>{{ $usagePct }}% · {{ $fmtDays($taken) }} / {{ $fmtDays($allocated) }} days</span>
-                </div>
-                <div class="balance-usage-track">
-                    <div class="balance-usage-fill" style="width: {{ max($usagePct, 2) }}%;"></div>
-                </div>
             </div>
         @endif
 
@@ -306,6 +309,13 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+        
+        <!-- Bottom link: Choose another leave type -->
+        <div style="display: block !important; width: 100% !important; text-align: left !important; margin-top: 24px !important; margin-bottom: 12px !important; padding-left: 0 !important;">
+            <a href="{{ route($balanceRoute ?? \App\Support\LeaveApplicant::balanceRoute(), ['year' => $year]) }}" style="color: #d9253c; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.95rem;">
+                <span style="font-size: 1.2rem; line-height: 1;">&larr;</span> Choose another leave type
+            </a>
         </div>
     @endif
 </div>

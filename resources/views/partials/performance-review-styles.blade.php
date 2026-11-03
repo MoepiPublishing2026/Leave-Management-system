@@ -16,12 +16,6 @@
         margin-bottom: 16px;
         padding: 0 12px;
     }
-    .pr-toolbar h1 {
-        margin: 0;
-        font-size: 28px;
-        color: #1e293b;
-        font-weight: 700;
-    }
     .pr-doc {
         background: #fff;
         border: 0;
@@ -77,22 +71,45 @@
     .pr-row:last-child { padding-bottom: 14px; }
     .pr-card h2 + .pr-row { padding-top: 14px; }
     .pr-label { font-size: 11px; font-weight: 700; color: #263041; }
+    
+    /* Lime green pill inputs */
     .pr-row input,
     .pr-row select {
         width: 100%;
-        background: #d6e21c;
-        color: #263041;
-        border: 2px solid #91a30a;
-        border-radius: 12px;
-        padding: 6px 14px;
-        font-size: 11px;
+        background: #d6e21c !important;
+        color: #263041 !important;
+        border: 2px solid #91a30a !important;
+        border-radius: 12px !important;
+        padding: 6px 14px !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
         font-family: inherit;
         box-sizing: border-box;
         height: auto;
         min-height: 0;
         color-scheme: light;
     }
+    
+    /* Custom JS Dropdowns */
+    .pr-row .filter-select__trigger {
+        background: #d6e21c !important;
+        color: #263041 !important;
+        border: 2px solid #91a30a !important;
+        border-radius: 12px !important;
+        padding: 8px 14px !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        min-height: 36px;
+        box-shadow: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        cursor: pointer !important;
+    }
+    
     .pr-row select option { color: #263041; background: #fff; }
+    
     .pr-meta {
         width: 100%;
         border-collapse: collapse;
@@ -268,14 +285,33 @@
         cursor: pointer;
         color: #fff;
     }
-    .pr-btn--primary { background: #b2cd16; color: #0a1347; border: 1px solid #91bf14; }
-    .pr-btn--primary:hover { background: #9eb812; color: #0a1347; }
+    
+    /* Save Draft - Red */
+    .pr-btn--draft { 
+        background: #d9253c !important; 
+        color: #ffffff !important; 
+        border: 1px solid #b01d30 !important; 
+        order: 1 !important; 
+    }
+    .pr-btn--draft:hover { 
+        background: #b01d30 !important; 
+    }
+    
+    /* Submit Review - Lime Green */
+    .pr-btn--primary { 
+        background: #b2cd16 !important; 
+        color: #ffffff !important; 
+        border: 1px solid #91bf14 !important; 
+        order: 2 !important; 
+    }
+    .pr-btn--primary:hover { 
+        background: #9eb812 !important; 
+    }
+    
     .pr-btn--secondary { background: #64748b; color: #fff; }
     .pr-btn--secondary:hover { background: #475569; color: #fff; }
     .pr-btn--ghost { background: #b2cd16; color: #0a1347; border: 1px solid #91bf14; }
     .pr-btn--ghost:hover { background: #9eb812; color: #0a1347; }
-    .pr-btn--draft { background: #850621; color: #fff; border: 1px solid #680523; }
-    .pr-btn--draft:hover { background: #680523; color: #fff; }
     .pr-footer {
         margin-top: 28px;
         text-align: center;
@@ -352,7 +388,7 @@
         font-family: inherit;
         font-size: 14px;
     }
-        @media (max-width: 760px) {
+    @media (max-width: 760px) {
         .pr-page { padding: 4px 0 0; }
         .pr-doc { padding: 0; }
         .pr-split { grid-template-columns: 1fr; }
@@ -387,16 +423,50 @@
         .pr-doc { box-shadow: none; border: 0; }
         .pr-page { max-width: none; }
     }
-    .pr-reviews-page .mgr-page-header {
-        max-width: none;
-        padding: 0;
-        margin: 0 0 18px;
+
+        /* ===== Action Buttons ===== */
+    .pr-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: flex-start; /* Aligns buttons to the left */
+        margin-top: 22px;
     }
-    .pr-reviews-page .mgr-page-header .requests-page-lead {
-        margin-bottom: 0;
+    .pr-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px; /* Square corners as in prototype */
+        padding: 10px 24px;
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 1.2;
+        text-decoration: none;
+        cursor: pointer;
+        box-shadow: none !important;
     }
-    .pr-reviews-page .requests-filter--draft.is-active { background: #D2B55B; }
-    .pr-reviews-page .requests-filter--submitted.is-active { background: #C291A4; }
-    .pr-reviews-page .requests-filter--reviewed.is-active { background: #E27A53; }
+    
+    /* Save Draft - Red (Moved to Left via Order) */
+    .pr-btn--draft { 
+        background: #d9253c !important; 
+        color: #ffffff !important; /* White font */
+        border: 1px solid #b01d30 !important; 
+        order: 1 !important; 
+    }
+    .pr-btn--draft:hover { 
+        background: #b01d30 !important; 
+    }
+    
+    /* Submit Review - Lime Green (Moved to Right via Order) */
+    .pr-btn--primary { 
+        background: #b2cd16 !important; 
+        color: #ffffff !important; /* White font */
+        border: 1px solid #91bf14 !important; 
+        order: 2 !important; 
+    }
+    .pr-btn--primary:hover { 
+        background: #9eb812 !important; 
+    }
+
 </style>
 @endonce

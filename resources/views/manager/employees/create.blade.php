@@ -24,8 +24,8 @@
     .button-group button.btn-form-action { font-family: inherit; }
     .branding { margin-top: 35px; font-size: 13px; color: #a2a6b1; user-select: none; letter-spacing: 0.5px; }
     @media (max-width: 576px) {
-        .button-group { flex-direction: column; align-items: stretch; gap: 10px; }
-        .button-group .btn-form-action { width: 100%; }
+    .button-group { flex-direction: column; align-items: stretch; gap: 10px; }
+    .button-group .btn-form-action { width: 100%; }
         html body .employee-create-page .signup-container { padding: 24px !important; }
     }
 
@@ -53,8 +53,26 @@
     html body .employee-create-page .checkbox-row label { margin-top:0 !important; font-size:13px !important; text-transform:none !important; }
     html body .employee-create-page input[type="checkbox"] { accent-color:#a2b222 !important; }
     html body .employee-create-page .field-hint { font-size:11px !important; font-weight:400 !important; color:#767672 !important; }
-    html body .employee-create-page .button-group .btn-form-action { background:#a2b222 !important; color:#000 !important; border:0 !important; border-radius:8px !important; padding:8px 16px !important; font-size:13px !important; min-height:0 !important; height:auto !important; }
-    html body .employee-create-page .button-group .btn-form-action:hover { background:#8d9c1c !important; }
+    
+    /* ===== Prototype match: Bright Lime Green Buttons ===== */
+    html body .employee-create-page .button-group .btn-form-action {
+        background: #b2cd16 !important; /* Bright lime green */
+        border: 1px solid #91bf14 !important; /* Slight border */
+        color: #0a1347 !important; /* Dark text */
+        border-radius: 6px !important; /* Squared corners */
+        padding: 8px 24px !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        min-height: 38px !important;
+        height: auto !important;
+        box-shadow: none !important;
+        transition: background-color 0.15s ease;
+    }
+    html body .employee-create-page .button-group .btn-form-action:hover {
+        background: #9eb812 !important; /* Slightly darker on hover */
+        color: #0a1347 !important;
+    }
+    
     html body .employee-create-page .branding { font-size:11px !important; margin-top:20px !important; }
 
     /* ===== Departments dropdown (tick several) ===== */
@@ -188,9 +206,9 @@
             </button>
         </div>
 
-        <div class="button-group">
-            <button type="submit" class="btn-form-action">Add Employee</button>
-            <a href="{{ route('manager.employees.index') }}" class="btn-form-action">Back to List</a>
+            <div class="button-group">
+            <button type="submit" class="btn-form-action" style="background: #cbe212 !important; color: #0a1347 !important; border: 1px solid #b5cb0e !important; border-radius: 6px !important; padding: 8px 24px !important; font-weight: 700 !important; font-size: 14px !important; min-height: 38px !important; box-shadow: none !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important;">Add Employee</button>
+            <a href="{{ route('manager.employees.index') }}" class="btn-form-action" style="background: #cbe212 !important; color: #0a1347 !important; border: 1px solid #b5cb0e !important; border-radius: 6px !important; padding: 8px 24px !important; font-weight: 700 !important; font-size: 14px !important; min-height: 38px !important; box-shadow: none !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; text-decoration: none !important;">Back to List</a>
         </div>
     </form>
 

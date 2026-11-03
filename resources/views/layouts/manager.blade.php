@@ -10,7 +10,7 @@
     <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}?v=3" sizes="180x180" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <style>
+        <style>
         html, body {
             margin: 0; padding: 0;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -359,14 +359,77 @@
             height: 38px;
         }
         /* remove link underline and colour */
-html body header.navbar .navbar-logo,
-html body header.navbar .navbar-logo:hover { text-decoration:none !important; color:#fff !important; }
-html body header.navbar .logo-text { color:#fff !important; text-decoration:none !important; }
+        html body header.navbar .navbar-logo,
+        html body header.navbar .navbar-logo:hover { text-decoration:none !important; color:#fff !important; }
+        html body header.navbar .logo-text { color:#fff !important; text-decoration:none !important; }
+        html body header.navbar .navbar-logo { gap:6px !important; letter-spacing:0 !important; }
+        html body header.navbar .logo-text { margin-left:0 !important; }
+        
+        /* ===== Prototype match: notifications dropdown ===== */
+        html body .dropdown-menu.notifications-dropdown {
+            min-width: 360px;
+            max-width: 360px;
+            max-height: 240px;
+            border: 0;
+            border-radius: 10px;
+            padding: 0;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.2);
+            scrollbar-width: thin;
+            scrollbar-color: #b8c2c2 #eef2f2;
+        }
+        html body .dropdown-menu.notifications-dropdown .dropdown-header {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
+            padding: 8px 12px;
+            border-bottom: 1px solid #9aa5a5;
+            background: #fff;
+        }
+        html body .dropdown-menu.notifications-dropdown .notification-dropdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 8px 12px;
+            background: #fff;
+        }
+        html body .dropdown-menu.notifications-dropdown .notification-dropdown-item:hover {
+            background: rgba(212, 225, 24, 0.15);
+        }
+        html body .dropdown-menu.notifications-dropdown .notification-dropdown-message {
+            flex: 1 1 auto;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.3;
+            color: #8a9a12;
+        }
+        html body .dropdown-menu.notifications-dropdown .notification-dropdown-time {
+            flex: 0 0 auto;
+            font-size: 11px;
+            font-weight: 500;
+            color: #475569;
+            white-space: nowrap;
+        }
+        html body .dropdown-menu.notifications-dropdown .dropdown-divider {
+            margin: 0;
+            border-top: 1px solid #9aa5a5;
+            opacity: 0.6;
+        }
 
-html body header.navbar .navbar-logo { gap:6px !important; letter-spacing:0 !important; }
-html body header.navbar .logo-text { margin-left:0 !important; }
+        /* ===== Prototype match: arrow next to the bell ===== */
+        #notificationsDropdown::after {
+            content: "" !important;
+            display: inline-block !important;
+            width: 0 !important;
+            height: 0 !important;
+            margin-left: 8px !important;
+            vertical-align: middle !important;
+            border: 0 !important; /* resets any bootstrap borders */
+            border-top: 7px solid #ffffff !important; /* Green arrow */
+            border-left: 5px solid transparent !important;
+            border-right: 5px solid transparent !important;
+        }
     </style>
-
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 

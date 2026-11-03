@@ -396,6 +396,41 @@
   .dashboard-top-bar h1 {
     margin: 0;
   }
+  .dashboard-top-bar h1 {
+    margin: 0;
+  }
+    /* ===== Prototype match: My Leave Dashboard tabs ===== */
+  .dashboard-container .mgr-quick-links {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 14px 36px;
+    margin: 6px 0 26px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+  .dashboard-container .mgr-quick-links .mgr-quick-link {
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #253141 !important;
+    text-decoration: none !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 8px;
+    padding: 6px 16px;
+    box-shadow: none !important;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .dashboard-container .mgr-quick-links .mgr-quick-link:hover,
+  .dashboard-container .mgr-quick-links .mgr-quick-link:focus,
+  .dashboard-container .mgr-quick-links .mgr-quick-link.active {
+    background: #d9253c !important;
+    color: #fff !important;
+  }
 </style>
 
 @if(!empty($teamDashboardUrl))
@@ -417,11 +452,11 @@
 <div class="dashboard-container">
 
   @if(\App\Support\LeaveApplicant::isManager($user))
-    <nav class="mgr-quick-links" aria-label="My leave pages">
-      <a href="{{ route($myRequestsRoute, ['status' => 'all']) }}" class="mgr-quick-link">My requests</a>
-      <a href="{{ route($calendarRoute) }}" class="mgr-quick-link">My calendar</a>
-      <a href="{{ route($applyRoute) }}" class="mgr-quick-link">Apply for leave</a>
-      <a href="{{ route($balanceRoute) }}" class="mgr-quick-link">Leave balances</a>
+      <nav class="mgr-quick-links" aria-label="My leave pages">
+      <a href="{{ route($myRequestsRoute, ['status' => 'all']) }}" class="mgr-quick-link {{ request()->routeIs($myRequestsRoute) ? 'active' : '' }}">My requests</a>
+      <a href="{{ route($calendarRoute) }}" class="mgr-quick-link {{ request()->routeIs($calendarRoute) ? 'active' : '' }}">My calendar</a>
+      <a href="{{ route($applyRoute) }}" class="mgr-quick-link {{ request()->routeIs($applyRoute) ? 'active' : '' }}">Apply for leave</a>
+      <a href="{{ route($balanceRoute) }}" class="mgr-quick-link {{ request()->routeIs($balanceRoute) ? 'active' : '' }}">Leave balances</a>
     </nav>
   @endif
 

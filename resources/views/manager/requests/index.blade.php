@@ -179,6 +179,234 @@ html body .team-requests-page .requests-table td.requests-empty {
         body.overdue-reason-locked .overdue-reason-lock-overlay {
             display: block;
         }
+        /* ===== Prototype Match: Team Requests Toolbar & Filters ===== */
+    
+    /* Toolbar Search area */
+    html body .requests-page .requests-toolbar {
+        background: transparent !important;
+        border: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 20px;
+    }
+    html body .requests-page .requests-search-form {
+        display: flex;
+        gap: 8px;
+    }
+    html body .requests-page .requests-search-form input[type="text"] {
+        background-color: #fff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 20px !important;
+        padding: 10px 18px 10px 44px !important;
+        font-size: 14px !important;
+        min-width: 280px;
+        height: 40px !important;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M16 16l5 5'/></svg>") !important;
+        background-repeat: no-repeat !important;
+        background-position: 16px center !important;
+        background-size: 18px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+    }
+    html body .requests-page .requests-btn {
+        background: #b2cd16 !important;
+        color: #0a1347 !important;
+        border: 1px solid #91bf14 !important;
+        border-radius: 6px !important;
+        padding: 0 16px !important;
+        font-weight: 700 !important;
+        font-size: 13px !important;
+        height: 40px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    html body .requests-page .requests-btn:hover {
+        background: #9eb812 !important;
+    }
+
+    /* Filter Tabs & Payment */
+    html body .requests-page .requests-filter-bar {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        background: transparent !important;
+        border: 0 !important;
+        padding: 0 !important;
+        margin-bottom: 24px !important;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    html body .requests-page .requests-filters {
+        background: transparent !important;
+        border: 0 !important;
+        padding: 0 !important;
+        display: inline-flex !important;
+        gap: 20px !important;
+    }
+    html body .requests-page .requests-filter {
+        background: transparent !important;
+        color: #263248 !important;
+        font-weight: 700 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        font-size: 14px !important;
+    }
+    html body .requests-page .requests-filter.is-active {
+        color: #2379b0 !important;
+    }
+    html body .requests-page .requests-pay-filter {
+        background: #dbe4e6 !important;
+        border: 0 !important;
+        border-radius: 12px !important;
+        padding: 6px 16px !important;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    html body .requests-page .requests-pay-filter label {
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        color: #475569 !important;
+        text-transform: none !important;
+        margin: 0 !important;
+    }
+    html body .requests-page .requests-pay-filter select {
+        background: #fff !important;
+        border: 0 !important;
+        border-radius: 20px !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        color: #1e293b !important;
+        padding: 8px 16px !important;
+        min-width: 140px !important;
+    }
+
+        /* ===== Fix: Payment Dropdown ===== */
+    html body .team-requests-page .requests-pay-filter {
+        background: #dbe4e6 !important; 
+        border: 0 !important; 
+        border-radius: 12px !important;
+        padding: 6px 16px !important; 
+        display: flex; 
+        align-items: center; 
+        gap: 12px; 
+        box-shadow: none !important;
+    }
+    html body .team-requests-page .requests-pay-filter label {
+        font-size: 14px !important; 
+        font-weight: 500 !important; 
+        color: #475569 !important;
+        text-transform: none !important; 
+        margin: 0 !important;
+    }
+    html body .team-requests-page .requests-pay-filter select {
+        background: #fff !important; 
+        border: 0 !important; 
+        border-radius: 20px !important; 
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        color: #1e293b !important;
+        padding: 8px 16px !important;
+        min-width: 140px !important;
+    }
+
+        /* ===== Force Prototype Match: Team Requests Filters & Tabs ===== */
+    
+    /* 1. Restore the grey background behind the tabs */
+    html body .team-requests-page .requests-filters {
+        background: #dbe4e6 !important; 
+        border-radius: 12px !important;
+        padding: 10px 24px !important;
+        display: inline-flex !important;
+        gap: 24px !important;
+        border: 0 !important;
+    }
+
+    /* 2. Make the tab text look like the prototype */
+    html body .team-requests-page .requests-filter {
+        color: #263248 !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        background: transparent !important;
+        padding: 0 !important;
+        border: 0 !important;
+    }
+    html body .team-requests-page .requests-filter.is-active {
+        color: #2379b0 !important;
+    }
+
+    /* 3. Style the Payment Dropdown container */
+    html body .team-requests-page .requests-pay-filter {
+        background: #dbe4e6 !important; 
+        border-radius: 12px !important;
+        padding: 6px 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        border: 0 !important;
+    }
+    html body .team-requests-page .requests-pay-filter label {
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        color: #475569 !important;
+        text-transform: none !important;
+        margin: 0 !important;
+    }
+    html body .team-requests-page .requests-pay-filter select {
+        background: #fff !important;
+        border: 0 !important;
+        border-radius: 20px !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        color: #1e293b !important;
+        padding: 8px 16px !important;
+        min-width: 140px !important;
+    }
+
+    /* 4. Action Buttons - Exact Match */
+    /* Submitted Button */
+    html body .team-requests-page .request-actions-submitted {
+        background: #dfe98c !important; 
+        color: #3b7a1e !important; 
+        border: 2px solid #a2b222 !important;
+        border-radius: 20px !important; 
+        padding: 8px 20px !important; 
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+    
+    /* Recommend Approve Button */
+    html body .team-requests-page .request-btn--approve {
+        background: #dfe98c !important; 
+        color: #3b7a1e !important; 
+        border: 2px solid #a2b222 !important;
+        border-radius: 20px !important; 
+        padding: 8px 20px !important; 
+        font-weight: 700 !important;
+        font-size: 14px !important;
+    }
+    html body .team-requests-page .request-btn--approve:hover {
+        background: #d0db72 !important;
+    }
+
+    /* Recommend Reject Button */
+    html body .team-requests-page .request-btn--reject {
+        background: #e41e3f !important; 
+        color: #fff !important; 
+        border: 2px solid #e41e3f !important;
+        border-radius: 20px !important; 
+        padding: 8px 20px !important; 
+        font-weight: 700 !important;
+        font-size: 14px !important;
+    }
+    html body .team-requests-page .request-btn--reject:hover {
+        background: #c91634 !important;
+    }
 
     </style>
     <script>document.body.classList.add('overdue-reason-locked');</script>

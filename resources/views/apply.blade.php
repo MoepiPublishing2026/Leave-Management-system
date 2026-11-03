@@ -317,6 +317,83 @@
       color: #000000;
   }
 
+        /* ===== Fix: Make Cancel button match Submit ===== */
+    html body .apply-page .btn-cancel,
+    html body form .btn-cancel {
+        background-color: #cbe212 !important; /* Bright lime green */
+        color: #0a1347 !important; /* Dark text */
+        border: 1px solid #b5cb0e !important;
+        border-radius: 6px !important; /* Rounded corners */
+        font-weight: 700 !important;
+        padding: 8px 16px !important;
+        text-decoration: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: none !important;
+        font-size: 14px !important;
+        min-height: 38px;
+    }
+    html body .apply-page .btn-cancel:hover,
+    html body form .btn-cancel:hover {
+        background-color: #b2cd16 !important; /* Slightly darker on hover */
+        color: #0a1347 !important;
+    }
+
+        /* ===== Fixes: Centered Dropdown, Curved Attachment Box, Cancel Button ===== */
+    
+    /* 1. Center the "Types of Leaves" label and dropdown */
+    form.leave-form .input-group:has(#leave_type) {
+        text-align: center !important;
+        align-items: center !important;
+    }
+    form.leave-form .input-group:has(#leave_type) label {
+        text-align: center !important;
+        width: 100%;
+    }
+    form.leave-form .input-group:has(#leave_type) select {
+        max-width: 600px !important; /* Prevents it from stretching too wide */
+        margin: 0 auto !important;
+    }
+
+    /* 2. Curve the Attachment Box */
+    .file-upload {
+        border-radius: 12px !important; 
+        border: 2px dashed #c5d931 !important; 
+        background: #fbfdf4 !important; /* Very faint green tint to match prototype */
+    }
+    .file-upload-zone {
+        padding: 34px 20px !important;
+    }
+    .file-upload-icon {
+        fill: #c5d931 !important; /* Matches the prototype icon color */
+    }
+
+    /* 3. Fix the Cancel and Submit Buttons */
+    form.leave-form .button-group .submit-btn,
+    form.leave-form .button-group .cancel-btn {
+        background-color: #cbe212 !important; /* Bright lime green */
+        color: #0a1347 !important; /* Dark text */
+        border: 1px solid #b5cb0e !important;
+        border-radius: 6px !important; /* Slightly squared corners */
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        padding: 10px 20px !important;
+        min-height: 40px !important;
+        box-shadow: none !important;
+    }
+    
+    form.leave-form .button-group .submit-btn:hover,
+    form.leave-form .button-group .cancel-btn:hover {
+        background-color: #b2cd16 !important;
+    }
+
+    /* Ensure the buttons container aligns them to the left */
+    form.leave-form .button-group {
+        justify-content: flex-start !important;
+        gap: 12px !important;
+    }
+
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
