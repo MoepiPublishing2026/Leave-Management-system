@@ -280,6 +280,216 @@
     .request-details-popup--leave .swal2-html-container {
         overflow: visible !important;
     }
+
+    html body .request-details-popup--senior.swal2-popup {
+        width: min(92vw, 600px) !important;
+        max-width: min(92vw, 600px) !important;
+        padding: 28px 34px 20px !important;
+        border-radius: 2px !important;
+        overflow: visible !important;
+        background: #fff !important;
+    }
+    html body .request-details-popup--senior .swal2-actions {
+        display: flex !important;
+        position: static !important;
+        width: 100% !important;
+        margin: 16px 0 2px !important;
+        padding: 0 !important;
+        background: #fff !important;
+        justify-content: center !important;
+    }
+    html body .request-details-container--senior .swal2-confirm.rd-senior-close {
+        background: #d4e21a !important;
+        color: #111111 !important;
+        border: 0 !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+        font-weight: 700 !important;
+        font-size: 15px !important;
+        min-width: 118px !important;
+        min-height: 0 !important;
+        height: auto !important;
+        padding: 10px 28px !important;
+    }
+    html body .request-details-container--senior .swal2-confirm.rd-senior-close:hover {
+        background: #c3d010 !important;
+        color: #111111 !important;
+    }
+    html body .rd-modal--senior {
+        color: #6b7280;
+        font-family: "Poppins", "Segoe UI", sans-serif;
+        font-weight: 400;
+    }
+    html body .rd-senior-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    html body .rd-senior-head h2 {
+        margin: 0;
+        font-family: "Century Gothic", "Questrial", "Poppins", sans-serif;
+        font-size: 30px;
+        line-height: 1.1;
+        font-weight: 700;
+        color: #243044;
+        letter-spacing: 0;
+    }
+    html body .rd-senior-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex: none;
+        margin-top: 0;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: #243044;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1;
+    }
+    .rd-senior-status--approved { background: #2a6fc0; }
+    .rd-senior-status--rejected { background: #c62828; }
+    .rd-senior-status svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+    html body .rd-senior-who {
+        margin: 0 0 18px;
+        font-size: 13px;
+        line-height: 1.35;
+        font-weight: 400;
+        color: #9aa3af;
+    }
+    html body .rd-senior-name {
+        font-size: 15px;
+        font-weight: 400;
+        color: #6f7884;
+    }
+    html body .rd-senior-meta {
+        margin-top: 2px;
+        font-size: 13px;
+        font-weight: 400;
+        color: #8b95a3;
+    }
+    html body .rd-senior-rule {
+        height: 3px;
+        margin: 14px 0 14px;
+        background: #e4ef3a;
+    }
+    html body .rd-senior-box {
+        border: 2px solid #e4ef3a;
+        border-radius: 2px;
+        padding: 18px 18px 20px;
+    }
+    html body .rd-senior-kicker {
+        margin: 0 0 16px;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        color: #243044;
+    }
+    html body .rd-senior-label {
+        margin: 18px 0 8px;
+        font-size: 15px;
+        font-weight: 400;
+        color: #6f7884;
+    }
+    html body .rd-senior-kicker + .rd-senior-label {
+        margin-top: 0;
+    }
+    html body .rd-senior-stats,
+    html body .rd-senior-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+    html body .rd-senior-stats span,
+    html body .rd-senior-pills span {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 14px;
+        border: 1px solid #e1e6ec;
+        border-radius: 999px;
+        background: #f7f8fa;
+        color: #8b95a3;
+        font-size: 13px;
+        font-weight: 400;
+    }
+    html body .rd-senior-request,
+    html body .rd-senior-copy,
+    html body .rd-senior-policy {
+        margin: 14px 0 0;
+        font-size: 13.5px;
+        line-height: 1.5;
+        font-weight: 400;
+        color: #8b95a3;
+    }
+    html body .rd-senior-alert {
+        margin-top: 16px;
+        padding: 12px 14px;
+        border-radius: 2px;
+        background: #243044;
+        color: #e4ef3a;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+    .rd-senior-pills { margin-top: 8px; }
+    .rd-senior-table {
+        width: 100%;
+        margin-top: 18px;
+        border-collapse: collapse;
+    }
+    .rd-senior-table th,
+    .rd-senior-table td {
+        padding: 9px 0;
+        border-bottom: 1px solid #e6eaf0;
+        vertical-align: top;
+    }
+    .rd-senior-table th {
+        width: 46%;
+        padding-right: 16px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #9aa3af;
+    }
+    .rd-senior-table td {
+        text-align: right;
+        font-size: 14px;
+        font-weight: 800;
+        color: #243044;
+    }
+    .rd-senior-messages {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 22px auto 4px;
+        width: min(100%, 420px);
+        min-height: 46px;
+        border-radius: 24px;
+        background: #2c3848;
+        color: #fff;
+        font-weight: 700;
+        font-size: 16px;
+        text-decoration: none;
+    }
+    .rd-senior-messages:hover {
+        background: #1c2633;
+        color: #fff;
+    }
     html body .swal2-popup.calendar-day-popup,
     html body .swal2-popup:has(.cal-day-modal) {
         width: 560px !important;

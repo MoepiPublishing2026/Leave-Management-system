@@ -6,6 +6,7 @@
     $enableProofUpload = $enableProofUpload ?? false;
     $deleteWarning = $deleteWarning ?? 'This request will be permanently removed.';
     $backLabel = $backLabel ?? '← Back to My requests';
+    $seniorLayout = $seniorLayout ?? false;
 @endphp
 @include('partials.request-details-modal-styles')
 <script>
@@ -15,6 +16,7 @@
         showDays: @json($showDays),
         showHandledMeta: @json($showHandledMeta),
         backLabel: @json($backLabel),
+        seniorLayout: @json($seniorLayout),
     };
 
     const fileIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2 5 5h-4a1 1 0 0 1-1-1V4zM8 13h8v2H8v-2zm0-4h8v2H8V9z"/></svg>';
@@ -342,7 +344,133 @@
         return chip('Attachment', names, 'rd-chip--full');
     }
 
+    function seniorStatusIcon(statusKey, isOverdue) {
+        const key = isOverdue ? 'overdue' : String(statusKey || '').toLowerCase();
+        if (key === 'approved') {
+            return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.8"/></svg>';
+        }
+        if (key === 'rejected') {
+            return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>';
+        }
+        return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
+    }
+
+    function renderSeniorPopup(details) {
+        const review = details.review && typeof details.review === 'object' ? details.review : {};
+        const statusKey = details.isOverdue ? 'overdue' : String(details.status || 'pending');
+        const statusLabel = statusDisplayLabel(details.status, details.isOverdue);
+        const deadline = review.proofDeadline || details.proofDeadline || '';
+        const requested = review.requested || details.days || '0';
+
+        let documents = 'No supporting document is required for this leave type.';
+        if (review.proofAttached || details.proofAttached) {
+            documents = 'Supporting document is attached.';
+        } else if (review.proofDeferred || details.proofDeferred) {
+            documents = "The doctor's letter is not attached yet. The doctor may recommend sick leave before the visit.";
+            if (deadline) documents += ` Upload deadline: ${deadline}.`;
+        } else if (review.proofRequired) {
+            documents = 'Supporting documentation is required and is not attached.';
+        }
+
+        const alertHtml = review.willConvertToUnpaid && review.unpaidNote
+            ? `<div class="rd-senior-alert">${escapeHtml(review.unpaidNote)}</div>`
+            : '';
+
+        const pills = [];
+        if (review.policyDefaultDays) pills.push(`${escapeHtml(review.policyDefaultDays)} days per year`);
+        pills.push(review.proofRequired ? 'proof required' : 'proof not required');
+        pills.push(review.allowHalfDays ? 'half days allowed' : 'half days not allowed');
+
+        const whoBits = [details.designation, details.email].filter((value) => hasText(value));
+        const files = Array.isArray(details.files) ? details.files : [];
+        const attachmentText = files.length
+            ? files.map((file) => escapeHtml(file.label || file.name || 'File')).join(', ')
+            : 'None';
+
+        let letterText = 'Not required';
+        if (review.proofAttached || details.proofAttached) {
+            letterText = 'Uploaded';
+        } else if (review.proofDeferred || details.proofDeferred || review.proofRequired) {
+            letterText = "Doctor's letter required after approval";
+            if (deadline) letterText += `. Deadline: ${deadline}`;
+        }
+
+        const dateText = (value) => escapeHtml(String(value || '—').toUpperCase());
+        const recommendation = hasText(details.managerRecommendation)
+            ? escapeHtml(String(details.managerRecommendation).toUpperCase())
+            : '—';
+        const messagesHtml = details.messagesUrl
+            ? `<a class="rd-senior-messages" href="${escapeHtml(details.messagesUrl)}">Open Messages</a>`
+            : '';
+        const rows = [
+            ['Leave type', escapeHtml(details.type || '—')],
+            ['Start date', dateText(details.start)],
+            ['End date', dateText(details.end)],
+            ['Working days', escapeHtml(String(requested))],
+            ['Comment', hasText(details.comment) ? escapeHtml(details.comment) : 'None'],
+            ['Attachments', attachmentText],
+            ["Doctor's letter", escapeHtml(letterText).toUpperCase()],
+            ['Recommendation', recommendation],
+        ];
+
+        return `
+            <div class="rd-modal rd-modal--senior">
+                <div class="rd-senior-head">
+                    <h2>Request #${escapeHtml(details.id)}</h2>
+                    <span class="rd-senior-status rd-senior-status--${escapeHtml(statusKey)}">${seniorStatusIcon(statusKey, details.isOverdue)}${escapeHtml(statusLabel)}</span>
+                </div>
+                <div class="rd-senior-rule"></div>
+                <div class="rd-senior-who">
+                    <div class="rd-senior-name">${escapeHtml(details.employee || 'Unknown')}</div>
+                    ${whoBits.length ? `<div class="rd-senior-meta">${whoBits.map((value) => escapeHtml(value)).join(' - ')}</div>` : ''}
+                </div>
+                <div class="rd-senior-box">
+                    <div class="rd-senior-kicker">Manager review</div>
+                    <div class="rd-senior-label">Verify leave balance</div>
+                    <div class="rd-senior-stats">
+                        <span>Allocated: ${escapeHtml(review.allocated || '0')}</span>
+                        <span>Taken: ${escapeHtml(review.taken || '0')}</span>
+                        <span>Remaining: ${escapeHtml(review.remaining || '0')}</span>
+                    </div>
+                    <p class="rd-senior-request">This request: ${escapeHtml(String(requested))} working day(s)</p>
+                    <div class="rd-senior-label">Verify supporting documents</div>
+                    <p class="rd-senior-copy">${escapeHtml(documents)}</p>
+                    ${alertHtml}
+                    <div class="rd-senior-label">Check leave policy</div>
+                    <div class="rd-senior-pills">${pills.map((pill) => `<span>${pill}</span>`).join('')}</div>
+                    ${review.policyText ? `<p class="rd-senior-policy">${escapeHtml(review.policyText)}</p>` : ''}
+                    <table class="rd-senior-table">
+                        <tbody>
+                            ${rows.map(([label, value]) => `<tr><th>${label}</th><td>${value}</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                    ${messagesHtml}
+                </div>
+            </div>
+        `;
+    }
+
     window.openRequestDetails = function (details) {
+        if (pageConfig.seniorLayout) {
+            const isMobileSenior = window.matchMedia('(max-width: 768px)').matches;
+            Swal.fire({
+                width: isMobileSenior ? 'auto' : 600,
+                position: 'center',
+                showCloseButton: false,
+                showIcon: false,
+                customClass: {
+                    popup: 'request-details-popup request-details-popup--leave request-details-popup--senior',
+                    container: 'request-details-container request-details-container--senior',
+                    confirmButton: 'rd-senior-close',
+                },
+                html: renderSeniorPopup(details),
+                showConfirmButton: true,
+                confirmButtonText: 'Close',
+                focusConfirm: false,
+            });
+            return;
+        }
+
         let daysText = 'N/A';
         if (details.days !== '' && details.days !== null && details.days !== undefined) {
             daysText = details.isHalfDay

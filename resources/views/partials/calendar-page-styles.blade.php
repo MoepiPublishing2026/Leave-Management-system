@@ -41,7 +41,7 @@
     }
     .calendar-page .calendar-shell {
         width: 100%;
-        max-width: 1180px;
+        max-width: 900px;
         margin: 0 auto;
         padding: 0 0 24px;
     }

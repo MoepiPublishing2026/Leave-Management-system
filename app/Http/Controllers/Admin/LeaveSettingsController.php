@@ -43,6 +43,26 @@ class LeaveSettingsController extends Controller
     {
         $this->assertCanManagePolicies();
 
+        $allowedTypes = ['Annual', 'Sick', 'Maternity', 'Paternity', 'Bereavement', 'Unpaid', 'Family Responsibility', 'Study'];
+        $clearType = trim((string) $request->input('clear_policy', ''));
+        if ($clearType !== '') {
+            if (! in_array($clearType, $allowedTypes, true)) {
+                return back()->with('error', 'That leave policy could not be cleared.');
+            }
+
+            LeavePolicy::updateOrCreate(
+                ['leave_type' => $clearType],
+                [
+                    'default_days' => 0,
+                    'max_carry_over' => 0,
+                    'allow_half_days' => false,
+                    'requires_proof' => false,
+                ]
+            );
+
+            return back()->with('success', $clearType.' leave policy was cleared.');
+        }
+
         $leaveTypes = $request->input('leave_type', []);
 
         foreach ($leaveTypes as $type) {

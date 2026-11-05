@@ -50,16 +50,16 @@
     window.chartTextColor = '#0f172a';
 
     window.chartBoldFontSpec = {
-        family: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-        size: 12,
-        weight: 'bold',
+        family: "'Inter', 'Segoe UI', sans-serif",
+        size: 10,
+        weight: '500',
         style: 'normal',
     };
 
     window.chartTooltipBold = {
-        bodyFont: { size: 13, weight: 'bold' },
-        titleFont: { size: 13, weight: 'bold' },
-        footerFont: { size: 12, weight: 'bold' },
+        bodyFont: { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500' },
+        titleFont: { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500' },
+        footerFont: { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500' },
     };
 
     window.chartLegendBold = {
@@ -116,6 +116,16 @@
             chart.options.layout = layout;
             chart.update('none');
         });
+    };
+
+    window.stackedBarTopRadius = (radius = 8) => (ctx) => {
+        const value = Number(ctx.raw) || 0;
+        if (value <= 0) return 0;
+        const datasets = ctx.chart?.data?.datasets || [];
+        for (let i = ctx.datasetIndex + 1; i < datasets.length; i += 1) {
+            if ((Number(datasets[i].data?.[ctx.dataIndex]) || 0) > 0) return 0;
+        }
+        return { topLeft: radius, topRight: radius, bottomLeft: 0, bottomRight: 0 };
     };
 
     window.registerMonthAxisChart = (chart) => {
@@ -284,8 +294,8 @@
 
         Chart.defaults.color = window.chartTextColor;
         Chart.defaults.font.family = window.chartBoldFontSpec.family;
-        Chart.defaults.font.size = 12;
-        Chart.defaults.font.weight = 'bold';
+        Chart.defaults.font.size = window.chartBoldFontSpec.size;
+        Chart.defaults.font.weight = window.chartBoldFontSpec.weight;
         Chart.defaults.font.style = 'normal';
         Chart.defaults.maintainAspectRatio = false;
     };

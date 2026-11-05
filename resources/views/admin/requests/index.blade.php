@@ -87,6 +87,7 @@
                     $details = [
                         'id' => $req->id,
                         'employee' => $applicantFull,
+                        'designation' => (string) ($req->user->designation ?? ''),
                         'email' => $req->user->email ?? '',
                         'department' => $req->user->department ?? '',
                         'type' => (string) ($req->leave_type ?? ''),
@@ -131,7 +132,7 @@
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>
                     <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y H:i') : '—' }}</td>
                     <td class="request-status-cell">
-                        <span class="request-badge request-badge--{{ $statusBadge }}">{{ $statusLabel }}</span>
+                        <span class="request-badge request-badge--{{ $statusBadge }}">@include('partials.request-status-icon', ['icon' => $statusBadge]){{ $statusLabel }}</span>
                         @if ($recLabel !== '')
                             <span class="request-badge request-badge--pending" title="{{ $req->manager_recommendation_comment }}">{{ $recLabel }}</span>
                         @endif
@@ -148,24 +149,24 @@
                                             @csrf
                                             @method('PATCH')
                                             <input type="hidden" name="approval_comment" class="approval-comment-input" value="" />
-                                            <button type="submit" class="request-btn request-btn--approve">Recommend Approve</button>
+                                            <button type="submit" class="request-btn request-btn--approve">@include('partials.request-action-icon', ['name' => 'check']) Recommend Approve</button>
                                         </form>
                                     @else
                                         <span class="request-actions-note" title="{{ $proofBlockReason }}">Awaiting proof</span>
                                     @endif
-                                    <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Recommend Reject</button>
+                                    <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">@include('partials.request-action-icon', ['name' => 'x']) Recommend Reject</button>
                                 </div>
                             @elseif ($canDecide && $req->isOverdue())
                                 <span class="request-actions-note">Start date has passed, so this request can no longer be approved or rejected.</span>
                             @elseif ($rowStatus === 'rejected')
-                                <a href="{{ route('admin.manager-requests.show_reason', $req) }}" class="request-link">View Reason</a>
+                                <a href="{{ route('admin.manager-requests.show_reason', $req) }}" class="request-link">@include('partials.request-action-icon', ['name' => 'view']) View Reason</a>
                             @endif
-                            <a href="{{ route('messages.leave', $req) }}" class="request-link">Messages</a>
+                            <a href="{{ route('messages.leave', $req) }}" class="request-link">@include('partials.request-action-icon', ['name' => 'message']) Messages</a>
                             @if ($canDelete)
                                 <form class="delete-request-form" method="POST" action="{{ route('admin.requests.destroy', $req) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">Delete</button>
+                                    <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">@include('partials.request-action-icon', ['name' => 'trash']) Delete</button>
                                 </form>
                             @endif
                         </div>
@@ -197,6 +198,7 @@
     'showEmployee' => true,
     'showDays' => true,
     'showHandledMeta' => true,
+    'seniorLayout' => true,
     'deleteWarning' => 'It will be permanently removed, including messages and attachments.',
 ])
 

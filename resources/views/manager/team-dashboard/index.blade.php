@@ -4,9 +4,9 @@
 
 @section('content')
 @include('partials.dashboard-status-card-styles')
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-    html body { font-family: 'Poppins', 'Segoe UI', sans-serif; }
+    html body { font-family: 'Inter', 'Segoe UI', sans-serif; }
 
     .mgr-page-header { width: 100%; align-items: center; margin-bottom: 22px; padding: 0 30px; box-sizing: border-box; }
     .mgr-page-header .mgr-page-header__main h1 {
@@ -22,7 +22,7 @@
         font-size: 12px;
     }
     .manager-container {
-        font-family: 'Poppins', 'Segoe UI', sans-serif;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
         width: 100%;
         max-width: 1200px;
         box-sizing: border-box;
@@ -115,20 +115,21 @@
         align-items: stretch;
     }
     .chart-card {
-        background: white;
-        padding: 12px 12px;
-        border-radius: 14px;
-        box-shadow: 0 3px 9px rgba(0, 0, 0, 0.18);
-        border: 1px solid #d6dbe0;
-        color: #222;
+        background: #ffffff;
+        padding: 16px 16px 12px;
+        border-radius: 18px;
+        box-shadow: 0 8px 22px rgba(38, 49, 66, 0.08);
+        border: 1px solid #eef2f6;
+        color: #263142;
         display: flex;
         flex-direction: column;
-        min-height: 236px;
+        min-height: 250px;
     }
     .chart-card h3 {
         margin: 0 0 10px 0;
         font-weight: 700;
-        font-size: 0.95rem;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 0.92rem;
         color: #253141;
     }
     .chart-body {
@@ -143,7 +144,8 @@
     .manager-container .chart-html-legend li,
     .manager-container .chart-html-legend span,
     .manager-container .chart-html-legend-label {
-        font-size: 0.78rem !important;
+        font-family: 'Inter', 'Segoe UI', sans-serif !important;
+        font-size: 0.62rem !important;
         font-weight: 700 !important;
         color: #0f172a !important;
     }
@@ -276,7 +278,7 @@
         <div class="chart-card">
             <h3>Paid vs Unpaid Leave</h3>
             <div class="chart-body chart-body--ring">
-                <canvas id="payStatusPolar"></canvas>
+                <canvas id="leaveChart"></canvas>
             </div>
         </div>
     </div>
@@ -342,13 +344,26 @@ document.addEventListener('DOMContentLoaded', () => {
         return fixedTypeColors[key] || hashToColor(key);
     };
 
-    window.chartBoldFontSpec = { family: "'Poppins', sans-serif", size: 12, weight: 'bold', style: 'normal' };
+    window.chartTextColor = '#3d4450';
+    window.chartBoldFontSpec = { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500', style: 'normal' };
     window.chartAxisTicksBold = { color: window.chartTextColor, font: { ...window.chartBoldFontSpec } };
     window.applyBoldChartDefaults();
     window.finalizeChartDefaults();
 
-    const protoColors = ['#4a7ff7', '#b08cf5', '#f5b96b', '#ffdc50', '#4fe6c5', '#94c4c8', '#a03d85', '#b9d84a'];
-    const blue = '#4a7ff7';
+    const protoColors = ['#4a7ff7', '#b08cf5', '#f5b96b', '#f0d24a', '#4fe8c6', '#90c8c8', '#a04088', '#b8d850'];
+    const statusSliceColors = {
+        Pending: '#105078',
+        Overdue: '#f4a0ab',
+        Approved: '#b08cf5',
+        Rejected: '#f07a86'
+    };
+    const monthlyStatusColors = {
+        Approved: '#7ebade',
+        Pending: '#105078',
+        Overdue: '#f4a0ab',
+        Rejected: '#d4e04a',
+    };
+    const blue = '#5b86ea';
 
     const sliceLabels = {
         id: 'sliceLabels',
@@ -367,8 +382,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             ctx.save();
-            ctx.font = 'bold 11px Poppins, sans-serif';
-            ctx.fillStyle = '#253141';
+            ctx.font = '500 9px Inter, sans-serif';
+            ctx.fillStyle = '#3d4450';
             ctx.textBaseline = 'middle';
 
             for (let i = 0; i < slices.length; i++) {
@@ -377,8 +392,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const slice = slices[i];
                 const middleAngle = (slice.startAngle + slice.endAngle) / 2;
-                const x = slice.x + Math.cos(middleAngle) * (slice.outerRadius + 8);
-                const y = slice.y + Math.sin(middleAngle) * (slice.outerRadius + 20);
+                const labelRadius = slice.outerRadius + 18;
+                const x = slice.x + Math.cos(middleAngle) * labelRadius;
+                const y = slice.y + Math.sin(middleAngle) * labelRadius;
 
                 if (Math.cos(middleAngle) > 0.25) {
                     ctx.textAlign = 'left';
@@ -436,53 +452,72 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     });
 
-    const payStatusLabels = ['Paid', 'Unpaid'];
     const payStatusData = @json(array_values($payStatusCounts ?? ['Paid' => 0, 'Unpaid' => 0]));
     const payStatusPct = @json($payStatusPercentages ?? []);
-    const payStatusColors = [protoColors[0], protoColors[1]];
+    const paidPercentage = Number(payStatusPct['Paid'] ?? 0);
+    const unpaidPercentage = Number(payStatusPct['Unpaid'] ?? 0);
 
-    new Chart(document.getElementById('payStatusPolar'), {
-        type: 'polarArea',
+    new Chart(document.getElementById('leaveChart'), {
+        type: 'bar',
         data: {
-            labels: payStatusLabels,
-            datasets: [{
-                data: payStatusData,
-                backgroundColor: payStatusColors,
-                borderWidth: 0
-            }]
-        },
-        options: mergeChartOptions({
-            layout: { padding: 10 },
-            scales: {
-                r: {
-                    beginAtZero: true,
-                    ticks: {
-                        display: false,
-                        backdropColor: 'transparent',
-                        showLabelBackdrop: false,
-                    },
-                    grid: { color: 'rgba(148, 163, 184, 0.35)', circular: true },
-                    angleLines: { color: 'rgba(148, 163, 184, 0.35)' },
-                    pointLabels: {
-                        display: true,
-                        color: '#253141',
-                        font: { family: "'Poppins', sans-serif", size: 11, weight: 'bold' },
-                        padding: 6,
-                    },
+            labels: ['Leave'],
+            datasets: [
+                {
+                    label: 'Paid',
+                    data: [paidPercentage],
+                    backgroundColor: '#4a7ff7',
+                    borderWidth: 0,
+                    stack: 'leave'
                 },
-            },
+                {
+                    label: 'Unpaid',
+                    data: [unpaidPercentage],
+                    backgroundColor: '#c4b0f2',
+                    borderWidth: 0,
+                    stack: 'leave'
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: {
-                legend: { display: false },
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        color: '#3d4450',
+                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500' }
+                    }
+                },
                 tooltip: {
                     callbacks: {
-                        label: (ctx) => {
-                            const pct = (payStatusPct[ctx.label] ?? 0).toFixed(1);
-                            return `${ctx.label}: ${ctx.raw} (${pct}%)`;
-                        }
+                        label: ctx => `${ctx.dataset.label}: ${ctx.raw}%`
                     }
                 }
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                        stepSize: 20,
+                        callback: value => value + '%',
+                        color: '#3d4450',
+                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500' }
+                    },
+                    grid: { color: '#d9d9d9' }
+                },
+                y: {
+                    stacked: true,
+                    display: false
+                }
             }
-        })
+        }
     });
 
     const statusPct = @json($statusPercentages ?? []);
@@ -498,7 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     const statusPieLabels = statusList.map(function (item) { return item.label; });
     const statusPieData = statusList.map(function (item) { return item.value; });
-    const statusPieColors = statusPieLabels.map((label, i) => protoColors[i % protoColors.length]);
+    const statusPieColors = statusPieLabels.map((label) => statusSliceColors[label] || '#90c8c8');
 
     new Chart(document.getElementById('statusPie'), {
         type: 'pie',
@@ -551,11 +586,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 data: monthlyTotals,
                 backgroundColor: hexToRgba(monthlyColor, 0.2),
                 borderColor: monthlyColor,
-                borderWidth: 1.5,
-                tension: 0.4,
+                borderWidth: 2,
+                tension: 0.45,
+                cubicInterpolationMode: 'monotone',
                 fill: false,
-                pointRadius: 2,
-                pointHoverRadius: 4
+                pointRadius: 0,
+                pointHoverRadius: 3,
+                capBezierPoints: true
             }]
         },
         options: mergeChartOptions({
@@ -600,37 +637,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     label: 'Approved',
                     data: monthlyApproved,
-                    backgroundColor: protoColors[6],
+                    backgroundColor: monthlyStatusColors.Approved,
                     borderWidth: 0,
-                    borderRadius: 5,
-                    maxBarThickness: 40,
+                    borderRadius: window.stackedBarTopRadius(8),
+                    borderSkipped: false,
+                    maxBarThickness: 28,
                     stack: 'status'
                 },
                 {
                     label: 'Pending',
                     data: monthlyPending,
-                    backgroundColor: protoColors[2],
+                    backgroundColor: monthlyStatusColors.Pending,
                     borderWidth: 0,
-                    borderRadius: 5,
-                    maxBarThickness: 40,
+                    borderRadius: window.stackedBarTopRadius(8),
+                    borderSkipped: false,
+                    maxBarThickness: 28,
                     stack: 'status'
                 },
                 {
                     label: 'Overdue',
                     data: monthlyOverdue,
-                    backgroundColor: protoColors[1],
+                    backgroundColor: monthlyStatusColors.Overdue,
                     borderWidth: 0,
-                    borderRadius: 5,
-                    maxBarThickness: 40,
+                    borderRadius: window.stackedBarTopRadius(8),
+                    borderSkipped: false,
+                    maxBarThickness: 28,
                     stack: 'status'
                 },
                 {
                     label: 'Rejected',
                     data: monthlyRejected,
-                    backgroundColor: protoColors[5],
+                    backgroundColor: monthlyStatusColors.Rejected,
                     borderWidth: 0,
-                    borderRadius: 5,
-                    maxBarThickness: 40,
+                    borderRadius: window.stackedBarTopRadius(8),
+                    borderSkipped: false,
+                    maxBarThickness: 28,
                     stack: 'status'
                 }
             ];
@@ -642,7 +683,19 @@ document.addEventListener('DOMContentLoaded', () => {
             datasets: monthlyStatusDatasets
         },
         options: mergeChartOptions({
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 10,
+                        boxHeight: 10,
+                        padding: 12,
+                        color: '#263142',
+                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500' }
+                    }
+                }
+            },
             scales: {
                 x: { stacked: true, grid: { display: false }, ticks: window.getMonthAxisTicks() },
                 y: { stacked: true, beginAtZero: true, grid: { color: '#d9d9d9' }, border: { display: false }, ticks: { precision: 0 } }
@@ -657,7 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'monthlyLine', values: monthlyTotals, message: 'No applications submitted in this leave year.' },
         { id: 'departmentBar', values: @json($departmentData ?? []), message: 'No leave requests by department for this filter.' },
         { id: 'monthlyStatusStackedBar', values: monthlyStatusDatasets, message: 'No monthly status data for this leave year.' },
-        { id: 'payStatusPolar', values: payStatusData, message: 'No paid or unpaid leave for this filter.' },
+        { id: 'leaveChart', values: payStatusData, message: 'No paid or unpaid leave for this filter.' },
     ]);
 
 });

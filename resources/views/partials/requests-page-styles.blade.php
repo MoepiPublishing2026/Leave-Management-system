@@ -512,7 +512,9 @@
         font-size: 0.88rem;
     }
     .request-badge {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         min-width: 0;
         padding: 4px 14px;
         border-radius: 14px;
@@ -524,6 +526,24 @@
         letter-spacing: 0;
         line-height: 1.25;
         box-shadow: none;
+    }
+    html body .requests-page .request-badge svg,
+    html body .requests-page .request-btn svg,
+    html body .requests-page .request-link svg,
+    html body .requests-page .request-actions-submitted svg {
+        width: 16px;
+        height: 16px;
+        flex: none;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+    html body .requests-page .request-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
     }
     .request-badge--approved {
         background: #9db4ff !important;

@@ -13,9 +13,9 @@
     $calendarRoute = \App\Support\LeaveApplicant::personalCalendarRoute($user);
     $leaveYearLabel = \App\Support\LeaveYear::label((int) ($year ?? now()->year));
 @endphp
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  html body { font-family: 'Poppins', 'Segoe UI', sans-serif; }
+  html body { font-family: 'Inter', 'Segoe UI', sans-serif; }
   body, html { margin: 0; padding: 0; }
 
   /* ---------- Page title ---------- */
@@ -42,7 +42,7 @@
 
   /* ---------- Main white panel ---------- */
   .dashboard-container {
-    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
     width: 100%;
     max-width: 1200px;
     box-sizing: border-box;
@@ -197,13 +197,13 @@
   }
   .chart-card {
     background: #fff;
-    padding: 14px 16px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
-    border: 1px solid #d6dbe0;
+    padding: 16px 16px 12px;
+    border-radius: 18px;
+    box-shadow: 0 8px 22px rgba(38, 49, 66, 0.08);
+    border: 1px solid #eef2f6;
     display: flex;
     flex-direction: column;
-    min-height: 226px;
+    min-height: 250px;
   }
   .chart-card h3 {
     margin: 0 0 8px;
@@ -231,29 +231,67 @@
   .status-legend-item { display: inline-flex; align-items: center; gap: 8px; }
   .status-legend-swatch { width: 10px; height: 10px; border-radius: 2px; }
 
-  /* Pyramid */
-  .pyramid-body { display: flex; flex-direction: column; gap: 14px; flex: 1; }
-  .pyramid {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 0;
+  /* Pyramid — same shape as My Leave Dashboard */
+  html body .dashboard-container .pyramid-body {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    flex: 1 !important;
+    width: 100% !important;
   }
-  .pyramid-row { height: 9px; border-radius: 10px; }
-  .pyramid-legend {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px 22px;
-    font-size: 0.62rem;
-    font-weight: 700;
-    color: #253141;
+  html body .dashboard-container .pyramid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 7px !important;
+    width: 100% !important;
+    padding: 10px 6px 2px !important;
   }
-  .pyramid-legend-item { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  .pyramid-swatch { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-  .pyramid-legend-text { display: flex; justify-content: space-between; gap: 8px; width: 100%; min-width: 0; }
-  .pyramid-legend-type { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .pyramid-legend-value { flex-shrink: 0; padding-right: 24px; }
+  html body .dashboard-container .pyramid-row {
+    height: 14px !important;
+    border-radius: 8px !important;
+    max-width: 100% !important;
+    flex: 0 0 auto !important;
+  }
+  html body .dashboard-container .pyramid-legend {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px 28px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    font-family: 'Inter', 'Segoe UI', sans-serif !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    color: #253141 !important;
+  }
+  html body .dashboard-container .pyramid-legend-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+  }
+  html body .dashboard-container .pyramid-swatch {
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 2px !important;
+    flex-shrink: 0 !important;
+  }
+  html body .dashboard-container .pyramid-legend-text {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  html body .dashboard-container .pyramid-legend-type {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  html body .dashboard-container .pyramid-legend-value {
+    flex-shrink: 0 !important;
+    padding-right: 0 !important;
+  }
 
   /* ---------- Responsive ---------- */
   @media (max-width: 1100px) {
@@ -445,7 +483,7 @@
       return fixedTypeColors[key] || fallbackColors[hashString(key || 'default') % fallbackColors.length];
     };
 
-    window.chartBoldFontSpec = { family: "'Poppins', sans-serif", size: 10, weight: 'bold', style: 'normal' };
+    window.chartBoldFontSpec = { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500', style: 'normal' };
     window.chartAxisTicksBold = { color: window.chartTextColor, font: { ...window.chartBoldFontSpec } };
     window.applyBoldChartDefaults();
     window.finalizeChartDefaults();
@@ -461,10 +499,10 @@
     };
 
     const monthlyStatusColors = {
-      Approved:  '#7fb3d5',
-      Pending:   '#1b4f72',
-      Overdue:   '#f1a1a8',
-      Rejected:  '#c8dc3a',
+      Approved:  '#7ebade',
+      Pending:   '#105078',
+      Overdue:   '#f4a0ab',
+      Rejected:  '#d4e04a',
       Withdrawn: '#fbe8b0',
     };
 
@@ -473,11 +511,21 @@
       'maternity': '#b08cf5',
       'paternity': '#f5b96b',
       'bereavement': '#ffdc50',
-      'unpaid': '#f07a7a',
-      'family responsibility': '#e98bd8',
+      'unpaid': '#f4a3ad',
+      'family responsibility': '#f48bb8',
       'study': '#4fe6c5',
-      'annual': '#5cc77a',
+      'annual': '#7dce6a',
     };
+    const utilizationOrder = [
+      'sick',
+      'maternity',
+      'paternity',
+      'bereavement',
+      'unpaid',
+      'family responsibility',
+      'study',
+      'annual',
+    ];
 
     const pyramidColors = {
       'maternity': '#f5b96b',
@@ -502,7 +550,7 @@
         if (total === 0) return;
 
         ctx.save();
-        ctx.font = '500 9px Poppins, sans-serif';
+        ctx.font = '500 9px Inter, sans-serif';
         ctx.fillStyle = '#253141';
         ctx.textBaseline = 'middle';
         slices.forEach((slice, i) => {
@@ -521,7 +569,7 @@
     };
     const roomForLabels = { padding: { top: 22, bottom: 22, left: 48, right: 48 } };
 
-    const smallTicks = { font: { family: "'Poppins', sans-serif", size: 8, weight: '500' }, color: '#253141' };
+    const smallTicks = { font: { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500' }, color: '#253141' };
 
     // ---------- Data from the controller ----------
     const leaveBalances = @json($chartLeaveBalances ?? $leaveBalances);
@@ -542,11 +590,17 @@
     const monthlyRejected  = padMonthlySeries(@json($monthlyRejectedData ?? []));
     const monthlyWithdrawn = padMonthlySeries(@json($monthlyWithdrawnData ?? []));
 
-    // Days used per leave type. Pass $leaveUtilization (['Sick' => 2, ...]) from the controller.
-    const utilizationRaw = @json($leaveUtilization ?? $leaveTypeCounts ?? []);
+    // Days used per leave type. $leaveUtilization is a list of { type, used }.
+    const utilizationRaw = @json($leaveUtilization ?? []);
     const utilizationByKey = {};
-    Object.entries(utilizationRaw).forEach(([type, val]) => {
-      utilizationByKey[normalizeKey(type)] = Number(val) || 0;
+    (Array.isArray(utilizationRaw) ? utilizationRaw : Object.entries(utilizationRaw)).forEach((item) => {
+      if (item && typeof item === 'object' && !Array.isArray(item) && item.type != null) {
+        utilizationByKey[normalizeKey(item.type)] = Number(item.used) || 0;
+        return;
+      }
+      if (Array.isArray(item)) {
+        utilizationByKey[normalizeKey(item[0])] = Number(item[1]) || 0;
+      }
     });
 
     // ---------- 1. Leave Requests by Type (doughnut) ----------
@@ -578,11 +632,13 @@
           data: monthlyTotals,
           borderColor: '#4a7ff7',
           backgroundColor: '#4a7ff7',
-          borderWidth: 1.5,
+          borderWidth: 2,
           tension: 0.45,
+          cubicInterpolationMode: 'monotone',
           fill: false,
           pointRadius: 0,
-          pointHoverRadius: 3
+          pointHoverRadius: 3,
+          capBezierPoints: true
         }]
       },
       options: mergeChartOptions({
@@ -608,7 +664,9 @@
       data,
       backgroundColor: monthlyStatusColors[label],
       borderWidth: 0,
-      maxBarThickness: 22,
+      borderRadius: window.stackedBarTopRadius(8),
+      borderSkipped: false,
+      maxBarThickness: 28,
       stack: 'status'
     }));
 
@@ -636,8 +694,8 @@
         const swatch = document.createElement('span');
         swatch.className = 'status-legend-swatch';
         swatch.style.background = monthlyStatusColors[label];
-        item.appendChild(text);
         item.appendChild(swatch);
+        item.appendChild(text);
         legendRoot.appendChild(item);
       });
     }
@@ -670,7 +728,20 @@
     });
 
     // ---------- 5. Leave Utilization by Type (bar) ----------
-    const utilizationTypes = Object.keys(leaveBalances);
+    const utilizationLabelByKey = {};
+    Object.keys(leaveBalances).forEach((type) => {
+      utilizationLabelByKey[normalizeKey(type)] = type;
+    });
+    Object.keys(utilizationByKey).forEach((key) => {
+      if (!utilizationLabelByKey[key]) utilizationLabelByKey[key] = key;
+    });
+    const utilizationTypes = utilizationOrder
+      .filter((key) => utilizationLabelByKey[key])
+      .map((key) => utilizationLabelByKey[key]);
+    Object.keys(utilizationLabelByKey).forEach((key) => {
+      const type = utilizationLabelByKey[key];
+      if (!utilizationTypes.includes(type)) utilizationTypes.push(type);
+    });
     const utilizationData = utilizationTypes.map((t) => utilizationByKey[normalizeKey(t)] || 0);
 
     new Chart(document.getElementById('utilizationBar'), {
@@ -682,15 +753,19 @@
           data: utilizationData,
           backgroundColor: utilizationTypes.map((t) => utilizationColors[normalizeKey(t)] || configColorForType(t)),
           borderWidth: 0,
-          borderRadius: 3,
-          maxBarThickness: 26
+          borderRadius: { topLeft: 10, topRight: 10, bottomLeft: 0, bottomRight: 0 },
+          borderSkipped: false,
+          minBarLength: 8,
+          maxBarThickness: 34,
+          categoryPercentage: 0.72,
+          barPercentage: 0.9
         }]
       },
       options: mergeChartOptions({
         plugins: { legend: { display: false } },
         scales: {
-          x: { grid: { display: false }, ticks: { ...smallTicks, maxRotation: 60, minRotation: 60, autoSkip: false } },
-          y: { beginAtZero: true, grid: { color: '#d9d9d9' }, border: { display: false }, ticks: { ...smallTicks, precision: 0 } }
+          x: { grid: { display: false }, ticks: { ...smallTicks, maxRotation: 45, minRotation: 45, autoSkip: false } },
+          y: { beginAtZero: true, grid: { color: '#e6e6e6' }, border: { display: false }, ticks: { ...smallTicks, precision: 0, stepSize: 10 } }
         }
       })
     });
@@ -709,7 +784,7 @@
 
         const row = document.createElement('div');
         row.className = 'pyramid-row';
-        row.style.width = `${widthPct}%`;
+        row.style.setProperty('width', `${widthPct}%`, 'important');
         row.style.background = color;
         row.title = label;
         row.setAttribute('aria-label', label);
@@ -742,7 +817,6 @@
       { id: 'monthlyLine', values: monthlyTotals, message: 'No applications submitted in this leave year.' },
       { id: 'monthlyStatusStackedBar', values: monthlyStatusDatasets, message: 'No monthly status data for this leave year.' },
       { id: 'statusPie', values: statusPieData, message: 'No leave requests by status yet.' },
-      { id: 'utilizationBar', values: utilizationData, message: 'No leave used yet this leave year.' },
     ]);
 
     // ---------- Leave balance tiles: navigate on click ----------

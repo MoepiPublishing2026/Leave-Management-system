@@ -9,19 +9,29 @@
 <style>
 html body .pr-reviews-page { font-family:'Poppins',sans-serif; }
 html body .pr-reviews-page h1 { color:#263248; font-weight:700; letter-spacing:0; }
-html body .pr-reviews-page .requests-page-lead { color:#000; }
+html body .pr-reviews-page .requests-page-lead { color:#64748b; }
 html body .pr-reviews-page .requests-page-lead strong { color:#a2b222; }
 
 html body .pr-reviews-page .requests-toolbar {
-    background:#d8e3e1 !important; border:0 !important; border-radius:14px !important;
-    padding:14px 16px !important; box-shadow:none !important; align-items:center;
+    display:flex !important; align-items:center !important; gap:16px !important;
+    background:#e7eeed !important; border:0 !important; border-radius:14px !important;
+    padding:14px 16px !important; box-shadow:none !important;
+}
+html body .pr-reviews-page .requests-toolbar-right {
+    flex:1 1 auto !important; margin-left:0 !important; min-width:0 !important;
+}
+html body main .pr-reviews-page .requests-search-form {
+    position:static !important; top:auto !important; right:auto !important; left:auto !important;
+    display:flex !important; align-items:center !important; gap:14px !important;
+    width:100% !important; max-width:none !important; margin:0 !important; z-index:auto !important;
 }
 html body .pr-reviews-page .requests-btn--primary,
 html body .pr-reviews-page .requests-btn--search,
 html body .pr-reviews-page .requests-btn--secondary {
-    background:#c5d931 !important; color:#111 !important; border:0 !important;
-    border-radius:8px !important; padding:8px 14px !important; font-weight:700 !important;
-    min-height:0 !important; font-size:13px !important;
+    background:#dce84a !important; color:#1c1c1c !important; border:0 !important;
+    border-radius:12px !important; padding:0 22px !important; height:48px !important;
+    font-weight:700 !important; min-height:0 !important; font-size:15px !important;
+    white-space:nowrap !important; display:inline-flex !important; align-items:center !important;
 }
 /* Reviewed pill + View/Edit button: oval */
 html body .pr-reviews-page .pr-status,
@@ -30,9 +40,10 @@ html body .pr-reviews-page .pr-card-btn {
     padding: 6px 16px !important;
 }
 html body .pr-reviews-page .requests-search-form input[type="text"] {
-    background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M16 16l5 5'/></svg>") no-repeat 14px center / 20px 20px !important;
+    flex:1 1 auto !important; width:auto !important; min-width:0 !important; height:48px !important;
+    background:#fff !important; background-image:none !important;
     border:0 !important; border-radius:12px !important;
-    padding:14px 18px 14px 44px !important; min-width:260px;
+    padding:12px 18px !important; font-size:15px !important; color:#333 !important;
 }
 
 html body .pr-reviews-page .requests-filter-bar {
@@ -40,14 +51,14 @@ html body .pr-reviews-page .requests-filter-bar {
     background:transparent !important; border:0 !important; box-shadow:none !important; padding:0 !important;
 }
 html body .pr-reviews-page .requests-filters {
-    display:inline-flex; gap:20px; background:#d8e3e1 !important; border:0 !important;
+    display:inline-flex; gap:20px; background:#e7eeed !important; border:0 !important;
     border-radius:14px; padding:12px 20px;
 }
 html body .pr-reviews-page .requests-filter {
-    background:transparent !important; color:#263248 !important; font-weight:700 !important;
+    background:transparent !important; color:#8b939c !important; font-weight:600 !important;
     padding:0 !important; border:0 !important; box-shadow:none !important;
 }
-html body .pr-reviews-page .requests-filter.is-active { background:transparent !important; color:#2379b0 !important; }
+html body .pr-reviews-page .requests-filter.is-active { background:transparent !important; color:#253141 !important; font-weight:700 !important; }
 
 html body .pr-reviews-page .pr-reviews-scope-header {
     max-width: none;
@@ -68,7 +79,7 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
 .pr-review-card__avatar {
     width:56px; height:56px; border-radius:50%; flex:none;
     display:inline-flex; align-items:center; justify-content:center;
-    background:#c5d931; color:#111; font-weight:800; font-size:1.05rem;
+    background:#dce84a; color:#1c1c1c; font-weight:800; font-size:1.05rem;
 }
 .pr-review-card__main { min-width:0; flex:1 1 220px; }
 .pr-review-card__name { margin:0; font-size:1.15rem; font-weight:800; color:#1e293b; }
@@ -89,22 +100,21 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
     padding:6px 14px; font-size:.82rem; font-weight:700; background:#fff; color:#475569;
 }
 .pr-status svg { width:14px; height:14px; }
-.pr-status--submitted { background:#e8f4ff; border-color:#7eb6e0; color:#2379b0; }
-.pr-status--draft { background:#eee; border-color:#9ca3af; color:#4b5563; }
-.pr-status--reviewed { background:#eaf6c8; border-color:#a2b222; color:#4b5c0e; }
-.pr-status--awaiting { background:#e8f4ff; border-color:#7eb6e0; color:#2379b0; }
+.pr-status--submitted { background:#e7f4fc; border-color:#7eb6e0; color:#2f86c5; }
+.pr-status--draft { background:#fff; border-color:#c5c9ce; color:#5c656e; }
+.pr-status--reviewed { background:#f4f8d8; border-color:#dce84a; color:#3d4a12; }
+.pr-status--awaiting { background:#e7f4fc; border-color:#7eb6e0; color:#2f86c5; }
 .pr-card-btn {
     display:inline-flex; align-items:center; gap:6px;
-    background:#fff; border:2px solid #c5d931; color:#6b7a14;
+    background:#fff; border:2px solid #dce84a; color:#3a3a3a;
     border-radius:999px; padding:6px 16px; font-size:.85rem; font-weight:600;
     text-decoration:none;
 }
-.pr-card-btn:hover { background:#f6fadf; color:#5a6810; }
+.pr-card-btn:hover { background:#f7fadf; color:#1c1c1c; }
 .pr-card-btn svg { width:14px; height:14px; }
-/* Icons black */
 .pr-status svg,
 .pr-card-btn svg {
-    stroke: #000 !important;
+    stroke: currentColor !important;
 }
 .pr-reviews-empty {
     text-align:center; padding:28px; color:#6b7280;
@@ -123,7 +133,7 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
     $isSenior = strtolower((string) ($user->role ?? '')) === 'admin';
     $indexRoute = PerformanceReviews::routeName($user, 'index');
     $filters = $isSenior
-        ? ['all' => 'All', 'submitted' => 'Awaiting review', 'reviewed' => 'Reviewed']
+        ? ['all' => 'All', 'submitted' => 'Awaiting Review', 'reviewed' => 'Reviewed']
         : ['all' => 'All', 'draft' => 'Draft', 'submitted' => 'Submitted', 'reviewed' => 'Reviewed'];
     $lead = $isSenior
         ? 'Reviews appear here after an employee or manager sends them.'
@@ -168,7 +178,7 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
     <div class="requests-toolbar">
         <div class="requests-toolbar-left">
             @if ($canCreate)
-                <a href="{{ route(PerformanceReviews::routeName($user, 'create')) }}" class="requests-btn requests-btn--primary">+ New Request</a>
+                <a href="{{ route(PerformanceReviews::routeName($user, 'create')) }}" class="requests-btn requests-btn--primary">+ New Review</a>
             @endif
         </div>
         <div class="requests-toolbar-right">
@@ -177,7 +187,7 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
                 @if ($isManagerList)
                     <input type="hidden" name="scope" value="{{ $reviewScope }}" />
                 @endif
-                <input type="text" name="search" placeholder="Search name, type, status, dates..." value="{{ $search }}" aria-label="Search reviews" />
+                <input type="text" name="search" placeholder="Search employee, reviewer, status" value="{{ $search }}" aria-label="Search reviews" />
                 <button type="submit" class="requests-btn requests-btn--search">Search</button>
                 <a href="{{ route($indexRoute, $clearParams) }}" class="requests-btn requests-btn--secondary">Clear</a>
             </form>

@@ -79,27 +79,28 @@
     
     .app-page .app-page-panel-1 {
         background: #fff !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 12px !important;
-        padding: 20px 24px !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
+        border: 3px solid #d4e21a !important;
+        border-radius: 8px !important;
+        padding: 22px 26px 24px !important;
+        box-shadow: none !important;
     }
     
     .app-page .app-page-panel-1 .app-page-section-title {
-        margin: 0 0 12px !important;
-        font-size: 14px !important;
+        margin: 0 0 14px !important;
+        font-size: 1.15rem !important;
         font-weight: 700 !important;
-        color: #243044 !important;
-        letter-spacing: 0.05em !important;
-        text-transform: uppercase !important;
+        color: #253141 !important;
+        letter-spacing: 0 !important;
+        text-transform: none !important;
+        text-align: center !important;
     }
     
     .app-page .app-page-panel-1 .app-info-box ul {
         margin: 0 !important;
-        padding-left: 20px !important;
-        color: #475569 !important;
-        font-size: 14px !important;
-        line-height: 1.6 !important;
+        padding-left: 22px !important;
+        color: #253141 !important;
+        font-size: 0.98rem !important;
+        line-height: 1.55 !important;
     }
     
     .app-page .app-page-panel-1 .app-info-box p {
@@ -178,7 +179,9 @@
         <div class="app-page-panel-1">
             <h2 class="app-page-section-title">Return to work</h2>
             <div class="app-info-box">
-                <p>Upon return from extended leave, employees must provide certification if applicable and coordinate with HR for any necessary updates.</p>
+                <ul>
+                    <li>Upon return from extended leave, employees must provide certification if applicable and coordinate with HR for any necessary updates.</li>
+                </ul>
             </div>
         </div>
     </div>

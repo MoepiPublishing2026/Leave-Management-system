@@ -9,20 +9,95 @@
 html body .team-requests-page { font-family:'Poppins',sans-serif; }
 html body .team-requests-page h1 { color:#263248; font-weight:700; }
 
-/* toolbar */
-html body .team-requests-page .requests-toolbar {
-    background:#d8e3e1 !important; border:0 !important; border-radius:14px !important;
-    padding:14px 16px !important; box-shadow:none !important; align-items:center;
+/* Title row shares the same left and right edge as the list. */
+html body main .team-requests-page > .mgr-page-header {
+    width: min(100%, 1120px) !important;
+    max-width: 1120px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-right: 0 !important;
+    position: relative !important;
 }
-html body .team-requests-page .requests-btn--primary,
-html body .team-requests-page .requests-btn--search,
-html body .team-requests-page .requests-btn--secondary {
-    background:#a2b222 !important; color:#000 !important; border:0 !important;
-    border-radius:8px !important; padding:8px 14px !important; font-weight:700 !important;
-    min-height:0 !important; font-size:13px !important;
+html body main .team-requests-page .mgr-scope-switch {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    margin: 0 0 8px auto !important;
 }
-html body .team-requests-page .requests-search-form input[type="text"] {
-    background:#fff !important; border:0 !important; border-radius:12px !important; padding:14px 18px !important; min-width:260px;
+
+/* Mint toolbar: + New Request, search, Search, Clear */
+html body main .team-requests-page .requests-toolbar {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 16px !important;
+    background: #d8e3e1 !important;
+    border: 0 !important;
+    border-radius: 14px !important;
+    padding: 14px 18px !important;
+    box-shadow: none !important;
+    min-height: 0 !important;
+    margin-bottom: 16px !important;
+}
+html body main .team-requests-page .requests-toolbar-left { flex: 0 0 auto !important; }
+html body main .team-requests-page .requests-toolbar-right {
+    flex: 1 1 auto !important;
+    margin-left: 0 !important;
+    min-width: 0 !important;
+}
+html body main .team-requests-page .requests-search-form {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+html body main .team-requests-page .requests-search-form input[type="text"] {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 48px !important;
+    box-sizing: border-box !important;
+    padding: 12px 16px 12px 46px !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background-color: #fff !important;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2.4' stroke-linecap='round'><circle cx='11' cy='11' r='6.5'/><path d='M16 16l5 5'/></svg>") !important;
+    background-repeat: no-repeat !important;
+    background-position: 16px center !important;
+    background-size: 20px 20px !important;
+    font-size: 15px !important;
+    line-height: 1.3 !important;
+    box-shadow: none !important;
+}
+html body main .team-requests-page .requests-btn--primary,
+html body main .team-requests-page .requests-btn--search,
+html body main .team-requests-page .requests-btn--secondary {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 48px !important;
+    padding: 0 22px !important;
+    background: #d4e21a !important;
+    color: #1a1a1a !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+}
+html body main .team-requests-page .requests-btn--primary:hover,
+html body main .team-requests-page .requests-btn--search:hover,
+html body main .team-requests-page .requests-btn--secondary:hover {
+    background: #c6d40f !important;
+    color: #1a1a1a !important;
 }
 
 /* tabs and payment filter */
@@ -112,11 +187,6 @@ html body .team-requests-page .request-badge--pending { background:#cebaf6 !impo
 html body .team-requests-page .request-badge--overdue { background:#cebaf6 !important; border-color:#a33d86; color:#fff !important; }
 html body .team-requests-page .request-badge--rejected { background:#f9c3c9 !important; border-color:#d5253a; color:#a31b2e !important; }
 
-/* search box magnifier */
-html body .team-requests-page .requests-search-form input[type="text"] {
-    padding-left:44px !important;
-    background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M16 16l5 5'/></svg>") no-repeat 14px center / 20px 20px !important;
-}
 html body .team-requests-page .requests-table td.requests-empty {
     position:static !important; display:block !important; padding:26px 0 !important;
     font-size:1rem !important; font-weight:700 !important; font-style:italic !important;
@@ -182,33 +252,6 @@ html body .team-requests-page .requests-table td.requests-empty {
         /* ===== Prototype Match: Team Requests Toolbar & Filters ===== */
     
     /* Toolbar Search area */
-    html body .requests-page .requests-toolbar {
-        background: transparent !important;
-        border: 0 !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 20px;
-    }
-    html body .requests-page .requests-search-form {
-        display: flex;
-        gap: 8px;
-    }
-    html body .requests-page .requests-search-form input[type="text"] {
-        background-color: #fff !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 20px !important;
-        padding: 10px 18px 10px 44px !important;
-        font-size: 14px !important;
-        min-width: 280px;
-        height: 40px !important;
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M16 16l5 5'/></svg>") !important;
-        background-repeat: no-repeat !important;
-        background-position: 16px center !important;
-        background-size: 18px !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
-    }
     html body .requests-page .requests-btn {
         background: #b2cd16 !important;
         color: #0a1347 !important;
@@ -437,6 +480,7 @@ html body .team-requests-page .requests-table td.requests-empty {
         'search' => $search ?? '',
         'monthFilter' => $monthFilter ?? null,
         'employeeFilter' => $employeeFilter ?? null,
+        'showSearchActions' => true,
         'searchPlaceholder' => 'Search name, type, status, dates...',
         'statusFilters' => [
             'all' => 'All',
@@ -539,7 +583,7 @@ html body .team-requests-page .requests-table td.requests-empty {
                             $statusLabel = \App\Support\LeaveStatusLabels::display($rowStatus, $req->isOverdue());
                             $statusBadge = \App\Support\LeaveStatusLabels::badgeClass($rowStatus, $req->isOverdue());
                         @endphp
-                        <span class="request-badge request-badge--{{ $statusBadge }}">{{ $statusLabel }}</span>
+                        <span class="request-badge request-badge--{{ $statusBadge }}">@include('partials.request-status-icon', ['icon' => $statusBadge]){{ $statusLabel }}</span>
                         @if ($certificateStatusLabel)
                             <span class="request-badge {{ $doctorsLetterMissing ? 'request-badge--letter-missing' : 'request-badge--letter-required' }}">{{ $certificateStatusLabel }}</span>
                         @endif
@@ -551,7 +595,7 @@ html body .team-requests-page .requests-table td.requests-empty {
                                     @if ($req->overdue_escalated_at)
                                         <span class="request-actions-note" title="{{ $req->overdue_escalation_reason ?? '' }}">Reason Sent</span>
                                     @else
-                                        <button type="button" class="request-btn request-btn--escalate" onclick="openLateReasonPopup({{ $req->id }})">Submit Reason</button>
+                                        <button type="button" class="request-btn request-btn--escalate" onclick="openLateReasonPopup({{ $req->id }})">@include('partials.request-action-icon', ['name' => 'edit']) Submit Reason</button>
                                     @endif
                                 @else
                                     <div class="request-actions-inline">
@@ -561,12 +605,12 @@ html body .team-requests-page .requests-table td.requests-empty {
                                                 @method('PATCH')
                                                 <input type="hidden" name="recommendation" value="approve" />
                                                 <input type="hidden" name="manager_recommendation_comment" class="approval-comment-input" value="" />
-                                                <button type="submit" class="request-btn request-btn--approve">Recommend Approve</button>
+                                                <button type="submit" class="request-btn request-btn--approve">@include('partials.request-action-icon', ['name' => 'check']) Recommend Approve</button>
                                             </form>
                                         @else
                                             <span class="request-actions-note" title="{{ $proofBlockReason }}">Awaiting proof</span>
                                         @endif
-                                        <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Recommend Reject</button>
+                                        <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">@include('partials.request-action-icon', ['name' => 'x']) Recommend Reject</button>
                                     </div>
                                 @endif
                             @elseif ($rowStatus === 'pending_senior')
@@ -575,16 +619,16 @@ html body .team-requests-page .requests-table td.requests-empty {
                                     Submitted
                                 </span>
                             @elseif ($rowStatus === 'rejected')
-                                <a href="{{ route('manager.requests.show_reason', $req) }}" class="request-link">View Reason</a>
+                                <a href="{{ route('manager.requests.show_reason', $req) }}" class="request-link">@include('partials.request-action-icon', ['name' => 'view']) View Reason</a>
                             @endif
                             @if($canMessage)
-                                <a href="{{ route('messages.leave', $req) }}" class="request-link">Messages</a>
+                                <a href="{{ route('messages.leave', $req) }}" class="request-link">@include('partials.request-action-icon', ['name' => 'message']) Messages</a>
                             @endif
                             @if($canDelete)
                                 <form class="delete-request-form" method="POST" action="{{ route('manager.requests.destroy', $req) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">Delete</button>
+                                    <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">@include('partials.request-action-icon', ['name' => 'trash']) Delete</button>
                                 </form>
                             @endif
                         </div>

@@ -145,7 +145,7 @@
         text-align: center;
     }
     .pdf-footer-icon {
-        color: #e3c44d;
+        color: #d4e21a;
         font-size: 11px;
         padding-right: 4px;
     }

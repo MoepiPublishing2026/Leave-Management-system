@@ -31,8 +31,8 @@
     }
     .balance-page-lead {
         margin: 0 0 16px;
-        color: #737373;
-        font-size: 0.82rem;
+        color: #64748b;
+        font-size: 0.95rem;
         font-weight: 400;
         line-height: 1.4;
     }
@@ -401,20 +401,20 @@
         list-style: none;
     }
     .balance-type-card {
-        background: {{ $balanceHeadingTealSoft }};
+        background: #fff;
         border-radius: 16px;
         padding: 18px 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 1.05rem;
+        gap: 12px;
+        font-size: 1rem;
         font-weight: 600;
-        color: #050505;
-        box-shadow: 0 3px 7px rgba(13, 59, 53, 0.12);
+        color: #253141;
+        box-shadow: 0 8px 18px rgba(38, 49, 66, 0.10);
         text-decoration: none;
-        border: 1px solid {{ $balanceHeadingTeal }};
-        border-left-width: 5px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid #ececec;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
     .balance-type-card:hover:not(.is-disabled) {
         box-shadow: 0 8px 20px rgba(13, 59, 53, 0.25);
@@ -430,8 +430,8 @@
         box-shadow: none;
     }
     .balance-type-card .type-days {
-        font-weight: 600;
-        color: {{ $balanceHeadingTeal }};
+        font-weight: 700;
+        color: #253141;
         white-space: nowrap;
     }
 
@@ -657,7 +657,240 @@
         font-weight: 400 !important;
         color: #000 !important;
         display: inline-block !important;
-    }    
+    }
+
+    /* Detail page matches the leave-balance design */
+    .balance-page .balance-toolbar-right {
+        gap: 12px !important;
+    }
+    .balance-page .balance-btn--apply {
+        background: #d4e21a !important;
+        border: none !important;
+        color: #1c1c1c !important;
+        border-radius: 8px !important;
+        min-height: 42px !important;
+        padding: 8px 18px !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        box-shadow: none !important;
+    }
+    .balance-page .balance-btn--apply:hover {
+        background: #c6d63a !important;
+        border: none !important;
+        color: #1c1c1c !important;
+    }
+    .balance-page .balance-summary-grid {
+        gap: 18px !important;
+        margin-bottom: 16px !important;
+    }
+    .balance-page .balance-summary-card {
+        background: #fff !important;
+        border: 1px solid #ececec !important;
+        border-radius: 16px !important;
+        box-shadow: 0 8px 18px rgba(38, 49, 66, 0.10) !important;
+        min-height: 118px !important;
+        padding: 18px 12px 16px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+    .balance-page .balance-summary-k {
+        font-size: 1.05rem !important;
+        font-weight: 500 !important;
+        color: #1a1a1a !important;
+        text-align: center !important;
+        margin: 0 !important;
+    }
+    .balance-page .balance-summary-v {
+        font-size: 34px !important;
+        font-weight: 500 !important;
+        line-height: 1.15 !important;
+        color: #111 !important;
+        text-align: center !important;
+        margin-top: 10px !important;
+    }
+    .balance-page .balance-summary-card--highlight {
+        background: #d4e21a !important;
+        border: 2px solid #bdbdbd !important;
+    }
+    .balance-page .balance-summary-card--highlight .balance-summary-k,
+    .balance-page .balance-summary-card--highlight .balance-summary-v {
+        color: #1a1a1a !important;
+    }
+    .balance-page .balance-summary-v span {
+        font-size: 18px !important;
+        font-weight: 500 !important;
+    }
+    .balance-page .balance-note {
+        background: #eef6a8 !important;
+        color: #8b9a28 !important;
+        border: 2px solid #bdbdbd !important;
+        border-radius: 999px !important;
+        padding: 10px 18px !important;
+        margin: 0 0 16px !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        line-height: 1.4 !important;
+    }
+    .balance-page .balance-usage-panel {
+        border-radius: 16px !important;
+        box-shadow: 0 8px 18px rgba(38, 49, 66, 0.10) !important;
+        border: 1px solid #ececec !important;
+        padding: 14px 16px 16px !important;
+        margin-bottom: 18px !important;
+    }
+    .balance-page .balance-usage-label {
+        font-size: 0.92rem !important;
+        font-weight: 600 !important;
+        color: #3a4654 !important;
+    }
+    .balance-page .balance-usage-fill {
+        background: #c6d63a !important;
+    }
+    .balance-page .balance-detail-grid {
+        gap: 18px !important;
+        margin-bottom: 18px !important;
+    }
+    .balance-page .balance-detail-card {
+        border-radius: 16px !important;
+        border: 1px solid #ececec !important;
+        box-shadow: 0 8px 18px rgba(38, 49, 66, 0.10) !important;
+        min-height: 148px !important;
+        padding: 16px 14px 14px !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+    .balance-page .balance-detail-card .detail-k {
+        width: 100% !important;
+        min-height: 0 !important;
+        margin-bottom: 8px !important;
+        text-align: center !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+        color: #1a1a1a !important;
+    }
+    .balance-page .balance-detail-card .detail-v {
+        width: 100% !important;
+        margin-top: auto !important;
+        text-align: center !important;
+        font-size: 1.65rem !important;
+        font-weight: 500 !important;
+        color: #111 !important;
+    }
+    .balance-page .balance-detail-card--docs .detail-v {
+        font-size: 0.98rem !important;
+        font-weight: 500 !important;
+        line-height: 1.45 !important;
+    }
+    .balance-page .balance-detail-card--status {
+        align-items: stretch !important;
+    }
+    .balance-page .balance-detail-card--status .balance-status-bars {
+        height: 56px !important;
+        margin: 8px 0 10px !important;
+    }
+    .balance-page .balance-detail-card--status .detail-v--status-meta {
+        margin-top: auto !important;
+        text-align: left !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        align-self: flex-start !important;
+    }
+    .balance-page .balance-status-bar {
+        width: 16px !important;
+        border-radius: 3px 3px 0 0 !important;
+    }
+    .balance-page .balance-panel {
+        border-radius: 16px !important;
+        box-shadow: 0 8px 18px rgba(38, 49, 66, 0.10) !important;
+        border: 1px solid #ececec !important;
+    }
+    .balance-page .balance-section-title {
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        padding: 12px 16px !important;
+    }
+    .balance-page .balance-table th,
+    .balance-page .balance-table td {
+        padding: 12px 16px !important;
+        font-size: 0.95rem !important;
+        color: #1a1a1a !important;
+    }
+    html body main .balance-page > .balance-change-row {
+        width: min(100%, 860px) !important;
+        max-width: 860px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        padding: 0 !important;
+        text-align: left !important;
+        box-sizing: border-box !important;
+    }
+    .balance-page .balance-change-type {
+        display: inline-flex !important;
+        align-items: center !important;
+        width: auto !important;
+        max-width: none !important;
+        margin: 6px 0 12px !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #e23b4a !important;
+        font-weight: 700 !important;
+        font-size: 1.05rem !important;
+        text-decoration: none !important;
+        text-align: left !important;
+    }
+    .balance-page .balance-change-type:hover {
+        color: #c42532 !important;
+        background: transparent !important;
+        text-decoration: none !important;
+    }
+    .balance-page .balance-summary-grid--single {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        margin-bottom: 16px !important;
+    }
+    .balance-page .balance-type-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 18px !important;
+    }
+    .balance-page .balance-type-card {
+        background: #fff !important;
+        border: 1px solid #ececec !important;
+        border-radius: 16px !important;
+        box-shadow: 0 8px 18px rgba(38, 49, 66, 0.10) !important;
+        color: #253141 !important;
+        min-height: 72px;
+    }
+    .balance-page .balance-type-card:hover:not(.is-disabled) {
+        border-color: #d4e21a !important;
+        box-shadow: 0 10px 22px rgba(38, 49, 66, 0.12) !important;
+        transform: translateY(-2px);
+    }
+    .balance-page .balance-type-card .type-name {
+        color: #253141 !important;
+    }
+    .balance-page .balance-type-card .type-days {
+        color: #253141 !important;
+        font-weight: 700 !important;
+    }
+    .balance-page .balance-type-card.is-disabled {
+        background: #f8fafc !important;
+        color: #94a3b8 !important;
+        box-shadow: none !important;
+    }
+    .balance-page .balance-type-card.is-disabled .type-name,
+    .balance-page .balance-type-card.is-disabled .type-days {
+        color: #94a3b8 !important;
+    }
+    @media (max-width: 1100px) {
+        .balance-page .balance-type-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        .balance-page .balance-summary-grid--single { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    }
+    @media (max-width: 768px) {
+        .balance-page .balance-type-grid,
+        .balance-page .balance-summary-grid--single { grid-template-columns: 1fr !important; }
+    }
 
 </style>
 @endonce

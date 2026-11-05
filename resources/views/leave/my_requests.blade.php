@@ -305,7 +305,9 @@
     html body .my-requests-page .leave-card__meta-row svg,
     html body .my-requests-page .request-badge svg,
     html body .my-requests-page .leave-card .request-btn svg {
-        stroke: #000 !important;
+        width: 18px;
+        height: 18px;
+        stroke: currentColor !important;
     }
 
     @media (max-width: 640px) {
@@ -435,17 +437,7 @@
 
                     <div class="leave-card__badges request-status-cell">
                         <span class="request-badge request-badge--{{ $badgeKey }}">
-                            @if (str_contains($badgeKey, 'approved'))
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.8"/></svg>
-                            @elseif (str_contains($badgeKey, 'rejected'))
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
-                            @elseif (str_contains($badgeKey, 'overdue'))
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg>
-                            @elseif (str_contains($badgeKey, 'withdrawn'))
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>
-                            @else
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/><path d="M12 8v4l2.5 1.5"/></svg>
-                            @endif
+                            @include('partials.request-status-icon', ['icon' => $badgeKey])
                             {{ $badgeText }}
                         </span>
                         @if ($proofStatusLabel)
@@ -468,7 +460,7 @@
                 <div class="leave-card__actions request-actions request-actions-cell" onclick="event.stopPropagation();">
                     @if ($canEdit)
                         <a href="{{ route(\App\Support\LeaveApplicant::editRoute(auth()->user()), $req->id) }}" class="request-btn request-btn--edit">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/></svg>
+                            @include('partials.request-action-icon', ['name' => 'edit'])
                             Edit
                         </a>
                     @endif
@@ -487,7 +479,7 @@
                                         data-filename="{{ $fileLink['name'] }}"
                                         data-previewable="1"
                                     >
-                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        @include('partials.request-action-icon', ['name' => 'view'])
                                         View {{ $fileLink['label'] }}
                                     </button>
                                 @endforeach
@@ -507,7 +499,7 @@
                                     data-deadline="{{ $proofDeadline ? $proofDeadline->format('d M Y') : '' }}"
                                     data-action-label="{{ $attachmentActionLabel }}"
                                 >
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l8-8"/></svg>
+                                    @include('partials.request-action-icon', ['name' => 'upload'])
                                     {{ $attachmentActionLabel }}
                                 </button>
                             </form>
@@ -523,7 +515,7 @@
                                 class="request-btn request-btn--withdraw withdraw-request-btn"
                                 data-approved="{{ $rowStatus === 'approved' ? '1' : '0' }}"
                             >
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+                                @include('partials.request-action-icon', ['name' => 'trash'])
                                 Withdraw
                             </button>
                         </form>
@@ -534,7 +526,7 @@
                             @csrf
                             @method('DELETE')
                             <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+                                @include('partials.request-action-icon', ['name' => 'trash'])
                                 Delete
                             </button>
                         </form>

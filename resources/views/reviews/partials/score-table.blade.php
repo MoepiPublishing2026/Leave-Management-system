@@ -8,7 +8,7 @@
 <table class="pr-score-table{{ $editable ? '' : ' pr-score-readonly' }}">
     <thead>
     <tr>
-        <th>Criteria</th>
+        <th>Your paragraph text</th>
         @foreach ($scoreLabels as $value => $label)
             <th title="{{ $label }}">{{ $value }}</th>
         @endforeach

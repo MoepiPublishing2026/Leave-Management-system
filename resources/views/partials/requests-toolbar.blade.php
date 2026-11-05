@@ -67,8 +67,10 @@
                 <input type="hidden" name="pay" value="{{ $payFilter }}" />
             @endif
             <input type="text" name="search" placeholder="{{ $searchPlaceholder ?? 'Search requests...' }}" value="{{ $search ?? '' }}" aria-label="Search requests" />
-            <!-- <button type="submit" class="requests-btn requests-btn--search">Search</button>
-            <a href="{{ route($filterRoute, $clearSearchParams) }}" class="requests-btn requests-btn--secondary">Clear</a> -->
+            @if (!empty($showSearchActions))
+                <button type="submit" class="requests-btn requests-btn--search">Search</button>
+                <a href="{{ route($filterRoute, $clearSearchParams) }}" class="requests-btn requests-btn--secondary">Clear</a>
+            @endif
         </form>
     </div>
 </div>

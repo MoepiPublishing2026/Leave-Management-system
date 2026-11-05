@@ -416,18 +416,11 @@
             opacity: 0.6;
         }
 
-        /* ===== Prototype match: arrow next to the bell ===== */
-        #notificationsDropdown::after {
-            content: "" !important;
-            display: inline-block !important;
-            width: 0 !important;
-            height: 0 !important;
-            margin-left: 8px !important;
-            vertical-align: middle !important;
-            border: 0 !important; /* resets any bootstrap borders */
-            border-top: 7px solid #ffffff !important; /* Green arrow */
-            border-left: 5px solid transparent !important;
-            border-right: 5px solid transparent !important;
+        #notificationsDropdown::after,
+        #notificationsDropdown.dropdown-toggle::after {
+            display: none !important;
+            content: none !important;
+            border: 0 !important;
         }
     </style>
     <!-- Bootstrap CSS -->
@@ -457,9 +450,9 @@
     @stack('styles')
     @include('partials.dashboard-status-card-styles')
     @yield('head')
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261021emp1"/>
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261105policieshead"/>
 </head>
-<body>
+<body class="role-manager">
     <header class="navbar" role="banner">
         <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
 

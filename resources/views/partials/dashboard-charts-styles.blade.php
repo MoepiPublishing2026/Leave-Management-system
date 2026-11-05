@@ -6,7 +6,9 @@
         min-width: 0;
     }
     .chart-card h3 {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
         font-weight: 700;
+        font-size: 0.92rem;
         color: #0f172a;
     }
     .chart-body {
@@ -42,13 +44,15 @@
         gap: 8px 12px;
         justify-content: center;
         width: 100%;
-        font-weight: 700 !important;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-weight: 500 !important;
     }
     .chart-html-legend-item {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        font-size: 0.8rem;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 0.62rem;
         font-weight: 700 !important;
         color: #0f172a;
         line-height: 1.25;

@@ -4,7 +4,7 @@
     <a href="{{ route('manager.employees.index') }}" class="{{ request()->routeIs('manager.employees.*') ? 'active' : '' }}">Employees</a>
 @endif
 <a href="{{ route('admin.requests', ['status' => 'all']) }}" class="{{ request()->routeIs(['admin.requests', 'admin.manager-requests*']) ? 'active' : '' }}">All Leave Requests</a>
-<a href="{{ route('admin.reviews.index') }}" class="{{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">Reviews</a>
+<a href="{{ route('admin.reviews.index') }}" class="{{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">Performance Reviews</a>
 <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
     Messages
     @if(($unreadMessageCount ?? 0) > 0)

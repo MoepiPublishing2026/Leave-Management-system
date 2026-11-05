@@ -9,7 +9,7 @@
     <link rel="shortcut icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" />
     <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}?v=3" sizes="180x180" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="{{ asset('css/auth-design.css') }}?v=1" />
+    <link rel="stylesheet" href="{{ asset('css/auth-design.css') }}?v=4" />
 </head>
 <body class="auth-page auth-verify-page">
     <main class="auth-shell verify-shell">

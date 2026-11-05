@@ -67,35 +67,29 @@ class AdminDashboardController extends Controller
         // Monthly applications line chart: when requests were submitted (created_at).
         $chartYear = ctype_digit((string) $monthFilter) ? (int) $monthFilter : LeaveYear::current();
         $barLabels = LeaveYear::barLabels();
-        $barData = array_fill(0, 12, 0);
         [$chartStart, $chartEnd] = LeaveYear::window($chartYear);
 
         $monthlyApplicationsQuery = LeaveRequest::query()
             ->byStaffApplicants()
-            ->whereRaw('LOWER(status) != ?', ['withdrawn'])
             ->where('leave_requests.created_at', '>=', $chartStart)
             ->where('leave_requests.created_at', '<=', $chartEnd);
         DashboardEmployeeFilter::apply($monthlyApplicationsQuery, $employeeFilter);
 
-        $monthlyData = (clone $monthlyApplicationsQuery)
-            ->select(DB::raw('MONTH(created_at) as month'), DB::raw('COUNT(*) as total'))
-            ->groupByRaw('MONTH(created_at)')
-            ->orderByRaw('MONTH(created_at)')
-            ->get();
-
-        foreach ($monthlyData as $row) {
-            $idx = LeaveYear::monthIndexFromNumber((int) $row->month);
-            if ($idx >= 0 && $idx < 12) {
-                $barData[$idx] = (int) $row->total;
-            }
-        }
-
-        // Monthly status breakdown: when requests were submitted (created_at), same scope as applications chart.
+        // Monthly status breakdown: when requests were submitted (created_at). The line uses the same rows.
         $monthlyBreakdown = MonthlyLeaveStatusBreakdown::fromQuery(clone $monthlyApplicationsQuery, 'created_at');
         $monthlyApprovedData = $monthlyBreakdown['monthlyApprovedData'];
         $monthlyPendingData = $monthlyBreakdown['monthlyPendingData'];
         $monthlyOverdueData = $monthlyBreakdown['monthlyOverdueData'];
         $monthlyRejectedData = $monthlyBreakdown['monthlyRejectedData'];
+        $monthlyWithdrawnData = $monthlyBreakdown['monthlyWithdrawnData'];
+        $barData = [];
+        for ($i = 0; $i < 12; $i++) {
+            $barData[] = (int) $monthlyApprovedData[$i]
+                + (int) $monthlyPendingData[$i]
+                + (int) $monthlyOverdueData[$i]
+                + (int) $monthlyRejectedData[$i]
+                + (int) $monthlyWithdrawnData[$i];
+        }
 
         $rawStatusCounts = (clone $baseQuery)->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
@@ -162,6 +156,7 @@ class AdminDashboardController extends Controller
             'monthlyPendingData' => $monthlyPendingData,
             'monthlyOverdueData' => $monthlyOverdueData,
             'monthlyRejectedData' => $monthlyRejectedData,
+            'monthlyWithdrawnData' => $monthlyWithdrawnData,
         ]);
 
         

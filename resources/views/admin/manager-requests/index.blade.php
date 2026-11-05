@@ -62,6 +62,7 @@
                     $details = [
                         'id' => $req->id,
                         'employee' => $managerName,
+                        'designation' => (string) ($req->user->designation ?? ''),
                         'email' => $req->user->email ?? '',
                         'department' => $req->user->department ?? '',
                         'type' => (string) ($req->leave_type ?? ''),
@@ -93,9 +94,9 @@
                     <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y H:i') : '—' }}</td>
                     <td class="request-status-cell">
                         @if ($req->isOverdue())
-                            <span class="request-badge request-badge--overdue">Overdue</span>
+                            <span class="request-badge request-badge--overdue">@include('partials.request-status-icon', ['icon' => 'overdue']) Overdue</span>
                         @else
-                            <span class="request-badge request-badge--{{ $rowStatus === 'withdrawn' ? 'withdrawn' : $rowStatus }}">{{ ucfirst($rowStatus) }}</span>
+                            <span class="request-badge request-badge--{{ $rowStatus === 'withdrawn' ? 'withdrawn' : $rowStatus }}">@include('partials.request-status-icon', ['icon' => $rowStatus === 'withdrawn' ? 'withdrawn' : $rowStatus]) {{ ucfirst($rowStatus) }}</span>
                         @endif
                         @if ($certificateStatusLabel)
                             <span class="request-badge {{ $doctorsLetterMissing ? 'request-badge--letter-missing' : 'request-badge--letter-required' }}">{{ $certificateStatusLabel }}</span>
@@ -110,19 +111,19 @@
                                             @csrf
                                             @method('PATCH')
                                             <input type="hidden" name="approval_comment" class="approval-comment-input" value="" />
-                                            <button type="submit" class="request-btn request-btn--approve">Approve</button>
+                                            <button type="submit" class="request-btn request-btn--approve">@include('partials.request-action-icon', ['name' => 'check']) Approve</button>
                                         </form>
                                     @else
                                         <span class="request-actions-note" title="{{ $proofBlockReason }}">Awaiting proof</span>
                                     @endif
-                                    <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">Reject</button>
+                                    <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">@include('partials.request-action-icon', ['name' => 'x']) Reject</button>
                                 </div>
                             @elseif ($req->isOverdue() && in_array($rowStatus, ['pending', 'pending_senior'], true))
                                 <span class="request-actions-note">Start date has passed, so this request can no longer be approved or rejected.</span>
                             @elseif ($rowStatus === 'rejected')
-                                <a href="{{ route('admin.manager-requests.show_reason', $req) }}" class="request-link">View Reason</a>
+                                <a href="{{ route('admin.manager-requests.show_reason', $req) }}" class="request-link">@include('partials.request-action-icon', ['name' => 'view']) View Reason</a>
                             @endif
-                            <a href="{{ route('messages.leave', $req) }}" class="request-link">Messages</a>
+                            <a href="{{ route('messages.leave', $req) }}" class="request-link">@include('partials.request-action-icon', ['name' => 'message']) Messages</a>
                         </div>
                     </td>
                 </tr>
@@ -152,6 +153,7 @@
     'showEmployee' => true,
     'showDays' => true,
     'showHandledMeta' => true,
+    'seniorLayout' => true,
     'backLabel' => '← Back to requests',
 ])
 

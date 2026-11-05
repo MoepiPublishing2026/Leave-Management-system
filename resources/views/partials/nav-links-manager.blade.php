@@ -4,7 +4,7 @@
     <a href="{{ route('manager.employees.index') }}" class="{{ request()->routeIs('manager.employees.*') ? 'active' : '' }}">Employees</a>
 @endif
 <a href="{{ route('manager.requests.index', ['status' => 'all']) }}" class="{{ request()->routeIs('manager.requests.*') ? 'active' : '' }}">Team Requests</a>
-<a href="{{ route('manager.reviews.index') }}" class="{{ request()->routeIs('manager.reviews.*') ? 'active' : '' }}">Reviews</a>
+<a href="{{ route('manager.reviews.index') }}" class="{{ request()->routeIs('manager.reviews.*') ? 'active' : '' }}">Performance Reviews</a>
 <a href="{{ route('manager.apply') }}" class="{{ request()->routeIs('manager.apply') ? 'active' : '' }}">Apply</a>
 <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">
     Messages

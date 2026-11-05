@@ -3,19 +3,35 @@
 @section('title', 'Senior Manager Dashboard')
 
 @section('content')
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Open+Sans:wght@700&display=swap" rel="stylesheet">
 <style>
-    html body { font-family: 'Poppins', 'Segoe UI', sans-serif; }
+    html body { font-family: 'Inter', 'Segoe UI', sans-serif; }
     body, html {
         margin: 0;
         padding: 0;
     }
     
+    .admin-dash-top {
+        width: 100%;
+        max-width: 1410px;
+        margin: 0 auto 18px;
+        padding: 0 30px;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+    }
+    .admin-dash-tools {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 20;
+    }
     .menu-button {
-        position: absolute;
-        top: 45px;
-        right: 8.5%;
-        width: 60px;
+        width: 54px;
         height: 50px;
         padding: 0;
         display: flex;
@@ -23,12 +39,12 @@
         justify-content: center;
         align-items: center;
         gap: 6px;
-        background-color: #263445;
-        border: 2px solid #c5dc16;
-        border-radius: 16px;
+        background-color: #263142;
+        border: 3px solid #d4e21a;
+        border-radius: 14px;
         cursor: pointer;
-        z-index: 1050;
         box-sizing: border-box;
+        flex-shrink: 0;
     }
 
     .menu-button span {
@@ -51,26 +67,29 @@
 
     .dashboard-filter-position {
         display: none;
-        position: absolute;
-        top: 45px;
-        right: 14.5%;
-        z-index: 1040;
-        width: 260px;
+        width: 210px;
     }
     .dashboard-filter-position.show {
         display: block;
     }
 
+    .dashboard-filter-position .dashboard-period-filter {
+        margin: 0;
+        justify-content: stretch;
+    }
     .dashboard-filter-position .dashboard-period-filter__form {
         display: flex;
+        flex-direction: column;
         justify-content: center;
-        align-items: center;
+        align-items: stretch;
+        gap: 4px;
         text-align: center;
         background: #ffffff;
-        border: 4px solid #c5dc16;
-        border-radius: 25px;
-        padding: 8px 12px;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        border: 3px solid #d4e21a;
+        border-radius: 22px;
+        padding: 10px 16px 12px;
+        box-shadow: 0 10px 24px rgba(38, 49, 66, 0.12);
+        width: 100%;
     }
 
     .dashboard-filter-position .filter-select__trigger {
@@ -79,41 +98,41 @@
         background: #ffffff;
         border: none;
         border-radius: 14px;
-        color: #30302d;
+        color: #111111;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
         font-size: 18px;
-        font-weight: 600;
+        font-weight: 700;
+        letter-spacing: 0;
         box-shadow: none;
     }
     .admin-container {
-        font-family: 'Poppins', 'Segoe UI', sans-serif;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
         width: 100%;
         max-width: 1410px;
         box-sizing: border-box;
-        padding: 80px 30px 20px;
-        background: white;
-        border: 1px solid #d3d8de;
-        border-radius: 14px;
-        box-shadow: 0 0 14px rgba(0, 0, 0, 0.16);
-        margin: 60px auto 56px;
+        padding: 36px 22px 22px;
+        background: #ffffff;
+        border: 1px solid #e7edf2;
+        border-radius: 28px;
+        box-shadow: 0 12px 32px rgba(38, 49, 66, 0.06);
+        margin: 0 auto 72px;
     }
     .admin-page-header {
-        width: 100%;
-        max-width: 1440px;
-        margin: 0 auto 22px;
-        padding: 0 14px;
+        min-width: 0;
+        margin: 0;
+        padding: 0 6px 18px;
         box-sizing: border-box;
     }
 
     .admin-page-header h1 {
-        font-family: 'Century Gothic', 'Poppins', sans-serif;
+        font-family: 'Open Sans', 'Segoe UI', sans-serif;
         font-weight: 700;
-        font-size: 52px;
-        color: #253141;
+        font-size: 38px;
+        color: #1a2332;
         margin: 0;
         padding: 0;
         letter-spacing: 0;
         line-height: 1.2;
-        margin-bottom: 50px;
     }
     .cards {
         display: flex;
@@ -145,26 +164,32 @@
     .admin-container .cards .card:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
     }
-    .admin-container .cards .card.card-all      { background: #4fe6c5 !important; }
-    .admin-container .cards .card.card-pending  { background: #f2b96b !important; }
-    .admin-container .cards .card.card-overdue  { background: #ab8cf5 !important; }
-    .admin-container .cards .card.card-approved { background: #a03d85 !important; }
-    .admin-container .cards .card.card-rejected { background: #94c4c8 !important; }
-    .admin-container .cards .card.card-onleave  { background: #b9d84a !important; }
+    .admin-container .cards .card.card-all      { background: #4fe8c6 !important; }
+    .admin-container .cards .card.card-pending  { background: #b090f6 !important; }
+    .admin-container .cards .card.card-overdue  { background: #f0b868 !important; }
+    .admin-container .cards .card.card-approved { background: #a04088 !important; }
+    .admin-container .cards .card.card-rejected { background: #90c8c8 !important; }
+    .admin-container .cards .card.card-onleave  { background: #b8d850 !important; }
     .card-title {
-        font-size: 0.85rem;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 0.78rem;
         font-weight: 400;
-        margin: 2px 0 6px 0;
+        margin: 0 0 2px 0;
         display: flex;
         align-items: center;
         gap: 8px;
         justify-content: center;
         text-align: center;
+        color: #ffffff;
+        line-height: 1.2;
     }
     .card-value {
-        font-weight: bold;
-        font-size: 1.4rem;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-weight: 700;
+        font-size: 1.65rem;
         margin-top: 0;
+        color: #ffffff;
+        line-height: 1.1;
     }
     .dash-charts-grid {
         display: grid;
@@ -174,21 +199,23 @@
         align-items: stretch;
     }
     .chart-card {
-        background: white;
-        padding: 12px 12px;
-        border-radius: 14px;
-        box-shadow: 0 3px 9px rgba(0, 0, 0, 0.18);
-        border: 1px solid #d6dbe0;
-        color: #222;
+        background: #ffffff;
+        padding: 16px 16px 12px;
+        border-radius: 18px;
+        box-shadow: 0 8px 22px rgba(38, 49, 66, 0.08);
+        border: 1px solid #eef2f6;
+        color: #263142;
         display: flex;
         flex-direction: column;
-        min-height: 236px;
+        min-height: 250px;
     }
     .chart-card h3 {
-        margin: 0 0 10px 0;
+        margin: 0 0 8px 0;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
         font-weight: 700;
-        font-size: 0.95rem;
-        color: #253141;
+        font-size: 0.92rem;
+        letter-spacing: 0;
+        color: #1a2332;
     }
     .chart-body {
         position: relative;
@@ -198,24 +225,41 @@
     .admin-container .chart-body--ring { height: 214px; }
     .admin-container .chart-body--ring canvas { max-height: 214px; }
     .admin-container .chart-body--plot { height: 186px; }
-    .admin-container .dashboard-period-filter__form {
-        background: #d9e5e4;
-        border: none;
-        border-radius: 14px;
-        box-shadow: none;
+    .dashboard-filter-position .filter-select-wrap {
+        min-width: 0;
+        width: 100%;
     }
-    .admin-container .dashboard-period-filter__label { font-size: 0.72rem; font-weight: 400; color: #4b5563; }
-    .admin-container .dashboard-period-filter .filter-select__trigger {
+    .dashboard-filter-position .filter-select__trigger {
+        min-height: 40px;
+        width: 100%;
+        justify-content: center;
+        background: #ffffff;
         border: none;
-        border-radius: 14px;
-        font-size: 0.8rem;
+        border-radius: 12px;
+        color: #30302d;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-size: 16px;
         font-weight: 700;
+        letter-spacing: 0;
+        color: #111111;
         box-shadow: none;
+        padding: 6px 8px;
     }
-    .admin-container .dashboard-period-filter .filter-select__option { text-align: center; font-weight: 700; }
-    .admin-container .dashboard-period-filter .filter-select__option.is-selected { background: #a2b224; color: #1f2937; }
+    .dashboard-filter-position .filter-select__label {
+        text-align: center;
+    }
+    .dashboard-filter-position .filter-select__option {
+        text-align: center;
+        font-weight: 700;
+    }
+    .dashboard-filter-position .filter-select__option.is-selected {
+        background: #d4e21a;
+        color: #263142;
+    }
     @media (max-width: 1200px) {
-        .admin-page-header h1 { font-size: 28px; }
+        .admin-dash-top { flex-wrap: wrap; }
+        .admin-dash-tools { margin-bottom: 0; }
+        .admin-page-header h1 { font-size: 32px; }
         .dash-charts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 992px) {
@@ -229,25 +273,26 @@
     }
 </style>
 
-<div class="admin-page-header">
-    <h1>Senior Manager Dashboard</h1>
-</div>
-<div>
-<button class="menu-button" aria-label="Open navigation menu" aria-expanded="false">
-    <span></span>
-    <span></span>
-    <span></span>
-</button>
-
-<div class="dashboard-filter-position">
-    <div class="dashboard-filter-dropdown">
-        @include('partials.dashboard-period-filter', [
-            'monthFilter' => $monthFilter ?? 'this_year',
-            'employeeFilter' => $employeeFilter ?? null,
-            'employees' => $employees ?? collect(),
-        ])
+<div class="admin-dash-top">
+    <div class="admin-page-header">
+        <h1>Senior Manager Dashboard</h1>
     </div>
-</div>
+    <div class="admin-dash-tools">
+        <div class="dashboard-filter-position show">
+            <div class="dashboard-filter-dropdown">
+                @include('partials.dashboard-period-filter', [
+                    'monthFilter' => $monthFilter ?? 'this_year',
+                    'employeeFilter' => $employeeFilter ?? null,
+                    'employees' => $employees ?? collect(),
+                ])
+            </div>
+        </div>
+        <button class="menu-button" type="button" aria-label="Show or hide dashboard filters" aria-expanded="true">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
 </div>
 
 @php
@@ -285,7 +330,7 @@
         </a>
 
         <a href="{{ route('admin.calendar') }}" role="listitem" aria-label="Staff on leave today" class="card card-onleave">
-            <div class="card-title">On Leave Today</div>
+            <div class="card-title">On Leave Requests</div>
             <div class="card-value">{{ $onLeaveTodayCount }}</div>
         </a>
 
@@ -305,7 +350,7 @@
             </div>
         </div>
         <div class="chart-card">
-            <h3>Monthly Applications Submitted ({{ \App\Support\LeaveYear::label((int) ($chartYear ?? now()->year)) }})</h3>
+            <h3>Monthly Application Submitted ({{ \App\Support\LeaveYear::label((int) ($chartYear ?? now()->year)) }})</h3>
             <div class="chart-body chart-body--plot">
                 <canvas id="monthlyLine"></canvas>
             </div>
@@ -415,7 +460,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return fixedTypeColors[key] || colorForKey(key);
     };
 
-    window.chartBoldFontSpec = { family: "'Poppins', sans-serif", size: 12, weight: 'bold', style: 'normal' };
+    window.chartTextColor = '#3d4450';
+    window.chartBoldFontSpec = { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500', style: 'normal' };
     window.chartAxisTicksBold = { color: window.chartTextColor, font: { ...window.chartBoldFontSpec } };
     window.applyBoldChartDefaults();
     window.finalizeChartDefaults();
@@ -444,8 +490,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const protoColors = ['#4a7ff7', '#b08cf5', '#f5b96b', '#ffdc50', '#4fe6c5', '#94c4c8', '#a03d85', '#b9d84a'];
-    const blue = '#4a7ff7';
+    const protoColors = ['#4a7ff7', '#b08cf5', '#f5b96b', '#f0d24a', '#4fe8c6', '#90c8c8', '#a04088', '#b8d850'];
+    const statusSliceColors = {
+        Pending: '#105078',
+        Overdue: '#f4a0ab',
+        Approved: '#b08cf5',
+        Rejected: '#f07a86'
+    };
+    const monthlyStatusColors = {
+        Approved: '#7ebade',
+        Pending: '#105078',
+        Overdue: '#f4a0ab',
+        Rejected: '#d4e04a',
+        Withdrawn: '#fbe8b0'
+    };
+    const blue = '#5b86ea';
 
     const sliceLabels = {
         id: 'sliceLabels',
@@ -464,8 +523,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             ctx.save();
-            ctx.font = 'bold 11px Poppins, sans-serif';
-            ctx.fillStyle = '#253141';
+            ctx.font = '500 9px Inter, sans-serif';
+            ctx.fillStyle = '#3d4450';
             ctx.textBaseline = 'middle';
 
             for (let i = 0; i < slices.length; i++) {
@@ -474,8 +533,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const slice = slices[i];
                 const middleAngle = (slice.startAngle + slice.endAngle) / 2;
-                const x = slice.x + Math.cos(middleAngle) * (slice.outerRadius + 8);
-                const y = slice.y + Math.sin(middleAngle) * (slice.outerRadius + 20);
+                const labelRadius = slice.outerRadius + 18;
+                const x = slice.x + Math.cos(middleAngle) * labelRadius;
+                const y = slice.y + Math.sin(middleAngle) * labelRadius;
 
                 if (Math.cos(middleAngle) > 0.25) {
                     ctx.textAlign = 'left';
@@ -545,7 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     const statusPieLabels = statusList.map(function (item) { return item.label; });
     const statusPieData = statusList.map(function (item) { return item.value; });
-    const statusPieColors = statusPieLabels.map((label, i) => protoColors[i % protoColors.length]);
+    const statusPieColors = statusPieLabels.map((label) => statusSliceColors[label] || '#90c8c8');
 
     new Chart(document.getElementById('statusPie'), {
         type: 'pie',
@@ -588,6 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthlyPending = padMonthlySeries(@json($monthlyPendingData));
     const monthlyOverdue = padMonthlySeries(@json($monthlyOverdueData));
     const monthlyRejected = padMonthlySeries(@json($monthlyRejectedData));
+    const monthlyWithdrawn = padMonthlySeries(@json($monthlyWithdrawnData ?? []));
     const monthlyColor = blue;
     const monthlyLineChart = new Chart(document.getElementById('monthlyLine'), {
         type: 'line',
@@ -598,11 +659,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 data: monthlyTotals,
                 backgroundColor: hexToRgba(monthlyColor, 0.2),
                 borderColor: monthlyColor,
-                borderWidth: 1.5,
-                tension: 0.4,
+                borderWidth: 2,
+                tension: 0.45,
+                cubicInterpolationMode: 'monotone',
                 fill: false,
-                pointRadius: 2,
-                pointHoverRadius: 4
+                pointRadius: 0,
+                pointHoverRadius: 3,
+                capBezierPoints: true
             }]
         },
         options: mergeChartOptions({
@@ -647,37 +710,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     label: 'Approved',
                     data: monthlyApproved,
-                    backgroundColor: protoColors[6],
+                    backgroundColor: monthlyStatusColors.Approved,
                     borderWidth: 0,
-                    borderRadius: 5,
-                    maxBarThickness: 40,
+                    borderRadius: window.stackedBarTopRadius(8),
+                    borderSkipped: false,
+                    maxBarThickness: 28,
                     stack: 'status'
                 },
                 {
                     label: 'Pending',
                     data: monthlyPending,
-                    backgroundColor: protoColors[2],
+                    backgroundColor: monthlyStatusColors.Pending,
                     borderWidth: 0,
-                    borderRadius: 5,
-                    maxBarThickness: 40,
+                    borderRadius: window.stackedBarTopRadius(8),
+                    borderSkipped: false,
+                    maxBarThickness: 28,
                     stack: 'status'
                 },
                 {
                     label: 'Overdue',
                     data: monthlyOverdue,
-                    backgroundColor: protoColors[1],
+                    backgroundColor: monthlyStatusColors.Overdue,
                     borderWidth: 0,
-                    borderRadius: 5,
-                    maxBarThickness: 40,
+                    borderRadius: window.stackedBarTopRadius(8),
+                    borderSkipped: false,
+                    maxBarThickness: 28,
                     stack: 'status'
                 },
                 {
                     label: 'Rejected',
                     data: monthlyRejected,
-                    backgroundColor: protoColors[5],
+                    backgroundColor: monthlyStatusColors.Rejected,
                     borderWidth: 0,
-                    borderRadius: 5,
-                    maxBarThickness: 40,
+                    borderRadius: window.stackedBarTopRadius(8),
+                    borderSkipped: false,
+                    maxBarThickness: 28,
+                    stack: 'status'
+                },
+                {
+                    label: 'Withdrawn',
+                    data: monthlyWithdrawn,
+                    backgroundColor: monthlyStatusColors.Withdrawn,
+                    borderWidth: 0,
+                    borderRadius: window.stackedBarTopRadius(8),
+                    borderSkipped: false,
+                    maxBarThickness: 28,
                     stack: 'status'
                 }
             ];
@@ -689,7 +766,19 @@ document.addEventListener('DOMContentLoaded', () => {
             datasets: monthlyStatusDatasets
         },
         options: mergeChartOptions({
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 10,
+                        boxHeight: 10,
+                        padding: 12,
+                        color: '#263142',
+                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500' }
+                    }
+                }
+            },
             scales: {
                 x: { stacked: true, grid: { display: false }, ticks: window.getMonthAxisTicks() },
                 y: { stacked: true, beginAtZero: true, grid: { color: '#d9d9d9' }, border: { display: false }, ticks: { precision: 0 } }
@@ -720,7 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 {
                     label: 'Unpaid',
                     data: [unpaidPercentage],
-                    backgroundColor: '#b08cf5',
+                    backgroundColor: '#c4b0f2',
                     borderWidth: 0,
                     stack: 'leave'
                 }
@@ -769,7 +858,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'monthlyLine', values: monthlyTotals, message: 'No applications submitted in this leave year.' },
         { id: 'departmentBar', values: @json($departmentData ?? []), message: 'No leave requests by department for this filter.' },
         { id: 'monthlyStatusStackedBar', values: monthlyStatusDatasets, message: 'No monthly status data for this leave year.' },
-        { id: 'payStatusPolar', values: payStatusData, message: 'No paid or unpaid leave for this filter.' },
+        { id: 'leaveChart', values: payStatusData, message: 'No paid or unpaid leave for this filter.' },
     ]);
 
 });

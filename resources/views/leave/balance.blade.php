@@ -22,49 +22,49 @@
     @if(empty($selectedType) || empty($focusedBalance))
         <h1>Leave Balance</h1>
         <p class="balance-page-lead">
-            Choose a leave type to view your <strong>{{ $yearLabel ?? $year }}</strong> balance and activity
+            Choose a leave type to view your {{ $yearLabel ?? $year }} balance and activity
             ({{ $yearRangeLabel ?? ('1 May '.$year.' – 30 April '.($year + 1)) }}).
             @if($year === $currentYear)
                 This leave year runs until 30 April {{ $year + 1 }}.
             @endif
         </p>
 
+        <div class="balance-index">
         <div class="balance-toolbar">
             <form class="balance-year-form balance-toolbar-left" method="GET" action="{{ route($balanceRoute ?? \App\Support\LeaveApplicant::balanceRoute()) }}">
                 <label for="year">Year</label>
                 <select id="year" name="year">
                     @foreach($yearOptions as $optionYear)
                         <option value="{{ $optionYear }}" @selected($year === $optionYear)>
-                            {{ \App\Support\LeaveYear::label($optionYear) }}{{ $optionYear === $currentYear ? ' (Current)' : '' }}
+                            {{ \App\Support\LeaveYear::label($optionYear) }}{{ $optionYear === $currentYear ? ' (current)' : '' }}
                         </option>
                     @endforeach
                 </select>
                 <button type="submit" class="balance-btn balance-btn--primary">Update</button>
             </form>
             <div class="balance-toolbar-right">
-                <a href="{{ route($dashboardRoute ?? \App\Support\LeaveApplicant::personalDashboardRoute(auth()->user())) }}" class="balance-btn balance-btn--secondary">My dashboard</a>
+                <a href="{{ route($dashboardRoute ?? \App\Support\LeaveApplicant::personalDashboardRoute(auth()->user())) }}" class="balance-btn balance-btn--apply">My dashboard</a>
                 @if(\App\Support\LeaveApplicant::isManager(auth()->user()))
-                    <a href="{{ route('manager.dashboard') }}" class="balance-btn balance-btn--secondary">Dashboard</a>
+                    <a href="{{ route('manager.dashboard') }}" class="balance-btn balance-btn--apply">Dashboard</a>
                 @endif
-                <a href="{{ route($myRequestsRoute ?? \App\Support\LeaveApplicant::myRequestsRoute(auth()->user())) }}" class="balance-btn balance-btn--secondary">My Requests</a>
+                <a href="{{ route($myRequestsRoute ?? \App\Support\LeaveApplicant::myRequestsRoute(auth()->user())) }}" class="balance-btn balance-btn--apply">My Requests</a>
             </div>
         </div>
 
         @if($annualAllocated > 0)
-            <div class="balance-summary-grid" style="margin-bottom: 22px;">
+            <div class="balance-summary-grid balance-summary-grid--single">
                 <div class="balance-summary-card">
-                    <div class="balance-summary-k">Annual remainings</div>
+                    <div class="balance-summary-k">Annual Remaining</div>
                     <div class="balance-summary-v">{{ $fmtDays($annualRemaining) }}</div>
-                    <div class="balance-summary-cap">days available in {{ $yearLabel ?? $year }}</div>
                 </div>
             </div>
             <div class="balance-usage-panel">
                 <div class="balance-usage-label">
-                    <span>Annual usage in {{ $yearLabel ?? $year }}</span>
-                    <span>{{ $annualUsagePercent }}% · {{ $fmtDays($annualTaken) }} / {{ $fmtDays($annualAllocated) }} days</span>
+                    <span>Usage for {{ $yearLabel ?? $year }}</span>
+                    <span>{{ $annualUsagePercent }}% used · {{ $fmtDays($annualRemaining) }} days remaining</span>
                 </div>
                 <div class="balance-usage-track">
-                    <div class="balance-usage-fill" style="width: {{ max($annualUsagePercent, 2) }}%;"></div>
+                    <div class="balance-usage-fill" style="width: {{ max($annualUsagePercent, $annualTaken > 0 ? 4 : 0) }}%;"></div>
                 </div>
             </div>
         @endif
@@ -88,6 +88,7 @@
                 </li>
             @endforeach
         </ul>
+        </div>
     @else
         @php
             $allocated = (float) ($focusedBalance['default_days'] ?? 0);
@@ -107,7 +108,7 @@
 
         <h1>{{ $selectedType }} Leave</h1>
         <p class="balance-page-lead">
-            Your <strong>{{ $yearLabel ?? $year }}</strong> balance and activity for this leave type.
+            Your {{ $yearLabel ?? $year }} balance and activity for this leave type.
         </p>
 
         <div class="balance-toolbar">
@@ -117,7 +118,7 @@
                 <select id="year-detail" name="year">
                     @foreach($yearOptions as $optionYear)
                         <option value="{{ $optionYear }}" @selected($year === $optionYear)>
-                            {{ \App\Support\LeaveYear::label($optionYear) }}{{ $optionYear === $currentYear ? ' (Current)' : '' }}
+                            {{ \App\Support\LeaveYear::label($optionYear) }}{{ $optionYear === $currentYear ? ' (current)' : '' }}
                         </option>
                     @endforeach
                 </select>
@@ -125,46 +126,28 @@
             </form>
             <div class="balance-toolbar-right">
                 @if(!$isTypeDisabled)
-                    <a href="{{ route($applyRoute ?? \App\Support\LeaveApplicant::applyRoute(auth()->user()), ['leave_type' => $selectedType]) }}" class="balance-btn balance-btn--apply">+Apply</a>
+                    <a href="{{ route($applyRoute ?? \App\Support\LeaveApplicant::applyRoute(auth()->user()), ['leave_type' => $selectedType]) }}" class="balance-btn balance-btn--apply">+ Apply</a>
                 @endif
-                <a href="{{ route($myRequestsRoute ?? \App\Support\LeaveApplicant::myRequestsRoute(auth()->user())) }}" class="balance-btn balance-btn--secondary">My Requests</a>
-                <a href="{{ route($balanceRoute ?? \App\Support\LeaveApplicant::balanceRoute(), ['year' => $year]) }}" class="balance-btn balance-btn--secondary">Change type</a>
+                <a href="{{ route($myRequestsRoute ?? \App\Support\LeaveApplicant::myRequestsRoute(auth()->user())) }}" class="balance-btn balance-btn--apply">My Requests</a>
             </div>
         </div>
 
         <div class="balance-summary-grid">
             <div class="balance-summary-card">
-                <div class="balance-summary-k">{{ $selectedType }} remaining</div>
-                <div class="balance-summary-body">
-                    <div class="balance-summary-v">{{ $fmtDays($remaining) }}</div>
-                </div>
+                <div class="balance-summary-k">{{ $selectedType }} Remaining</div>
+                <div class="balance-summary-v">{{ $fmtDays($remaining) }}</div>
             </div>
-            <div class="balance-summary-card balance-summary-card--used">
+            <div class="balance-summary-card">
                 <div class="balance-summary-k">Used</div>
-                <div class="balance-summary-body balance-summary-body--meter">
-                    <div class="balance-summary-meter">
-                        <div class="balance-summary-meter-fill" > 
-                            {{ $fmtDays($taken) }}
-                        </div>
-                    </div>
-                </div>
+                <div class="balance-summary-v">{{ $fmtDays($taken) }}</div>
             </div>
-            <div class="balance-summary-card balance-summary-card--remaining-meter">
+            <div class="balance-summary-card balance-summary-card--highlight">
                 <div class="balance-summary-k">Remaining</div>
-                <div class="balance-summary-body balance-summary-body--meter">
-                    <div class="balance-summary-meter">
-                        <div class="balance-summary-meter-fill" style="width: {{ $remainingMeterWidth }}%;">
-                            {{ $fmtDays($remaining) }}
-                        </div>
-                    </div>
-                </div>
+                <div class="balance-summary-v">{{ $fmtDays($remaining) }} <span>days</span></div>
             </div>
-            <div class="balance-summary-card balance-summary-card--allocated">
-                <div class="balance-summary-k">Allocated</div>
-                <div class="balance-summary-body">
-                    <div class="balance-summary-v">{{ $fmtDays($allocated) }}</div>
-                    <div class="balance-summary-cap balance-summary-cap--spacer" aria-hidden="true">&nbsp;</div>
-                </div>
+            <div class="balance-summary-card">
+                <div class="balance-summary-k">Pending</div>
+                <div class="balance-summary-v">{{ (int) ($requestCounts['pending'] ?? 0) }}</div>
             </div>
         </div>
 
@@ -176,47 +159,42 @@
                     Applications for {{ $selectedType }} leave are currently unavailable.
                 @endif
             </div>
-        @elseif($countsAgainstAnnual && $annualRemaining <= 5)
-            <div class="balance-alert balance-alert--warn">
-                Annual leave remaining: <strong>{{ $fmtDays($annualRemaining) }}</strong> day(s). Other leave types do not take from this balance.
-            </div>
         @endif
 
-        @if($pendingDaysTotal > 0)
-            <div class="balance-alert balance-alert--info">
-                <strong>{{ $fmtDays($pendingDaysTotal) }}</strong> day(s) pending approval — not deducted until approved.
-            </div>
-        @endif
+        <div class="balance-note">
+            Annual leave remaining: {{ $fmtDays($annualRemaining) }} day(s). Other leave types do not take from this balance.
+        </div>
 
-        @if($allocated > 0)
-            <div class="balance-usage-panel">
-                <div class="balance-usage-label">
-                    <span>Usage in {{ $yearLabel ?? $year }}</span>
-                    <span>{{ $usagePct }}% · {{ $fmtDays($taken) }} / {{ $fmtDays($allocated) }} days</span>
-                </div>
-                <div class="balance-usage-track">
-                    <div class="balance-usage-fill" style="width: {{ max($usagePct, 2) }}%;"></div>
-                </div>
+        <div class="balance-usage-panel">
+            <div class="balance-usage-label">
+                <span>Usage for {{ $yearLabel ?? $year }}</span>
+                <span>{{ $usagePct }}% used · {{ $fmtDays($remaining) }} days remaining</span>
             </div>
-        @endif
+            <div class="balance-usage-track">
+                <div class="balance-usage-fill" style="width: {{ max($usagePct, $taken > 0 ? 4 : 0) }}%;"></div>
+            </div>
+        </div>
 
         <div class="balance-detail-grid">
             <div class="balance-detail-card balance-detail-card--status">
-                <div class="detail-k">Requests status</div>
+                <div class="detail-k">Status requests</div>
                 <div class="balance-status-bars" role="img" aria-label="Pending {{ $requestCounts['pending'] ?? 0 }}, approved {{ $requestCounts['approved'] ?? 0 }}, declined {{ $requestCounts['rejected'] ?? 0 }}">
                     <div class="balance-status-bar" style="height: {{ $pendingBarHeight }}px; background: #263142;" title="Pending: {{ $requestCounts['pending'] ?? 0 }}"></div>
                     <div class="balance-status-bar" style="height: {{ $approvedBarHeight }}px; background: #263142;" title="Approved: {{ $requestCounts['approved'] ?? 0 }}"></div>
                     <div class="balance-status-bar" style="height: {{ $declinedBarHeight }}px; background: #263142;" title="Declined: {{ $requestCounts['rejected'] ?? 0 }}"></div>
                 </div>
-                <div class="detail-v detail-v--status-meta">Declined: {{ $requestCounts['rejected'] ?? 0 }}</div>
+                <div class="detail-v detail-v--status-meta">Declined:{{ $requestCounts['rejected'] ?? 0 }}</div>
             </div>
             <div class="balance-detail-card">
-                <div class="detail-k">Pending requests</div>
+                <div class="detail-k">Pending Requests</div>
                 <div class="detail-v">{{ $fmtDays($pendingDaysTotal) }} days</div>
             </div>
-            <div class="balance-detail-card">
+            <div class="balance-detail-card balance-detail-card--docs">
                 <div class="detail-k">Documents</div>
-                <div class="detail-v">{{ $docLabel }} · Half days {{ strtolower($halfDayLabel) }}</div>
+                <div class="detail-v">
+                    <div>{{ $docLabel }}.</div>
+                    <div>Half Days {{ strtolower($halfDayLabel) }}.</div>
+                </div>
             </div>
             <div class="balance-detail-card">
                 <div class="detail-k">Approved requests</div>
@@ -239,9 +217,9 @@
                         <tbody>
                             @foreach($upcomingLeaves as $leave)
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}</td>
-                                    <td>{{ $fmtDays($leave->days ?? 0) }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($leave->start_date)->format('d-m-Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($leave->end_date)->format('d-m-Y') }}</td>
+                                    <td>{{ $fmtDays($leave->days ?? 0) }} days</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -266,10 +244,10 @@
                         <tbody>
                             @foreach($pendingLeavesDisplay as $leave)
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}</td>
-                                    <td>{{ $fmtDays($leave->days ?? 0) }}</td>
-                                    <td><span class="request-badge request-badge--pending">Pending</span></td>
+                                    <td>{{ \Carbon\Carbon::parse($leave->start_date)->format('d-m-Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($leave->end_date)->format('d-m-Y') }}</td>
+                                    <td>{{ $fmtDays($leave->days ?? 0) }} days</td>
+                                    <td>Pending</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -293,10 +271,10 @@
                     <tbody>
                         @forelse($approvedLeaves as $leave)
                             <tr>
-                                <td>{{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }}</td>
-                                <td>{{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}</td>
-                                <td>{{ $fmtDays($leave->days ?? 0) }}</td>
-                                <td><span class="request-badge request-badge--approved">Approved</span></td>
+                                <td>{{ \Carbon\Carbon::parse($leave->start_date)->format('d-m-Y') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($leave->end_date)->format('d-m-Y') }}</td>
+                                <td>{{ $fmtDays($leave->days ?? 0) }} days</td>
+                                <td>Approved</td>
                             </tr>
                         @empty
                             <tr>
@@ -306,6 +284,10 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <div class="balance-change-row">
+            <a href="{{ route($balanceRoute ?? \App\Support\LeaveApplicant::balanceRoute(), ['year' => $year]) }}" class="balance-change-type">← Choose another leave type</a>
         </div>
     @endif
 </div>

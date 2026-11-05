@@ -641,8 +641,9 @@
                     <button
                         type="button"
                         class="settings-icon-button"
-                        aria-label="Delete {{ $type }} leave policy"
-                        title="Delete policy"
+                        aria-label="Clear {{ $type }} leave policy"
+                        title="Clear policy"
+                        data-leave-type="{{ $type }}"
                         onclick="resetPolicy(this)">
 
                         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -752,24 +753,32 @@
     }
 
     function resetPolicy(button) {
-        const card = button.closest('.settings-policy-card');
-        const name = card.querySelector('.settings-policy-header').textContent.trim();
+        const name = button.getAttribute('data-leave-type') || 'this';
+        const form = document.getElementById('leavePoliciesForm');
 
-        if (!window.confirm('Reset the settings for ' + name + '?')) {
-            return;
-        }
+        Swal.fire({
+            icon: 'warning',
+            title: 'Clear ' + name + ' policy?',
+            text: 'Days, carryover, half-day requests, and supporting documentation for this leave type will be cleared and saved.',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, clear',
+            cancelButtonText: 'Cancel',
+            focusCancel: true,
+        }).then(function(result) {
+            if (!result.isConfirmed || !form) {
+                return;
+            }
 
-        card.querySelectorAll('.settings-policy-value').forEach(function(input) {
-            input.value = 0;
+            let input = form.querySelector('input[name="clear_policy"]');
+            if (!input) {
+                input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'clear_policy';
+                form.appendChild(input);
+            }
+            input.value = name;
+            form.submit();
         });
-
-        card.querySelector('[name^="allow_half_days"]').checked = false;
-        card.querySelector('[name^="requires_proof"]').checked = false;
-
-        card.querySelector('.settings-edit-half-days').checked = false;
-        card.querySelector('.settings-edit-proof').checked = false;
-
-        updatePolicyStatus(card);
     }
 </script>
 @endsection

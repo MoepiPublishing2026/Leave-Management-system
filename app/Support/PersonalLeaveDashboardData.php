@@ -56,22 +56,15 @@ class PersonalLeaveDashboardData
                 ->count();
         }
 
-        $leaveTypeCounts = LeaveTypeChartCounts::fromQuery($activeRequestsQuery);
+        $leaveTypeCounts = LeaveTypeChartCounts::fromQuery(
+            LeaveRequest::where('user_id', $userId)
+        );
         $leaveTypeCounts = self::filterChartLeaveTypes($leaveTypeCounts, $userId);
         $leaveTypePercentages = PercentageDistribution::oneDecimalPercents($leaveTypeCounts);
 
         $dashboardYear = LeaveYear::current();
         [$yearStart, $yearEnd] = LeaveYear::window($dashboardYear);
         $barLabels = LeaveYear::barLabels();
-        $barData = [];
-        foreach ($barLabels as $i => $month) {
-            $monthNumber = ((LeaveYear::START_MONTH - 1 + $i) % 12) + 1;
-            $barData[] = LeaveRequest::where('user_id', $userId)
-                ->where('created_at', '>=', $yearStart)
-                ->where('created_at', '<=', $yearEnd)
-                ->whereMonth('created_at', $monthNumber)
-                ->count();
-        }
 
         $monthlyBreakdown = MonthlyLeaveStatusBreakdown::fromQuery(
             LeaveRequest::where('user_id', $userId)
@@ -85,6 +78,14 @@ class PersonalLeaveDashboardData
         $monthlyOverdueData = $monthlyBreakdown['monthlyOverdueData'];
         $monthlyRejectedData = $monthlyBreakdown['monthlyRejectedData'];
         $monthlyWithdrawnData = $monthlyBreakdown['monthlyWithdrawnData'];
+        $barData = [];
+        for ($i = 0; $i < 12; $i++) {
+            $barData[] = (int) $monthlyApprovedData[$i]
+                + (int) $monthlyPendingData[$i]
+                + (int) $monthlyOverdueData[$i]
+                + (int) $monthlyRejectedData[$i]
+                + (int) $monthlyWithdrawnData[$i];
+        }
 
         $policies = LeavePolicy::all()->keyBy('leave_type');
         $year = $dashboardYear;

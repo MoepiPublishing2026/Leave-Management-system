@@ -62,6 +62,10 @@ class RequestsController extends Controller
         $employeeFilter = DashboardEmployeeFilter::selectedId($request->query('employee'));
         $query = LeaveRequest::query()->byEmployeeApplicants()->with('user');
         ManagerTeam::scopeLeaveRequests($query);
+        $query->whereRaw('LOWER(TRIM(status)) != ?', ['withdrawn']);
+        if ($status === 'withdrawn') {
+            $status = 'all';
+        }
 
         LeaveRequestPeriodFilter::apply($query, is_string($monthFilter) ? $monthFilter : null, 'created_at');
         DashboardEmployeeFilter::apply($query, $employeeFilter);
@@ -77,8 +81,6 @@ class RequestsController extends Controller
                 ->whereDate('start_date', '>=', Carbon::today());
         } elseif ($status !== 'all') {
             $query->whereRaw('LOWER(TRIM(status)) = ?', [$status]);
-        } else {
-            $query->whereRaw('LOWER(TRIM(status)) != ?', ['withdrawn']);
         }
 
         $effectiveSearch = $search;

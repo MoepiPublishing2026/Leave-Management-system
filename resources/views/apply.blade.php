@@ -62,12 +62,28 @@
       box-sizing: border-box;
   }
   form.leave-form .input-group--full { flex: 1 1 100%; }
-  form.leave-form .input-group--half { flex: 1 1 calc(50% - 13px); }
-  form.leave-form .input-group label {
+  form.leave-form .input-group--half {
+      flex: 1 1 calc(50% - 13px) !important;
+      width: calc(50% - 13px) !important;
+      max-width: calc(50% - 13px) !important;
+      min-width: 0 !important;
+  }
+  form.leave-form .input-group--half input,
+  form.leave-form .input-group--half .flatpickr-wrapper {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+  }
+  form.leave-form .input-group label,
+  form.leave-form .section-title,
+  form.leave-form .file-upload-title,
+  form.leave-form .half-day-row label {
       margin-bottom: 8px;
       font-weight: 400;
       font-size: 13px;
       color: #111;
+      text-transform: none !important;
+      letter-spacing: 0 !important;
   }
 
   /* ---------- Leave type dropdown (custom, matches the design) ---------- */
@@ -158,7 +174,7 @@
       width: 100%;
       padding: 10px 12px;
       border: 1.5px solid #c4d931;
-      border-radius: 2px;
+      border-radius: 8px;
       font-size: 13px;
       color: #333;
       font-family: inherit;
@@ -276,22 +292,22 @@
       letter-spacing: 0.03em;
   }
 .attachment-badge--optional {
-    background: #dce4e6;               /* background colour */
-    color: #6b7378;                    /* text colour */
-    border: none;                      /* remove left & right */
-    border-top: 1.5px solid #8f9a9e;   /* ← line above */
-    border-bottom: 1.5px solid #8f9a9e;/* ← line below */
+    background: #d5dde0;
+    color: #5c656b;
+    border: none;
+    border-radius: 999px;
+    padding: 4px 16px;
 }
   .attachment-badge--required { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
   .file-upload {
-    border: 3px dashed #c4d931;   /* dashed lime border line */
-    border-radius: 22px;          ← all 4 corners rounded (was 14px)
+    border: 2px dashed #c4d931;
+    border-radius: 16px;
     background: #ecece3;
-    overflow: hidden;             /* keeps the inside from poking out past the round corners */
+    overflow: hidden;
     transition: border-color 0.25s, background 0.25s;
 }
-  .file-upload.required { border-color: #cf2727 !important; background: #fffafa; }
-  .file-upload.is-dragover { border-color: #a0b026; background: #f4f6e4; }
+  .file-upload.required { border-color: #cf2727 !important; background: #fffafa !important; }
+  .file-upload.is-dragover { border-color: #a0b026; background: #f4f6e4 !important; }
   .file-upload-zone {
       display: flex;
       flex-direction: column;
@@ -303,9 +319,13 @@
       position: relative;
       user-select: none;
   }
-  .file-upload,
-.file-upload.is-dragover {
-    background: #e6e6e6 !important;   /* ← grey background */
+  html body main form.leave-form .file-upload {
+    background: #ecece3 !important;
+    border: 2px dashed #c4d931 !important;
+}
+html body main form.leave-form .file-upload.is-dragover {
+    background: #f4f6e4 !important;
+    border-color: #a0b026 !important;
 }
   /* Attachments box: force all 4 corners round */
 .file-upload,

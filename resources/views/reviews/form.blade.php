@@ -78,7 +78,6 @@
         </table>
 
         <div class="pr-score-block">
-            <h2>Self-rating</h2>
             @include('reviews.partials.score-table', [
                 'name' => 'self_scores',
                 'values' => old('self_scores', $review->self_scores ?? []),

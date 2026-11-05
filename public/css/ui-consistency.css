@@ -13,7 +13,7 @@
 }
 
 body:has(.site-footer) {
-  --footer-height: 64px;
+  --footer-height: 76px;
 }
 
 html,
@@ -178,14 +178,37 @@ html body header.navbar .logo-text {
 html body nav.navbar nav.menu,
 html body header.navbar nav.menu {
   display: flex !important;
-  flex: 0 1 auto !important;
+  flex: 0 0 auto !important;
   align-items: center !important;
   justify-content: flex-end !important;
   flex-wrap: nowrap !important;
-  gap: 8px !important;
+  gap: 6px !important;
   margin-left: auto !important;
   margin-right: 0 !important;
-  min-width: 0;
+  min-width: auto !important;
+  overflow: visible !important;
+}
+/* Only the manager bar has enough tabs to need a scrolling row */
+html body.role-manager nav.navbar nav.menu,
+html body.role-manager header.navbar nav.menu {
+  flex: 1 1 auto !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+}
+html body.role-manager nav.navbar nav.menu::-webkit-scrollbar,
+html body.role-manager header.navbar nav.menu::-webkit-scrollbar {
+  display: none;
+}
+html body.role-manager nav.navbar .navbar-logo,
+html body.role-manager header.navbar .navbar-logo {
+  position: relative !important;
+  z-index: 3 !important;
+  background: #263041 !important;
+  padding-right: 12px !important;
 }
 
 html body nav.navbar nav.menu > a,
@@ -196,11 +219,17 @@ html body header.navbar nav.menu > .nav-item > a {
   font-weight: 400 !important;
   font-size: 13px !important;
   line-height: 1.2 !important;
-  padding: 8px !important;
+  padding: 9px 10px !important;
   margin: 0 !important;
   white-space: nowrap !important;
-  flex-shrink: 0;
   color: #fff !important;
+}
+html body.role-manager nav.navbar nav.menu > a,
+html body.role-manager header.navbar nav.menu > a,
+html body.role-manager nav.navbar nav.menu > .nav-item > a,
+html body.role-manager header.navbar nav.menu > .nav-item > a {
+  padding: 8px !important;
+  flex-shrink: 0 !important;
 }
 
 html body nav.navbar nav.menu > .nav-item,
@@ -1275,36 +1304,157 @@ html body .employee-create-page .signup-container .dept-option:hover { backgroun
 }
 
 /* ===== Performance review: section cards ===== */
-html body .pr-doc .pr-section {
-    background:#fff; margin:22px 0; border-radius:4px; overflow:visible;
-    border:2px solid #4c4c4c; box-shadow:4px 4px 0 #4c4c4c;
-}
+html body .pr-doc .pr-section,
 html body .pr-doc .pr-section:nth-of-type(even) {
-    border-color:#c5d931; box-shadow:4px 4px 0 #c5d931;
+    background:#fff; margin:16px 0; border-radius:2px; overflow:hidden;
+    border:2px solid #c6d63a; border-left:4px solid #c6d63a; border-bottom:4px solid #c6d63a;
+    box-shadow:none; max-width:none; width:100%;
 }
 html body .pr-doc .pr-section h2 {
-    background:#fff !important; color:#263041 !important;
-    font-size:12px; font-weight:700; margin:0; padding:12px 16px;
-    border:0 !important; border-bottom:1px solid #c5d931 !important;
+    background:#fff !important; color:#243044 !important;
+    font-size:14px; font-weight:700; margin:0; padding:12px 16px;
+    border:0 !important; border-bottom:2px solid #c6d63a !important;
 }
 html body .pr-doc .pr-readonly { padding:14px 16px; font-size:11px; color:#555; }
 html body .pr-doc .pr-title { color:#263041; font-weight:700; }
 
-html body .pr-doc .pr-meta th,
-html body .pr-doc .pr-id-table th,
-html body .pr-doc .pr-legend th,
-html body .pr-doc .pr-score-table th,
-html body .pr-doc .pr-score-block h2 {
+html body .pr-doc .pr-meta th {
     background: #263041 !important;
     color: #fff !important;
     border-color: #263041 !important;
 }
+html body .pr-doc .lh-doc-body {
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+html body .pr-doc .pr-split {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 28px !important;
+    align-items: start !important;
+    width: 100% !important;
+    margin: 28px 0 !important;
+}
+html body .pr-doc .pr-id-table,
+html body .pr-doc .pr-legend {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border: 1px solid #111111 !important;
+    outline: 3px solid #c6d63a !important;
+    outline-offset: 0 !important;
+    background: #fff !important;
+}
+html body .pr-doc .pr-id-table th,
+html body .pr-doc .pr-id-table td,
+html body .pr-doc .pr-legend th,
+html body .pr-doc .pr-legend td {
+    background: #fff !important;
+    color: #243044 !important;
+    border: 1px solid #111111 !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+}
+html body .pr-doc .pr-id-table th,
+html body .pr-doc .pr-legend th {
+    font-weight: 700 !important;
+}
+html body .pr-doc .pr-id-table td {
+    width: auto !important;
+}
+html body .pr-doc .pr-legend th {
+    width: 42px !important;
+    min-width: 42px !important;
+    text-align: center !important;
+}
+html body .pr-doc .pr-legend td {
+    width: auto !important;
+}
+html body .pr-doc .pr-legend th[colspan] {
+    width: auto !important;
+    text-align: left !important;
+}
+html body .pr-doc .pr-score-block h2 {
+    display: none !important;
+}
+html body .pr-doc .pr-score-block {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    margin: 8px 0 36px !important;
+}
+html body .pr-doc .pr-score-table {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border: 1px solid #1a1a1a !important;
+    border-left: 4px solid #1a1a1a !important;
+    border-bottom: 4px solid #1a1a1a !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    background: #fff !important;
+}
+html body .pr-doc .pr-score-table th,
+html body .pr-doc .pr-score-table td {
+    background: #fff !important;
+    color: #1a1a1a !important;
+    border: 0 !important;
+    border-right: 1px solid #1a1a1a !important;
+    border-bottom: 1px solid #1a1a1a !important;
+    font-weight: 400 !important;
+    font-size: 15px !important;
+    padding: 16px 12px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+html body .pr-doc .pr-score-table th {
+    font-weight: 700 !important;
+}
+html body .pr-doc .pr-score-table th:last-child,
+html body .pr-doc .pr-score-table td:last-child {
+    border-right: 0 !important;
+}
+html body .pr-doc .pr-score-table tr:last-child td {
+    border-bottom: 0 !important;
+}
+html body .pr-doc .pr-score-table th:first-child,
+html body .pr-doc .pr-score-table td:first-child {
+    text-align: left !important;
+    width: 34% !important;
+    padding-left: 18px !important;
+    font-weight: 400 !important;
+}
+html body .pr-doc .pr-score-table th:first-child {
+    font-weight: 700 !important;
+}
+html body .pr-doc .pr-score-table input[type="radio"] {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+    border: 1.5px solid #1a1a1a !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+    accent-color: #1a1a1a;
+    vertical-align: middle !important;
+}
+html body .pr-doc .pr-score-table input[type="radio"]:checked {
+    background: radial-gradient(circle, #1a1a1a 42%, #fff 46%) !important;
+}
 
 /* ===== Performance review: prototype look ===== */
 
-html body .pr-doc .pr-section {
-    background:#fff; margin:22px 0; border-radius:4px; overflow:visible;
-    border:1px solid #4c4c4c; box-shadow:5px 5px 0 #4c4c4c;
+html body .pr-doc .pr-section,
+html body .pr-doc .pr-section:nth-of-type(even) {
+    background:#fff !important; margin:16px 0 !important; border-radius:2px !important; overflow:hidden !important;
+    border:2px solid #c6d63a !important; border-left:4px solid #c6d63a !important; border-bottom:4px solid #c6d63a !important;
+    box-shadow:none !important; max-width:none !important; width:100% !important;
 }
 html body .pr-doc .pr-card,
 html body .lh-body .pr-card {
@@ -1313,19 +1463,25 @@ html body .lh-body .pr-card {
 }
 html body .pr-doc .pr-card + .pr-card + .pr-section,
 html body .pr-doc .pr-card + .pr-card + .pr-section + .pr-section + .pr-section {
-    border:2px solid #d6e21c; box-shadow:5px 5px 0 #d6e21c;
+    border:2px solid #c6d63a !important;
+    border-left:4px solid #c6d63a !important;
+    border-bottom:4px solid #c6d63a !important;
+    box-shadow:none !important;
 }
 
 html body .pr-doc .pr-section h2,
 html body .pr-doc .pr-card h2,
 html body .lh-body .pr-card h2 {
-    background:#fff !important; color:#263041 !important;
-    font-size:12px; font-weight:700; margin:0; padding:12px 16px;
-    border:0 !important; border-bottom:1px solid #d6e21c !important;
+    background:#fff !important; color:#243044 !important;
+    font-size:14px !important; font-weight:700 !important; margin:0; padding:12px 16px;
+    border:0 !important; border-bottom:2px solid #c6d63a !important;
 }
 
 html body .pr-doc .pr-section textarea,
-html body .pr-doc .pr-readonly { padding:14px 16px; font-size:11px; color:#555; }
+html body .pr-doc .pr-readonly {
+    padding:14px 16px; font-size:14px; color:#243044; min-height:64px;
+    background:#fff;
+}
 
 html body .pr-doc .pr-row,
 html body .lh-body .pr-row {
@@ -1564,4 +1720,281 @@ html body button.cal-day-close:hover {
     background: #8d9c1c !important;
     background-color: #8d9c1c !important;
     color: #263041 !important;
+}
+
+/* Page titles share one style and one left edge on every role. */
+html body main,
+html body main.content {
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 28px 30px 48px !important;
+    box-sizing: border-box !important;
+}
+
+html body main h1,
+html body main .messages-page-title,
+html body main .analytics-insights-page .page-header h2,
+html body main .employee-create-page h1,
+html body main .my-requests-page h1,
+html body main .profile-page h1,
+html body main .requests-page h1,
+html body main .admin-page-header h1,
+html body main .mgr-page-header h1,
+html body main .mgr-page-header .mgr-page-header__main h1,
+html body main .app-page h1,
+html body main .calendar-page h1,
+html body main .calendar-page #calendar-heading,
+html body main .employees-page h1,
+html body main .balance-page h1,
+html body main .reports-page h1,
+html body main .notifications-page h1,
+html body main .settings-container h1,
+html body main .main-content h1,
+html body main .page-container h1 {
+    font-family: "Century Gothic", "Questrial", "Poppins", sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 38px !important;
+    color: #253141 !important;
+    letter-spacing: 0 !important;
+    text-align: left !important;
+    line-height: 1.2 !important;
+    margin: 0 0 16px !important;
+    padding: 0 !important;
+    border: none !important;
+    width: auto !important;
+    max-width: 100% !important;
+}
+
+html body main :is(
+    .admin-dash-top,
+    .admin-page-header,
+    .mgr-page-header,
+    .dashboard-top-bar,
+    .requests-page,
+    .my-requests-page,
+    .reports-page,
+    .notifications-page,
+    .employees-page,
+    .balance-page,
+    .app-page,
+    .profile-page,
+    .analytics-insights-page,
+    .calendar-page,
+    .settings-container,
+    .employee-create-page,
+    .page-container,
+    .messages-page-title
+) {
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+    box-sizing: border-box !important;
+}
+
+html body main :is(
+    .admin-container,
+    .manager-container,
+    .dashboard-container,
+    .messages-wrap,
+    .calendar-page .calendar-shell
+) {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+html body main .admin-dash-top {
+    align-items: flex-start !important;
+}
+
+/* Senior manager content sits in from both sides. Headings stay on the shared left edge. */
+html body main :is(
+    .analytics-insights-page,
+    .reports-page,
+    .requests-page,
+    .employees-page,
+    .notifications-page,
+    .app-page,
+    .profile-page,
+    .settings-container
+) {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+html body main :is(
+    .requests-page,
+    .reports-page,
+    .notifications-page,
+    .app-page,
+    .profile-page,
+    .settings-container,
+    .employees-page
+) > :not(h1):not(.requests-page-lead):not(.reports-page-lead):not(.notifications-lead):not(.app-page-lead):not(.employees-header):not(.mgr-page-header):not(.pr-reviews-scope-header):not(.app-page-header) {
+    width: min(100%, 1120px) !important;
+    max-width: 1120px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+}
+html body main .analytics-insights-page > :not(.page-header) {
+    width: min(100%, 1120px) !important;
+    max-width: 1120px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+}
+
+/* Same side space on employee and manager pages. Headings stay on the left. */
+html body main :is(.balance-page, .employee-create-page, .page-container) {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+html body main .balance-page > h1,
+html body main .balance-page > .balance-page-lead {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
+}
+html body main .balance-page > .balance-index {
+    width: min(100%, 1120px) !important;
+    max-width: 1120px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+}
+html body main .balance-page > :not(h1):not(.balance-page-lead):not(.balance-index) {
+    width: min(100%, 860px) !important;
+    max-width: 860px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+}
+html body main .page-container > :not(h1):not(.page-lead) {
+    width: min(100%, 1120px) !important;
+    max-width: 1120px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+}
+html body main .employee-create-page > .signup-container {
+    width: min(100%, 720px) !important;
+    max-width: 720px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+}
+
+/* Leave application is one card. Center the card so both sides have space. */
+html body main.content > .main-content,
+html body main > .main-content {
+    width: min(100% - 80px, 860px) !important;
+    max-width: 860px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 28px 40px 24px !important;
+}
+
+/* Search and header buttons stop at the same right edge as the page content. */
+html body main .requests-page {
+    position: relative !important;
+}
+html body main .requests-page .requests-search-form {
+    top: 0 !important;
+    right: max(0px, calc((100% - 1120px) / 2)) !important;
+    left: auto !important;
+}
+html body main .my-requests-page .requests-search-form {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    width: auto !important;
+    max-width: none !important;
+}
+html body main .team-requests-page .requests-search-form {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+}
+html body main .pr-reviews-page .requests-search-form {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+}
+html body main .pr-reviews-page > h1,
+html body main .pr-reviews-page > .requests-page-lead,
+html body main .pr-reviews-page > .mgr-page-header {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    box-sizing: border-box !important;
+}
+html body main .app-page > .app-page-header {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    box-sizing: border-box !important;
+}
+html body main .analytics-insights-page > .page-header,
+html body main .employees-page > .employees-header,
+html body main .requests-page > .mgr-page-header,
+html body main .pr-reviews-page > .mgr-page-header,
+html body main .app-page > .app-page-header {
+    padding-right: max(0px, calc((100% - 1120px) / 2)) !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 1200px) {
+    html body main,
+    html body main.content {
+        padding: 18px 16px 32px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    html body main h1,
+    html body main .messages-page-title,
+    html body main .analytics-insights-page .page-header h2,
+    html body main .employee-create-page h1,
+    html body main .my-requests-page h1,
+    html body main .profile-page h1,
+    html body main .requests-page h1,
+    html body main .admin-page-header h1,
+    html body main .mgr-page-header h1,
+    html body main .mgr-page-header .mgr-page-header__main h1,
+    html body main .app-page h1,
+    html body main .calendar-page h1,
+    html body main .calendar-page #calendar-heading,
+    html body main .employees-page h1,
+    html body main .balance-page h1,
+    html body main .reports-page h1,
+    html body main .notifications-page h1,
+    html body main .settings-container h1,
+    html body main .main-content h1,
+    html body main .page-container h1 {
+        font-size: 28px !important;
+    }
 }

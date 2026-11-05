@@ -21,7 +21,7 @@ class PerformanceReviews
             'leadership_skills' => 'Leadership skills',
             'time_management' => 'Time management',
             'reliability' => 'Reliability',
-            'organizational_skills' => 'Organizational skills',
+            'organizational_skills' => 'Organisational Skills',
             'willingness_to_learn' => 'Willingness to learn',
             'consistency' => 'Consistency',
             'productivity' => 'Productivity',
@@ -33,7 +33,7 @@ class PerformanceReviews
     public static function scoreLabels(): array
     {
         return [
-            1 => 'Unsatisfactory',
+            1 => 'Unsatisfied',
             2 => 'Below expectation',
             3 => 'Satisfactory',
             4 => 'Above expectation',
