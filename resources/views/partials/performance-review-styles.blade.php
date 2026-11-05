@@ -392,7 +392,6 @@
         .pr-page { padding: 4px 0 0; }
         .pr-doc { padding: 0; }
         .pr-split { grid-template-columns: 1fr; }
-        .pr-title { font-size: 22px; }
         .pr-brand img { height: 48px; max-width: min(200px, 70vw); }
         .pr-row {
             grid-template-columns: 1fr;

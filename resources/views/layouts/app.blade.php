@@ -367,7 +367,7 @@
     </style>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261105policieshead" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261105scoreheads" />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -427,8 +427,10 @@
 
         <nav class="menu" aria-label="Primary Navigation">
             @include('partials.nav-links-employee')
+        </nav>
 
             @auth
+        <div class="navbar-utilities">
             <div class="nav-item dropdown">
                 <a href="#" id="notificationsDropdown" class="nav-link dropdown-toggle position-relative" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="#5e920a" viewBox="0 0 24 24">

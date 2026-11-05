@@ -398,9 +398,9 @@
       <div class="card-title">Rejected Requests</div>
       <div class="card-value">{{ $rejectedCount ?? 0 }}</div>
     </a>
-    <a href="{{ route($statusRoute, ['status' => 'on_leave']) }}" role="listitem" aria-label="On leave requests count" class="card card-onleave">
-      <div class="card-title">On Leave Requests</div>
-      <div class="card-value">{{ $onLeaveCount ?? 0 }}</div>
+    <a href="{{ route($statusRoute, ['status' => 'withdrawn']) }}" role="listitem" aria-label="Withdrawn requests count" class="card card-onleave">
+      <div class="card-title">Withdrawn Requests</div>
+      <div class="card-value">{{ $withdrawnCount ?? 0 }}</div>
     </a>
   </div>
 
@@ -496,6 +496,7 @@
       Approved: '#ffdc50',
       Overdue:  '#f5b96b',
       Rejected: '#4a7ff7',
+      Withdrawn: '#fbe8b0',
     };
 
     const monthlyStatusColors = {

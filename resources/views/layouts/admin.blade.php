@@ -130,12 +130,18 @@
             padding: 10px 12px;
         }
         .navbar-utilities .nav-item.dropdown > a.dropdown-toggle::after {
-            display: none;
+            display: inline-block;
+            margin-left: 6px;
+            content: "";
+            border-top: 0.35em solid #fff;
+            border-right: 0.32em solid transparent;
+            border-bottom: 0;
+            border-left: 0.32em solid transparent;
         }
         .navbar-utilities .nav-item.dropdown .badge-notification {
             position: absolute;
             top: 4px;
-            right: 2px;
+            right: 18px;
             margin-left: 0;
             min-width: 17px;
             height: 17px;
@@ -381,7 +387,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261105policieshead" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261105scoreheads" />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -434,12 +440,14 @@
 
         <nav class="menu" role="navigation" aria-label="Primary Navigation">
             @include('partials.nav-links-admin')
+        </nav>
 
             @auth
             @php
                 $user = auth()->user();
                 $notifications = \App\Support\UserNotifications::unreadForDropdown($user, 10);
             @endphp
+        <div class="navbar-utilities">
             <div class="nav-item dropdown">
                 <a href="#" id="notificationsDropdown" class="nav-link position-relative dropdown-toggle"
                    role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">

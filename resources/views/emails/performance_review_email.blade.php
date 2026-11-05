@@ -58,10 +58,11 @@
     </div>
 
     @if (filled($review->self_scores))
+        <h2 style="margin:22px 0 10px;font-size:18px;color:#253141;">Self rating</h2>
         <table class="lh-scores">
             <thead>
             <tr>
-                <th>Your paragraph text</th>
+                <th>Criteria</th>
                 @foreach ($scoreLabels as $value => $label)
                     <th title="{{ $label }}">{{ $value }}</th>
                 @endforeach
@@ -84,10 +85,11 @@
         @endif
     @endif
 
+    <h2 style="margin:22px 0 10px;font-size:18px;color:#253141;">Final rating</h2>
     <table class="lh-scores">
         <thead>
         <tr>
-            <th>Your paragraph text</th>
+            <th>Criteria</th>
             @foreach ($scoreLabels as $value => $label)
                 <th title="{{ $label }}">{{ $value }}</th>
             @endforeach

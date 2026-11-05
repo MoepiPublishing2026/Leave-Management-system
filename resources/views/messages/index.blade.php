@@ -48,7 +48,7 @@
     }
 
     .messages-sidebar-head {
-        padding: 10px 20px 18px;
+        padding: 10px 20px 12px;
         font-size: 24px;
         font-weight: 800;
         color: #273548;
@@ -58,9 +58,55 @@
         letter-spacing: 0;
     }
 
+    .messages-search {
+        margin: 0 16px 14px;
+    }
+
+    .messages-search-field {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 14px;
+        background: #e7eef3;
+        border-radius: 10px;
+        color: #8b97a3;
+    }
+
+    .messages-search-field svg {
+        width: 16px;
+        height: 16px;
+        flex: none;
+        stroke: currentColor;
+    }
+
+    .messages-search-field input {
+        width: 100%;
+        border: 0;
+        outline: none;
+        background: transparent;
+        color: #273548;
+        font-size: 0.92rem;
+        font-family: inherit;
+    }
+
+    .messages-search-field input::placeholder {
+        color: #8b97a3;
+    }
+
+    .messages-search-empty {
+        padding: 18px 16px;
+        color: #8b97a3;
+        font-size: 0.9rem;
+    }
+
     .thread-list {
         overflow-y: auto;
         flex: 1;
+    }
+
+    .thread-list .thread[hidden] {
+        display: none !important;
     }
 
     .thread {
@@ -859,6 +905,15 @@
 <div class="messages-wrap {{ $activeConversation ? 'is-mobile-thread' : '' }}">
     <aside class="messages-sidebar" aria-label="Chats">
         <div class="messages-sidebar-head">Chats</div>
+        <form class="messages-search" role="search" action="{{ route('messages.index') }}" method="GET">
+            @if($activeConversation)
+                <input type="hidden" name="conversation" value="{{ $activeConversation->id }}">
+            @endif
+            <label class="messages-search-field">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input type="search" id="messagesSearch" name="search" placeholder="Search conversations..." aria-label="Search conversations" autocomplete="off">
+            </label>
+        </form>
         <div class="thread-list">
             @forelse($conversations as $c)
                 @php
@@ -903,6 +958,7 @@
             @empty
                 <div class="messages-empty">No chats yet</div>
             @endforelse
+            <div class="messages-search-empty" hidden>No conversations found</div>
         </div>
     </aside>
 
@@ -1092,6 +1148,24 @@
 @endif
 
 <script>
+        const messagesSearch = document.getElementById('messagesSearch');
+        const messageThreads = document.querySelectorAll('.thread-list .thread');
+        const messagesSearchEmpty = document.querySelector('.messages-search-empty');
+        messagesSearch?.addEventListener('input', () => {
+            const query = messagesSearch.value.trim().toLowerCase();
+            let shown = 0;
+            messageThreads.forEach((thread) => {
+                const matches = query === '' || thread.textContent.toLowerCase().includes(query);
+                thread.hidden = !matches;
+                if (matches) shown += 1;
+            });
+            if (messagesSearchEmpty) {
+                messagesSearchEmpty.hidden = query === '' || shown > 0;
+            }
+        });
+        messagesSearch?.form?.addEventListener('submit', (event) => {
+            event.preventDefault();
+        });
     document.addEventListener('DOMContentLoaded', () => {
         const box = document.getElementById('messagesBody');
         if (box) box.scrollTop = box.scrollHeight;

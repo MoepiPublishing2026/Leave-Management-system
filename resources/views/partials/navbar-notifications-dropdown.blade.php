@@ -14,7 +14,5 @@
     @empty
         <li class="dropdown-item text-center text-muted">No new notifications</li>
     @endforelse
-    @if(!empty($showViewAll))
-        <li><a href="{{ route('notifications.index') }}" class="dropdown-item notification-dropdown-all">View All</a></li>
-    @endif
+    <li class="notification-dropdown-footer"><a href="{{ route('notifications.index') }}" class="dropdown-item notification-dropdown-all">View all</a></li>
 </ul>

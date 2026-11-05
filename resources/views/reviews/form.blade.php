@@ -52,22 +52,22 @@
 
         <div class="pr-section">
             <h2>Goals achieved</h2>
-            <textarea name="goals_achieved" required placeholder="List the goals achieved this month">{{ old('goals_achieved', $review->goals_achieved) }}</textarea>
+            <textarea name="goals_achieved" placeholder="List the goals achieved this month">{{ old('goals_achieved', $review->goals_achieved) }}</textarea>
         </div>
 
         <div class="pr-section">
             <h2>Quality of work</h2>
-            <textarea name="quality_of_work" required placeholder="Comment on quality of work">{{ old('quality_of_work', $review->quality_of_work) }}</textarea>
+            <textarea name="quality_of_work" placeholder="Comment on quality of work">{{ old('quality_of_work', $review->quality_of_work) }}</textarea>
         </div>
 
         <div class="pr-section">
             <h2>Examples of taking initiative and being creative</h2>
-            <textarea name="initiative_examples" required placeholder="Add examples">{{ old('initiative_examples', $review->initiative_examples) }}</textarea>
+            <textarea name="initiative_examples" placeholder="Add examples">{{ old('initiative_examples', $review->initiative_examples) }}</textarea>
         </div>
 
         <div class="pr-section">
             <h2>Areas for improvement</h2>
-            <textarea name="areas_for_improvement" required placeholder="Add areas for improvement">{{ old('areas_for_improvement', $review->areas_for_improvement) }}</textarea>
+            <textarea name="areas_for_improvement" placeholder="Add areas for improvement">{{ old('areas_for_improvement', $review->areas_for_improvement) }}</textarea>
         </div>
 
         <table class="pr-legend" style="max-width:280px;margin:22px 0 12px;">
@@ -78,6 +78,7 @@
         </table>
 
         <div class="pr-score-block">
+            <h2 class="pr-score-heading">Self rating</h2>
             @include('reviews.partials.score-table', [
                 'name' => 'self_scores',
                 'values' => old('self_scores', $review->self_scores ?? []),
@@ -88,9 +89,9 @@
         </div>
 
         <div class="pr-actions" style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 22px;">
-            <button type="submit" name="action" value="draft" class="pr-btn pr-btn--draft" style="background: #d9253c !important; color: #ffffff !important; border: 1px solid #b01d30 !important; border-radius: 4px !important; padding: 10px 24px !important; font-weight: 700 !important; font-size: 14px !important; cursor: pointer !important; min-height: 38px; display: inline-flex; align-items: center; justify-content: center;">Save draft</button>
+            <button type="submit" name="intent" value="draft" class="pr-btn pr-btn--draft" style="background: #d9253c !important; color: #ffffff !important; border: 1px solid #b01d30 !important; border-radius: 4px !important; padding: 10px 24px !important; font-weight: 700 !important; font-size: 14px !important; cursor: pointer !important; min-height: 38px; display: inline-flex; align-items: center; justify-content: center;">Save draft</button>
             
-            <button type="submit" name="action" value="submit" class="pr-btn pr-btn--primary" style="background: #b2cd16 !important; color: #ffffff !important; border: 1px solid #91bf14 !important; border-radius: 4px !important; padding: 10px 24px !important; font-weight: 700 !important; font-size: 14px !important; cursor: pointer !important; min-height: 38px; display: inline-flex; align-items: center; justify-content: center;">Submit review</button>
+            <button type="submit" name="intent" value="submit" class="pr-btn pr-btn--primary" style="background: #b2cd16 !important; color: #ffffff !important; border: 1px solid #91bf14 !important; border-radius: 4px !important; padding: 10px 24px !important; font-weight: 700 !important; font-size: 14px !important; cursor: pointer !important; min-height: 38px; display: inline-flex; align-items: center; justify-content: center;">Submit review</button>
         </div>
         @include('partials.letterhead-document-footer')
     </form>

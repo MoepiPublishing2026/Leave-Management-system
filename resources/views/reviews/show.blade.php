@@ -28,6 +28,15 @@
         <div class="lh-doc-body">
         <div class="pr-title">Monthly Performance Review</div>
 
+        @include('reviews.partials.review-header-cards', [
+            'editable' => false,
+            'review' => $review,
+            'employeeName' => $review->employee_name,
+            'reviewerName' => $reviewerName,
+            'showStatus' => true,
+            'statusLabel' => $review->statusLabelFor($user),
+        ])
+
         <div class="pr-section">
             <h2>Goals achieved</h2>
             <div class="pr-readonly">{{ $review->goals_achieved ?: '—' }}</div>
@@ -64,6 +73,7 @@
 
         @if ($showSelfScores)
             <div class="pr-score-block">
+                <h2 class="pr-score-heading">Self rating</h2>
                 @include('reviews.partials.score-table', [
                     'name' => 'self_scores',
                     'values' => $review->self_scores ?? [],
@@ -84,6 +94,7 @@
             @endif
 
             <div class="pr-score-block">
+                <h2 class="pr-score-heading">Final rating</h2>
                 @include('reviews.partials.score-table', [
                     'name' => 'scores',
                     'values' => old('scores', $review->scores ?? []),

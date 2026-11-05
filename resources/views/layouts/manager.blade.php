@@ -418,9 +418,13 @@
 
         #notificationsDropdown::after,
         #notificationsDropdown.dropdown-toggle::after {
-            display: none !important;
-            content: none !important;
-            border: 0 !important;
+            display: inline-block !important;
+            margin-left: 6px !important;
+            content: "" !important;
+            border-top: 0.35em solid #fff !important;
+            border-right: 0.32em solid transparent !important;
+            border-bottom: 0 !important;
+            border-left: 0.32em solid transparent !important;
         }
     </style>
     <!-- Bootstrap CSS -->
@@ -450,7 +454,7 @@
     @stack('styles')
     @include('partials.dashboard-status-card-styles')
     @yield('head')
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261105policieshead"/>
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261105scoreheads"/>
 </head>
 <body class="role-manager">
     <header class="navbar" role="banner">
@@ -473,6 +477,7 @@
 
         <nav class="menu" aria-label="Primary Navigation">
             @include('partials.nav-links-manager')
+        </nav>
 
             @auth
             @php
@@ -480,6 +485,7 @@
                 $notifications = \App\Support\UserNotifications::unreadForDropdown($user, 10);
             @endphp
 
+        <div class="navbar-utilities">
             <div class="nav-item dropdown">
                 <a href="#" id="notificationsDropdown" class="nav-link position-relative dropdown-toggle"
                    role="button" data-bs-toggle="dropdown" aria-expanded="false">

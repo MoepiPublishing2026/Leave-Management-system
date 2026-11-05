@@ -711,7 +711,7 @@
     }
     .balance-page .balance-summary-card--highlight {
         background: #d4e21a !important;
-        border: 2px solid #bdbdbd !important;
+        border: 1px solid #ececec !important;
     }
     .balance-page .balance-summary-card--highlight .balance-summary-k,
     .balance-page .balance-summary-card--highlight .balance-summary-v {
@@ -817,8 +817,8 @@
         color: #1a1a1a !important;
     }
     html body main .balance-page > .balance-change-row {
-        width: min(100%, 860px) !important;
-        max-width: 860px !important;
+        width: min(100%, 980px) !important;
+        max-width: 980px !important;
         margin-left: auto !important;
         margin-right: auto !important;
         padding: 0 !important;
@@ -853,19 +853,30 @@
     .balance-page .balance-type-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
         gap: 18px !important;
+        align-items: stretch !important;
+    }
+    .balance-page .balance-type-grid > li {
+        display: flex !important;
+        min-height: 96px !important;
     }
     .balance-page .balance-type-card {
         background: #fff !important;
-        border: 1px solid #ececec !important;
+        border: 1.5px solid #c6d63a !important;
         border-radius: 16px !important;
         box-shadow: 0 8px 18px rgba(38, 49, 66, 0.10) !important;
         color: #253141 !important;
-        min-height: 72px;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 96px !important;
+        box-sizing: border-box !important;
     }
     .balance-page .balance-type-card:hover:not(.is-disabled) {
-        border-color: #d4e21a !important;
+        border: 1.5px solid #263041 !important;
         box-shadow: 0 10px 22px rgba(38, 49, 66, 0.12) !important;
         transform: translateY(-2px);
+    }
+    .balance-page .balance-type-card .type-name {
+        line-height: 1.3 !important;
     }
     .balance-page .balance-type-card .type-name {
         color: #253141 !important;
@@ -876,6 +887,7 @@
     }
     .balance-page .balance-type-card.is-disabled {
         background: #f8fafc !important;
+        border: 1.5px solid #c5ced6 !important;
         color: #94a3b8 !important;
         box-shadow: none !important;
     }
