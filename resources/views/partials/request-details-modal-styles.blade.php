@@ -504,7 +504,7 @@
     .rd-fields {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 6px;
     }
     .rd-fields--extra {
         margin-top: 12px;
@@ -525,14 +525,18 @@
         line-height: 1.35;
         min-width: 0;
     }
-    .rd-chip-k {
-        font-weight: 600;
-        color: #1e293b;
-    }
-    .rd-chip-v {
-        font-weight: 600;
-        word-break: break-word;
-    }
+    
+  .rd-chip-k {
+    font-size: 0.72rem;       /* ← smaller label text */
+    font-weight: 500;
+    color: #1e293b;
+    margin-right: 6px;
+}
+.rd-chip-v {
+    font-size: 0.72rem;       /* ← value text size */
+    font-weight: 500;
+    word-break: break-word;
+}
     .rd-chip-muted {
         color: #94a3b8;
         font-weight: 500;
@@ -834,6 +838,10 @@
         border-radius: 8px;
     }
     .attachment-preview-container { z-index: 10200 !important; }
+    /* Gap above the Attachment box */
+.rd-fields > .rd-chip-row + .rd-chip--full {
+    margin-top: 16px;         /* ← space above Attachment (increase for more) */
+}
 
     @media (max-width: 768px) {
         .request-details-popup.swal2-popup {

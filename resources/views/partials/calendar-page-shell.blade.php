@@ -37,7 +37,7 @@
                         @if($showUserInModal ?? true)
                             No approved leave scheduled this month.
                         @else
-                            You have no approved leave scheduled this month.
+                           No approved leave scheduled this month.
                         @endif
                     </p>
                 @else

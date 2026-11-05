@@ -4,212 +4,316 @@
 
 @section('content')
 @include('partials.requests-page-styles')
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 @php
     use App\Support\LeaveProofRules;
     use App\Support\LeaveAttachmentLinks;
+
+    $balanceRoute = \App\Support\LeaveApplicant::balanceRoute();
+
+    // "01 Sept 2026" style dates, as in the design
+    $fmtLong = function ($date) {
+        if (!$date) return '—';
+        return str_replace(' Sep ', ' Sept ', \Carbon\Carbon::parse($date)->format('d M Y'));
+    };
+    $fmtShort = fn ($date) => $date ? \Carbon\Carbon::parse($date)->format('d M') : '—';
 @endphp
 
 <style>
-    .leave-cards { display: flex; flex-direction: column; gap: 18px; margin-top: 18px; }
+    /* ================= Page ================= */
+    html body .my-requests-page {
+        font-family: 'Poppins', 'Segoe UI', sans-serif;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 16px 30px;
+        box-sizing: border-box;
+    }
+    html body .my-requests-page h1 {
+        font-family: 'Century Gothic', 'Poppins', sans-serif;
+        font-size: 36px;
+        font-weight: 700;
+        color: #263248;
+        margin: 26px 0 8px 6px;
+    }
+    html body .my-requests-page .requests-page-lead {
+        font-size: 15px;
+        color: #000;
+        margin: 0 0 20px;
+    }
+    html body .my-requests-page .requests-page-lead strong { color: #a2b222; font-weight: 700; }
+    html body .my-requests-page .requests-page-lead .lead-dot { margin: 0 4px 0 8px; }
 
-    .leave-card {
+    /* ================= Toolbar: New Request · Search · Clear ================= */
+    html body .my-requests-page .requests-toolbar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        background: #d8e3e1 !important;
+        border: 0 !important;
+        border-radius: 12px !important;
+        padding: 14px 22px !important;
+        box-shadow: none !important;
+        margin-bottom: 10px;
+    }
+    html body .my-requests-page .requests-btn--primary,
+    html body .my-requests-page .requests-btn--search,
+    html body .my-requests-page .requests-btn--secondary {
+        background: #d4e21a !important;
+        color: #111 !important;
+        border: 0 !important;
+        border-radius: 10px !important;
+        padding: 12px 14px !important;
+        font-family: inherit;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        line-height: 1.1 !important;
+        min-height: 0 !important;
+        box-shadow: none !important;
+        text-transform: none !important;
+        cursor: pointer;
+    }
+    html body .my-requests-page .requests-btn--search,
+    html body .my-requests-page .requests-btn--secondary { padding: 12px 32px !important; }
+    html body .my-requests-page .requests-btn--primary:hover,
+    html body .my-requests-page .requests-btn--search:hover,
+    html body .my-requests-page .requests-btn--secondary:hover { background: #c3d010 !important; }
+
+    html body .my-requests-page .requests-search-form input[type="text"] {
+        background: #fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2.4' stroke-linecap='round'><circle cx='11' cy='11' r='6.5'/><path d='M16 16l5 5'/></svg>") no-repeat 16px center / 20px 20px !important;
+        border: 0 !important;
+        border-radius: 10px !important;
+        padding: 12px 16px 12px 46px !important;
+        min-width: 250px;
+        font-family: inherit;
+        font-size: 12px !important;
+        color: #333;
+        box-shadow: none !important;
+    }
+    html body .my-requests-page .requests-search-form input[type="text"]::placeholder { color: #777; }
+
+    /* ================= Status tabs + Payment filter ================= */
+    html body .my-requests-page .requests-filter-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin-bottom: 30px;
+    }
+    html body .my-requests-page .requests-filters {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        background: #d8e3e1 !important;
+        border: 0 !important;
+        border-radius: 12px !important;
+        padding: 14px 20px !important;
+    }
+    html body .my-requests-page .requests-filter {
+        background: transparent !important;
+        color: #263248 !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        text-decoration: none;
+    }
+    html body .my-requests-page .requests-filter.is-active { color: #2379b0 !important; }
+
+    /* Payment box */
+    html body .my-requests-page .requests-filter-bar > *:not(.requests-filters) {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: #d8e3e1 !important;
+        border: 0 !important;
+        border-radius: 12px !important;
+        padding: 10px 16px 10px 20px !important;
+        box-shadow: none !important;
+    }
+    html body .my-requests-page .requests-filter-bar label {
+        margin: 0;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        color: #263248 !important;
+        white-space: nowrap;
+    }
+    html body .my-requests-page .requests-filter-bar select {
+        appearance: none;
+        -webkit-appearance: none;
+        min-width: 165px;
+        padding: 9px 40px 9px 18px !important;
+        background: #fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23222' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>") no-repeat right 14px center / 18px 18px !important;
+        border: 0 !important;
+        border-radius: 10px !important;
+        font-family: inherit;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        color: #111;
+        cursor: pointer;
+    }
+
+    /* ================= Request cards ================= */
+    .leave-cards { display: flex; flex-direction: column; gap: 28px; }
+
+    html body .my-requests-page .leave-card {
         position: relative;
         background: #fff;
-        border: 1px solid #d9dedc;
+        border: 1px solid #dcdcdc;
         border-radius: 14px;
-        padding: 16px 20px 14px 34px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, .12);
+        padding: 16px 16px 14px 34px;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
         cursor: pointer;
         transition: box-shadow .15s ease, transform .15s ease;
     }
-    .leave-card:hover { box-shadow: 0 6px 16px rgba(0, 0, 0, .18); transform: translateY(-1px); }
-    .leave-card.overdue-row { border-color: #e0a3a3; }
+    html body .my-requests-page .leave-card:hover { box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3); transform: translateY(-1px); }
+    html body .my-requests-page .leave-card.overdue-row { border-color: #e0a3a3; }
 
-    .leave-card__num {
-        position: absolute; top: 8px; left: 12px;
-        font-size: .8rem; font-weight: 800; color: #0d5c63;
+    html body .my-requests-page .leave-card__num {
+        position: absolute;
+        top: 6px;
+        left: 10px;
+        font-size: 14px;
+        font-weight: 800;
+        font-style: normal;                              /* straight, not slanted */
+        color: #2379b0 !important;
+        text-shadow: 0 2px 3px rgba(0, 0, 0, 0.35);      /* soft shadow under the number */
     }
 
-    .leave-card__top {
-        display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    .leave-card__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    html body .my-requests-page .leave-card__title {
+        margin: 4px 0 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: #555;
+        text-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
     }
-    .leave-card__title { margin: 0; font-size: 1.25rem; font-weight: 800; color: #4a4f52; }
-
     .leave-card__badges { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
 
-    .leave-card__meta { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; color: #4a4f52; font-size: .95rem; }
-    .leave-card__meta-row { display: flex; align-items: center; gap: 8px; }
-    .leave-card__meta-row svg { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-    .leave-card__actions {
+    .leave-card__meta {
         margin-top: 10px;
-        display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; align-items: center;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        color: #444;
+        font-size: 15px;
+    }
+    .leave-card__meta-row { display: flex; align-items: center; gap: 8px; }
+    .leave-card__meta-row svg {
+        width: 18px; height: 18px; flex: none;
+        stroke: #333; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* ================= Status pills ================= */
+    html body .my-requests-page .request-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border: 2px solid #767672;
+        border-radius: 12px;
+        padding: 3px 12px;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.3;
+        background: #e2e2e2;
+        color: #555;
+    }
+    html body .my-requests-page .request-badge svg {
+        width: 14px; height: 14px; flex: none;
+        fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    html body .my-requests-page .request-badge--pending  { background: #cebaf6 !important; border-color: #a33d86 !important; color: #a33d86 !important; }
+    html body .my-requests-page .request-badge--approved { background: #9db4ff !important; border-color: #2a6fc0 !important; color: #1f3f8f !important; }
+    html body .my-requests-page .request-badge--overdue  { background: #cebaf6 !important; border-color: #a33d86 !important; color: #7a1f5f !important; }
+    html body .my-requests-page .request-badge--rejected { background: #f9c3c9 !important; border-color: #d5253a !important; color: #a31b2e !important; }
+    html body .my-requests-page .request-badge--letter-required { background: #fff4cc !important; border-color: #c99a00 !important; color: #7a5c00 !important; }
+    html body .my-requests-page .request-badge--letter-missing  { background: #f9c3c9 !important; border-color: #d5253a !important; color: #a31b2e !important; }
+
+    /* ================= Card buttons ================= */
+    html body .my-requests-page .leave-card__actions {
+        margin-top: 4px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: flex-end;
+        align-items: center;
     }
     .leave-card__actions form { margin: 0; display: inline-flex; }
-    .leave-card__actions .request-existing-files { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+    .leave-card__actions .request-existing-files { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+    .leave-card__actions .proof-upload-input { display: none; }
 
+    html body .my-requests-page .leave-card .request-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #fff !important;
+        border: 1.5px solid #c5d931 !important;
+        color: #8d9a1a !important;
+        border-radius: 12px !important;
+        padding: 6px 12px !important;
+        font-family: inherit;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        line-height: 1.2;
+        text-decoration: none;
+        text-transform: none !important;
+        box-shadow: none !important;
+        cursor: pointer;
+    }
+    html body .my-requests-page .leave-card .request-btn svg {
+        width: 14px; height: 14px; flex: none;
+        fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    }
+    html body .my-requests-page .leave-card .request-btn:hover { background: #f6fadf !important; }
+    html body .my-requests-page .leave-card .proof-upload-btn { min-width: 188px; }
+    html body .my-requests-page .leave-card .request-btn--check { padding: 8px 26px !important; }
+
+    html body .my-requests-page .leave-card .request-btn--withdraw,
+    html body .my-requests-page .leave-card .request-btn--delete {
+        background: #f69ea6 !important;
+        border: 1px solid #ff0000 !important;
+        color: #e00000 !important;
+    }
+    html body .my-requests-page .leave-card .request-btn--withdraw:hover,
+    html body .my-requests-page .leave-card .request-btn--delete:hover { background: #f48a94 !important; }
+
+    /* ================= Empty state + footnote ================= */
     .requests-empty-card {
         text-align: center; padding: 28px; color: #6b7280;
         background: #fff; border: 1px dashed #cfd6d4; border-radius: 14px;
     }
+    .requests-footnote {
+        max-width: 820px;
+        margin: 22px auto 0;
+        text-align: center;
+        font-size: 11px;
+        line-height: 1.45;
+        color: #6f6f6f;
+    }
+    
 
-    @media (max-width: 576px) {
-        .leave-card { padding-left: 30px; }
-        .leave-card__actions { justify-content: flex-start; }
+    /* ================= All icons black ================= */
+    html body .my-requests-page .leave-card__meta-row svg,
+    html body .my-requests-page .request-badge svg,
+    html body .my-requests-page .leave-card .request-btn svg {
+        stroke: #000 !important;
     }
 
-  /* ===== My Leave Requests: match prototype ===== */
-html body .my-requests-page { font-family:'Poppins',sans-serif; }
-html body .my-requests-page h1 { color:#263248; font-weight:700; }
-html body .my-requests-page .requests-page-lead { color:#000; }
-html body .my-requests-page .requests-page-lead strong { color:#a2b222; }
-
-/* toolbar */
-html body .my-requests-page .requests-toolbar {
-    background:#d8e3e1 !important; border:0 !important; border-radius:14px !important;
-    padding:14px 16px !important; box-shadow:none !important; align-items:center;
-}
-html body .my-requests-page .requests-btn--primary,
-html body .my-requests-page .requests-btn--search,
-html body .my-requests-page .requests-btn--secondary {
-    background:#a2b222 !important; color:#000 !important; border:0 !important;
-    border-radius:8px !important; padding:8px 14px !important; font-weight:700 !important;
-    min-height:0 !important; font-size:13px !important;
-}
-html body .my-requests-page .requests-search-form input[type="text"] {
-    background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M16 16l5 5'/></svg>") no-repeat 14px center / 20px 20px !important;
-    border:0 !important; border-radius:12px !important;
-    padding:14px 18px 14px 44px !important; min-width:260px;
-}
-
-/* tabs and payment filter */
-html body .my-requests-page .requests-filter-bar {
-    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;
-    background:transparent !important; border:0 !important; box-shadow:none !important; padding:0 !important;
-}
-html body .my-requests-page .requests-filters {
-    display:inline-flex; gap:20px; background:#d8e3e1 !important; border:0 !important;
-    border-radius:14px; padding:12px 20px;
-}
-html body .my-requests-page .requests-filter {
-    background:transparent !important; color:#263248 !important; font-weight:700 !important;
-    padding:0 !important; border:0 !important; box-shadow:none !important;
-}
-html body .my-requests-page .requests-filter.is-active { color:#2379b0 !important; }
-html body .my-requests-page .requests-filter-bar select {
-    background:#fff !important; border:0 !important; border-radius:12px !important; font-weight:700;
-}
-
-/* cards */
-html body .my-requests-page .leave-cards { gap:26px; }
-html body .my-requests-page .leave-card {
-    background:#fff; border:1px solid #ddd; border-radius:14px;
-    box-shadow:6px 8px 14px rgba(0,0,0,.22);
-    padding:18px 24px 16px 34px;
-}
-html body .my-requests-page .leave-card__num { color:#2379b0 !important; font-weight:800 !important; }
-html body .my-requests-page .leave-card__title {
-    color:#555; font-size:1.5rem; text-shadow:1px 2px 3px rgba(0,0,0,.35);
-}
-
-/* status pills */
-html body .my-requests-page .request-badge {
-    border:2px solid #666; border-radius:14px; padding:4px 14px; font-weight:700; font-size:.8rem;
-}
-html body .my-requests-page .request-badge--approved { background:#9db4ff !important; border-color:#2a6fc0; color:#1f3f8f !important; }
-html body .my-requests-page .request-badge--pending { background:#cebaf6 !important; border-color:#a33d86; color:#7a2a7a !important; }
-html body .my-requests-page .request-badge--overdue { background:#cebaf6 !important; border-color:#a33d86; color:#fff !important; }
-html body .my-requests-page .request-badge--rejected { background:#f9c3c9 !important; border-color:#d5253a; color:#a31b2e !important; }
-html body .my-requests-page [class*="request-badge--withdrawn"] { background:#e2e2e2 !important; border-color:#767672; color:#555 !important; }
-
-/* buttons: outlined lime, Withdraw pink */
-html body .my-requests-page .leave-card .request-btn {
-    background:#fff !important; border:2px solid #c5d931 !important; color:#8d9a1a !important;
-    border-radius:999px !important; padding:6px 16px !important; font-size:.85rem !important; font-weight:600 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    box-shadow: none !important;
-    line-height: 1 !important;
-}
-html body .my-requests-page .leave-card .request-btn:hover { background:#f6fadf !important; }
-html body .my-requests-page .leave-card .request-btn--withdraw,
-html body .my-requests-page .leave-card .request-btn--delete {
-    background:#f69ea6 !important; border:1px solid #f00 !important; color:#e00 !important;
-}
-html body .my-requests-page .leave-card .request-btn--withdraw:hover,
-html body .my-requests-page .leave-card .request-btn--delete:hover { background:#f48a94 !important; }  
-
-/* ===== Fine-tune: buttons, Payment bar, tabs, pills ===== */
-
-/* toolbar buttons: smaller, like the prototype */
-html body .my-requests-page .requests-btn--primary,
-html body .my-requests-page .requests-btn--search,
-html body .my-requests-page .requests-btn--secondary {
-    padding:8px 14px !important; font-size:13px !important; line-height:1.2 !important; min-height:0 !important;
-}
-html body .my-requests-page .requests-search-form input[type="text"] {
-    padding-top:11px !important; padding-bottom:11px !important; font-size:13px !important; min-width:250px;
-}
-html body .my-requests-page .requests-toolbar { padding:12px 16px !important; gap:10px; }
-
-/* tabs: bigger text, more space */
-html body .my-requests-page .requests-filters { gap:16px; padding:12px 22px; }
-html body .my-requests-page .requests-filter { font-size:15px !important; }
-
-/* Payment bar: same grey-teal, bold label, white pill dropdown */
-html body .my-requests-page .requests-filter-bar > *:not(.requests-filters) {
-    background:#d8e3e1 !important; border:0 !important; border-radius:14px !important;
-    padding:12px 18px !important; display:flex; align-items:center; gap:14px; box-shadow:none !important;
-}
-html body .my-requests-page .requests-filter-bar label {
-    text-transform:none !important; letter-spacing:0 !important;
-    font-size:15px !important; font-weight:700 !important; color:#263248 !important; white-space:nowrap;
-}
-html body .my-requests-page .requests-filter-bar select {
-    min-width:170px; padding:10px 16px !important; font-size:15px !important;
-}
-
-/* status pills: anything not approved/pending/overdue/rejected becomes grey outlined (Withdrawn) */
-html body .my-requests-page .leave-card__badges .request-badge:not(.request-badge--approved):not(.request-badge--pending):not(.request-badge--overdue):not(.request-badge--rejected) {
-    background:#e2e2e2 !important; border:2px solid #767672 !important; color:#555 !important;
-    border-radius:14px; padding:4px 14px; font-weight:700; font-size:.8rem;
-}
-
-/* card buttons: bottom right, same spacing as prototype */
-html body .my-requests-page .leave-card__actions { justify-content:flex-end; gap:10px; margin-top:12px; }
-
-/* ===== Fix: Payment Dropdown ===== */
-html body .my-requests-page .requests-pay-filter {
-    background: #dbe4e6 !important; /* Grey background box */
-    border: 0 !important; 
-    border-radius: 12px !important;
-    padding: 6px 16px !important; 
-    display: flex; 
-    align-items: center; 
-    gap: 12px; 
-    box-shadow: none !important;
-}
-html body .my-requests-page .requests-pay-filter label {
-    font-size: 14px !important; 
-    font-weight: 500 !important; /* Not bold */
-    color: #475569 !important;
-    text-transform: none !important; /* Sentence case */
-    margin: 0 !important;
-}
-html body .my-requests-page .requests-pay-filter select {
-    background: #fff !important; 
-    border: 0 !important; 
-    border-radius: 20px !important; 
-    font-weight: 600 !important;
-    font-size: 14px !important;
-    color: #1e293b !important;
-    padding: 8px 16px !important;
-    min-width: 140px !important;
-}    
-
+    @media (max-width: 640px) {
+        html body .my-requests-page h1 { font-size: 28px; }
+        html body .my-requests-page .requests-search-form input[type="text"] { min-width: 0; width: 100%; }
+        html body .my-requests-page .leave-card { padding-left: 30px; }
+        html body .my-requests-page .leave-card__actions { justify-content: flex-start; }
+    }
 </style>
 
 <div class="requests-page my-requests-page">
@@ -220,7 +324,7 @@ html body .my-requests-page .requests-pay-filter select {
                 <p class="requests-page-lead">
                     Showing <strong>{{ ucfirst($status) }}</strong>
                     @if ($leaveRequests->total() > 0)
-                        · {{ $leaveRequests->total() }} {{ Str::plural('request', $leaveRequests->total()) }}
+                        <span class="lead-dot">•</span>{{ $leaveRequests->total() }} {{ Str::plural('request', $leaveRequests->total()) }}
                     @endif
                 </p>
             </div>
@@ -235,7 +339,7 @@ html body .my-requests-page .requests-pay-filter select {
         <p class="requests-page-lead">
             Showing <strong>{{ ucfirst($status) }}</strong>
             @if ($leaveRequests->total() > 0)
-                · {{ $leaveRequests->total() }} {{ Str::plural('request', $leaveRequests->total()) }}
+                <span class="lead-dot">•</span>{{ $leaveRequests->total() }} {{ Str::plural('request', $leaveRequests->total()) }}
             @endif
         </p>
     @endif
@@ -247,14 +351,14 @@ html body .my-requests-page .requests-pay-filter select {
         'status' => $status,
         'payFilter' => $payFilter ?? 'all',
         'search' => $search ?? '',
-        'showNewRequest' =>  false,
-        'searchPlaceholder' => 'Search type, status, dates, comment...',
+        'showNewRequest' => true,
+        'searchPlaceholder' => 'Search name, type, status, dates..',
         'statusFilters' => [
             'all' => 'All',
             'pending' => 'Pending',
+            'submitted' => 'Submitted',
             'approved' => 'Approved',
             'rejected' => 'Rejected',
-            'withdrawn' => 'Withdrawn',
             'overdue' => 'Overdue',
         ],
     ])
@@ -279,6 +383,13 @@ html body .my-requests-page .requests-pay-filter select {
                 $doctorsLetterMissing = LeaveProofRules::isProofPastDeadline($req);
                 $proofUploadPending = LeaveProofRules::isProofUploadWindowPending($req);
                 $certificateNote = LeaveProofRules::managerCertificateNote($req);
+
+                $badgeKey = $req->isOverdue()
+                    ? 'overdue'
+                    : \App\Support\LeaveStatusLabels::badgeClass($rowStatus, $req->isOverdue());
+                $badgeText = $req->isOverdue()
+                    ? 'Overdue'
+                    : \App\Support\LeaveStatusLabels::display($rowStatus, $req->isOverdue());
 
                 $details = [
                     'id' => $req->id,
@@ -311,20 +422,32 @@ html body .my-requests-page .requests-pay-filter select {
                     'conversionReason' => (string) ($req->converted_to_unpaid_reason ?? ''),
                 ];
                 $details = array_merge($details, $req->popupMeta());
+
+                $typeName = trim((string) $req->leave_type);
+                $displayType = preg_match('/\bleave\s*$/i', $typeName) ? $typeName : $typeName.' Leave';
             @endphp
 
             <div class="leave-card row-click {{ $req->isOverdue() ? 'overdue-row' : '' }}" data-details='@json($details)'>
                 <span class="leave-card__num">{{ $leaveRequests->firstItem() + $loop->index }}</span>
 
                 <div class="leave-card__top">
-                    <h3 class="leave-card__title">{{ $req->leave_type }}</h3>
+                    <h3 class="leave-card__title">{{ $displayType }}</h3>
 
                     <div class="leave-card__badges request-status-cell">
-                        @if ($req->isOverdue())
-                            <span class="request-badge request-badge--overdue">Overdue</span>
-                        @else
-                            <span class="request-badge request-badge--{{ \App\Support\LeaveStatusLabels::badgeClass($rowStatus, $req->isOverdue()) }}">{{ \App\Support\LeaveStatusLabels::display($rowStatus, $req->isOverdue()) }}</span>
-                        @endif
+                        <span class="request-badge request-badge--{{ $badgeKey }}">
+                            @if (str_contains($badgeKey, 'approved'))
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.8"/></svg>
+                            @elseif (str_contains($badgeKey, 'rejected'))
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+                            @elseif (str_contains($badgeKey, 'overdue'))
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg>
+                            @elseif (str_contains($badgeKey, 'withdrawn'))
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>
+                            @else
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/><path d="M12 8v4l2.5 1.5"/></svg>
+                            @endif
+                            {{ $badgeText }}
+                        </span>
                         @if ($proofStatusLabel)
                             <span class="request-badge {{ $doctorsLetterMissing ? 'request-badge--letter-missing' : 'request-badge--letter-required' }}">{{ $proofStatusLabel }}</span>
                         @endif
@@ -333,23 +456,19 @@ html body .my-requests-page .requests-pay-filter select {
 
                 <div class="leave-card__meta">
                     <div class="leave-card__meta-row">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                        <span>Submitted {{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('j M Y') : '—' }}</span>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="1.5"/><path d="M8 3v4M16 3v4M3.5 9.5h17M7.5 13h1M11.5 13h1M15.5 13h1M7.5 16.5h1M11.5 16.5h1M15.5 16.5h1"/></svg>
+                        <span>Submitted {{ $fmtLong($req->created_at) }}</span>
                     </div>
                     <div class="leave-card__meta-row">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-                        <span>
-                            {{ $req->start_date ? \Carbon\Carbon::parse($req->start_date)->format('d M') : '—' }}
-                            -
-                            {{ $req->end_date ? \Carbon\Carbon::parse($req->end_date)->format('d M') : '—' }}
-                        </span>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+                        <span>{{ $fmtShort($req->start_date) }} - {{ $fmtShort($req->end_date) }}</span>
                     </div>
                 </div>
 
                 <div class="leave-card__actions request-actions request-actions-cell" onclick="event.stopPropagation();">
                     @if ($canEdit)
                         <a href="{{ route(\App\Support\LeaveApplicant::editRoute(auth()->user()), $req->id) }}" class="request-btn request-btn--edit">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg>
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/></svg>
                             Edit
                         </a>
                     @endif
@@ -368,7 +487,7 @@ html body .my-requests-page .requests-pay-filter select {
                                         data-filename="{{ $fileLink['name'] }}"
                                         data-previewable="1"
                                     >
-                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
                                         View {{ $fileLink['label'] }}
                                     </button>
                                 @endforeach
@@ -388,7 +507,7 @@ html body .my-requests-page .requests-pay-filter select {
                                     data-deadline="{{ $proofDeadline ? $proofDeadline->format('d M Y') : '' }}"
                                     data-action-label="{{ $attachmentActionLabel }}"
                                 >
-                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l8-8"/></svg>
                                     {{ $attachmentActionLabel }}
                                 </button>
                             </form>
@@ -404,7 +523,7 @@ html body .my-requests-page .requests-pay-filter select {
                                 class="request-btn request-btn--withdraw withdraw-request-btn"
                                 data-approved="{{ $rowStatus === 'approved' ? '1' : '0' }}"
                             >
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
                                 Withdraw
                             </button>
                         </form>
@@ -415,18 +534,32 @@ html body .my-requests-page .requests-pay-filter select {
                             @csrf
                             @method('DELETE')
                             <button type="button" class="request-btn request-btn--delete delete-request-btn" data-request-id="{{ $req->id }}">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
                                 Delete
                             </button>
                         </form>
                     @endif
-                </div>            
+
+                    @if ($rowStatus === 'approved')
+                        <a href="{{ route($balanceRoute, ['type' => $req->leave_type]) }}" class="request-btn request-btn--check">Check remaining days</a>
+                    @endif
+                </div>
             </div>
         @empty
             <div class="requests-empty-card requests-empty">No leave requests found for this filter.</div>
         @endforelse
     </div>
 
+    <p class="requests-footnote">
+        Click any row to view full request details. While a request is still pending, use Edit to correct details or replace documents.
+        Approved leave may be withdrawn until its final leave day; the balance is then restored. For approved sick leave, upload your
+        doctor's letter using Upload doctor's letter in the Actions column by the day after your leave ends at the latest.
+    </p>
+
+    @if (method_exists($leaveRequests, 'links') && $leaveRequests->hasPages())
+        <div class="requests-pagination">{{ $leaveRequests->withQueryString()->links() }}</div>
+    @endif
+</div>
 
 @include('partials.requests-page-scripts', [
     'showEmployee' => false,

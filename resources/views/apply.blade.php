@@ -3,95 +3,55 @@
 @section('title', !empty($editingLeave) ? 'Edit leave request' : 'Leave Application')
 
 @section('content')
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   html, body {
-      margin: 0; padding: 0; height: 100%; min-height: 100vh; background: white;
+      margin: 0; padding: 0; height: 100%; min-height: 100vh; background: #fff;
   }
+
+  /* ---------- White card ---------- */
   .main-content {
-      margin: 24px auto 0;
-      padding: 40px 50px;
-      min-height: 100vh;
+      font-family: 'Poppins', 'Segoe UI', sans-serif;
+      margin: 18px auto 40px;
+      padding: 26px 26px 22px;
       width: calc(100% - 32px);
-      max-width: 1500px;
+      max-width: 980px;
       background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 0 10px #a7bd8dff;
+      border: 1px solid #cfcfcf;
+      border-radius: 12px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
       box-sizing: border-box;
   }
-  @media (max-width: 768px) {
-      .main-content {
-          margin-top: 18px;
-          padding: 18px 14px;
-          min-height: auto;
-          width: 100%;
-          max-width: 100%;
-          box-sizing: border-box;
-          overflow-x: clip;
-      }
-      form.leave-form {
-          gap: 16px;
-          width: 100%;
-          max-width: 100%;
-          min-width: 0;
-          box-sizing: border-box;
-      }
-      form.leave-form .input-group,
-      form.leave-form .input-group--half {
-          flex: 1 1 100% !important;
-          min-width: 0 !important;
-          width: 100% !important;
-          max-width: 100% !important;
-          box-sizing: border-box;
-      }
-      form.leave-form .input-group select,
-      form.leave-form .input-group .filter-select-wrap,
-      form.leave-form .input-group .filter-select__trigger,
-      form.leave-form .input-group .filter-select__menu,
-      form.leave-form .input-group input[type="text"],
-      form.leave-form .input-group textarea {
-          width: 100% !important;
-          max-width: 100% !important;
-          box-sizing: border-box;
-      }
-      form.leave-form .button-group {
-          flex-direction: column;
-          gap: 10px;
-          margin-top: 20px;
-      }
-      form.leave-form .button-group button {
-          width: 100% !important;
-      }
-  }
   .main-content h1 {
+      font-family: 'Century Gothic', 'Poppins', sans-serif;
       font-weight: 700;
-      font-size: 28px;
-      color: #555555;
-      margin-bottom: 8px;
+      font-size: 38px;
+      color: #545454;
+      margin: 0 0 8px;
+      line-height: 1.1;
   }
   .main-content h2 {
-      font-weight: normal;
-      color: #8888;
-      font-size: 14px;
-      margin-bottom: 30px;
+      font-weight: 400;
+      color: #8a8a8a;
+      font-size: 13px;
+      margin: 0 0 22px;
+      padding-left: 4px;
   }
-  .form-alert {
-      margin-bottom: 20px;
-      padding: 12px 14px;
-      border-radius: 6px;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #991b1b;
-      font-size: 14px;
-  }
-  .form-alert ul {
-      margin: 6px 0 0;
-      padding-left: 18px;
-  }
+
+  /* ---------- Form layout ---------- */
   form.leave-form {
       display: flex;
       flex-wrap: wrap;
-      gap: 30px 40px;
+      gap: 22px 26px;
+      font-size: 13px;
+      color: #111;
+  }
+  form.leave-form .section-title {
+      flex-basis: 100%;
       font-size: 14px;
+      font-weight: 400;
+      color: #111;
+      margin: 0 0 4px 4px;
   }
   form.leave-form .input-group {
       flex: 1 1 45%;
@@ -101,38 +61,201 @@
       max-width: 100%;
       box-sizing: border-box;
   }
-  form.leave-form .input-group--full {
-      flex: 1 1 100%;
-  }
-  form.leave-form .input-group--half {
-      flex: 1 1 45%;
-  }
+  form.leave-form .input-group--full { flex: 1 1 100%; }
+  form.leave-form .input-group--half { flex: 1 1 calc(50% - 13px); }
   form.leave-form .input-group label {
-      margin-bottom: 5px;
-      font-weight: 600;
-      text-transform: none;
+      margin-bottom: 8px;
+      font-weight: 400;
+      font-size: 13px;
+      color: #111;
   }
-  form.leave-form .input-group select,
-  form.leave-form .input-group input[type="text"],
-  form.leave-form .input-group textarea {
-      padding: 10px 12px;
-      border: 1px solid #C4D931;
-      border-radius: 6px;
-      font-size: 14px;
-      color: #333;
+
+  /* ---------- Leave type dropdown (custom, matches the design) ---------- */
+  .ltype { position: relative; width: 100%; }
+  .ltype-native {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      overflow: hidden;
+  }
+  /* Hide the app's generic select enhancer if it wraps this select */
+  .ltype .filter-select-wrap,
+  .ltype .filter-select__trigger,
+  .ltype .filter-select__menu { display: none !important; }
+
+  .ltype-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 42px;
+      padding: 0 14px;
+      border: 1.5px solid #6b6b6b;
+      border-radius: 10px;
+      background: #fff;
       font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      color: #111;
+      text-align: left;
+      cursor: pointer;
       box-sizing: border-box;
   }
+  .ltype-trigger:focus-visible { outline: 2px solid #c4d931; outline-offset: 2px; }
+  .ltype-chevron { width: 18px; height: 18px; flex-shrink: 0; transition: transform 0.2s ease; }
+  .ltype.is-open .ltype-chevron { transform: rotate(180deg); }
+
+  .ltype-menu {
+      position: absolute;
+      top: calc(100% + 2px);
+      left: 0;
+      right: 0;
+      z-index: 60;
+      margin: 0;
+      padding: 4px 6px;
+      list-style: none;
+      background: #fff;
+      border: 1px solid #e2e2e2;
+      border-radius: 0 0 6px 6px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+      max-height: 230px;
+      overflow-y: auto;
+  }
+  .ltype-menu[hidden] { display: none; }
+  .ltype-menu::-webkit-scrollbar { width: 8px; }
+  .ltype-menu::-webkit-scrollbar-track { background: #eef2f2; }
+  .ltype-menu::-webkit-scrollbar-thumb { background: #a9c3c3; border-radius: 8px; }
+  .ltype-option {
+      display: block;
+      width: 100%;
+      margin: 2px 0;
+      padding: 7px 12px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      color: #2b2b2b;
+      text-align: center;
+      cursor: pointer;
+  }
+  .ltype-option:hover,
+  .ltype-option:focus-visible { background: #f1f5c4; outline: none; }
+  .ltype-option.is-selected { background: #d4e21a; color: #222; }
+  .ltype-option:disabled { background: transparent; color: #a3a3a3; cursor: not-allowed; }
+
+  /* Date picker in the same lime theme */
+  .flatpickr-day.selected,
+  .flatpickr-day.selected:hover { background: #d4e21a; border-color: #d4e21a; color: #111; }
+  .flatpickr-day.today { border-color: #a0b026; }
+
+  /* Date inputs + comment: lime border, square corners */
+  form.leave-form .input-group input[type="text"],
+  form.leave-form .input-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #c4d931;
+      border-radius: 2px;
+      font-size: 13px;
+      color: #333;
+      font-family: inherit;
+      background: #fff;
+      box-sizing: border-box;
+      outline: none;
+  }
+  /* Start Date & End Date border colour */
+#start_date,
+#end_date {
+    border-color: #c4d931 !important;   /* ← put your colour here */
+}
+
+/* Border colour while the box is clicked/active */
+/* #start_date:focus,
+#end_date:focus {
+    border-color: #a0b026 !important;   /* ← darker shade for focus */
+} */
+/* Half-day row: box + words on one line */
+/* Half-day row: box + words on one line */
+.half-day-row {
+    flex-basis: 100% !important;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 5px;                       /* words sit close to the box */
+}
+.half-day-row label {
+    margin: 0 !important;
+    font-size: 14px;
+    line-height: 14px;
+    color: #222;
+    cursor: pointer;
+}
+
+/* The checkbox */
+.half-day-row input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px !important;
+    height: 14px;
+    margin: 0;
+    flex-shrink: 0;
+    border: 1.5px solid #555;       /* thin grey border */
+    border-radius: 3px;             /* slightly rounded on all 4 corners */
+    background: #fff;
+    cursor: pointer;
+    position: relative;
+}
+
+/* Tick when checked */
+.half-day-row input[type="checkbox"]:checked {
+    background: #d4e21a;
+}
+.half-day-row input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 3.5px;
+    top: 0.5px;
+    width: 3px;
+    height: 7px;
+    border: solid #111;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+}
+
+/* Greyed out when half days aren't allowed */
+.half-day-row input[type="checkbox"]:disabled {
+    border-color: #b5b5b5;
+    background: #f2f2f2;
+    /* cursor: not-allowed; */
+}
+  form.leave-form .input-group input[type="text"] { height: 42px; }
+  form.leave-form .input-group input[type="text"]:disabled { background: #f5f5f5; }
+  form.leave-form .input-group input[type="text"]:focus,
+  form.leave-form .input-group textarea:focus { border-color: #a0b026; }
   form.leave-form .input-group textarea {
       resize: vertical;
-      min-height: 70px;
+      min-height: 56px;
       max-height: 150px;
   }
+  form.leave-form .input-group textarea::placeholder { color: #8a8a8a; font-size: 11px; }
+
+  .half-day-row {
+      flex-basis: 100% !important;
+      flex-direction: row !important;
+      align-items: center;
+      gap: 8px;
+  }
+  .half-day-row label { margin-bottom: 0 !important; }
+  .half-day-row input[type="checkbox"] { width: 13px; height: 13px; margin: 0; accent-color: #a0b026; }
+
+  /* ---------- Attachments ---------- */
   .file-upload-wrap {
-      flex: 1 1 100%;
+      flex: 1 1 100% !important;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
   }
   .file-upload-header {
       display: flex;
@@ -140,260 +263,205 @@
       justify-content: space-between;
       gap: 10px;
       flex-wrap: wrap;
+      padding: 0 4px;
   }
-  .file-upload-title {
-      font-weight: 700;
-      color: #2d3748;
-      font-size: 14px;
-  }
+  .file-upload-title { font-weight: 700; color: #111; font-size: 13px; }
   .attachment-badge {
       display: inline-block;
-      padding: 3px 10px;
+      padding: 3px 18px;
       border-radius: 999px;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
   }
-  .attachment-badge--optional {
-      background: #f1f5f9;
-      color: #64748b;
-      border: 1px solid #cbd5e1;
-  }
-  .attachment-badge--required {
-      background: #fef2f2;
-      color: #b91c1c;
-      border: 1px solid #fecaca;
-  }
+.attachment-badge--optional {
+    background: #dce4e6;               /* background colour */
+    color: #6b7378;                    /* text colour */
+    border: none;                      /* remove left & right */
+    border-top: 1.5px solid #8f9a9e;   /* ← line above */
+    border-bottom: 1.5px solid #8f9a9e;/* ← line below */
+}
+  .attachment-badge--required { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
   .file-upload {
-      border: 2px dashed #C4D931;
-      border-radius: 8px;
-      background: #ECECE3;
-      transition: border-color 0.25s, background 0.25s;
-  }
-  .file-upload.required {
-      border-color: #cf2727 !important;
-      background: #fffafa;
-  }
-  .file-upload.is-dragover {
-      border-color: #138056;
-      background: #f0faf4;
-  }
+    border: 3px dashed #c4d931;   /* dashed lime border line */
+    border-radius: 22px;          ← all 4 corners rounded (was 14px)
+    background: #ecece3;
+    overflow: hidden;             /* keeps the inside from poking out past the round corners */
+    transition: border-color 0.25s, background 0.25s;
+}
+  .file-upload.required { border-color: #cf2727 !important; background: #fffafa; }
+  .file-upload.is-dragover { border-color: #a0b026; background: #f4f6e4; }
   .file-upload-zone {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 22px 16px;
+      padding: 22px 16px 18px;
       text-align: center;
       cursor: pointer;
       position: relative;
       user-select: none;
   }
-  .file-upload-zone:hover {
-      background-color: #f9f9f9;
-  }
-  .file-upload-icon {
-      width: 40px;
-      height: 40px;
-      margin-bottom: 10px;
-      fill: #A0B026;
-      opacity: 0.85;
-  }
-  .file-upload-text {
-      margin: 0 0 6px;
-      color: #A0B026;
-      font-size: 14px;
-  }
-  .file-upload-hint {
-      margin: 0;
-      color: #6b7280;
-      font-size: 12px;
-      line-height: 1.4;
-  }
+  .file-upload,
+.file-upload.is-dragover {
+    background: #e6e6e6 !important;   /* ← grey background */
+}
+  /* Attachments box: force all 4 corners round */
+.file-upload,
+.file-upload.required,
+.file-upload.is-dragover {
+    border-radius: 22px !important;
+    border-top-left-radius: 22px !important;
+    border-top-right-radius: 22px !important;
+    border-bottom-left-radius: 22px !important;
+    border-bottom-right-radius: 22px !important;
+    overflow: hidden;
+}
+
+/* Everything inside follows the same curve */
+.file-upload-zone {
+    border-radius: 20px;
+    background: transparent;
+}
+.file-upload-zone:hover {
+    background: transparent;
+}
+  .file-upload-icon { width: 34px; height: 34px; margin-bottom: 8px; color: #a0b026; }
+  .file-upload-text { margin: 0 0 6px; color: #a0b026; font-size: 14px; }
+  .file-upload-text strong { font-weight: 700; }
+  .file-upload-hint { margin: 0; color: #666; font-size: 11px; line-height: 1.4; }
   .file-upload input[type="file"] {
-      position: absolute;
-      opacity: 0;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      cursor: pointer;
+      position: absolute; opacity: 0; width: 100%; height: 100%; top: 0; left: 0; cursor: pointer;
   }
   .file-upload-list {
-      list-style: none;
-      margin: 0;
-      padding: 0 12px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      list-style: none; margin: 0; padding: 0 12px 12px;
+      display: flex; flex-direction: column; gap: 8px;
   }
   .file-upload-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 8px 10px;
-      border: 1px solid #d1e7c4;
-      border-radius: 6px;
-      background: #fff;
-      font-size: 13px;
-      color: #2d3748;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 8px 10px; border: 1px solid #c4d931; border-radius: 6px;
+      background: #fff; font-size: 13px; color: #2d3748;
   }
   .file-upload-item-name {
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-weight: 600;
+      flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;
   }
-  .file-upload-item-meta {
-      color: #6b7280;
-      font-size: 12px;
-      white-space: nowrap;
-  }
+  .file-upload-item-meta { color: #6b7280; font-size: 12px; white-space: nowrap; }
   .file-upload-remove {
-      border: none;
-      background: #fee2e2;
-      color: #991b1b;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      flex-shrink: 0;
+      border: none; background: #fee2e2; color: #991b1b; font-size: 12px; font-weight: 700;
+      padding: 4px 8px; border-radius: 4px; cursor: pointer; flex-shrink: 0;
   }
-  .file-upload-remove:hover {
-      background: #fecaca;
-  }
+  .file-upload-remove:hover { background: #fecaca; }
   .file-upload-error {
-      margin: 0 12px 12px;
-      padding: 8px 10px;
-      border-radius: 6px;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #991b1b;
-      font-size: 12px;
+      margin: 0 12px 12px; padding: 8px 10px; border-radius: 6px;
+      background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-size: 12px;
   }
-  .parental-leave-note {
-      margin: 8px 0 0;
-      font-size: 13px;
-      color: #64748b;
-      line-height: 1.45;
-  }
+  .parental-leave-note { margin: 8px 0 0; font-size: 13px; color: #64748b; line-height: 1.45; }
+
+  /* Border color for the important comment textarea */
+  #important_comment {
+    border-color: #c4d931 !important;   /* border colour */
+    min-height: 56px;                   /* height */
+    
+}
+#important_comment:focus {
+    border-color: #a0b026 !important;   /* border when clicked */
+}
+label[for="important_comment"] {
+    /* label styles */
+}
+
+  /* ---------- Buttons ---------- */
   form.leave-form .button-group {
       flex-basis: 100%;
-      margin-top: 40px;
+      margin-top: 18px;
       display: flex;
-      gap: 20px;
+      gap: 22px;
       justify-content: flex-start;
   }
   html body main form.leave-form .button-group button,
   form.leave-form .button-group button {
-      padding: 8px 16px !important;
+      padding: 14px 34px !important;
       min-height: 0 !important;
       height: auto !important;
       width: auto !important;
-      border-radius: 8px !important;
-      border: none;
+      border-radius: 12px !important;
+      border: none !important;
+      background: #d4e21a !important;
+      color: #111 !important;
+      font-family: inherit;
       font-weight: 700;
       font-size: 13px !important;
       line-height: 1.2 !important;
+      box-shadow: none !important;
       cursor: pointer;
       user-select: none;
+      transition: background-color 0.2s;
   }
-  form.leave-form .button-group .submit-btn,
-  form.leave-form .button-group .cancel-btn {
-      background-color: #A0B026;
-      color: #000000;
-      border: 1px solid #A0B026;
-      box-shadow: 0 4px 14px rgba(178, 205, 22, 0.2);
-      transition: background-color 0.25s;
+  html body main form.leave-form .button-group .submit-btn,
+  form.leave-form .button-group .submit-btn { padding: 14px 48px !important; }
+  form.leave-form .button-group button:hover { background: #c3d010 !important; }
+  form.leave-form .button-group button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* ---------- Pop-ups (SweetAlert2) ---------- */
+  .moepi-swal.swal2-popup {
+      width: 690px;
+      max-width: calc(100% - 32px);
+      border-radius: 12px;
+      padding: 24px 30px 34px;
+      font-family: 'Poppins', 'Segoe UI', sans-serif;
   }
-  form.leave-form .button-group .submit-btn:hover,
-  form.leave-form .button-group .cancel-btn:hover {
-      background-color: #8F9E20;
-      color: #000000;
+  .moepi-swal .swal2-icon.moepi-swal-icon {
+      border: none !important;
+      width: 88px;
+      height: 88px;
+      margin: 0 auto;
+      animation: none !important;
   }
+  .moepi-swal .moepi-swal-icon .swal2-icon-content { display: flex; animation: none !important; }
+  .moepi-swal .moepi-swal-icon svg { width: 88px; height: 88px; display: block; }
+  .moepi-swal .moepi-swal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #222;
+      text-transform: uppercase;
+      padding: 20px 16px 0;
+  }
+  .moepi-swal .moepi-swal-text {
+      font-size: 17px;
+      color: #333;
+      margin: 12px 40px 0;
+      line-height: 1.35;
+      white-space: pre-line;
+  }
+  .moepi-swal .moepi-swal-actions { margin-top: 26px; gap: 12px; }
+  .moepi-swal-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 16px 24px;
+      min-width: 76px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 17px;
+      cursor: pointer;
+  }
+  .moepi-swal-btn:focus { outline: none; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08); }
+  .moepi-swal-btn--success { background: #d4e21a; color: #222; }
+  .moepi-swal-btn--danger  { background: #ff0000; color: #fff; }
+  .moepi-swal-btn--ghost   { background: #e9ecef; color: #222; }
 
-        /* ===== Fix: Make Cancel button match Submit ===== */
-    html body .apply-page .btn-cancel,
-    html body form .btn-cancel {
-        background-color: #cbe212 !important; /* Bright lime green */
-        color: #0a1347 !important; /* Dark text */
-        border: 1px solid #b5cb0e !important;
-        border-radius: 6px !important; /* Rounded corners */
-        font-weight: 700 !important;
-        padding: 8px 16px !important;
-        text-decoration: none !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-shadow: none !important;
-        font-size: 14px !important;
-        min-height: 38px;
-    }
-    html body .apply-page .btn-cancel:hover,
-    html body form .btn-cancel:hover {
-        background-color: #b2cd16 !important; /* Slightly darker on hover */
-        color: #0a1347 !important;
-    }
-
-        /* ===== Fixes: Centered Dropdown, Curved Attachment Box, Cancel Button ===== */
-    
-    /* 1. Center the "Types of Leaves" label and dropdown */
-    form.leave-form .input-group:has(#leave_type) {
-        text-align: center !important;
-        align-items: center !important;
-    }
-    form.leave-form .input-group:has(#leave_type) label {
-        text-align: center !important;
-        width: 100%;
-    }
-    form.leave-form .input-group:has(#leave_type) select {
-        max-width: 600px !important; /* Prevents it from stretching too wide */
-        margin: 0 auto !important;
-    }
-
-    /* 2. Curve the Attachment Box */
-    .file-upload {
-        border-radius: 12px !important; 
-        border: 2px dashed #c5d931 !important; 
-        background: #fbfdf4 !important; /* Very faint green tint to match prototype */
-    }
-    .file-upload-zone {
-        padding: 34px 20px !important;
-    }
-    .file-upload-icon {
-        fill: #c5d931 !important; /* Matches the prototype icon color */
-    }
-
-    /* 3. Fix the Cancel and Submit Buttons */
-    form.leave-form .button-group .submit-btn,
-    form.leave-form .button-group .cancel-btn {
-        background-color: #cbe212 !important; /* Bright lime green */
-        color: #0a1347 !important; /* Dark text */
-        border: 1px solid #b5cb0e !important;
-        border-radius: 6px !important; /* Slightly squared corners */
-        font-weight: 700 !important;
-        font-size: 14px !important;
-        padding: 10px 20px !important;
-        min-height: 40px !important;
-        box-shadow: none !important;
-    }
-    
-    form.leave-form .button-group .submit-btn:hover,
-    form.leave-form .button-group .cancel-btn:hover {
-        background-color: #b2cd16 !important;
-    }
-
-    /* Ensure the buttons container aligns them to the left */
-    form.leave-form .button-group {
-        justify-content: flex-start !important;
-        gap: 12px !important;
-    }
-
+  /* ---------- Mobile ---------- */
+  @media (max-width: 768px) {
+      .main-content { margin-top: 14px; padding: 18px 14px; width: 100%; overflow-x: clip; }
+      .main-content h1 { font-size: 28px; }
+      form.leave-form { gap: 16px; width: 100%; min-width: 0; }
+      form.leave-form .input-group,
+      form.leave-form .input-group--half {
+          flex: 1 1 100% !important; min-width: 0 !important; width: 100% !important; max-width: 100% !important;
+      }
+      form.leave-form .button-group { flex-direction: column; gap: 10px; }
+      form.leave-form .button-group button { width: 100% !important; }
+  }
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -404,27 +472,18 @@
     <h1>{{ !empty($editingLeave) ? 'Edit leave request #'.$editingLeave->id : 'Leave Application' }}</h1>
     <h2>{{ !empty($editingLeave) ? 'Correct the details or replace documents while this request is still pending.' : 'Fill in the form to request a leave' }}</h2>
 
-    @if ($errors->any())
-        <div class="form-alert" role="alert">
-            <strong>Please fix the following:</strong>
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <form class="leave-form" method="POST" action="{{ route($submitRoute ?? 'leave.submit', $submitRouteParams ?? []) }}" enctype="multipart/form-data" novalidate>
         @csrf
         @if (($formMethod ?? 'POST') === 'PUT')
             @method('PUT')
         @endif
 
-        <label class="section-title" style="flex-basis:100%;font-size:16px;margin-bottom:5px;">Leave Info</label>
+        <label class="section-title">Leave Info</label>
+
         <div class="input-group input-group--full">
-            <label for="leave_type">Types of Leaves:</label>
-            <select id="leave_type" name="leave_type" required>
+            <label for="leaveTypeTrigger">Types of leaves:</label>
+            <div class="ltype" id="leaveTypeDropdown">
+            <select id="leave_type" name="leave_type" class="ltype-native" data-filter-select="off" tabindex="-1" aria-hidden="true" required>
                 <option value="">Select Leave Type</option>
                 @php
                     $selectedLeaveType = old('leave_type', optional($editingLeave ?? null)->leave_type ?? request('leave_type'));
@@ -451,6 +510,12 @@
                     {{ $policy->leave_type }}{{ $isTypeExhausted ? ' (No balance remaining)' : ($isAnnualExhausted ? ' (Annual pool exhausted)' : '') }}</option>
                 @endforeach
             </select>
+                <button type="button" class="ltype-trigger" id="leaveTypeTrigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="leaveTypeMenu">
+                    <span id="leaveTypeTriggerText">Select Leave Type</span>
+                    <svg class="ltype-chevron" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <ul class="ltype-menu" id="leaveTypeMenu" role="listbox" aria-label="Types of leaves" hidden></ul>
+            </div>
             @if (!empty($usedParentalLeaveType) && !empty($blockedParentalLeaveType))
                 <p class="parental-leave-note" id="parental-leave-note">
                     You already have a <strong>{{ $usedParentalLeaveType }}</strong> request on record, so <strong>{{ $blockedParentalLeaveType }}</strong> leave is not available.
@@ -468,23 +533,27 @@
             <input id="end_date" name="end_date" type="text" value="{{ old('end_date', isset($editingLeave) && empty($editingLeave->is_half_day) ? $editingLeave->end_date : '') }}" />
         </div>
 
-        <div class="input-group" style="flex-basis: 100%; flex-direction: row; align-items: center; gap: 10px;">
+        <div class="input-group half-day-row">
             <input type="checkbox" id="half_day" name="half_day" value="1" style="width: auto;" {{ old('half_day', isset($editingLeave) && $editingLeave->is_half_day ? '1' : null) ? 'checked' : '' }}>
-            <label for="half_day" style="margin-bottom: 0;">Half-Day Request (End Date will be ignored)</label>
+            <label for="half_day">Half-Day Request (End Date will be ignored)</label>
         </div>
 
         <div class="input-group file-upload-wrap">
             <div class="file-upload-header">
-                <span class="file-upload-title">Attachment</span>
+                <span class="file-upload-title">Attachments</span>
                 <span class="attachment-badge attachment-badge--optional" id="attachment-badge">Optional</span>
             </div>
             <div class="file-upload" id="file-upload-container">
                 <div class="file-upload-zone" id="file-upload-zone">
-                    <svg class="file-upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15.01l1.41 1.41L11 14.84V19h2v-4.16l1.59 1.59L16 15.01 12.01 11 8 15.01z"/>
+                    <svg class="file-upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/>
+                        <path d="M14 3v5h5"/>
+                        <path d="M12 16v-5"/>
+                        <path d="M9.5 13.5 12 11l2.5 2.5"/>
+                        <path d="M9 18.5h6"/>
                     </svg>
-                    <p class="file-upload-text"><strong>Click to browse</strong> or drag files here</p>
-                    <p class="file-upload-hint" id="file-upload-hint">PDF, JPG, PNG, or Word — up to 10 MB per file. You can attach more than one file.</p>
+                    <p class="file-upload-text"><strong>Click to browse</strong> or drag file here</p>
+                    <p class="file-upload-hint" id="file-upload-hint">PDF, JPG, PNG, or Word - up to 10 MB per file. You can attach more than one file</p>
                     <input
                         type="file"
                         id="file_uploads"
@@ -512,7 +581,7 @@
         </div>
 
         <div class="input-group" style="flex-basis: 100%;">
-            <label for="important_comment">Reason for leave (Important Comment): <span style="color:#b42318;">*</span></label>
+            <label for="important_comment">Reason for leave (Important Comment):</label>
             <textarea id="important_comment" name="important_comment" required minlength="3" maxlength="512" placeholder="Explain why you are taking this leave...">{{ old('important_comment', optional($editingLeave ?? null)->important_comment ?? '') }}</textarea>
         </div>
 
@@ -527,6 +596,55 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // ---------- Pop-ups styled like the design ----------
+    const ICON_SUCCESS = '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#00c805"/><path d="M18 33l9 9 19-20" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const ICON_ERROR = '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#f23b3b"/><path d="M21 21l22 22M43 21L21 43" stroke="#fff" stroke-width="8" stroke-linecap="round"/></svg>';
+
+    const swalClasses = (buttonVariant) => ({
+        popup: 'moepi-swal',
+        icon: 'moepi-swal-icon',
+        title: 'moepi-swal-title',
+        htmlContainer: 'moepi-swal-text',
+        actions: 'moepi-swal-actions',
+        confirmButton: `moepi-swal-btn moepi-swal-btn--${buttonVariant}`,
+        cancelButton: 'moepi-swal-btn moepi-swal-btn--ghost',
+    });
+
+    function showError(message, asHtml = false) {
+        return Swal.fire({
+            icon: 'error',
+            iconHtml: ICON_ERROR,
+            title: 'Please fix the following errors:',
+            [asHtml ? 'html' : 'text']: message,
+            confirmButtonText: 'OK',
+            buttonsStyling: false,
+            backdrop: 'rgba(30, 30, 30, 0.25)',
+            customClass: swalClasses('danger'),
+        });
+    }
+
+    function showSuccess(message) {
+        return Swal.fire({
+            icon: 'success',
+            iconHtml: ICON_SUCCESS,
+            title: 'Success',
+            text: message,
+            confirmButtonText: 'OK',
+            buttonsStyling: false,
+            backdrop: 'rgba(30, 30, 30, 0.25)',
+            customClass: swalClasses('success'),
+        });
+    }
+
+    // Server-side messages (e.g. overlapping dates, or a successful submit)
+    const serverErrors = @json($errors->all());
+    const successMessage = @json(session('success'));
+    if (serverErrors.length) {
+        showError(serverErrors.join('\n'));
+    } else if (successMessage) {
+        showSuccess(successMessage);
+    }
+
     const publicHolidays = @json($publicHolidays);
     const leaveBalancesByYear = @json($leaveBalancesByYear);
     const nowYear = @json($nowYear);
@@ -639,6 +757,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const allowHalfDaysByType = @json(\App\Models\LeavePolicy::all()->keyBy('leave_type')->map->allow_half_days);
     const approverLabel = @json($approverLabel ?? 'your manager');
 
+    const DEFAULT_HINT = 'PDF, JPG, PNG, or Word - up to 10 MB per file. You can attach more than one file';
     const MAX_FILE_BYTES = 10 * 1024 * 1024;
     const ALLOWED_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
     let selectedFiles = [];
@@ -730,12 +849,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        if (rejected.length) {
-            showFileError('Some files were not added: ' + rejected.join(', '));
-        } else {
-            showFileError('');
-        }
-
+        showFileError(rejected.length ? 'Some files were not added: ' + rejected.join(', ') : '');
         syncFileInput();
         updateFileUploadRequirement();
     }
@@ -787,7 +901,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 : 'attachment-badge attachment-badge--required';
             fileUploadHint.textContent = keepingExisting
                 ? 'Current documents will be kept. Upload new files only if you want to replace them.'
-                : 'Supporting document required for this leave type. PDF, JPG, PNG, or Word — up to 10 MB per file.';
+                : 'Supporting document required for this leave type. PDF, JPG, PNG, or Word - up to 10 MB per file.';
         } else if (isDeferredSick) {
             fileUploadContainer.classList.remove('required');
             attachmentBadge.textContent = 'Optional now';
@@ -810,7 +924,7 @@ document.addEventListener('DOMContentLoaded', function () {
             fileUploadContainer.classList.remove('required');
             attachmentBadge.textContent = 'Optional';
             attachmentBadge.className = 'attachment-badge attachment-badge--optional';
-            fileUploadHint.textContent = 'PDF, JPG, PNG, or Word — up to 10 MB per file. You can attach more than one file.';
+            fileUploadHint.textContent = DEFAULT_HINT;
         }
     }
 
@@ -842,18 +956,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (endDateInputForProof) {
         endDateInputForProof.addEventListener('change', updateFileUploadRequirement);
     }
-    flatpickr('#start_date', {
-        ...fpOptions,
-        onChange: function () {
-            updateFileUploadRequirement();
-        },
-    });
-    flatpickr('#end_date', {
-        ...fpOptions,
-        onChange: function () {
-            updateFileUploadRequirement();
-        },
-    });
+    flatpickr('#start_date', { ...fpOptions, onChange: updateFileUploadRequirement });
+    flatpickr('#end_date', { ...fpOptions, onChange: updateFileUploadRequirement });
     updateFileUploadRequirement();
 
     function updateHalfDayEligibility() {
@@ -861,8 +965,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!isAllowed) {
             halfDayCheckbox.checked = false;
             halfDayCheckbox.disabled = true;
-            const endDateInput = document.getElementById('end_date');
-            endDateInput.disabled = false;
+            document.getElementById('end_date').disabled = false;
         } else {
             halfDayCheckbox.disabled = false;
         }
@@ -870,14 +973,99 @@ document.addEventListener('DOMContentLoaded', function () {
     leaveTypeSelect.addEventListener('change', updateHalfDayEligibility);
     updateHalfDayEligibility();
 
+    // ---------- Custom leave type dropdown ----------
+    const ltypeRoot = document.getElementById('leaveTypeDropdown');
+    const ltypeTrigger = document.getElementById('leaveTypeTrigger');
+    const ltypeTriggerText = document.getElementById('leaveTypeTriggerText');
+    const ltypeMenu = document.getElementById('leaveTypeMenu');
+
+    function renderLeaveTypeDropdown() {
+        const selected = leaveTypeSelect.options[leaveTypeSelect.selectedIndex];
+        ltypeTriggerText.textContent = selected ? selected.textContent.trim() : 'Select Leave Type';
+
+        ltypeMenu.innerHTML = '';
+        Array.from(leaveTypeSelect.options).forEach((opt) => {
+            const isSelected = opt.value === leaveTypeSelect.value;
+            const li = document.createElement('li');
+            li.setAttribute('role', 'none');
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'ltype-option' + (isSelected ? ' is-selected' : '');
+            btn.textContent = opt.textContent.trim();
+            btn.dataset.value = opt.value;
+            btn.disabled = opt.disabled;
+            btn.setAttribute('role', 'option');
+            btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+            li.appendChild(btn);
+            ltypeMenu.appendChild(li);
+        });
+    }
+
+    function openLeaveTypeMenu() {
+        renderLeaveTypeDropdown();
+        ltypeMenu.hidden = false;
+        ltypeRoot.classList.add('is-open');
+        ltypeTrigger.setAttribute('aria-expanded', 'true');
+        const current = ltypeMenu.querySelector('.ltype-option.is-selected:not(:disabled)')
+            || ltypeMenu.querySelector('.ltype-option:not(:disabled)');
+        if (current) {
+            current.focus();
+            current.scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    function closeLeaveTypeMenu(returnFocus) {
+        if (ltypeMenu.hidden) return;
+        ltypeMenu.hidden = true;
+        ltypeRoot.classList.remove('is-open');
+        ltypeTrigger.setAttribute('aria-expanded', 'false');
+        if (returnFocus) ltypeTrigger.focus();
+    }
+
+    ltypeTrigger.addEventListener('click', () => {
+        if (ltypeMenu.hidden) openLeaveTypeMenu();
+        else closeLeaveTypeMenu(false);
+    });
+    ltypeTrigger.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            openLeaveTypeMenu();
+        }
+    });
+    ltypeMenu.addEventListener('click', (event) => {
+        const btn = event.target.closest('.ltype-option');
+        if (!btn || btn.disabled) return;
+        leaveTypeSelect.value = btn.dataset.value;
+        leaveTypeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        closeLeaveTypeMenu(true);
+    });
+    ltypeMenu.addEventListener('keydown', (event) => {
+        const items = Array.from(ltypeMenu.querySelectorAll('.ltype-option:not(:disabled)'));
+        const index = items.indexOf(document.activeElement);
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            items[Math.min(index + 1, items.length - 1)]?.focus();
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            items[Math.max(index - 1, 0)]?.focus();
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            closeLeaveTypeMenu(true);
+        } else if (event.key === 'Tab') {
+            closeLeaveTypeMenu(false);
+        }
+    });
+    document.addEventListener('click', (event) => {
+        if (!ltypeRoot.contains(event.target)) closeLeaveTypeMenu(false);
+    });
+
     function updateLeaveTypeEligibility() {
         const startDate = startDateInput.value;
         const yearKey = startDate ? (leaveYearForDate(startDate) || nowYear) : nowYear;
         const leaveBalances = leaveBalancesByYear[yearKey] || {};
         const annualBalance = leaveBalances['Annual'] ?? leaveBalances['Annual Leave'] ?? 0;
 
-        const options = Array.from(leaveTypeSelect.options);
-        options.forEach((opt) => {
+        Array.from(leaveTypeSelect.options).forEach((opt) => {
             if (!opt.value) return;
             const typeBalance = Number(leaveBalances[opt.value] ?? 0);
             let disabled = typeBalance <= 0;
@@ -886,7 +1074,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 disabled = true;
                 unavailableLabel = ' (Annual pool exhausted)';
             }
-            if (blockedParentalLeaveType && opt.value && opt.value.toLowerCase() === blockedParentalLeaveType.toLowerCase()) {
+            if (blockedParentalLeaveType && opt.value.toLowerCase() === blockedParentalLeaveType.toLowerCase()) {
                 disabled = true;
                 unavailableLabel = ' (Unavailable)';
             }
@@ -901,6 +1089,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (typeof window.syncFilterSelectOptions === 'function') {
             window.syncFilterSelectOptions(leaveTypeSelect);
         }
+        renderLeaveTypeDropdown();
     }
 
     startDateInput.addEventListener('change', updateLeaveTypeEligibility);
@@ -913,6 +1102,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (typeof window.syncFilterSelectOptions === 'function') {
             window.syncFilterSelectOptions(leaveTypeSelect);
         }
+        renderLeaveTypeDropdown();
     }
 
     leaveForm.addEventListener('submit', function (e) {
@@ -925,48 +1115,26 @@ document.addEventListener('DOMContentLoaded', function () {
         const comment = (document.getElementById('important_comment')?.value || '').trim();
 
         if (!leaveType) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Missing Info',
-                text: 'Please select a type of leave.',
-                confirmButtonText: 'OK'
-            });
+            showError('Please select a type of leave.');
             return;
         }
         if (blockedParentalLeaveType && leaveType.toLowerCase() === blockedParentalLeaveType.toLowerCase()) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Leave Type Not Available',
-                text: `${blockedParentalLeaveType} leave is not available because you already have the other parental leave type on record.`,
-                confirmButtonText: 'OK'
-            });
+            showError(`${blockedParentalLeaveType} leave is not available because you already have the other parental leave type on record.`);
             return;
         }
         if (!startDate || (!endDate && !halfDay)) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Missing Dates',
-                text: 'Please select both start and end dates.',
-                confirmButtonText: 'OK'
-            });
+            showError('Please select both start and end dates.');
             return;
         }
         if (comment.length < 3) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Missing Reason',
-                text: 'Please provide a reason for this leave request.',
-                confirmButtonText: 'OK'
-            });
+            showError('Please provide a reason for this leave request.');
             return;
         }
 
         const startYear = startDate ? leaveYearForDate(startDate) : null;
 
-        let daysRequested = calculateWorkingDays(startDate, endDate);
         let daysByYear = workingDaysByYear(startDate, endDate);
         if (halfDay && calculateWorkingDays(startDate, startDate) > 0) {
-            daysRequested = 0.5;
             daysByYear = { [startYear || nowYear]: 0.5 };
         }
 
@@ -977,64 +1145,48 @@ document.addEventListener('DOMContentLoaded', function () {
             const leaveBalances = leaveBalancesByYear[yearKey] || {};
             const annualBalance = Number(leaveBalances['Annual'] ?? leaveBalances['Annual Leave'] ?? 0);
             const balance = Number(leaveBalances[leaveType] ?? 0);
+            const safeType = escapeHtml(leaveType || 'leave');
 
             if (countsAgainstAnnual(leaveType)) {
                 if (annualBalance <= 0) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Annual Leave Limit Reached',
-                        html: `You have exhausted your annual leave for <b>${leaveYearLabel(yearKey)}</b>. Other leave types use their own balances and can still be requested.`,
-                        confirmButtonText: 'OK'
-                    });
+                    showError(`You have exhausted your annual leave for <b>${leaveYearLabel(yearKey)}</b>. Other leave types use their own balances and can still be requested.`, true);
                     return;
                 }
-
                 if (daysInYear > annualBalance) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Annual Leave Balance Exceeded',
-                        html: `Your remaining annual leave balance for <b>${leaveYearLabel(yearKey)}</b> is <b>${annualBalance}</b> day${annualBalance === 1 ? '' : 's'}. This request uses <b>${daysInYear}</b> working day${daysInYear === 1 ? '' : 's'} in ${leaveYearLabel(yearKey)} (excluding weekends and public holidays).`,
-                        confirmButtonText: 'OK'
-                    });
+                    showError(`Your remaining annual leave balance for <b>${leaveYearLabel(yearKey)}</b> is <b>${annualBalance}</b> day${annualBalance === 1 ? '' : 's'}. This request uses <b>${daysInYear}</b> working day${daysInYear === 1 ? '' : 's'} in ${leaveYearLabel(yearKey)} (excluding weekends and public holidays).`, true);
                     return;
                 }
             }
 
             if (daysInYear > balance) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Insufficient Leave Balance',
-                    html: `Your remaining <b>${leaveType || 'leave'}</b> balance for <b>${leaveYearLabel(yearKey)}</b> is <b>${balance}</b> day${balance === 1 ? '' : 's'}. This request uses <b>${daysInYear}</b> working day${daysInYear === 1 ? '' : 's'} in ${leaveYearLabel(yearKey)} (excluding weekends and public holidays).`,
-                    confirmButtonText: 'OK'
-                });
+                showError(`Your remaining <b>${safeType}</b> balance for <b>${leaveYearLabel(yearKey)}</b> is <b>${balance}</b> day${balance === 1 ? '' : 's'}. This request uses <b>${daysInYear}</b> working day${daysInYear === 1 ? '' : 's'} in ${leaveYearLabel(yearKey)} (excluding weekends and public holidays).`, true);
                 return;
             }
         }
 
         const attachmentError = validateAttachmentsBeforeSubmit();
         if (attachmentError) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Attachment Required',
-                text: attachmentError,
-                confirmButtonText: 'OK'
-            });
+            showError(attachmentError);
             return;
         }
 
         const normalizedLeaveType = leaveType.trim().toLowerCase();
         if (normalizedLeaveType === 'maternity' || normalizedLeaveType === 'paternity') {
             const otherParentalLeave = normalizedLeaveType === 'maternity' ? 'Paternity' : 'Maternity';
+            const safeType = escapeHtml(leaveType);
 
             Swal.fire({
                 icon: 'warning',
                 title: `Confirm ${leaveType} leave`,
-                html: `You selected <b>${leaveType}</b> leave.<br><br>After submitting, <b>${otherParentalLeave}</b> leave will be unavailable unless you withdraw this request. Is your selection correct?`,
+                html: `You selected <b>${safeType}</b> leave.<br><br>After submitting, <b>${otherParentalLeave}</b> leave will be unavailable unless you withdraw this request. Is your selection correct?`,
                 showCancelButton: true,
                 confirmButtonText: `Yes, apply for ${leaveType}`,
                 cancelButtonText: 'No, change selection',
                 reverseButtons: true,
-                focusCancel: true
+                focusCancel: true,
+                buttonsStyling: false,
+                backdrop: 'rgba(30, 30, 30, 0.25)',
+                customClass: { ...swalClasses('success'), icon: '' },
             }).then((result) => {
                 if (result.isConfirmed) {
                     document.getElementById('submit-btn').disabled = true;
@@ -1044,6 +1196,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        document.getElementById('submit-btn').disabled = true;
         leaveForm.submit();
     });
 });

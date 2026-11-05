@@ -58,9 +58,9 @@
         margin-top: 14px;
         padding: 14px 16px;
         border-radius: 12px;
-        background: #f8fafc;
+        background: transparent;
         border: 1px solid #cbd5e1;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        box-shadow: none;
     }
     .calendar-page .calendar-meta-title {
         margin: 0 0 8px;
@@ -120,11 +120,9 @@
     .calendar-page .calendar-legend-swatch--weekend { background: #a9c3c5; }
     .calendar-page .calendar-legend-swatch--today {
         background: #79b7df;
-        
     }
     .calendar-page .calendar-legend-hint {
-        margin: 8px 0 0;
-        margin-top: 6px;
+        margin: 6px 0 0;
         font-size: 0.68rem;
         color: #777;
         line-height: 1.45;
@@ -155,7 +153,7 @@
         border-radius: 11px;
         padding: 10px 8px 8px;
         min-height: 96px;
-        background:  #c8d1da;
+        background: #c8d1da;
         position: relative;
         box-sizing: border-box;
         overflow: hidden;
@@ -185,7 +183,7 @@
         outline-offset: 2px;
     }
     .calendar-page .day.has-leave {
-        background:  #c8d1da !important;
+        background: #c8d1da !important;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
     .calendar-page .day.has-leave .day-number {
@@ -193,7 +191,6 @@
     }
     .calendar-page .day.day-today:not(.day-holiday):not(.has-leave) {
         background: #8fc7cd !important;
-        
     }
     .calendar-page .day.day-today.has-leave {
         box-shadow: inset 0 0 0 2px #0f766e, 0 2px 10px rgba(15, 118, 110, 0.12);
@@ -255,7 +252,7 @@
         font-weight: 700;
         color: #fff;
         font-size: 0.72rem;
-        background:  #ae3b8e;
+        background: #ae3b8e;
         border: none;
         border-radius: 999px;
         padding: 4px 6px;
@@ -306,7 +303,6 @@
     }
     .calendar-page .day.has-leave .holiday-label {
         display: none;
-        background: #c8d1da
     }
     .calendar-page ul.leave-details-list {
         padding-left: 20px;
@@ -359,7 +355,7 @@
             margin: 12px 4px 0;
             padding: 10px;
             border-radius: 17px;
-            background: #fff;
+            background: transparent;
             border: 2px solid #cbd5df;
             box-shadow: none;
         }
@@ -408,8 +404,8 @@
         }
     }
 
-        /* ===== Clean up Month Picker Pill ===== */
-    
+    /* ===== Clean up Month Picker Pill ===== */
+
     /* Hide the dropdown chevron arrow */
     .calendar-page .cal-nav-chevron {
         display: none !important;
@@ -417,7 +413,7 @@
 
     /* Adjust the text container to sit side-by-side on one line */
     .calendar-page .cal-nav-current-text {
-        flex-direction: row !important; 
+        flex-direction: row !important;
         align-items: center !important;
         justify-content: center !important;
         gap: 6px !important;
@@ -434,7 +430,7 @@
     .calendar-page .cal-nav-current-year {
         font-size: 1rem !important;
         font-weight: 600 !important;
-        color: #1e293b !important; /* Dark text instead of green */
+        color: #1e293b !important;
     }
 
     /* Center the pill */
@@ -443,6 +439,16 @@
         padding: 8px 20px !important;
         justify-content: center !important;
     }
-    
+
+    /* ===== "Showing days with approved leave" box: no background colour ===== */
+    .calendar-page .calendar-meta {
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+    @media (max-width: 768px) {
+        .calendar-page .calendar-meta {
+            background: transparent !important;
+        }
+    }
 </style>
 @endonce
