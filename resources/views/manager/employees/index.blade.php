@@ -40,8 +40,7 @@
     
     .employees-table-wrap {
         position: relative;
-        overflow-x: auto;
-        overflow-y: visible;
+        overflow: hidden;
         border: 2px solid #8fb3a8;
         border-radius: 0px;
         box-shadow:
@@ -62,12 +61,13 @@
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
-        font-size: 0.92rem;
-        min-width: 880px;
+        font-size: 0.88rem;
+        min-width: 0;
+        table-layout: fixed;
     }
     .employees-table th,
     .employees-table td {
-        padding: 14px 16px;
+        padding: 12px 8px;
         text-align: left;
         border-bottom: 1px solid #A4B4F6;
         border-right: 1px solid #A4B4F6;
@@ -93,8 +93,8 @@
         color: #fff;
         font-size: 0.72rem;
         text-transform: uppercase;
-        letter-spacing: 0.075em;
-        white-space: nowrap;
+        letter-spacing: 0.04em;
+        white-space: normal;
         border-bottom-color: #A4B4F6;
         border-right-color: #A4B4F6;
         box-shadow: 0 2px 0 #2A6FA1;
@@ -119,9 +119,10 @@
         border-bottom: 1px solid #A4B4F6;
     }
     .employees-email {
-        overflow-wrap: anywhere;
-        word-break: break-word;
-        max-width: 220px;
+        white-space: nowrap;
+        overflow-wrap: normal;
+        word-break: normal;
+        max-width: none;
     }
     .employees-dept,
     .employees-assigned {
@@ -196,19 +197,6 @@
         font-style: italic;
         font-weight: 600;
     }
-    @media (max-width: 768px) {
-        .employees-page h1 {
-            font-size: 1.75rem;
-        }
-        .employee-actions {
-            flex-direction: column;
-            align-items: stretch;
-        }
-        .edit-button,
-        .delete-button {
-            width: 100%;
-        }
-    }
     html body .employees-page .employees-table td .employee-actions a.edit-button,
 html body .employees-page .employees-table td .employee-actions button.delete-button {
     background:#fff !important; background-color:#fff !important; background-image:none !important;
@@ -224,14 +212,40 @@ html body .employees-page .employees-table td .employee-actions button.delete-bu
 html body .employees-page .employees-table td .employee-actions svg { stroke:#222 !important; }
 
 /* header text slightly larger like the prototype */
+html body .employees-page .employees-table td.employees-email {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    max-width: none !important;
+}
 html body .employees-page .employees-table th { font-size:.78rem !important; }
 html body .employees-page .employees-table-wrap {
-    overflow-x: auto !important;
-    overflow-y: visible !important;
+    overflow: hidden !important;
 }
 html body .employees-page .employees-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
     border-collapse: separate !important;
     border-spacing: 0 !important;
+}
+@media (min-width: 769px) {
+    html body .employees-page .employees-table th:nth-child(1),
+    html body .employees-page .employees-table td:nth-child(1) { width: 11% !important; }
+    html body .employees-page .employees-table th:nth-child(2),
+    html body .employees-page .employees-table td:nth-child(2) { width: 12% !important; }
+    html body .employees-page .employees-table th:nth-child(3),
+    html body .employees-page .employees-table td:nth-child(3) { width: 22% !important; }
+    html body .employees-page .employees-table th:nth-child(4),
+    html body .employees-page .employees-table td:nth-child(4) { width: 11% !important; }
+    html body .employees-page .employees-table th:nth-child(5),
+    html body .employees-page .employees-table td:nth-child(5) { width: 13% !important; }
+    html body .employees-page .employees-table th:nth-child(6),
+    html body .employees-page .employees-table td:nth-child(6) { width: 10% !important; }
+    html body .employees-page .employees-table th:nth-child(7),
+    html body .employees-page .employees-table td:nth-child(7) { width: 10% !important; }
+    html body .employees-page .employees-table th:nth-child(8),
+    html body .employees-page .employees-table td:nth-child(8) { width: 11% !important; }
 }
 html body .employees-page .employees-table thead,
 html body .employees-page .employees-table th {
@@ -239,6 +253,83 @@ html body .employees-page .employees-table th {
     top: 0 !important;
     z-index: 4 !important;
     background: #2379b0 !important;
+}
+
+@media (max-width: 768px) {
+    html body .employees-page .employees-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding-right: 0 !important;
+    }
+    html body .employees-page .add-employee-button {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    html body .employees-page .employees-table-wrap {
+        overflow: visible !important;
+        background: transparent !important;
+    }
+    html body .employees-page .employees-table {
+        display: block !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+    html body .employees-page .employees-table thead {
+        display: none !important;
+    }
+    html body .employees-page .employees-table tbody {
+        display: block !important;
+        width: 100% !important;
+    }
+    html body .employees-page .employees-table tbody tr {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 0 14px !important;
+        border: 2px solid #9aa9ff !important;
+        background: #fff !important;
+        box-sizing: border-box !important;
+    }
+    html body .employees-page .employees-table td {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 10px !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        padding: 10px 12px !important;
+        text-align: right !important;
+        white-space: normal !important;
+        border: 0 !important;
+        border-bottom: 1px solid #dbe3f5 !important;
+        position: static !important;
+    }
+    html body .employees-page .employees-table td:last-child {
+        border-bottom: 0 !important;
+    }
+    html body .employees-page .employees-table td::before {
+        content: attr(data-label);
+        flex: 0 0 42%;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #2379b0;
+    }
+    html body .employees-page .employees-table td.employees-empty {
+        display: block !important;
+        text-align: center !important;
+    }
+    html body .employees-page .employees-table td.employees-empty::before {
+        content: none;
+    }
+    html body .employees-page .employees-table td .employee-actions {
+        flex-direction: row !important;
+        justify-content: flex-end !important;
+        width: auto !important;
+    }
 }
 </style>
 
@@ -266,11 +357,11 @@ html body .employees-page .employees-table th {
             <tbody>
                 @forelse ($employees as $employee)
                     <tr>
-                        <td>{{ $employee->first_name }}</td>
-                        <td>{{ $employee->last_name }}</td>
-                        <td class="employees-email">{{ $employee->email }}</td>
-                        <td class="employees-dept">{{ $employee->department ?: '—' }}</td>
-                        <td class="employees-assigned">
+                        <td data-label="First name">{{ $employee->first_name }}</td>
+                        <td data-label="Last name">{{ $employee->last_name }}</td>
+                        <td class="employees-email" data-label="Email">{{ $employee->email }}</td>
+                        <td class="employees-dept" data-label="Department">{{ $employee->department ?: '—' }}</td>
+                        <td class="employees-assigned" data-label="Assigned to / Manages">
                             @if(strtolower((string) ($employee->role ?? '')) === 'manager')
                                 @php $managed = $employee->managedDepartments->pluck('department')->filter()->values(); @endphp
                                 @if($managed->isNotEmpty())
@@ -284,13 +375,13 @@ html body .employees-page .employees-table th {
                                 —
                             @endif
                         </td>
-                        <td>{{ \App\Support\RoleLabels::display($employee->role) }}</td>
-                        <td>
+                        <td data-label="Role">{{ \App\Support\RoleLabels::display($employee->role) }}</td>
+                        <td data-label="Status">
                             <span class="employee-status {{ $employee->is_active ? 'employee-status--active' : 'employee-status--inactive' }}">
                                 {{ $employee->is_active ? 'Active' : 'Inactive' }}
                             </span>
                         </td>
-                        <td>
+                        <td data-label="Action">
                             <div class="employee-actions">
     <a href="{{ route('manager.employees.edit', $employee->id) }}" class="edit-button" title="Edit" aria-label="Edit employee">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg>

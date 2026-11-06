@@ -372,29 +372,35 @@
     @media (max-width: 760px) {
         .app-page {
             max-width: 100%;
-            padding-right: 8px;
-            padding-left: 8px;
+            padding-right: 0;
+            padding-left: 0;
+            overflow-x: hidden;
         }
 
         .app-page h1 {
             margin-left: 0;
-            font-size: 29px;
+            font-size: 28px;
         }
 
         .app-page .app-page-lead {
             margin-left: 0;
-            margin-bottom: 22px;
+            margin-bottom: 18px;
         }
 
         .settings-policy-card {
-            grid-template-columns: minmax(0, 1fr) 52px 75px;
-            gap: 14px 6px;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 10px;
             padding: 14px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
+        }
+
+        .settings-policy-name,
+        .settings-policy-actions,
+        .settings-policy-card.is-editing .settings-policy-options {
+            grid-column: 1 / -1;
         }
 
         .settings-policy-name {
-            grid-column: 1 / -1;
             gap: 12px;
         }
 
@@ -406,15 +412,26 @@
         .settings-policy-field {
             align-items: flex-start;
             text-align: left;
+            min-width: 0;
         }
 
         .settings-policy-field > label,
-        .settings-policy-field > .settings-field-label {
+        .settings-policy-field > .settings-field-label,
+        .settings-status {
             white-space: normal;
         }
 
+        .settings-status {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .settings-policy-value {
+            max-width: none;
+            text-align: left;
+        }
+
         .settings-policy-actions {
-            grid-column: 1 / -1;
             justify-content: flex-end;
         }
 
@@ -422,51 +439,30 @@
             padding-left: 0;
         }
 
-    
-        .settings-footer-row {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 40px;
-            margin-top: 36px;
-            width: 100%;
-        }
-
-        .settings-notes-panel {
-            flex: 0 0 66%;
-            max-width: 620px;
-            padding: 26px 30px;
-            background: #e9ddb7;
-            border: 1px solid #c9b57e;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
+        .settings-footer-row,
         .settings-actions {
-            flex: 0 0 auto;
             display: flex;
-            align-items: right-end;
-            justify-content: flex-end;
-            margin: 0;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 16px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .settings-notes-panel,
+        .settings-notes {
+            flex: 1 1 auto;
+            max-width: 100%;
+            width: 100%;
+            padding: 16px;
+            box-sizing: border-box;
         }
 
         .settings-actions .app-page-btn {
-            min-width: 155px;
+            width: 100%;
+            min-width: 0;
             height: 48px;
-            padding: 0 24px;
-            border: none;
-            border-radius: 10px;
-            background: #d4e500;
-            color: #000;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-    
-        }
-
-        .settings-actions .app-page-btn:hover {
-            background: #c4d500;
+            white-space: normal;
         }
     }
 </style>

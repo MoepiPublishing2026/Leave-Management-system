@@ -817,8 +817,8 @@
         color: #1a1a1a !important;
     }
     html body main .balance-page > .balance-change-row {
-        width: min(100%, 980px) !important;
-        max-width: 980px !important;
+        width: min(100%, 1040px) !important;
+        max-width: 1040px !important;
         margin-left: auto !important;
         margin-right: auto !important;
         padding: 0 !important;

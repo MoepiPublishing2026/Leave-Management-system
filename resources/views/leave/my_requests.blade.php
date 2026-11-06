@@ -310,11 +310,39 @@
         stroke: currentColor !important;
     }
 
-    @media (max-width: 640px) {
-        html body .my-requests-page h1 { font-size: 28px; }
-        html body .my-requests-page .requests-search-form input[type="text"] { min-width: 0; width: 100%; }
-        html body .my-requests-page .leave-card { padding-left: 30px; }
+    @media (max-width: 768px) {
+        html body .my-requests-page { padding: 0 0 24px; max-width: 100%; }
+        html body .my-requests-page h1 { font-size: 28px; margin-left: 0; }
+        html body .my-requests-page .requests-toolbar,
+        html body .my-requests-page .requests-filter-bar {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px !important;
+        }
+        html body .my-requests-page .requests-search-form {
+            position: static !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            flex-wrap: wrap !important;
+        }
+        html body .my-requests-page .requests-search-form input[type="text"] {
+            min-width: 0 !important;
+            width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+        html body .my-requests-page .requests-filters,
+        html body .my-requests-page .requests-pay-filter {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            flex-wrap: wrap !important;
+        }
+        html body .my-requests-page .requests-filter-bar select { min-width: 0 !important; width: 100% !important; }
+        html body .my-requests-page .leave-card { padding: 28px 12px 14px; }
+        html body .my-requests-page .leave-card__top { flex-direction: column; align-items: flex-start; }
+        html body .my-requests-page .leave-card__badges,
         html body .my-requests-page .leave-card__actions { justify-content: flex-start; }
+        html body .my-requests-page .leave-card .proof-upload-btn { min-width: 0 !important; }
+        html body .my-requests-page .leave-card__title { font-size: 18px; }
     }
 </style>
 

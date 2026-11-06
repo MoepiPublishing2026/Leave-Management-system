@@ -138,8 +138,6 @@
         letter-spacing: 0.5px;
     }
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
     @media (max-width: 576px) {
         .signup-container { padding: 24px; }
         input[type="text"], input[type="email"], input[type="password"], select { font-size: 16px; padding: 11px 14px; }
@@ -212,6 +210,28 @@ html body .employee-create-page .button-group button.btn-form-action {
 html body .employee-create-page .button-group .btn-form-action:hover { background:#8d9c1c !important; }
 
 html body .employee-create-page .branding { font-size:11px !important; margin-top:20px !important; }
+
+@media (max-width: 768px) {
+    html body .employee-create-page {
+        max-width: 100% !important;
+        padding: 0 0 24px !important;
+    }
+    html body .employee-create-page .signup-container {
+        padding: 18px 14px 16px !important;
+    }
+    html body .employee-create-page .button-group {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+    html body .employee-create-page .button-group .btn-form-action,
+    html body .employee-create-page .button-group a.btn-form-action,
+    html body .employee-create-page .button-group button.btn-form-action {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}
 
 </style>
 
@@ -354,6 +374,14 @@ html body .employee-create-page .branding { font-size:11px !important; margin-to
             <a href="{{ route('manager.employees.index') }}" class="btn-form-action" style="background: #cbe212 !important; color: #0a1347 !important; border: 1px solid #b5cb0e !important; border-radius: 6px !important; padding: 8px 24px !important; font-weight: 700 !important; font-size: 14px !important; min-height: 38px !important; box-shadow: none !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; text-decoration: none !important;">Back to List</a>
         </div>
     </form>
+
+    @if ((int) auth()->id() !== (int) $employee->id)
+        <form method="POST" action="{{ route('manager.employees.send-password', $employee->id) }}" style="margin-top:12px;">
+            @csrf
+            <button type="submit" class="btn-form-action" style="background:#fff !important; color:#0a1347 !important; border:1px solid #b5cb0e !important; border-radius:6px !important; padding:8px 24px !important; font-weight:700 !important; font-size:14px !important; min-height:38px !important; box-shadow:none !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; cursor:pointer !important;">Send new password</button>
+            <p class="field-hint" style="text-align:left;margin-top:8px;">Emails a new login password. Their current password stops working after the email is sent.</p>
+        </form>
+    @endif
 
     <div class="branding">
         &copy; {{ date('Y') }} Moepi Publishing. All rights reserved.

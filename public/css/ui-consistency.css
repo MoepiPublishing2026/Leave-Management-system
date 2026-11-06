@@ -1961,8 +1961,19 @@ html body main :is(
     margin-right: auto !important;
 }
 html body main .calendar-page .calendar-shell {
+    width: min(100%, 960px) !important;
+    max-width: 960px !important;
+}
+html body main .admin-container,
+html body main .manager-container,
+html body main .dashboard-container,
+html body main .messages-wrap,
+html body main .pr-page {
     width: min(100%, 1040px) !important;
     max-width: 1040px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
 }
 
 html body main .admin-dash-top {
@@ -1996,15 +2007,15 @@ html body main :is(
     .settings-container,
     .employees-page
 ) > :not(h1):not(.requests-page-lead):not(.reports-page-lead):not(.notifications-lead):not(.app-page-lead):not(.employees-header):not(.mgr-page-header):not(.pr-reviews-scope-header):not(.app-page-header) {
-    width: min(100%, 1120px) !important;
-    max-width: 1120px !important;
+    width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box !important;
 }
 html body main .analytics-insights-page > :not(.page-header) {
-    width: min(100%, 1120px) !important;
-    max-width: 1120px !important;
+    width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box !important;
@@ -2030,29 +2041,29 @@ html body main .balance-page > .balance-page-lead {
     box-sizing: border-box !important;
 }
 html body main .balance-page > .balance-index {
-    width: min(100%, 1120px) !important;
-    max-width: 1120px !important;
+    width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box !important;
 }
 html body main .balance-page > :not(h1):not(.balance-page-lead):not(.balance-index) {
-    width: min(100%, 980px) !important;
-    max-width: 980px !important;
+    width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box !important;
 }
 html body main .page-container > :not(h1):not(.page-lead) {
-    width: min(100%, 1120px) !important;
-    max-width: 1120px !important;
+    width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box !important;
 }
 html body main .employee-create-page > .signup-container {
-    width: min(100%, 720px) !important;
-    max-width: 720px !important;
+    width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box !important;
@@ -2061,8 +2072,8 @@ html body main .employee-create-page > .signup-container {
 /* Leave application is one card. Center the card so both sides have space. */
 html body main.content > .main-content,
 html body main > .main-content {
-    width: min(100% - 80px, 980px) !important;
-    max-width: 980px !important;
+    width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     padding: 28px 40px 24px !important;
@@ -2074,7 +2085,7 @@ html body main .requests-page {
 }
 html body main .requests-page .requests-search-form {
     top: 0 !important;
-    right: max(0px, calc((100% - 1120px) / 2)) !important;
+    right: max(0px, calc((100% - 1040px) / 2)) !important;
     left: auto !important;
 }
 html body main .my-requests-page .requests-search-form {
@@ -2123,7 +2134,7 @@ html body main .employees-page > .employees-header,
 html body main .requests-page > .mgr-page-header,
 html body main .pr-reviews-page > .mgr-page-header,
 html body main .app-page > .app-page-header {
-    padding-right: max(0px, calc((100% - 1120px) / 2)) !important;
+    padding-right: max(0px, calc((100% - 1040px) / 2)) !important;
     box-sizing: border-box !important;
 }
 
@@ -2156,5 +2167,141 @@ html body main .app-page > .app-page-header {
     html body main .main-content h1,
     html body main .page-container h1 {
         font-size: 28px !important;
+    }
+
+    html body main.content > .main-content,
+    html body main > .main-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding: 16px 14px 20px !important;
+    }
+    html body form.leave-form .input-group,
+    html body form.leave-form .input-group--half {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+    html body form.leave-form .button-group {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+    }
+    html body form.leave-form .button-group button {
+        width: 100% !important;
+    }
+
+    html body main .requests-page .requests-search-form,
+    html body main .my-requests-page .requests-search-form,
+    html body main .team-requests-page .requests-search-form {
+        position: static !important;
+        top: auto !important;
+        right: auto !important;
+        left: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    html body .requests-page .requests-toolbar,
+    html body .requests-page .requests-toolbar-1,
+    html body .requests-page .requests-filter-bar,
+    html body .my-requests-page .requests-toolbar,
+    html body .my-requests-page .requests-filter-bar,
+    html body .team-requests-page .requests-filter-bar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    html body .requests-page .requests-filters,
+    html body .my-requests-page .requests-filters,
+    html body .team-requests-page .requests-filters,
+    html body .requests-page .requests-pay-filter,
+    html body .my-requests-page .requests-pay-filter {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        flex-wrap: wrap !important;
+    }
+    html body .requests-page .requests-search-form input[type="text"],
+    html body .my-requests-page .requests-search-form input[type="text"] {
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 140px !important;
+    }
+    html body .requests-table tr.row-click,
+    html body .team-requests-page .requests-table tr.row-click {
+        grid-template-columns: 1fr !important;
+        padding: 28px 12px 14px !important;
+    }
+    html body .requests-table tr.row-click td,
+    html body .team-requests-page .requests-table tr.row-click td {
+        grid-column: 1 / -1 !important;
+        grid-row: auto !important;
+        justify-self: start !important;
+        min-width: 0 !important;
+        white-space: normal !important;
+    }
+    html body .requests-table td.request-actions-cell,
+    html body .request-actions,
+    html body .team-requests-page .request-actions {
+        min-width: 0 !important;
+        width: 100% !important;
+        justify-content: flex-start !important;
+    }
+
+    html body main .app-page > .app-page-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        padding-right: 0 !important;
+        gap: 10px !important;
+    }
+    html body .app-page .leave-info-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    html body .app-page .app-page-panel,
+    html body .app-page .app-page-panel-1 {
+        padding: 14px !important;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12) !important;
+    }
+
+    html body .pr-doc .pr-split {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    html body .pr-doc .lh-doc-body {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+    html body .pr-doc .pr-id-table th,
+    html body .pr-doc .pr-id-table td,
+    html body .pr-doc .pr-legend th,
+    html body .pr-doc .pr-legend td {
+        white-space: normal !important;
+        padding: 8px 10px !important;
+        font-size: 13px !important;
+    }
+    html body .pr-doc .pr-legend th {
+        width: 36px !important;
+        min-width: 36px !important;
+    }
+    html body .pr-doc .pr-score-table {
+        table-layout: fixed !important;
+    }
+    html body .pr-doc .pr-score-table th,
+    html body .pr-doc .pr-score-table td {
+        padding: 8px 2px !important;
+        font-size: 12px !important;
+    }
+    html body .pr-doc .pr-score-table th:first-child,
+    html body .pr-doc .pr-score-table td:first-child {
+        width: 30% !important;
+        padding-left: 8px !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+    }
+    html body .pr-doc .pr-score-table input[type="radio"] {
+        width: 14px !important;
+        height: 14px !important;
     }
 }

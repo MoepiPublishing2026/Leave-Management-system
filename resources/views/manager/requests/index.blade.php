@@ -11,8 +11,8 @@ html body .team-requests-page h1 { color:#263248; font-weight:700; }
 
 /* Title row shares the same left and right edge as the list. */
 html body main .team-requests-page > .mgr-page-header {
-    width: min(100%, 1120px) !important;
-    max-width: 1120px !important;
+    width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     padding-right: 0 !important;
@@ -449,6 +449,36 @@ html body .team-requests-page .requests-table td.requests-empty {
     }
     html body .team-requests-page .request-btn--reject:hover {
         background: #c91634 !important;
+    }
+
+    @media (max-width: 768px) {
+        html body .team-requests-page .requests-filter-bar,
+        html body .team-requests-page .requests-toolbar {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+        html body .team-requests-page .requests-filters,
+        html body .team-requests-page .requests-pay-filter,
+        html body .team-requests-page .requests-search-form {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        html body .team-requests-page .requests-table tr.row-click {
+            grid-template-columns: 1fr !important;
+            padding: 28px 12px 14px !important;
+        }
+        html body .team-requests-page .requests-table tr.row-click td {
+            grid-column: 1 / -1 !important;
+            grid-row: auto !important;
+            justify-self: start !important;
+            position: static !important;
+            white-space: normal !important;
+        }
+        html body .team-requests-page .request-actions {
+            width: 100% !important;
+            justify-content: flex-start !important;
+        }
     }
 
     </style>

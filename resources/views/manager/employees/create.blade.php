@@ -186,25 +186,7 @@
                autocomplete="off" autocapitalize="off" spellcheck="false"
                readonly onfocus="this.removeAttribute('readonly')" required />
         @error('email')<div class="error">{{ $message }}</div>@enderror
-
-        <label for="password">Password</label>
-        <div class="password-toggle">
-            <input type="password" name="password" id="password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
-            <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password" aria-pressed="false">
-                <svg id="eyeOpenPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" /><circle cx="12" cy="12" r="3" /></svg>
-                <svg id="eyeClosedPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true" style="display:none;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5a10.6 10.6 0 00-4.9 1.2" /></svg>
-            </button>
-        </div>
-        @error('password')<div class="error">{{ $message }}</div>@enderror
-
-        <label for="password_confirmation">Confirm Password</label>
-        <div class="password-toggle">
-            <input type="password" name="password_confirmation" id="password_confirmation" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" required />
-            <button type="button" class="toggle-password" id="togglePasswordConfirmation" aria-label="Show password" aria-pressed="false">
-                <svg id="eyeOpenPasswordConfirmation" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" /><circle cx="12" cy="12" r="3" /></svg>
-                <svg id="eyeClosedPasswordConfirmation" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true" style="display:none;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5a10.6 10.6 0 00-4.9 1.2" /></svg>
-            </button>
-        </div>
+        <p class="field-hint">A login password is created automatically and emailed to this address.</p>
 
             <div class="button-group">
             <button type="submit" class="btn-form-action" style="background: #cbe212 !important; color: #0a1347 !important; border: 1px solid #b5cb0e !important; border-radius: 6px !important; padding: 8px 24px !important; font-weight: 700 !important; font-size: 14px !important; min-height: 38px !important; box-shadow: none !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important;">Add Employee</button>
@@ -222,14 +204,10 @@
     document.addEventListener('DOMContentLoaded', function () {
         function clearBrowserAutofill() {
             const email = document.getElementById('employee_email');
-            const password = document.getElementById('password');
-            const confirm = document.getElementById('password_confirmation');
             const expectedEmail = email ? (email.getAttribute('data-expected') || '') : '';
             if (email && email.value !== expectedEmail) {
                 email.value = expectedEmail;
             }
-            if (password) password.value = '';
-            if (confirm) confirm.value = '';
         }
         window.addEventListener('load', function () {
             clearBrowserAutofill();
@@ -290,24 +268,6 @@
         departmentSelect?.addEventListener('change', updateDepartmentHint);
         roleSelect?.addEventListener('change', syncRoleFields);
         syncRoleFields();
-
-        function setupPasswordToggle(inputId, toggleId, openId, closedId) {
-            const input = document.getElementById(inputId);
-            const toggle = document.getElementById(toggleId);
-            const eyeOpen = document.getElementById(openId);
-            const eyeClosed = document.getElementById(closedId);
-            if (!input || !toggle || !eyeOpen || !eyeClosed) return;
-            toggle.addEventListener('click', function () {
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                eyeOpen.style.display = isPassword ? 'none' : 'block';
-                eyeClosed.style.display = isPassword ? 'block' : 'none';
-                toggle.setAttribute('aria-pressed', String(isPassword));
-                toggle.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
-            });
-        }
-        setupPasswordToggle('password', 'togglePassword', 'eyeOpenPassword', 'eyeClosedPassword');
-        setupPasswordToggle('password_confirmation', 'togglePasswordConfirmation', 'eyeOpenPasswordConfirmation', 'eyeClosedPasswordConfirmation');
     });
 </script>
 

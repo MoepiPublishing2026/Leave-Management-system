@@ -124,8 +124,44 @@
     }
     
     @media (max-width: 768px) {
-        .app-page .leave-info-grid {
+        html body main .app-page {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+        }
+        html body main .app-page > .app-page-header,
+        html body main .app-page > .app-page-lead,
+        html body main .app-page > .policy-card,
+        html body main .app-page > .leave-info-grid {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            box-sizing: border-box !important;
+        }
+        html body .app-page .app-page-header {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding-right: 0 !important;
+        }
+        html body .app-page .app-page-btn--secondary {
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        html body .app-page .leave-info-grid {
             grid-template-columns: 1fr !important;
+            gap: 16px !important;
+        }
+        html body .app-page .app-page-panel,
+        html body .app-page .app-page-panel-1 {
+            padding: 14px !important;
+            box-shadow: none !important;
+        }
+        html body .app-page .app-badge-row {
+            gap: 8px !important;
+        }
+        html body .app-page .app-badge {
+            white-space: normal !important;
         }
     }
 </style>

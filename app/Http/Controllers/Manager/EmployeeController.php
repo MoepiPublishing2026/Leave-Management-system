@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Mail\WelcomeUserMail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -132,7 +133,6 @@ class EmployeeController extends Controller
             'first_name' => ['required', 'string', 'max:15', 'regex:/^[a-zA-Z]+$/'],
             'last_name' => ['required', 'string', 'max:15', 'regex:/^[a-zA-Z]+$/'],
             'email' => 'required|email:rfc|max:255|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
             'role' => 'required|in:employee,manager,admin',
         ];
 
@@ -193,7 +193,7 @@ class EmployeeController extends Controller
         }
 
         try {
-            $rawPassword = $request->password;
+            $rawPassword = $this->makeLoginPassword();
             $department = $role === 'manager'
                 ? ($managedDepartments[0] ?? null)
                 : ($request->department ?: null);
@@ -212,16 +212,67 @@ class EmployeeController extends Controller
             if ($role === 'manager') {
                 DepartmentManagers::syncForManager($user, $managedDepartments);
             }
-
-            Mail::to($user->email)->send(new WelcomeUserMail($user, $rawPassword));
-
-            return redirect()->route('manager.employees.index')->with('success', 'Employee added successfully.');
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
             return redirect()->back()
                 ->withErrors(['error' => 'An error occurred while creating the employee. Please try again.'])
                 ->withInput();
+        }
+
+        if (! $this->emailLoginPassword($user, $rawPassword)) {
+            return redirect()
+                ->route('manager.employees.edit', $user->id)
+                ->with('error', 'The account was created, but the password email could not be sent. Use Send new password to try again.');
+        }
+
+        return redirect()
+            ->route('manager.employees.index')
+            ->with('success', 'Employee added. A login password was emailed to them.');
+    }
+
+    public function sendNewPassword($id)
+    {
+        $this->ensureCanManageEmployees();
+        $employee = User::findOrFail($id);
+
+        if ((int) Auth::id() === (int) $employee->id) {
+            return redirect()
+                ->route('manager.employees.edit', $employee->id)
+                ->with('error', 'Use Profile to change your own password.');
+        }
+
+        $rawPassword = $this->makeLoginPassword();
+
+        if (! $this->emailLoginPassword($employee, $rawPassword)) {
+            return redirect()
+                ->route('manager.employees.edit', $employee->id)
+                ->with('error', 'The password email could not be sent. Their current password is unchanged.');
+        }
+
+        $employee->password = Hash::make($rawPassword);
+        $employee->save();
+
+        return redirect()
+            ->route('manager.employees.edit', $employee->id)
+            ->with('success', 'A new password was emailed. Their previous password no longer works.');
+    }
+
+    private function makeLoginPassword(): string
+    {
+        return Str::password(12, letters: true, numbers: true, symbols: false);
+    }
+
+    private function emailLoginPassword(User $user, string $rawPassword): bool
+    {
+        try {
+            Mail::to($user->email)->send(new WelcomeUserMail($user, $rawPassword));
+
+            return true;
+        } catch (\Throwable $e) {
+            Log::error($e->getMessage());
+
+            return false;
         }
     }
 

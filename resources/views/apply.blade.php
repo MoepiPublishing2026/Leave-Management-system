@@ -472,15 +472,23 @@ label[for="important_comment"] {
 
   /* ---------- Mobile ---------- */
   @media (max-width: 768px) {
-      .main-content { margin-top: 14px; padding: 18px 14px; width: 100%; overflow-x: clip; }
+      html body main .main-content,
+      html body main.content > .main-content {
+          margin: 0 !important;
+          padding: 16px 14px 20px !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          overflow-x: clip;
+      }
       .main-content h1 { font-size: 28px; }
       form.leave-form { gap: 16px; width: 100%; min-width: 0; }
       form.leave-form .input-group,
       form.leave-form .input-group--half {
           flex: 1 1 100% !important; min-width: 0 !important; width: 100% !important; max-width: 100% !important;
       }
-      form.leave-form .button-group { flex-direction: column; gap: 10px; }
+      form.leave-form .button-group { flex-direction: column; gap: 10px; width: 100%; }
       form.leave-form .button-group button { width: 100% !important; }
+      .file-upload-hint { overflow-wrap: anywhere; }
   }
 </style>
 
