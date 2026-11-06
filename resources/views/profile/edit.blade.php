@@ -281,7 +281,6 @@
 
 <div class="app-page profile-page">
     <h1>Profile</h1>
-    <p class="app-page-lead">Update your password and profile picture. Name and email are managed by your senior manager or manager.</p>
 
     <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
         @csrf

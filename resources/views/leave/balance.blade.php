@@ -21,13 +21,6 @@
 <div class="balance-page">
     @if(empty($selectedType) || empty($focusedBalance))
         <h1>Leave Balance</h1>
-        <p class="balance-page-lead">
-            Choose a leave type to view your {{ $yearLabel ?? $year }} balance and activity
-            ({{ $yearRangeLabel ?? ('1 May '.$year.' – 30 April '.($year + 1)) }}).
-            @if($year === $currentYear)
-                This leave year runs until 30 April {{ $year + 1 }}.
-            @endif
-        </p>
 
         <div class="balance-index">
         <div class="balance-toolbar">
@@ -107,9 +100,6 @@
         @endphp
 
         <h1>{{ $selectedType }} Leave</h1>
-        <p class="balance-page-lead">
-            Your {{ $yearLabel ?? $year }} balance and activity for this leave type.
-        </p>
 
         <div class="balance-toolbar">
             <form class="balance-year-form balance-toolbar-left" method="GET" action="{{ route($balanceRoute ?? \App\Support\LeaveApplicant::balanceRoute()) }}">

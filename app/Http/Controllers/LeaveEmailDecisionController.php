@@ -118,8 +118,8 @@ class LeaveEmailDecisionController extends Controller
 
         $recommendation = strtolower((string) ($leaveRequest->manager_recommendation ?? ''));
         $recLabel = match ($recommendation) {
-            'approve' => 'Recommend Approve',
-            'reject' => 'Recommend Reject',
+            'approve' => 'Approve',
+            'reject' => 'Reject',
             default => '—',
         };
 

@@ -278,7 +278,7 @@
         <h1>Senior Manager Dashboard</h1>
     </div>
     <div class="admin-dash-tools">
-        <div class="dashboard-filter-position show">
+        <div class="dashboard-filter-position">
             <div class="dashboard-filter-dropdown">
                 @include('partials.dashboard-period-filter', [
                     'monthFilter' => $monthFilter ?? 'this_year',
@@ -287,7 +287,7 @@
                 ])
             </div>
         </div>
-        <button class="menu-button" type="button" aria-label="Show or hide dashboard filters" aria-expanded="true">
+        <button class="menu-button" type="button" aria-label="Show or hide dashboard filters" aria-expanded="false">
             <span></span>
             <span></span>
             <span></span>

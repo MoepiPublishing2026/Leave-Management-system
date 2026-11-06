@@ -12,12 +12,6 @@
 
 <div class="requests-page">
     <h1>Manager Leave Requests</h1>
-    <p class="requests-page-lead">
-        Review and approve leave submitted by managers.
-        @if ($requests->total() > 0)
-            · {{ $requests->total() }} {{ Str::plural('request', $requests->total()) }}
-        @endif
-    </p>
 
     @include('partials.requests-toolbar', [
         'formRoute' => 'admin.manager-requests',

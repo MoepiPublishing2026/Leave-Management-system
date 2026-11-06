@@ -9,13 +9,13 @@
 html body .team-requests-page { font-family:'Poppins',sans-serif; }
 html body .team-requests-page h1 { color:#263248; font-weight:700; }
 
-/* Title row shares the same left and right edge as the list. */
+/* Title stays on the left. The switch ends on the same right edge as the list. */
 html body main .team-requests-page > .mgr-page-header {
-    width: min(100%, 1040px) !important;
-    max-width: 1040px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    padding-right: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-right: max(0px, calc((100% - 1040px) / 2)) !important;
     position: relative !important;
 }
 html body main .team-requests-page .mgr-scope-switch {
@@ -488,12 +488,6 @@ html body .team-requests-page .requests-table td.requests-empty {
 <div class="requests-page team-requests-page" @if($overdueReasonCount > 0) data-overdue-reason-lock="1" @endif>    <div class="mgr-page-header">
         <div class="mgr-page-header__main">
             <h1>Team Requests</h1>
-            <p class="requests-page-lead">
-                Showing <strong>{{ ucfirst($status) }}</strong>
-                @if ($requests->total() > 0)
-                    • {{ $requests->total() }} {{ Str::plural('request', $requests->total()) }}
-                @endif
-            </p>
         </div>
         @include('partials.manager-scope-switch', [
             'scope' => 'team',

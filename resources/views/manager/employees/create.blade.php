@@ -89,8 +89,7 @@
 </style>
 
 <div class="employee-create-page">
-    <h1 style="font-weight:700; margin:0 0 8px;">Add Employee</h1>
-    <p style="margin:0 0 18px;">Create a new user account and send their login details by email.</p>
+    <h1 style="font-weight:700; margin:0 0 18px;">Add Employee</h1>
 
     <div class="signup-container">
     <form method="POST" action="{{ route('manager.employees.store') }}" autocomplete="off">

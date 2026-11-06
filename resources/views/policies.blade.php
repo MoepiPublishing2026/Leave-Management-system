@@ -171,7 +171,6 @@
         <h1>Company Leave Policies</h1>
         <a href="{{ route('policies.download') }}" class="app-page-btn app-page-btn--secondary" target="_blank" rel="noopener noreferrer">Download PDF</a>
     </div>
-    <p class="app-page-lead">Guidelines for each leave type, including entitlements and documentation requirements.</p>
 
     @foreach ($leaveTypes as $type)
         @php

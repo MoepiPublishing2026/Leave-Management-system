@@ -168,13 +168,13 @@
   .flatpickr-day.selected:hover { background: #d4e21a; border-color: #d4e21a; color: #111; }
   .flatpickr-day.today { border-color: #a0b026; }
 
-  /* Date inputs + comment: lime border, square corners */
+  /* Date inputs + comment: lime border. Left corners stay rounded; the right edge is straight. */
   form.leave-form .input-group input[type="text"],
   form.leave-form .input-group textarea {
       width: 100%;
       padding: 10px 12px;
       border: 1.5px solid #c4d931;
-      border-radius: 8px;
+      border-radius: 8px 0 0 8px;
       font-size: 13px;
       color: #333;
       font-family: inherit;
@@ -184,8 +184,11 @@
   }
   /* Start Date & End Date border colour */
 #start_date,
-#end_date {
-    border-color: #c4d931 !important;   /* ← put your colour here */
+#end_date,
+#important_comment {
+    border-color: #c4d931 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
 }
 
 /* Border colour while the box is clicked/active */
@@ -498,7 +501,6 @@ label[for="important_comment"] {
 
 <div class="main-content">
     <h1>{{ !empty($editingLeave) ? 'Edit leave request #'.$editingLeave->id : 'Leave Application' }}</h1>
-    <h2>{{ !empty($editingLeave) ? 'Correct the details or replace documents while this request is still pending.' : 'Fill in the form to request a leave' }}</h2>
 
     <form class="leave-form" method="POST" action="{{ route($submitRoute ?? 'leave.submit', $submitRouteParams ?? []) }}" enctype="multipart/form-data" novalidate>
         @csrf

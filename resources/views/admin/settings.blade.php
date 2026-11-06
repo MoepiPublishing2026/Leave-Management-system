@@ -470,10 +470,6 @@
 <div class="app-page">
     <h1>Leave Policies</h1>
 
-    <p class="app-page-lead">
-        Configure default days, carry-over limits, and rules for each leave type. Changes apply to new requests immediately.
-    </p>
-
     <form id="leavePoliciesForm"
           action="{{ route($formRoute ?? 'admin.settings.save') }}"
           method="POST"

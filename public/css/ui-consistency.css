@@ -1977,7 +1977,7 @@ html body main .pr-page {
 }
 
 html body main .admin-dash-top {
-    align-items: flex-start !important;
+    align-items: stretch !important;
 }
 
 /* Senior manager content sits in from both sides. Headings stay on the shared left edge. */
@@ -2030,8 +2030,7 @@ html body main :is(.balance-page, .employee-create-page, .page-container) {
     padding-left: 0 !important;
     padding-right: 0 !important;
 }
-html body main .balance-page > h1,
-html body main .balance-page > .balance-page-lead {
+html body main .balance-page > h1 {
     width: 100% !important;
     max-width: none !important;
     margin-left: 0 !important;
@@ -2112,7 +2111,6 @@ html body main .pr-reviews-page .requests-search-form {
     max-width: none !important;
 }
 html body main .pr-reviews-page > h1,
-html body main .pr-reviews-page > .requests-page-lead,
 html body main .pr-reviews-page > .mgr-page-header {
     width: 100% !important;
     max-width: none !important;
@@ -2135,6 +2133,86 @@ html body main .requests-page > .mgr-page-header,
 html body main .pr-reviews-page > .mgr-page-header,
 html body main .app-page > .app-page-header {
     padding-right: max(0px, calc((100% - 1040px) / 2)) !important;
+    box-sizing: border-box !important;
+}
+
+/* Buttons sit on the line under the title, ending where the content ends. */
+html body main .mgr-page-header,
+html body main .employees-header,
+html body main .app-page-header,
+html body main .analytics-insights-page > .page-header {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+}
+html body main .mgr-page-header .mgr-scope-switch,
+html body main .employees-header .add-employee-button,
+html body main .app-page-header .app-page-btn,
+html body main .analytics-insights-page > .page-header > .filter-form {
+    align-self: flex-end !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin-top: 0 !important;
+    margin-bottom: 8px !important;
+}
+
+/* Dashboard switch ends on the same right edge as the cards. */
+html body main > .mgr-page-header:not(.calendar-page-header) {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+html body main > .mgr-page-header:not(.calendar-page-header) .mgr-scope-switch {
+    margin-right: max(0px, calc((100% - 1040px) / 2)) !important;
+}
+
+/* Dashboard filters stay under the title and share the cards' right edge. */
+html body main .admin-dash-top {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 0 12px !important;
+    padding: 0 !important;
+}
+html body main .admin-dash-top .admin-page-header {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+html body main .admin-dash-top .admin-dash-tools {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    align-self: auto !important;
+    width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
+    margin: 0 auto 12px !important;
+}
+
+/* Subheadings start on the same left edge as the content. Titles stay on the left. */
+html body main :is(
+    .requests-page,
+    .reports-page,
+    .notifications-page,
+    .app-page,
+    .balance-page,
+    .page-container,
+    .employee-create-page
+) {
+    --content-inset: max(0px, calc((100% - 1040px) / 2));
+}
+html body main .requests-page-lead,
+html body main .reports-page-lead,
+html body main .notifications-lead,
+html body main .app-page-lead,
+html body main .balance-page-lead,
+html body main .page-lead,
+html body main .employee-create-page > p {
+    width: auto !important;
+    max-width: min(100%, 1040px) !important;
+    margin-left: var(--content-inset, 0px) !important;
+    margin-right: 0 !important;
+    text-align: left !important;
     box-sizing: border-box !important;
 }
 

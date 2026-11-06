@@ -6,7 +6,6 @@
 
 <div class="reports-page">
     <h1>{{ $pageTitle }}</h1>
-    <p class="reports-page-lead">Summary and recent activity for the selected period.</p>
 
     <div class="reports-toolbar">
         <form id="reportsFilterForm" method="GET" action="{{ route($filterRoute) }}" class="reports-filter-form reports-toolbar-forms">

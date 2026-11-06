@@ -236,8 +236,7 @@ html body .employee-create-page .branding { font-size:11px !important; margin-to
 </style>
 
 <div class="employee-create-page">
-    <h1 style="font-weight:700; font-size:40px; color:#2c3e50; margin:0 0 8px; letter-spacing:0.04em;">Edit Employee</h1>
-    <p style="margin:0 0 18px; color:#64748b; font-size:0.92rem;">Update account details for {{ $employee->first_name }} {{ $employee->last_name }}.</p>
+    <h1 style="font-weight:700; font-size:40px; color:#2c3e50; margin:0 0 18px; letter-spacing:0.04em;">Edit Employee</h1>
 
     <div class="signup-container">
     <form method="POST" action="{{ route('manager.employees.update', $employee->id) }}" autocomplete="off">

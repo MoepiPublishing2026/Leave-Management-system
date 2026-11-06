@@ -454,7 +454,7 @@
     @stack('styles')
     @include('partials.dashboard-status-card-styles')
     @yield('head')
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261106align"/>
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261106dashbtn"/>
 </head>
 <body class="role-manager">
     <header class="navbar" role="banner">

@@ -135,9 +135,6 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
     $filters = $isSenior
         ? ['all' => 'All', 'submitted' => 'Awaiting Review', 'reviewed' => 'Reviewed']
         : ['all' => 'All', 'draft' => 'Draft', 'submitted' => 'Submitted', 'reviewed' => 'Reviewed'];
-    $lead = $isSenior
-        ? 'Reviews appear here after an employee or manager sends them.'
-        : 'Fill in your monthly performance review, then submit it.';
     $empty = $isSenior
         ? 'No reviews have been sent yet.'
         : 'No performance reviews yet.';
@@ -147,10 +144,8 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
     $scopeQuery = $isManagerList ? ['scope' => $reviewScope] : [];
     $clearParams = array_filter(['status' => $status] + $scopeQuery);
     if ($reviewScope === 'team') {
-        $lead = 'Reviews your team has sent. Use My reviews to write and submit your own.';
         $empty = 'No team reviews yet.';
     } elseif ($reviewScope === 'mine') {
-        $lead = 'Fill in your monthly performance review, then submit it.';
         $empty = 'No performance reviews yet.';
     }
 @endphp
@@ -160,7 +155,6 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
         <div class="mgr-page-header pr-reviews-scope-header">
             <div class="mgr-page-header__main">
                 <h1>Monthly Performance Reviews</h1>
-                <p class="requests-page-lead">{{ $lead }}</p>
             </div>
             @include('partials.manager-scope-switch', [
                 'scope' => $reviewScope === 'mine' ? 'personal' : 'team',
@@ -172,7 +166,6 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
         </div>
     @else
         <h1>Monthly Performance Reviews</h1>
-        <p class="requests-page-lead">{{ $lead }}</p>
     @endif
 
     <div class="requests-toolbar">

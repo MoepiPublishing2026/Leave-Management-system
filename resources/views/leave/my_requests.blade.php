@@ -351,12 +351,6 @@
         <div class="mgr-page-header">
             <div class="mgr-page-header__main">
                 <h1>My Leave Requests</h1>
-                <p class="requests-page-lead">
-                    Showing <strong>{{ ucfirst($status) }}</strong>
-                    @if ($leaveRequests->total() > 0)
-                        <span class="lead-dot">•</span>{{ $leaveRequests->total() }} {{ Str::plural('request', $leaveRequests->total()) }}
-                    @endif
-                </p>
             </div>
             @include('partials.manager-scope-switch', [
                 'scope' => 'personal',
@@ -366,12 +360,6 @@
         </div>
     @else
         <h1>My Leave Requests</h1>
-        <p class="requests-page-lead">
-            Showing <strong>{{ ucfirst($status) }}</strong>
-            @if ($leaveRequests->total() > 0)
-                <span class="lead-dot">•</span>{{ $leaveRequests->total() }} {{ Str::plural('request', $leaveRequests->total()) }}
-            @endif
-        </p>
     @endif
 
     @include('partials.requests-toolbar', [

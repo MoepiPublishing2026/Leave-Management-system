@@ -12,12 +12,6 @@
 
 <div class="requests-page">
     <h1>All Leave Requests</h1>
-    <p class="requests-page-lead">
-        Review all employee and manager leave requests. Final Senior Manager decisions can be submitted here or securely from email.
-        <!--@if ($requests->total() > 0)
-            · {{ $requests->total() }} {{ Str::plural('request', $requests->total()) }}
-        @endif-->
-    </p>
 
     @include('partials.requests-toolbar', [
         'formRoute' => 'admin.requests',
@@ -78,11 +72,13 @@
                     $canDelete = $isPreviousYear;
                     $statusLabel = \App\Support\LeaveStatusLabels::display($rowStatus, $req->isOverdue());
                     $statusBadge = \App\Support\LeaveStatusLabels::badgeClass($rowStatus, $req->isOverdue());
-                    $recLabel = match (strtolower((string) ($req->manager_recommendation ?? ''))) {
-                        'approve' => 'Recommend Approve',
-                        'reject' => 'Recommend Reject',
-                        default => '',
-                    };
+                    $recLabel = $awaitingSenior
+                        ? match (strtolower((string) ($req->manager_recommendation ?? ''))) {
+                            'approve' => 'Manager recommended approval',
+                            'reject' => 'Manager recommended rejection',
+                            default => '',
+                        }
+                        : '';
 
                     $details = [
                         'id' => $req->id,
@@ -149,12 +145,12 @@
                                             @csrf
                                             @method('PATCH')
                                             <input type="hidden" name="approval_comment" class="approval-comment-input" value="" />
-                                            <button type="submit" class="request-btn request-btn--approve">@include('partials.request-action-icon', ['name' => 'check']) Recommend Approve</button>
+                                            <button type="submit" class="request-btn request-btn--approve">@include('partials.request-action-icon', ['name' => 'check']) Approve</button>
                                         </form>
                                     @else
                                         <span class="request-actions-note" title="{{ $proofBlockReason }}">Awaiting proof</span>
                                     @endif
-                                    <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">@include('partials.request-action-icon', ['name' => 'x']) Recommend Reject</button>
+                                    <button type="button" class="request-btn request-btn--reject" onclick="openRejectPopup({{ $req->id }})">@include('partials.request-action-icon', ['name' => 'x']) Reject</button>
                                 </div>
                             @elseif ($canDecide && $req->isOverdue())
                                 <span class="request-actions-note">Start date has passed, so this request can no longer be approved or rejected.</span>

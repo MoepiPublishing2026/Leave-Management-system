@@ -5,20 +5,8 @@
 @section('content')
 @include('partials.notifications-page-styles')
 
-@php
-    $unreadCount = (int) ($notifications->whereNull('read_at')->count());
-@endphp
-
 <div class="notifications-page">
     <h1>Notifications</h1>
-    <p class="notifications-lead">
-        @if($notifications->total() > 0)
-            Showing {{ $notifications->total() }} {{ \Illuminate\Support\Str::plural('notification', $notifications->total()) }}
-            @if($unreadCount > 0) · <strong>{{ $unreadCount }}</strong> unread @endif
-        @else
-            All your notifications in one place.
-        @endif
-    </p>
 
     @if ($notifications->isEmpty())
         <div class="notifications-toolbar">
