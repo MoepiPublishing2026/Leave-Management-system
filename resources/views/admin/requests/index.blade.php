@@ -72,13 +72,11 @@
                     $canDelete = $isPreviousYear;
                     $statusLabel = \App\Support\LeaveStatusLabels::display($rowStatus, $req->isOverdue());
                     $statusBadge = \App\Support\LeaveStatusLabels::badgeClass($rowStatus, $req->isOverdue());
-                    $recLabel = $awaitingSenior
-                        ? match (strtolower((string) ($req->manager_recommendation ?? ''))) {
-                            'approve' => 'Manager recommended approval',
-                            'reject' => 'Manager recommended rejection',
-                            default => '',
-                        }
-                        : '';
+                    $recLabel = match (strtolower((string) ($req->manager_recommendation ?? ''))) {
+                        'approve' => 'Manager recommended approval',
+                        'reject' => 'Manager recommended rejection',
+                        default => '',
+                    };
 
                     $details = [
                         'id' => $req->id,

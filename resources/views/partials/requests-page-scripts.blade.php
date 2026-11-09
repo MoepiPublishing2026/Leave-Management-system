@@ -396,14 +396,28 @@
         }
 
         const dateText = (value) => escapeHtml(String(value || '—').toUpperCase());
-        const recommendation = hasText(details.managerRecommendation)
-            ? escapeHtml(String(details.managerRecommendation).toUpperCase())
-            : '—';
+        let recommendation = '—';
+        if (hasText(details.managerRecommendation)) {
+            recommendation = escapeHtml(String(details.managerRecommendation).toUpperCase());
+            if (hasText(details.managerRecommendationComment)) {
+                recommendation += `<div class="rd-chip-note">${escapeHtml(details.managerRecommendationComment)}</div>`;
+            }
+        }
         const messagesHtml = details.messagesUrl
             ? `<a class="rd-senior-messages" href="${escapeHtml(details.messagesUrl)}">Open Messages</a>`
             : '';
         const rows = [
             ['Leave type', escapeHtml(details.type || '—')],
+        ];
+        if (details.convertedToUnpaidAt) {
+            rows.push([
+                'Converted',
+                `<strong>${escapeHtml(details.originalLeaveType || 'Sick')} → Unpaid</strong>` +
+                `<div class="rd-chip-note">${escapeHtml(details.convertedToUnpaidAt)}</div>` +
+                `<div class="rd-chip-note">${escapeHtml(details.conversionReason || 'Required documents were not submitted by the deadline.')}</div>`,
+            ]);
+        }
+        rows.push(
             ['Start date', dateText(details.start)],
             ['End date', dateText(details.end)],
             ['Working days', escapeHtml(String(requested))],
@@ -411,7 +425,7 @@
             ['Attachments', attachmentText],
             ["Doctor's letter", escapeHtml(letterText).toUpperCase()],
             ['Recommendation', recommendation],
-        ];
+        );
 
         return `
             <div class="rd-modal rd-modal--senior">
