@@ -310,6 +310,8 @@
     transition: border-color 0.25s, background 0.25s;
 }
   .file-upload.required { border-color: #cf2727 !important; background: #fffafa !important; }
+  .file-upload.required .file-upload-icon,
+  .file-upload.required .file-upload-text { color: #cf2727 !important; }
   .file-upload.is-dragover { border-color: #a0b026; background: #f4f6e4 !important; }
   .file-upload-zone {
       display: flex;
@@ -325,6 +327,14 @@
   html body main form.leave-form .file-upload {
     background: #ecece3 !important;
     border: 2px dashed #c4d931 !important;
+}
+html body main form.leave-form .file-upload.required {
+    background: #fffafa !important;
+    border: 2px dashed #cf2727 !important;
+}
+html body main form.leave-form .file-upload.required .file-upload-icon,
+html body main form.leave-form .file-upload.required .file-upload-text {
+    color: #cf2727 !important;
 }
 html body main form.leave-form .file-upload.is-dragover {
     background: #f4f6e4 !important;

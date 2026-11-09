@@ -5,6 +5,10 @@
 @section('content')
 @include('partials.notifications-page-styles')
 
+@php
+    $unreadCount = (int) ($notifications->whereNull('read_at')->count());
+@endphp
+
 <div class="notifications-page">
     <h1>Notifications</h1>
 
