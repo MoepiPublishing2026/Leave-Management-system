@@ -779,7 +779,7 @@
     }
     .balance-page .balance-detail-card--docs .detail-v {
         font-size: 0.98rem !important;
-        font-weight: 500 !important;
+        font-weight: 800 !important;
         line-height: 1.45 !important;
     }
     .balance-page .balance-detail-card--status {

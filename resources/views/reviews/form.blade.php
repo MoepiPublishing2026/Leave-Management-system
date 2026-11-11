@@ -89,9 +89,9 @@
         </div>
 
         <div class="pr-actions" style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 22px;">
-            <button type="submit" name="intent" value="draft" class="pr-btn pr-btn--draft" style="background: #d9253c !important; color: #ffffff !important; border: 1px solid #b01d30 !important; border-radius: 4px !important; padding: 10px 24px !important; font-weight: 700 !important; font-size: 14px !important; cursor: pointer !important; min-height: 38px; display: inline-flex; align-items: center; justify-content: center;">Save draft</button>
+            <button type="submit" name="intent" value="draft" class="pr-btn pr-btn--draft" style="background: #d9253c !important; color: #ffffff !important; border: 1px solid #b01d30 !important; border-radius: 12px !important; padding: 10px 24px !important; font-weight: 700 !important; font-size: 14px !important; cursor: pointer !important; min-height: 38px; display: inline-flex; align-items: center; justify-content: center;">Save draft</button>
             
-            <button type="submit" name="intent" value="submit" class="pr-btn pr-btn--primary" style="background: #b2cd16 !important; color: #ffffff !important; border: 1px solid #91bf14 !important; border-radius: 4px !important; padding: 10px 24px !important; font-weight: 700 !important; font-size: 14px !important; cursor: pointer !important; min-height: 38px; display: inline-flex; align-items: center; justify-content: center;">Submit review</button>
+            <button type="submit" name="intent" value="submit" class="pr-btn pr-btn--primary" style="background: #b2cd16 !important; color: #ffffff !important; border: 1px solid #91bf14 !important; border-radius: 12px !important; padding: 10px 24px !important; font-weight: 700 !important; font-size: 14px !important; cursor: pointer !important; min-height: 38px; display: inline-flex; align-items: center; justify-content: center;">Submit review</button>
         </div>
         @include('partials.letterhead-document-footer')
     </form>
