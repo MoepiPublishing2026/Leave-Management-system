@@ -14,8 +14,8 @@ html body .pr-reviews-page .requests-page-lead strong { color:#a2b222; }
 
 html body .pr-reviews-page .requests-toolbar {
     display:flex !important; align-items:center !important; gap:16px !important;
-    background:#e7eeed !important; border:0 !important; border-radius:14px !important;
-    padding:14px 16px !important; box-shadow:none !important;
+    background:#e7eeed !important; border:0 !important; border-radius:12px !important;
+    padding:14px 22px !important; box-shadow:none !important;
 }
 html body .pr-reviews-page .requests-toolbar-right {
     flex:1 1 auto !important; margin-left:0 !important; min-width:0 !important;
@@ -28,10 +28,19 @@ html body main .pr-reviews-page .requests-search-form {
 html body .pr-reviews-page .requests-btn--primary,
 html body .pr-reviews-page .requests-btn--search,
 html body .pr-reviews-page .requests-btn--secondary {
-    background:#dce84a !important; color:#1c1c1c !important; border:0 !important;
-    border-radius:12px !important; padding:0 22px !important; height:48px !important;
-    font-weight:700 !important; min-height:0 !important; font-size:15px !important;
-    white-space:nowrap !important; display:inline-flex !important; align-items:center !important;
+    background: #d4e21a !important;
+    color: #111 !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    padding: 12px 14px !important;
+    font-family: inherit;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+    min-height: 0 !important;
+    box-shadow: none !important;
+    text-transform: none !important;
+    cursor: pointer;
 }
 /* Reviewed pill + View/Edit button: oval */
 html body .pr-reviews-page .pr-status,
@@ -40,9 +49,9 @@ html body .pr-reviews-page .pr-card-btn {
     padding: 6px 16px !important;
 }
 html body .pr-reviews-page .requests-search-form input[type="text"] {
-    flex:1 1 auto !important; width:auto !important; min-width:0 !important; height:48px !important;
+    flex:1 1 auto !important; width:auto !important; min-width:0 !important; height:41px !important;
     background:#fff !important; background-image:none !important;
-    border:0 !important; border-radius:12px !important;
+    border:0 !important; border-radius:10px !important;
     padding:12px 18px !important; font-size:15px !important; color:#333 !important;
 }
 

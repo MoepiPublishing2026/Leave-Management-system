@@ -60,31 +60,37 @@
         flex-wrap: wrap;
         align-items: center;
         justify-content: center;
-        gap: 12px 40px;
+        gap: 10px;
         margin: 4px 0 26px;
         padding: 10px 8px 14px;
     }
+
     .mgr-quick-link {
         display: inline-block;
-        padding: 0 2px 5px;
-        background: none;
+        padding: 6px 18px;
+        background: transparent;
         border: none;
-        border-radius: 0;
-        color: #850621;
+        border-radius: 11px;
+        color: #263244;
         font-weight: 700;
-        font-size: 1.02rem;
-        letter-spacing: 0.02em;
+        font-size: 1rem;
+        letter-spacing: 0;
         text-decoration: none;
-        border-bottom: 3px solid #850621;
         box-shadow: none;
         white-space: nowrap;
         cursor: pointer;
-        transition: color 0.15s ease, border-color 0.15s ease;
+        transition: background 0.2s ease, color 0.2s ease;
     }
+
+    .mgr-quick-link.active,
+    .mgr-quick-link[aria-current="page"] {
+        background: #df2038;
+        color: #ffffff;
+    }
+
     .mgr-quick-link:hover {
-        background: none;
-        color: #680523;
-        border-bottom-color: #680523;
+        background: #df2038;
+        color: #ffffff;
     }
     @media (max-width: 1200px) {
         .mgr-page-header__main h1 {

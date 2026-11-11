@@ -237,14 +237,14 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 8px 14px !important;
-        min-height: 54px !important;
+        padding: 12px 14px !important;
+        min-height: 0 !important;
         min-width: 0 !important;
         height: auto !important;
         font-weight: 700;
         font-size: 13px !important;
-        line-height: 1.2 !important;
-        border-radius: 8px !important;
+        line-height: 1.1 !important;
+        border-radius: 10px !important;
         cursor: pointer;
         border: none;
         text-decoration: none;
