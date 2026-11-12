@@ -37,7 +37,7 @@ html body .pr-reviews-page .requests-btn--secondary {
     font-size: 13px !important;
     font-weight: 700 !important;
     line-height: 1.1 !important;
-    min-height: 0 !important;
+    min-height: 48px !important;
     box-shadow: none !important;
     text-transform: none !important;
     cursor: pointer;

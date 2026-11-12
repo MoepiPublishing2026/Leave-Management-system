@@ -135,7 +135,7 @@
         background: #d8e3e1 !important;
         border: 0 !important;
         border-radius: 12px !important;
-        padding: 10px 16px 10px 20px !important;
+        
         box-shadow: none !important;
     }
     html body .my-requests-page .requests-filter-bar label {

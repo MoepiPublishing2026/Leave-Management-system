@@ -132,7 +132,7 @@
       margin: 0;
       padding: 4px 6px;
       list-style: none;
-      background: #fff;
+      background: #ffffff;
       border: 1px solid #e2e2e2;
       border-radius: 0 0 6px 6px;
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);

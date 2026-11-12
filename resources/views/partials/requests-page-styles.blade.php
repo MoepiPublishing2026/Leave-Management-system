@@ -238,7 +238,7 @@
         align-items: center;
         justify-content: center;
         padding: 12px 14px !important;
-        min-height: 0 !important;
+        min-height: 48px !important;
         min-width: 0 !important;
         height: auto !important;
         font-weight: 700;
