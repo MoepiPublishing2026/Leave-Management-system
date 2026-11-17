@@ -291,7 +291,7 @@ html body nav.navbar nav.menu .badge-notification {
   height: 20px !important;
   padding: 0 6px !important;
   border-radius: 999px !important;
-  background: #a8bc1e !important; /* one shade darker than lime #c4d82e */
+  background: #7d9a14 !important; /* darker green than prior badge shade */
   color: #ffffff !important;
   font-size: 12px !important;
   font-weight: 800 !important;
@@ -1141,7 +1141,7 @@ html body .mobile-sidebar-brand .logo-text {
   white-space: nowrap !important;
 }
 html body .mobile-sidebar .badge-notification {
-  background: #a8bc1e !important;
+  background: #7d9a14 !important;
   color: #ffffff !important;
 }
 

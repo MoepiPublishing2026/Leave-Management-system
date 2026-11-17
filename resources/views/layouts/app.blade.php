@@ -134,7 +134,7 @@
             height: 20px;
             padding: 0 6px;
             border-radius: 999px;
-            background: #a8bc1e;
+            background: #7d9a14;
             color: #ffffff;
             font-size: 12px;
             font-weight: 800;
@@ -171,7 +171,7 @@
             height: 18px;
             padding: 0 6px;
             border-radius: 999px;
-            background: #a8bc1e;
+            background: #7d9a14;
             color: #ffffff;
             font-size: 11px;
             font-weight: 800;
@@ -407,7 +407,7 @@
     </style>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261117msgbadge" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261117badge7d" />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
