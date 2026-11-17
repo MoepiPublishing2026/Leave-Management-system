@@ -185,7 +185,7 @@
     }
     .cal-nav-year-btn:hover:not(:disabled) {
         background: rgba(178, 205, 22, 0.2);
-        border-color: #b2cd16;
+        border-color: #d4e21a;
     }
     .cal-nav-year-btn:disabled {
         opacity: 0.35;
@@ -218,13 +218,13 @@
     }
     .cal-nav-month:hover {
         background: rgba(178, 205, 22, 0.2);
-        border-color: #b2cd16;
+        border-color: #d4e21a;
         color: #0a1347;
         transform: translateY(-1px);
     }
     .cal-nav-month.is-active {
-        background: #b2cd16;
-        border-color: #91bf14;
+        background: #d4e21a;
+        border-color: #c3d010;
         color: #0a1347;
         box-shadow: 0 4px 14px rgba(178, 205, 22, 0.35);
     }
@@ -233,9 +233,9 @@
         width: 100%;
         margin-top: 12px;
         padding: 9px 12px;
-        border: 1px solid #91bf14;
+        border: 1px solid #c3d010;
         border-radius: 10px;
-        background: #b2cd16;
+        background: #d4e21a;
         color: #0a1347;
         font-size: 0.88rem;
         font-weight: 700;
@@ -244,7 +244,7 @@
         transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
     }
     .cal-nav-today:hover {
-        background: #9eb812;
+        background: #c3d010;
         color: #0a1347;
         transform: translateY(-1px);
     }

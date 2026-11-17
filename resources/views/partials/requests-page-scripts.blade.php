@@ -417,10 +417,18 @@
                 `<div class="rd-chip-note">${escapeHtml(details.conversionReason || 'Required documents were not submitted by the deadline.')}</div>`,
             ]);
         }
+        const workingDaysValue = details.isHalfDay
+            ? `${escapeHtml(String(requested))} (half day${details.halfDayPeriodLabel ? `: ${escapeHtml(String(details.halfDayPeriodLabel))}` : ''})`
+            : escapeHtml(String(requested));
         rows.push(
             ['Start date', dateText(details.start)],
             ['End date', dateText(details.end)],
-            ['Working days', escapeHtml(String(requested))],
+            ['Working days', workingDaysValue],
+        );
+        if (details.isHalfDay) {
+            rows.push(['Half-day period', escapeHtml(details.halfDayPeriodLabel || 'Not set')]);
+        }
+        rows.push(
             ['Comment', hasText(details.comment) ? escapeHtml(details.comment) : 'None'],
             ['Attachments', attachmentText],
             ["Doctor's letter", escapeHtml(letterText).toUpperCase()],
@@ -446,7 +454,7 @@
                         <span>Taken: ${escapeHtml(review.taken || '0')}</span>
                         <span>Remaining: ${escapeHtml(review.remaining || '0')}</span>
                     </div>
-                    <p class="rd-senior-request">This request: ${escapeHtml(String(requested))} working day(s)</p>
+                    <p class="rd-senior-request">This request: ${escapeHtml(String(requested))} working day(s)${details.isHalfDay && details.halfDayPeriodLabel ? ` · Half-day ${escapeHtml(String(details.halfDayPeriodLabel))}` : ''}</p>
                     <div class="rd-senior-label">Verify supporting documents</div>
                     <p class="rd-senior-copy">${escapeHtml(documents)}</p>
                     ${alertHtml}
@@ -488,7 +496,7 @@
         let daysText = 'N/A';
         if (details.days !== '' && details.days !== null && details.days !== undefined) {
             daysText = details.isHalfDay
-                ? `${escapeHtml(String(details.days))} Days (half day)`
+                ? `${escapeHtml(String(details.days))} Days (half day${details.halfDayPeriodLabel ? `: ${escapeHtml(String(details.halfDayPeriodLabel))}` : ''})`
                 : `${escapeHtml(String(details.days))} Days`;
         }
 
@@ -578,6 +586,7 @@
                         ${chip('Number of days', daysText)}
                         ${chip('Comment', hasText(details.comment) ? escapeHtml(details.comment) : '<span class="rd-chip-muted">None</span>')}
                     </div>
+                    ${details.isHalfDay ? `<div class="rd-chip-row">${chip('Half-day period', escapeHtml(details.halfDayPeriodLabel || 'Not set'), 'rd-chip--full')}</div>` : ''}
                     ${renderAttachmentChip(details)}
                 </div>
                 ${extraHtml}

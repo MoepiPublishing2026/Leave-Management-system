@@ -5,8 +5,8 @@
     $balanceHeadingTeal = '#0f766e';
     $balanceHeadingTealDark = '#123f3a';
     $balanceHeadingTealSoft = '#d3e5df';
-    $balanceApplyGreen = '#b2cd16';
-    $balanceApplyGreenBorder = '#91bf14';
+    $balanceApplyGreen = '#d4e21a';
+    $balanceApplyGreenBorder = '#c3d010';
     $balanceApplyGreenText = '#111';
     $balanceColorPending = $balanceStatusColors['pending'] ?? '#C291A4';
     $balanceColorApproved = $balanceStatusColors['approved'] ?? '#E27A53';
@@ -154,8 +154,8 @@
         border-color: #8a9f12;
     }
     .balance-page .balance-btn--apply:hover {
-        background: #a2b222 !important;
-        border-color: #a2b222 !important;
+        background: #d4e21a !important;
+        border-color: #d4e21a !important;
         color: #111 !important;
     }
 
@@ -535,8 +535,8 @@
         box-shadow: none !important;
     }
     .balance-page .balance-btn--apply:hover {
-        background: #a2b222 !important;
-        border-color: #a2b222 !important;
+        background: #d4e21a !important;
+        border-color: #d4e21a !important;
         color: #111 !important;
     }
 

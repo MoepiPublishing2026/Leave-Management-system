@@ -14,7 +14,7 @@ class NotificationsController extends Controller
         $notifications = UserNotifications::latestForIndex($user, 20);
 
         // Render the correct layout per role (prevents Manager/Admin from seeing Employee layout)
-        $view = match ($user->role ?? 'employee') {
+        $view = match (strtolower((string) ($user->role ?? 'employee'))) {
             'admin' => 'admin.notifications.index',
             'manager' => 'manager.notifications.index',
             default => 'notifications.index',

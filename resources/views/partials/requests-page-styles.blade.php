@@ -248,7 +248,7 @@
         cursor: pointer;
         border: none;
         text-decoration: none;
-        background: #a2b222;
+        background: #d4e21a;
         color: #000;
         transition: background-color 0.15s ease, color 0.15s ease;
     }
@@ -256,7 +256,7 @@
     .requests-btn--primary:hover,
     .requests-btn--secondary:hover,
     .requests-btn--search:hover {
-        background: #9eb812;
+        background: #c3d010;
         color: #0a1347;
     }
     .requests-filter-bar {
@@ -663,13 +663,13 @@
     }
     .request-btn--approve,
     .request-btn--escalate {
-        border: 1px solid #91bf14;
-        background: #b2cd16;
+        border: 1px solid #c3d010;
+        background: #d4e21a;
         color: #0a1347;
     }
     .request-btn--approve:hover,
     .request-btn--escalate:hover {
-        background: #9eb812;
+        background: #c3d010;
         color: #0a1347;
     }
     .request-btn--reject {
@@ -709,16 +709,23 @@
         color: #065f46;
     }
     .request-btn--edit {
-        border: 1px solid #91bf14;
-        background: #b2cd16;
+        border: 1px solid #c3d010;
+        background: #d4e21a;
         color: #0a1347;
     }
     .request-btn--edit:hover {
-        background: #9eb812;
+        background: #c3d010;
         color: #0a1347;
     }
     .request-existing-files {
         display: contents;
+    }
+    .request-half-slot {
+        margin-top: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #4b5563;
+        white-space: nowrap;
     }
     .request-status-cell {
         min-width: 120px;

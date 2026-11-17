@@ -33,6 +33,7 @@
         <tr><th>Leave type</th><td>{{ $leaveRequest->leave_type }}</td></tr>
         <tr><th>Start</th><td>{{ $leaveRequest->start_date }}</td></tr>
         <tr><th>End</th><td>{{ $leaveRequest->end_date }}</td></tr>
+        @include('emails.partials.half-day-slot', ['leaveRequest' => $leaveRequest, 'asMetaRow' => true])
         <tr><th>Working days</th><td>{{ \App\Support\LeaveDaysFormatter::format($workingDays) }}</td></tr>
         <tr><th>Remaining balance</th><td>{{ $remainingBalance }}</td></tr>
         @if (! $isManagerApplicant)

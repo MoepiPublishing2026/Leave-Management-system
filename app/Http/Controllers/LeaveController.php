@@ -667,7 +667,8 @@ public function update(Request $request, $id)
     $substantiveChange = strcasecmp((string) $leaveRequest->leave_type, (string) $payload['leave_type']) !== 0
         || Carbon::parse($leaveRequest->start_date)->toDateString() !== $payload['start_date']
         || Carbon::parse($leaveRequest->end_date)->toDateString() !== $payload['end_date']
-        || (bool) $leaveRequest->is_half_day !== (bool) $payload['is_half_day'];
+        || (bool) $leaveRequest->is_half_day !== (bool) $payload['is_half_day']
+        || (string) ($leaveRequest->half_day_period ?? '') !== (string) ($payload['half_day_period'] ?? '');
 
     $wasRecommended = strtolower(trim((string) $leaveRequest->status)) === 'pending_senior'
         && ! $leaveRequest->isManagerApplicant()
@@ -731,6 +732,7 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
         'end_date' => $halfDay ? 'nullable|date|after_or_equal:start_date' : 'required|date|after_or_equal:start_date',
         'important_comment' => 'required|string|min:3|max:512',
         'half_day' => 'nullable|boolean',
+        'half_day_period' => $halfDay ? 'required|in:morning,afternoon' : 'nullable|in:morning,afternoon',
         'file_uploads' => ($requiresProofAtSubmit && ! $hasExistingFiles) ? 'required|array|min:1' : 'nullable|array',
         'file_uploads.*' => 'file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx',
     ];
@@ -739,6 +741,8 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
         'leave_type.required' => 'Please select a type of leave.',
         'important_comment.required' => 'Please provide a reason for this leave request.',
         'important_comment.min' => 'Please provide a valid reason (at least 3 characters).',
+        'half_day_period.required' => 'Please choose a half-day period: 08:00 – 12:00 or 12:00 – 17:00.',
+        'half_day_period.in' => 'Please choose a half-day period: 08:00 – 12:00 or 12:00 – 17:00.',
         'file_uploads.required' => 'Proof (attachment) is required for this type of leave.',
         'file_uploads.min' => 'Please attach at least one supporting document.',
         'file_uploads.*.max' => 'Each attachment must be 10 MB or smaller.',
@@ -766,6 +770,13 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
 
     if ($halfDay) {
         $validated['end_date'] = $validated['start_date'];
+        if (! \App\Support\LeaveWorkdayRules::isValidHalfDayPeriod($validated['half_day_period'] ?? null)) {
+            return redirect()->back()
+                ->withErrors(['half_day_period' => 'Please choose a half-day period: 08:00 – 12:00 or 12:00 – 17:00.'])
+                ->withInput();
+        }
+    } else {
+        $validated['half_day_period'] = null;
     }
 
     $startDate = Carbon::parse($validated['start_date']);
@@ -774,6 +785,15 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
     if ($existing && $startDate->lt(Carbon::today()) && $startDate->toDateString() !== Carbon::parse($existing->start_date)->toDateString()) {
         return redirect()->back()
             ->withErrors(['start_date' => 'A new start date cannot be in the past.'])
+            ->withInput();
+    }
+
+    $existingStart = ($existing && $existing->start_date)
+        ? Carbon::parse($existing->start_date)
+        : null;
+    if (! \App\Support\LeaveWorkdayRules::canApplyStartingOn($startDate, null, $existingStart, (string) $leaveType)) {
+        return redirect()->back()
+            ->withErrors(['start_date' => \App\Support\LeaveWorkdayRules::sameDayApplyBlockedMessage((string) $leaveType)])
             ->withInput();
     }
 
@@ -885,6 +905,9 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
 
     unset($validated['half_day']);
     $validated['is_half_day'] = $halfDay;
+    if (! $halfDay) {
+        $validated['half_day_period'] = null;
+    }
 
     return $validated;
 }
@@ -1163,13 +1186,8 @@ public function withdraw($id)
         ->firstOrFail();
 
     if (! $leaveRequest->canBeWithdrawnByEmployee()) {
-        $leavePeriodPassed = $leaveRequest->end_date
-            && Carbon::parse($leaveRequest->end_date)->startOfDay()->lt(Carbon::today());
-        $message = $leavePeriodPassed
-            ? 'This leave can no longer be withdrawn because all of its leave days have passed.'
-            : 'Only pending or approved leave can be withdrawn.';
-
-        return redirect()->route($this->myRequestsRoute())->with('error', $message);
+        return redirect()->route($this->myRequestsRoute())
+            ->with('error', \App\Support\LeaveWorkdayRules::withdrawBlockedMessage($leaveRequest));
     }
 
     $previousStatus = strtolower(trim((string) $leaveRequest->status));

@@ -39,7 +39,7 @@
             left: 0;
             right: 0;
             height: 5px;
-            background: linear-gradient(90deg, #b2cd16 0%, #9ef755 100%);
+            background: linear-gradient(90deg, #d4e21a 0%, #9ef755 100%);
         }
         .login-logo { text-align: center; margin-bottom: 20px; }
         .login-logo img { height: 170px; width: auto; max-width: 100%; }
@@ -72,7 +72,7 @@
         }
         input:focus {
             outline: none;
-            border-color: #b2cd16;
+            border-color: #d4e21a;
             background: white;
             box-shadow: 0 0 0 3px rgba(178, 205, 22, 0.1);
         }
@@ -89,12 +89,12 @@
             transition: color 0.3s ease;
         }
         .toggle-password:hover svg {
-            stroke: #b2cd16;
+            stroke: #d4e21a;
         }
         .toggle-password svg {
             width: 22px;
             height: 22px;
-            stroke: #b2cd16;
+            stroke: #d4e21a;
             transition: stroke 0.3s ease;
         }
         
@@ -108,7 +108,7 @@
             border-radius: 10px;
             cursor: pointer;
             border: none;
-            background: linear-gradient(135deg, #b2cd16 0%, #9ef755 100%);
+            background: linear-gradient(135deg, #d4e21a 0%, #9ef755 100%);
             color: white;
             margin-top: 10px;
             transition: all 0.3s ease;
@@ -150,7 +150,7 @@
         }
 
         .links a {
-            color: #b2cd16;
+            color: #d4e21a;
             font-weight: 600;
             text-decoration: none;
             font-size: 14px;
@@ -165,7 +165,7 @@
             left: 0;
             width: 0;
             height: 2px;
-            background: #b2cd16;
+            background: #d4e21a;
             transition: width 0.3s ease;
         }
 

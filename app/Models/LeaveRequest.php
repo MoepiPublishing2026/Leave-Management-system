@@ -14,7 +14,7 @@ class LeaveRequest extends Model
 
     protected $fillable = [
         'user_id',
-        'leave_type', 'start_date', 'end_date', 'is_half_day', 'status', 'file_uploads', 'important_comment',
+        'leave_type', 'start_date', 'end_date', 'is_half_day', 'half_day_period', 'status', 'file_uploads', 'important_comment',
         'original_leave_type', 'converted_to_unpaid_at', 'converted_to_unpaid_reason',
         'manager_recommendation', 'manager_recommendation_comment', 'recommended_by', 'recommended_at',
         'pending_review_reminder_stage', 'last_pending_review_reminder_at',
@@ -128,17 +128,7 @@ class LeaveRequest extends Model
 
     public function canBeWithdrawnByEmployee(): bool
     {
-        $status = strtolower(trim((string) ($this->status ?? '')));
-
-        if (! in_array($status, ['pending', 'pending_senior', 'approved'], true)) {
-            return false;
-        }
-
-        if (! $this->end_date) {
-            return false;
-        }
-
-        return Carbon::parse($this->end_date)->startOfDay()->gte(Carbon::today());
+        return \App\Support\LeaveWorkdayRules::canWithdraw($this);
     }
 
     public function canBeDeletedByEmployee(): bool
@@ -217,6 +207,8 @@ class LeaveRequest extends Model
                     : (($this->start_date && $this->end_date) ? LeaveWorkingDays::count($this) : '')
             ),
             'isHalfDay' => (bool) $this->is_half_day,
+            'halfDayPeriod' => (string) ($this->half_day_period ?? ''),
+            'halfDayPeriodLabel' => \App\Support\LeaveWorkdayRules::halfDayPeriodLabel($this->half_day_period),
         ];
     }
 }

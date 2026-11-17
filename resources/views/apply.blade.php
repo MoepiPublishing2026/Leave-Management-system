@@ -269,6 +269,44 @@
   .half-day-row label { margin-bottom: 0 !important; }
   .half-day-row input[type="checkbox"] { width: 13px; height: 13px; margin: 0; accent-color: #a0b026; }
 
+  .half-day-period-row {
+      flex-basis: 100% !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 8px;
+  }
+  .half-day-period-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+  }
+  .half-day-period-label .req { color: #c91919; }
+  .half-day-period-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+  }
+  .half-day-period-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0 !important;
+      font-size: 13px;
+      font-weight: 600;
+      color: #222;
+      cursor: pointer;
+  }
+  .half-day-period-option input[type="radio"] {
+      width: auto !important;
+      margin: 0;
+      accent-color: #d4e21a;
+  }
+  .half-day-period-row .field-error {
+      margin: 0;
+      color: #c91919;
+      font-size: 12px;
+  }
+
   /* ---------- Attachments ---------- */
   .file-upload-wrap {
       flex: 1 1 100% !important;
@@ -578,6 +616,30 @@ label[for="important_comment"] {
             <label for="half_day">Half-Day Request (End Date will be ignored)</label>
         </div>
 
+        @php
+            $halfDayPeriodOld = old('half_day_period', isset($editingLeave) ? ($editingLeave->half_day_period ?? '') : '');
+            $halfDayPeriods = \App\Support\LeaveWorkdayRules::halfDayPeriods();
+        @endphp
+        <div class="input-group half-day-period-row" id="half_day_period_row" hidden>
+            <span class="half-day-period-label">Half-day period <span class="req">*</span></span>
+            <div class="half-day-period-options" role="radiogroup" aria-label="Half-day period">
+                @foreach ($halfDayPeriods as $periodValue => $periodLabel)
+                    <label class="half-day-period-option">
+                        <input
+                            type="radio"
+                            name="half_day_period"
+                            value="{{ $periodValue }}"
+                            {{ $halfDayPeriodOld === $periodValue ? 'checked' : '' }}
+                        >
+                        <span>{{ $periodLabel }}</span>
+                    </label>
+                @endforeach
+            </div>
+            @error('half_day_period')
+                <p class="field-error">{{ $message }}</p>
+            @enderror
+        </div>
+
         <div class="input-group file-upload-wrap">
             <div class="file-upload-header">
                 <span class="file-upload-title">Attachments</span>
@@ -771,17 +833,36 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const halfDayCheckbox = document.getElementById('half_day');
+    const halfDayPeriodRow = document.getElementById('half_day_period_row');
+    const halfDayPeriodInputs = () => Array.from(document.querySelectorAll('input[name="half_day_period"]'));
 
-    halfDayCheckbox.addEventListener('change', function() {
+    function syncHalfDayPeriodUi() {
         const endDateInput = document.getElementById('end_date');
-        if (this.checked) {
-            endDateInput.value = '';
-            endDateInput.disabled = true;
-        } else {
-            endDateInput.disabled = false;
+        const checked = !!(halfDayCheckbox && halfDayCheckbox.checked && !halfDayCheckbox.disabled);
+        if (endDateInput) {
+            if (checked) {
+                endDateInput.value = '';
+                endDateInput.disabled = true;
+            } else {
+                endDateInput.disabled = false;
+            }
         }
-    });
-    halfDayCheckbox.dispatchEvent(new Event('change'));
+        if (halfDayPeriodRow) {
+            halfDayPeriodRow.hidden = !checked;
+        }
+        halfDayPeriodInputs().forEach((input) => {
+            input.disabled = !checked;
+            input.required = checked;
+            if (!checked) {
+                input.checked = false;
+            }
+        });
+    }
+
+    if (halfDayCheckbox) {
+        halfDayCheckbox.addEventListener('change', syncHalfDayPeriodUi);
+        syncHalfDayPeriodUi();
+    }
 
     const leaveForm = document.querySelector('form.leave-form');
     const fileUploadContainer = document.getElementById('file-upload-container');
@@ -1009,6 +1090,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             halfDayCheckbox.disabled = false;
         }
+        syncHalfDayPeriodUi();
     }
     leaveTypeSelect.addEventListener('change', updateHalfDayEligibility);
     updateHalfDayEligibility();
@@ -1164,6 +1246,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (!startDate || (!endDate && !halfDay)) {
             showError('Please select both start and end dates.');
+            return;
+        }
+        if (halfDay && !halfDayPeriodInputs().some((input) => input.checked)) {
+            showError('Please choose a half-day period: 08:00 – 12:00 or 12:00 – 17:00.');
             return;
         }
         if (comment.length < 3) {

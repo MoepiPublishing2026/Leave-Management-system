@@ -49,9 +49,9 @@
         box-sizing: border-box;
     }
     .request-details-popup .swal2-confirm {
-        background: #b2cd16 !important;
+        background: #d4e21a !important;
         color: #0a1347 !important;
-        border: 1px solid #91bf14 !important;
+        border: 1px solid #c3d010 !important;
         border-radius: 10px !important;
         font-weight: 700 !important;
         font-size: 0.92rem !important;
@@ -60,7 +60,7 @@
         box-shadow: 0 2px 6px rgba(15, 61, 46, 0.12) !important;
     }
     .request-details-popup .swal2-confirm:hover {
-        background: #9eb812 !important;
+        background: #c3d010 !important;
         color: #0a1347 !important;
     }
     .request-details-popup .swal2-confirm:focus {
@@ -365,18 +365,18 @@
         font-size: 13px;
         line-height: 1.35;
         font-weight: 400;
-        color: #9aa3af;
+        color: #111111;
     }
     html body .rd-senior-name {
         font-size: 15px;
-        font-weight: 400;
-        color: #6f7884;
+        font-weight: 700;
+        color: #111111;
     }
     html body .rd-senior-meta {
         margin-top: 2px;
         font-size: 13px;
         font-weight: 400;
-        color: #8b95a3;
+        color: #111111;
     }
     html body .rd-senior-rule {
         height: 3px;
@@ -401,8 +401,8 @@
     html body .rd-senior-label {
         margin: 18px 0 8px;
         font-size: 15px;
-        font-weight: 400;
-        color: #6f7884;
+        font-weight: 600;
+        color: #111111;
     }
     html body .rd-senior-kicker + .rd-senior-label {
         margin-top: 0;
@@ -418,12 +418,12 @@
         display: inline-flex;
         align-items: center;
         padding: 6px 14px;
-        border: 1px solid #e1e6ec;
+        border: 1px solid #d1d5db;
         border-radius: 999px;
         background: #f7f8fa;
-        color: #8b95a3;
+        color: #111111;
         font-size: 13px;
-        font-weight: 400;
+        font-weight: 600;
     }
     html body .rd-senior-request,
     html body .rd-senior-copy,
@@ -432,7 +432,7 @@
         font-size: 13.5px;
         line-height: 1.5;
         font-weight: 400;
-        color: #8b95a3;
+        color: #111111;
     }
     html body .rd-senior-alert {
         margin-top: 16px;
@@ -464,13 +464,13 @@
         font-weight: 700;
         letter-spacing: 0.04em;
         text-transform: uppercase;
-        color: #9aa3af;
+        color: #111111;
     }
     .rd-senior-table td {
         text-align: right;
         font-size: 14px;
         font-weight: 800;
-        color: #243044;
+        color: #111111;
     }
     .rd-senior-messages {
         display: flex;
@@ -590,7 +590,7 @@
     html body button.swal2-confirm.calendar-day-close,
     html body .cal-day-close,
     html body button.cal-day-close {
-        background: #a2b222 !important;
+        background: #d4e21a !important;
         color: #263041 !important;
         font-weight: 700 !important;
         font-size: 18px !important;
@@ -617,7 +617,7 @@
     html body button.swal2-confirm.calendar-day-close:hover,
     html body .cal-day-close:hover,
     html body button.cal-day-close:hover {
-        background: #8d9c1c !important;
+        background: #c3d010 !important;
         color: #263041 !important;
     }
     .rd-modal--proto {
@@ -737,13 +737,13 @@
     }
     
   .rd-chip-k {
-    font-size: 0.72rem;       /* ← smaller label text */
+    font-size: 0.72rem;       /* ? smaller label text */
     font-weight: 500;
     color: #1e293b;
     margin-right: 6px;
 }
 .rd-chip-v {
-    font-size: 0.72rem;       /* ← value text size */
+    font-size: 0.72rem;       /* ? value text size */
     font-weight: 500;
     word-break: break-word;
 }
@@ -757,7 +757,7 @@
         padding: 0;
         border: 0;
         background: none;
-        color: #a2b222;
+        color: #d4e21a;
         font-weight: 700;
         font-size: inherit;
         cursor: pointer;
@@ -935,7 +935,7 @@
         content: "";
         display: block;
         height: 4px;
-        background: linear-gradient(90deg, #0f766e 0%, #16a085 45%, #b2cd16 100%);
+        background: linear-gradient(90deg, #0f766e 0%, #16a085 45%, #d4e21a 100%);
     }
     .attachment-preview-popup .swal2-title {
         padding: 16px 20px 8px !important;
@@ -964,9 +964,9 @@
     }
     .attachment-preview-popup .attachment-preview-btn-download,
     .attachment-preview-popup .swal2-confirm {
-        background: #b2cd16 !important;
+        background: #d4e21a !important;
         color: #0a1347 !important;
-        border: 1px solid #91bf14 !important;
+        border: 1px solid #c3d010 !important;
         border-radius: 8px !important;
         font-weight: 700 !important;
         box-shadow: none !important;
@@ -1050,7 +1050,7 @@
     .attachment-preview-container { z-index: 10200 !important; }
     /* Gap above the Attachment box */
 .rd-fields > .rd-chip-row + .rd-chip--full {
-    margin-top: 16px;         /* ← space above Attachment (increase for more) */
+    margin-top: 16px;         /* ? space above Attachment (increase for more) */
 }
 
     @media (max-width: 768px) {

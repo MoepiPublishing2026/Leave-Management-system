@@ -17,7 +17,7 @@
         {{ $leaveRequest->leave_type }} leave from
         {{ \Carbon\Carbon::parse($leaveRequest->start_date)->format('d M Y') }}
         to
-        {{ \Carbon\Carbon::parse($leaveRequest->end_date)->format('d M Y') }}.
+        {{ \Carbon\Carbon::parse($leaveRequest->end_date)->format('d M Y') }}@include('emails.partials.half-day-slot', ['leaveRequest' => $leaveRequest, 'asInline' => true]).
     </p>
     @if ($wasApproved)
         <p style="margin:0 0 16px;">The leave balance previously used by this approval is now available to the applicant again.</p>

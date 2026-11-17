@@ -24,7 +24,7 @@
             height: 90px;
             background-color: #ffffff !important;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             flex-wrap: nowrap;
             padding: 0 20px;
@@ -60,11 +60,18 @@
             display: flex;
             gap: 6px;
             align-items: center;
+            margin-left: 0;
+        }
+        .navbar-end {
+            display: flex;
+            align-items: center;
             margin-left: auto;
+            gap: 8px;
+            min-width: 0;
         }
         nav.menu a {
-            font-weight: 700;
-            color: #5e920aff;
+            font-weight: 600;
+            color: #ffffff;
             text-decoration: none;
             padding: 9px 10px;
             border-radius: 8px;
@@ -75,14 +82,10 @@
             align-items: center;
             gap: 4px;
         }
-        nav.menu a.active, nav.menu a:hover {
-            background-color: #eff106;
-            color: #0a1347;
-        }
-        /* Ensure hover wins if other CSS overrides it */
+        nav.menu a.active,
         nav.menu a:hover {
-            background-color: #eff106 !important;
-            color: #0a1347 !important;
+            background-color: transparent;
+            color: #c4d82e;
         }
 
         /* Notification dropdown */
@@ -92,8 +95,8 @@
             align-items: center;
         }
         .nav-item.dropdown > a {
-            font-weight: 700;
-            color: #5e920aff;
+            font-weight: 600;
+            color: #ffffff;
             text-decoration: none;
             padding: 9px 10px;
             border-radius: 8px;
@@ -105,8 +108,8 @@
         }
         .nav-item.dropdown > a:hover,
         .nav-item.dropdown > a:focus {
-            background-color: #eff106 !important;
-            color: #0a1347 !important;
+            background-color: transparent !important;
+            color: #c4d82e !important;
         }
 
         .badge-notification {
@@ -117,7 +120,7 @@
             height: 18px;
             padding: 0 6px;
             border-radius: 999px;
-            background: #4c8615ff;
+            background: #a8bc1e;
             color: white;
             font-size: 11px;
             font-weight: 800;
@@ -283,7 +286,7 @@
             background-color: #f0f2f7;
         }
 
-        /* Main content below navbar â€” scroll offset handled by ui-consistency.css */
+        /* Main content below navbar — scroll offset handled by ui-consistency.css */
         main,
         main.content {
             padding: 40px;
@@ -304,17 +307,25 @@
                 height: 40px;
                 max-width: 200px;
             }
-            /* Mobile navbar: hamburger left, small logo right (profile hidden) */
+            /* Mobile navbar: logo left, hamburger right */
             .navbar-logo {
                 display: flex;
-                margin-left: auto;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
                 cursor: pointer;
             }
             .navbar-logo img { height: 40px; max-width: 200px; }
             .navbar-profile { display: none; }
+            .navbar-end,
+            .navbar-utilities { display: none !important; }
             nav.menu { display: none; }
-            .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
-            .mobile-menu-btn { margin-right: auto; }
+            .mobile-menu-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                margin-left: auto !important;
+                margin-right: 0 !important;
+            }
             main,
             main.content {
                 padding: 18px;
@@ -365,57 +376,39 @@
         html body header.navbar .navbar-logo { gap:6px !important; letter-spacing:0 !important; }
         html body header.navbar .logo-text { margin-left:0 !important; }
         
-        /* ===== Prototype match: notifications dropdown ===== */
-        html body .dropdown-menu.notifications-dropdown {
-            min-width: 360px;
-            max-width: 360px;
-            max-height: 240px;
-            border: 0;
-            border-radius: 10px;
-            padding: 0;
-            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.2);
-            scrollbar-width: thin;
-            scrollbar-color: #b8c2c2 #eef2f2;
+        /* Notifications dropdown styled via ui-consistency.css (prototype match) */
+        .notif-bell {
+            position: static;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            width: auto;
+            height: auto;
         }
-        html body .dropdown-menu.notifications-dropdown .dropdown-header {
-            font-size: 13px;
-            font-weight: 700;
-            color: #1e293b;
-            padding: 8px 12px;
-            border-bottom: 1px solid #9aa5a5;
-            background: #fff;
-        }
-        html body .dropdown-menu.notifications-dropdown .notification-dropdown-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 8px 12px;
-            background: #fff;
-        }
-        html body .dropdown-menu.notifications-dropdown .notification-dropdown-item:hover {
-            background: rgba(212, 225, 24, 0.15);
-        }
-        html body .dropdown-menu.notifications-dropdown .notification-dropdown-message {
-            flex: 1 1 auto;
-            font-size: 12px;
-            font-weight: 700;
-            line-height: 1.3;
-            color: #8a9a12;
-        }
-        html body .dropdown-menu.notifications-dropdown .notification-dropdown-time {
-            flex: 0 0 auto;
-            font-size: 11px;
-            font-weight: 500;
-            color: #475569;
-            white-space: nowrap;
-        }
-        html body .dropdown-menu.notifications-dropdown .dropdown-divider {
+        .notif-bell .badge-notification {
+            position: static;
+            top: auto;
+            right: auto;
             margin: 0;
-            border-top: 1px solid #9aa5a5;
-            opacity: 0.6;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            font-size: 12px;
+            background: #a8bc1e;
+            color: #ffffff;
+            pointer-events: none;
         }
-
+        #notificationsDropdown {
+            color: #ffffff;
+        }
+        #notificationsDropdown .notif-bell svg {
+            fill: currentColor;
+        }
+        #notificationsDropdown:hover,
+        #notificationsDropdown:focus,
+        .nav-item.dropdown.show > #notificationsDropdown {
+            color: #c4d82e;
+        }
         #notificationsDropdown::after,
         #notificationsDropdown.dropdown-toggle::after {
             display: inline-block !important;
@@ -425,6 +418,11 @@
             border-right: 0.32em solid transparent !important;
             border-bottom: 0 !important;
             border-left: 0.32em solid transparent !important;
+        }
+        #notificationsDropdown.dropdown-toggle:hover::after,
+        #notificationsDropdown.dropdown-toggle:focus::after,
+        .nav-item.dropdown.show > #notificationsDropdown.dropdown-toggle::after {
+            border-top-color: #c4d82e !important;
         }
     </style>
     <!-- Bootstrap CSS -->
@@ -454,12 +452,10 @@
     @stack('styles')
     @include('partials.dashboard-status-card-styles')
     @yield('head')
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261117align"/>
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261117msgbadge"/>
 </head>
 <body class="role-manager">
     <header class="navbar" role="banner">
-        <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
-
         <a class="navbar-logo" href="{{ route('manager.dashboard') }}" aria-label="Go to dashboard">
             <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
             <span class="logo-text">MOEPI</span>
@@ -475,8 +471,10 @@
             }
         @endphp
 
-        <nav class="menu" aria-label="Primary Navigation">
-            @include('partials.nav-links-manager')
+        <div class="navbar-end">
+            <nav class="menu" aria-label="Primary Navigation">
+                @include('partials.nav-links-manager')
+            </nav>
 
             @auth
             @php
@@ -487,14 +485,15 @@
             <div class="navbar-utilities">
                 <div class="nav-item dropdown">
                     <a href="#" id="notificationsDropdown" class="nav-link position-relative dropdown-toggle"
-                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="#5e920a" viewBox="0 0 24 24">
-                            <path d="M12 2C8.13401 2 5 5.13401 5 9V16L3.29289 17.7071C2.90237 18.0976 3.02331 18.7069 3.53033 18.8944C3.73765 18.9712 3.96214 19 4.18534 19H19.8147C20.0379 19 20.2624 18.9712 20.4697 18.8944C20.9767 18.7069 21.0976 18.0976 20.7071 17.7071L19 16V9C19 5.13401 15.866 2 12 2ZM7 9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V17H7V9ZM12 22C13.1046 22 14 21.1046 14 20H10C10 21.1046 10.8954 22 12 22Z"/>
-                        </svg>
-
-                        @if($notificationCount > 0)
-                            <span class="badge-notification">{{ $notificationCount }}</span>
-                        @endif
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                        <span class="notif-bell">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 2C8.13401 2 5 5.13401 5 9V16L3.29289 17.7071C2.90237 18.0976 3.02331 18.7069 3.53033 18.8944C3.73765 18.9712 3.96214 19 4.18534 19H19.8147C20.0379 19 20.2624 18.9712 20.4697 18.8944C20.9767 18.7069 21.0976 18.0976 20.7071 17.7071L19 16V9C19 5.13401 15.866 2 12 2ZM7 9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V17H7V9ZM12 22C13.1046 22 14 21.1046 14 20H10C10 21.1046 10.8954 22 12 22Z"/>
+                            </svg>
+                            @if($notificationCount > 0)
+                                <span class="badge-notification">{{ $notificationCount }}</span>
+                            @endif
+                        </span>
                     </a>
 
                     @include('partials.navbar-notifications-dropdown')
@@ -522,7 +521,9 @@
                 </div>
             </div>
             @endauth
-        </nav>
+        </div>
+
+        <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
     </header>
 
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>

@@ -58,9 +58,9 @@
     }
     .dashboard-period-filter__btn {
         padding: 8px 14px;
-        border: 1px solid #91bf14;
+        border: 1px solid #c3d010;
         border-radius: 8px;
-        background: #b2cd16;
+        background: #d4e21a;
         color: #0a1347;
         font-family: inherit;
         font-size: 0.88rem;
@@ -69,7 +69,7 @@
         transition: background-color 0.15s ease, color 0.15s ease;
     }
     .dashboard-period-filter__btn:hover {
-        background: #9eb812;
+        background: #c3d010;
         color: #0a1347;
     }
     @media (max-width: 600px) {

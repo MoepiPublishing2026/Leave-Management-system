@@ -157,7 +157,7 @@ html body .team-requests-page .request-actions,
 html body .team-requests-page .request-actions-inline { display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:flex-end; }
 html body .team-requests-page .request-btn--approve,
 html body .team-requests-page .request-actions-submitted {
-    background:#dfe98c !important; color:#3b7a1e !important; border:2px solid #a2b222 !important;
+    background:#dfe98c !important; color:#3b7a1e !important; border:2px solid #d4e21a !important;
     border-radius:14px !important; padding:10px 22px !important; font-weight:700 !important;
 }
 html body .team-requests-page .request-btn--reject {
@@ -262,9 +262,9 @@ html body .team-requests-page .requests-table td.requests-empty {
     
     /* Toolbar Search area */
     html body .requests-page .requests-btn {
-        background: #b2cd16 !important;
+        background: #d4e21a !important;
         color: #0a1347 !important;
-        border: 1px solid #91bf14 !important;
+        border: 1px solid #c3d010 !important;
         border-radius: 6px !important;
         padding: 0 16px !important;
         font-weight: 700 !important;
@@ -275,7 +275,7 @@ html body .team-requests-page .requests-table td.requests-empty {
         justify-content: center !important;
     }
     html body .requests-page .requests-btn:hover {
-        background: #9eb812 !important;
+        background: #c3d010 !important;
     }
 
     /* Filter Tabs & Payment */
@@ -422,7 +422,7 @@ html body .team-requests-page .requests-table td.requests-empty {
     html body .team-requests-page .request-actions-submitted {
         background: #dfe98c !important; 
         color: #3b7a1e !important; 
-        border: 2px solid #a2b222 !important;
+        border: 2px solid #d4e21a !important;
         border-radius: 20px !important; 
         padding: 8px 20px !important; 
         font-weight: 700 !important;
@@ -436,7 +436,7 @@ html body .team-requests-page .requests-table td.requests-empty {
     html body .team-requests-page .request-btn--approve {
         background: #dfe98c !important; 
         color: #3b7a1e !important; 
-        border: 2px solid #a2b222 !important;
+        border: 2px solid #d4e21a !important;
         border-radius: 20px !important; 
         padding: 8px 20px !important; 
         font-weight: 700 !important;
@@ -606,7 +606,12 @@ html body .team-requests-page .requests-table td.requests-empty {
                 @endphp
                 <tr class="row-click {{ $req->isOverdue() ? 'overdue-row' : '' }}" data-details='@json($details)'>
                     <td>{{ $requests->firstItem() + $index }}</td>
-                    <td>{{ $req->leave_type }}</td>
+                    <td>
+                        {{ $req->leave_type }}
+                        @if (!empty($req->is_half_day))
+                            <div class="request-half-slot">Half day{{ ($details['halfDayPeriodLabel'] ?? '') !== '' ? ': '.$details['halfDayPeriodLabel'] : '' }}</div>
+                        @endif
+                    </td>
                     <td>{{ $employeeFull }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M') }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M') }}</td>

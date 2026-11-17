@@ -26,7 +26,7 @@
             background-color: #ffffff !important;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             flex-wrap: nowrap;
             padding: 0 20px;
             z-index: 9999;
@@ -53,12 +53,19 @@
             display: flex;
             gap: 6px;
             align-items: center;
+            margin-left: 0;
+        }
+        .navbar-end {
+            display: flex;
+            align-items: center;
             margin-left: auto;
+            gap: 8px;
+            min-width: 0;
         }
 
         nav.menu a {
-            color: #5e920aff;
-            font-weight: 700;
+            color: #ffffff;
+            font-weight: 600;
             font-size: 13px;
             text-decoration: none;
             padding: 9px 10px;
@@ -72,13 +79,8 @@
 
         nav.menu a:hover,
         nav.menu a.active {
-            background-color: #eff106;
-            color: #0a1347;
-        }
-        /* Ensure hover wins if other CSS overrides it */
-        nav.menu a:hover {
-            background-color: #eff106 !important;
-            color: #0a1347 !important;
+            background-color: transparent;
+            color: #c4d82e;
         }
         .badge-notification {
             display: inline-flex;
@@ -88,7 +90,7 @@
             height: 18px;
             padding: 0 6px;
             border-radius: 999px;
-            background: #4c8615ff;
+            background: #a8bc1e;
             color: white;
             font-size: 11px;
             font-weight: 800;
@@ -102,8 +104,8 @@
             align-items: center;
         }
         .nav-item.dropdown > a {
-            font-weight: 700;
-            color: #5e920aff;
+            font-weight: 600;
+            color: #ffffff;
             text-decoration: none;
             padding: 9px 10px;
             border-radius: 8px;
@@ -115,8 +117,8 @@
         }
         .nav-item.dropdown > a:hover,
         .nav-item.dropdown > a:focus {
-            background-color: #eff106 !important;
-            color: #0a1347 !important;
+            background-color: transparent !important;
+            color: #c4d82e !important;
         }
 
         .navbar-utilities {
@@ -138,39 +140,51 @@
             border-bottom: 0;
             border-left: 0.32em solid transparent;
         }
-        .navbar-utilities .nav-item.dropdown .badge-notification {
-            position: absolute;
-            top: 4px;
-            right: 18px;
-            margin-left: 0;
-            min-width: 17px;
-            height: 17px;
-            padding: 0 5px;
-            font-size: 10px;
+        .navbar-utilities .notif-bell {
+            position: static;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            width: auto;
+            height: auto;
+        }
+        .navbar-utilities .notif-bell .badge-notification {
+            position: static;
+            top: auto;
+            right: auto;
+            margin: 0;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            font-size: 12px;
+            background: #a8bc1e;
+            color: #ffffff;
             pointer-events: none;
+        }
+        #notificationsDropdown {
+            color: #ffffff;
+        }
+        #notificationsDropdown .notif-bell svg {
+            fill: currentColor;
+        }
+        #notificationsDropdown:hover,
+        #notificationsDropdown:focus,
+        .nav-item.dropdown.show > #notificationsDropdown {
+            color: #c4d82e;
+        }
+        #notificationsDropdown.dropdown-toggle::after {
+            border-top-color: #ffffff;
+        }
+        #notificationsDropdown.dropdown-toggle:hover::after,
+        #notificationsDropdown.dropdown-toggle:focus::after,
+        .nav-item.dropdown.show > #notificationsDropdown.dropdown-toggle::after {
+            border-top-color: #c4d82e;
         }
         .navbar-utilities .navbar-profile {
             margin-left: 12px;
         }
 
-        .dropdown-menu.notifications-dropdown {
-            min-width: 420px;
-            max-height: 350px;
-            overflow-y: auto;
-            padding: 0;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .dropdown-menu.notifications-dropdown .dropdown-header {
-            font-weight: 700;
-            text-align: center;
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            background: #ffffff;
-        }
-        .dropdown-menu.notifications-dropdown .dropdown-item {
-            white-space: normal;
-        }
+        /* Notifications dropdown styled via ui-consistency.css (prototype match) */
         .mobile-menu-btn {
             display: none;
             border: none;
@@ -317,7 +331,7 @@
             display: none;
         }
 
-        /* Main content below navbar â€” scroll offset handled by ui-consistency.css */
+        /* Main content below navbar — scroll offset handled by ui-consistency.css */
         main.content {
             padding: 24px;
             max-width: 1500px;
@@ -337,14 +351,23 @@
                 height: 40px;
                 max-width: 200px;
             }
-            /* Mobile navbar: hamburger left, logo right (profile hidden) */
-            header.navbar .logo {
+            /* Mobile navbar: logo left, hamburger right */
+            .navbar-logo {
                 display: flex;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
             }
             .navbar-profile { display: none; }
-            .navbar-utilities { display: none; }
+            .navbar-end,
+            .navbar-utilities { display: none !important; }
             nav.menu { display: none; }
-            .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
+            .mobile-menu-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                margin-left: auto !important;
+                margin-right: 0 !important;
+            }
             main.content {
                 padding: 18px;
                 max-width: 100%;
@@ -387,7 +410,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261117align" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261117msgbadge" />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -421,8 +444,6 @@
 </head>
 <body class="role-admin">
     <header class="navbar" role="banner">
-        <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
-
         <a class="navbar-logo" href="{{ route('admin.dashboard') }}" aria-label="Go to dashboard">
             <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
             <span class="logo-text">MOEPI</span>
@@ -438,8 +459,10 @@
             }
         @endphp
 
-        <nav class="menu" role="navigation" aria-label="Primary Navigation">
-            @include('partials.nav-links-admin')
+        <div class="navbar-end">
+            <nav class="menu" role="navigation" aria-label="Primary Navigation">
+                @include('partials.nav-links-admin')
+            </nav>
 
             @auth
             @php
@@ -450,13 +473,14 @@
                 <div class="nav-item dropdown">
                     <a href="#" id="notificationsDropdown" class="nav-link position-relative dropdown-toggle"
                        role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="#5e920a" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M12 2C8.13401 2 5 5.13401 5 9V16L3.29289 17.7071C2.90237 18.0976 3.02331 18.7069 3.53033 18.8944C3.73765 18.9712 3.96214 19 4.18534 19H19.8147C20.0379 19 20.2624 18.9712 20.4697 18.8944C20.9767 18.7069 21.0976 18.0976 20.7071 17.7071L19 16V9C19 5.13401 15.866 2 12 2ZM7 9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V17H7V9ZM12 22C13.1046 22 14 21.1046 14 20H10C10 21.1046 10.8954 22 12 22Z"/>
-                        </svg>
-
-                        @if($notificationCount > 0)
-                            <span class="badge-notification">{{ $notificationCount }}</span>
-                        @endif
+                        <span class="notif-bell">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 2C8.13401 2 5 5.13401 5 9V16L3.29289 17.7071C2.90237 18.0976 3.02331 18.7069 3.53033 18.8944C3.73765 18.9712 3.96214 19 4.18534 19H19.8147C20.0379 19 20.2624 18.9712 20.4697 18.8944C20.9767 18.7069 21.0976 18.0976 20.7071 17.7071L19 16V9C19 5.13401 15.866 2 12 2ZM7 9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V17H7V9ZM12 22C13.1046 22 14 21.1046 14 20H10C10 21.1046 10.8954 22 12 22Z"/>
+                            </svg>
+                            @if($notificationCount > 0)
+                                <span class="badge-notification">{{ $notificationCount }}</span>
+                            @endif
+                        </span>
                     </a>
 
                     @include('partials.navbar-notifications-dropdown')
@@ -483,7 +507,9 @@
                 </div>
             </div>
             @endauth
-        </nav>
+        </div>
+
+        <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
     </header>
 
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>

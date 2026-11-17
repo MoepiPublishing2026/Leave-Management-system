@@ -13,20 +13,25 @@
 @include('partials.content-page-styles')
 <style>
     .app-page.profile-page {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 24px 4px 32px;
+        max-width: none;
+        width: 100%;
+        margin: 0;
+        padding: 0 0 32px;
         color: #243044;
         font-family: "Poppins", "Segoe UI", sans-serif;
         box-sizing: border-box;
     }
     html body main .profile-page h1 {
-        margin: 0 0 6px;
+        margin: 0 0 16px 0 !important;
+        padding-left: 0 !important;
         color: #243044;
-        font-size: 32px;
+        font-size: 38px;
         font-weight: 700;
-        letter-spacing: -0.02em;
-        line-height: 1.15;
+        letter-spacing: 0;
+        line-height: 1.2;
+        text-align: left !important;
+        width: 100% !important;
+        max-width: none !important;
     }
     .profile-page .app-page-lead {
         margin: 0 0 22px;
@@ -173,7 +178,7 @@
         cursor: pointer;
     }
     html body main .profile-page .app-page-btn:hover {
-        background: #b2cd16 !important;
+        background: #d4e21a !important;
     }
     html body main .profile-page .app-page-btn--danger {
         background: #dc2626 !important;

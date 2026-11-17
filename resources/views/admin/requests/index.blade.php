@@ -127,7 +127,7 @@
                         'managerRecommendation' => $recLabel,
                         'managerRecommendationComment' => (string) ($req->manager_recommendation_comment ?? ''),
                     ];
-                    $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req));
+                    $details = array_merge($details, \App\Support\LeaveReviewChecklist::forRequest($req), $req->popupMeta());
 
                     if ($canDecide || LeaveProofRules::requiresProof($req->leave_type)) {
                         $details['proofDeferred'] = LeaveProofRules::allowsDeferredProof($req->leave_type) && LeaveProofRules::requiresProof($req->leave_type);
@@ -141,7 +141,12 @@
                 @endphp
                 <tr class="row-click {{ $req->isOverdue() ? 'overdue-row' : '' }}" data-details='@json($details)'>
                     <td>{{ $requests->firstItem() + $index }}</td>
-                    <td>{{ $req->leave_type }}</td>
+                    <td>
+                        {{ $req->leave_type }}
+                        @if (!empty($req->is_half_day))
+                            <div class="request-half-slot">Half day{{ ($details['halfDayPeriodLabel'] ?? '') !== '' ? ': '.$details['halfDayPeriodLabel'] : '' }}</div>
+                        @endif
+                    </td>
                     <td>{{ $applicantFull }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>

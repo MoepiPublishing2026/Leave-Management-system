@@ -10,7 +10,8 @@
     }
     .lh-sheet {
         position: relative;
-        max-width: 920px;
+        width: min(100%, 210mm);
+        max-width: 210mm;
         margin: 0 auto;
         background: #ffffff;
         border: 0;
@@ -78,10 +79,10 @@
     }
     .lh-doc-title {
         text-align: center;
-        font-size: 28px;
+        font-size: 36px;
         font-weight: 800;
-        color: #1b1e40;
-        margin: 8px 0 22px;
+        color: #263041;
+        margin: 8px 0 26px;
         letter-spacing: 0.02em;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     }
@@ -96,9 +97,19 @@
     .lh-legend,
     .lh-scores {
         width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 16px;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 22px;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+    }
+    .lh-meta {
+        border-width: 5px 2px 5px 2px;
+        border-style: solid;
+        border-color: #d6e21c;
+        box-shadow: inset 0 0 0 1px #263041;
     }
     .lh-meta th,
     .lh-meta td,
@@ -109,8 +120,8 @@
     .lh-scores th,
     .lh-scores td {
         border: 1px solid #cbd5e1;
-        padding: 8px 10px;
-        font-size: 14px;
+        padding: 12px 14px;
+        font-size: 15px;
         vertical-align: top;
         text-align: left;
     }
@@ -118,7 +129,7 @@
     .lh-id-table th,
     .lh-legend th,
     .lh-scores th {
-        background: #4F81BD;
+        background: #263041;
         color: #fff;
         font-weight: 700;
     }
@@ -128,12 +139,13 @@
     .lh-scores td:first-child,
     .lh-scores th:first-child { text-align: left; }
     .lh-scores {
-        width: min(100%, 820px);
+        width: 100%;
         border-collapse: separate;
         border-spacing: 0;
-        border: 1px solid #1a1a1a;
-        border-left: 4px solid #1a1a1a;
-        border-bottom: 4px solid #1a1a1a;
+        border-width: 2px 2px 5px 5px;
+        border-style: solid;
+        border-color: #263041;
+        box-shadow: -3px 0 0 #b5b8be, 0 3px 0 #b5b8be, -3px 3px 0 #b5b8be;
         border-radius: 12px;
         overflow: hidden;
         background: #fff;
@@ -211,31 +223,42 @@
     .lh-id-table td { min-width: 180px; }
     .lh-legend td { min-width: 170px; }
     .lh-section {
-        border: 2px solid #c6d63a;
-        border-left: 4px solid #c6d63a;
-        border-bottom: 4px solid #c6d63a;
-        margin: 16px 0;
-        max-width: 820px;
+        border-width: 5px 2px 5px 2px;
+        border-style: solid;
+        border-color: #d6e21c;
+        box-shadow: inset 0 0 0 1px #263041;
+        margin: 22px 0;
+        max-width: none;
+        width: 100%;
         background: #fff;
-        box-shadow: none;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .lh-section:nth-of-type(odd) {
+        border-width: 2px 2px 5px 5px;
+        border-color: #263041;
+        box-shadow: -3px 0 0 #b5b8be, 0 3px 0 #b5b8be, -3px 3px 0 #b5b8be;
     }
     .lh-section h2 {
         margin: 0;
         background: #fff;
         color: #243044;
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 700;
-        padding: 12px 16px;
-        border-bottom: 2px solid #c6d63a;
+        padding: 14px 18px;
+        border-bottom: 2px solid #263041;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     }
+    .lh-section:nth-of-type(odd) h2 {
+        border-bottom-color: #d6e21c;
+    }
     .lh-section-body {
-        padding: 14px 16px;
-        min-height: 64px;
+        padding: 16px 18px;
+        min-height: 72px;
         white-space: pre-wrap;
-        line-height: 1.5;
+        line-height: 1.55;
         color: #243044;
-        font-size: 14px;
+        font-size: 15px;
     }
     .lh-split {
         display: flex;
@@ -247,8 +270,8 @@
     }
     .lh-footer {
         position: relative;
-        width: calc(100% - 64px);
-        max-width: 920px;
+        width: calc(100% - 48px);
+        max-width: 210mm;
         box-sizing: border-box;
         margin: 18px auto 0;
         background: #808388;
@@ -327,7 +350,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 12px 18px;
+        padding: 12px 22px;
         border-radius: 8px;
         font-weight: 700;
         font-size: 15px;
@@ -336,9 +359,9 @@
         cursor: pointer;
         font-family: inherit;
     }
-    .lh-btn--approve { background: #16a34a; color: #fff; }
-    .lh-btn--reject { background: #dc2626; color: #fff; }
-    .lh-btn--primary { background: #4F81BD; color: #fff; }
+    .lh-btn--approve { background: #d4e21a; color: #263041; }
+    .lh-btn--reject { background: #d5253a; color: #fff; }
+    .lh-btn--primary { background: #d4e21a; color: #263041; }
     .lh-btn--disabled { background: #94a3b8; color: #fff; cursor: not-allowed; }
     .lh-flash {
         margin: 0 0 16px;
@@ -353,18 +376,20 @@
     .lh-files a {
         display: inline-block;
         margin: 0 8px 8px 0;
-        padding: 8px 12px;
-        background: #eef2ff;
-        color: #1e3a8a;
+        padding: 10px 14px;
+        background: #d6e21c;
+        color: #263041;
         font-weight: 700;
         text-decoration: none;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
+        border-radius: 8px;
     }
     .lh-reject-box {
         margin-top: 18px;
         padding: 16px;
-        border: 1px solid #fecaca;
+        border: 2px solid #d5253a;
         background: #fff7f7;
+        border-radius: 12px;
     }
     .lh-reject-box label { display: block; font-weight: 700; margin: 0 0 8px; }
     .lh-reject-box textarea,
@@ -381,8 +406,9 @@
         padding: 4px 10px;
         font-weight: 700;
         font-size: 0.85rem;
-        background: #dbeafe;
-        color: #1e3a8a;
+        background: #eef3c4;
+        color: #263041;
+        border-radius: 999px;
     }
     .lh-pill--ok { background: #dcfce7; color: #166534; }
     .lh-center { text-align: center; }
@@ -391,7 +417,21 @@
         overflow: hidden;
         padding: 0;
         border: 0;
+        width: min(100%, 210mm);
+        max-width: 210mm;
+        margin-left: auto;
+        margin-right: auto;
         box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
+        box-sizing: border-box;
+    }
+    @media print {
+        @page { size: A4 portrait; margin: 12mm; }
+        .lh-sheet,
+        .pr-doc {
+            width: 210mm;
+            max-width: 210mm;
+            box-shadow: none;
+        }
     }
     .pr-doc > .lh-header {
         margin: 0;

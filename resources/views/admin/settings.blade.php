@@ -9,24 +9,26 @@
     .app-page {
         box-sizing: border-box;
         width: 100%;
-        max-width: 932px;
-        margin: 0 auto;
-        padding: 0 10px 24px;
+        max-width: none;
+        margin: 0;
+        padding: 0 0 24px;
         font-family: "Poppins", "Segoe UI", Arial, sans-serif;
         color: #273449;
     }
 
     .app-page h1 {
-        margin: 0 0 5px 8px;
+        margin: 0 0 16px 0;
         color: #273449;
         font-size: 36px;
         font-weight: 700;
         line-height: 1.25;
         letter-spacing: -0.7px;
+        text-align: left;
+        padding-left: 0;
     }
 
     .app-page .app-page-lead {
-        margin: 0 0 27px 10px;
+        margin: 0 0 27px 0;
         color: #696969;
         font-size: 14px;
         font-weight: 400;

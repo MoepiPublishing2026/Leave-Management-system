@@ -14,7 +14,7 @@
     </p>
     <p style="margin:0 0 16px;">
         Original type: {{ $leaveRequest->original_leave_type ?: 'Sick' }}.
-        Dates: {{ $leaveRequest->start_date }} to {{ $leaveRequest->end_date }}.
+        Dates: {{ $leaveRequest->start_date }} to {{ $leaveRequest->end_date }}@include('emails.partials.half-day-slot', ['leaveRequest' => $leaveRequest, 'asInline' => true]).
     </p>
 
     @include('emails.partials.primary-button', ['url' => $portalUrl ?? url('/login')])

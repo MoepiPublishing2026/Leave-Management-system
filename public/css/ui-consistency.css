@@ -3,8 +3,10 @@
 
 :root {
   --ui-font-sans: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  --ui-brand-1: #b2cd16;
-  --ui-brand-2: #9ef755;
+  --ui-brand-1: #d4e21a;
+  --ui-brand-2: #c3d010;
+  --ui-lime: #d4e21a;
+  --ui-lime-dark: #c3d010;
   --ui-muted: #a0aec0;
   --ui-divider: #e2e8f0;
   --ui-shadow-brand: 0 10px 25px rgba(178, 205, 22, 0.3);
@@ -71,25 +73,26 @@ main.content::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
-/* Mobile navbar: logo left, menu button right */
+/* Mobile navbar: logo left, hamburger right */
 @media (max-width: 1200px) {
   :root {
     --navbar-height: 64px;
   }
 
   :where(nav.navbar, header.navbar) {
-    justify-content: flex-start;
-    gap: 12px;
+    justify-content: flex-start !important;
+    gap: 12px !important;
   }
 
   :where(nav.navbar, header.navbar) :where(.navbar-logo, .logo) {
-    order: 1;
+    order: 1 !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
 
   :where(nav.navbar, header.navbar) .mobile-menu-btn {
-    order: 2;
+    display: inline-flex !important;
+    order: 4 !important;
     margin-left: auto !important;
     margin-right: 0 !important;
   }
@@ -126,10 +129,11 @@ main.content {
   object-fit: contain;
 }
 
-/* Same navbar lockup on employee, manager, and senior manager pages */
+/* Same navbar on employee, manager, and senior: logo left | tabs + bell + avatar right */
 html body nav.navbar,
 html body header.navbar {
   display: flex !important;
+  flex-direction: row !important;
   align-items: center !important;
   justify-content: flex-start !important;
   flex-wrap: nowrap !important;
@@ -139,17 +143,28 @@ html body header.navbar {
   background: #263041 !important;
   border-bottom: 6px solid #c4d82e !important;
   box-shadow: none !important;
+  overflow: visible !important;
 }
 
+html body nav.navbar > .mobile-menu-btn,
+html body header.navbar > .mobile-menu-btn {
+  display: none !important;
+  order: 3 !important;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
 html body nav.navbar .navbar-logo,
 html body header.navbar .navbar-logo {
   display: flex !important;
   align-items: center !important;
   flex: 0 0 auto !important;
+  order: 1 !important;
   gap: 8px !important;
-  margin: 0 !important;
+  margin: 0 12px 0 0 !important;
   color: #fff !important;
   text-decoration: none !important;
+  position: relative !important;
+  z-index: 5 !important;
 }
 
 html body nav.navbar .navbar-logo img,
@@ -175,56 +190,130 @@ html body header.navbar .logo-text {
   white-space: nowrap !important;
 }
 
+/* One right group: menu + utilities (same on all roles) */
+html body nav.navbar > .navbar-end,
+html body header.navbar > .navbar-end {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex: 1 1 auto !important;
+  order: 2 !important;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  min-width: 0 !important;
+  gap: 8px !important;
+  overflow: visible !important;
+}
+
+html body nav.navbar .navbar-end nav.menu,
+html body header.navbar .navbar-end nav.menu,
 html body nav.navbar nav.menu,
 html body header.navbar nav.menu {
   display: flex !important;
-  flex: 0 0 auto !important;
+  flex: 1 1 auto !important;
   align-items: center !important;
   justify-content: flex-end !important;
   flex-wrap: nowrap !important;
-  gap: 6px !important;
-  margin-left: auto !important;
-  margin-right: 0 !important;
-  min-width: auto !important;
-  overflow: visible !important;
+  gap: 4px !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  scrollbar-width: none !important;
 }
-/* Keep links + bell/avatar as one right-aligned group */
-html body nav.navbar nav.menu .navbar-utilities,
-html body header.navbar nav.menu .navbar-utilities {
+html body nav.navbar nav.menu::-webkit-scrollbar,
+html body header.navbar nav.menu::-webkit-scrollbar {
+  display: none;
+}
+
+html body header.navbar .navbar-end > .navbar-utilities,
+html body nav.navbar .navbar-end > .navbar-utilities,
+html body header.navbar > .navbar-utilities,
+html body nav.navbar > .navbar-utilities {
   display: flex !important;
   align-items: center !important;
   flex: 0 0 auto !important;
-  margin-left: 8px !important;
+  margin-left: 4px !important;
   margin-right: 0 !important;
-}
-/* Senior manager: nav group ends on the same right edge as the content container */
-html body.role-admin header.navbar nav.menu,
-html body.role-admin nav.navbar nav.menu {
-  margin-left: auto !important;
-  margin-right: max(0px, calc((100% - 1040px) / 2 - 10px)) !important;
-}
-/* Only the manager bar has enough tabs to need a scrolling row */
-html body.role-manager nav.navbar nav.menu,
-html body.role-manager header.navbar nav.menu {
-  flex: 0 1 auto !important;
-  justify-content: flex-end !important;
-  gap: 6px !important;
-  margin-left: auto !important;
-  min-width: 0 !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  scrollbar-width: none !important;
-}
-html body.role-manager nav.navbar nav.menu::-webkit-scrollbar,
-html body.role-manager header.navbar nav.menu::-webkit-scrollbar {
-  display: none;
-}
-html body.role-manager nav.navbar .navbar-logo,
-html body.role-manager header.navbar .navbar-logo {
   position: relative !important;
-  z-index: 3 !important;
-  background: #263041 !important;
-  padding-right: 12px !important;
+  z-index: 40 !important;
+  pointer-events: auto !important;
+  overflow: visible !important;
+}
+html body header.navbar .navbar-utilities .nav-item.dropdown,
+html body nav.navbar .navbar-utilities .nav-item.dropdown,
+html body header.navbar .navbar-utilities .navbar-profile,
+html body nav.navbar .navbar-utilities .navbar-profile {
+  position: relative !important;
+  overflow: visible !important;
+}
+/* Bell + count + caret: count beside bell, never overlaid */
+html body header.navbar .navbar-utilities .nav-item.dropdown > a#notificationsDropdown,
+html body nav.navbar .navbar-utilities .nav-item.dropdown > a#notificationsDropdown {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  color: #ffffff !important; /* bell white until hover */
+}
+html body header.navbar .navbar-utilities .notif-bell,
+html body nav.navbar .navbar-utilities .notif-bell {
+  position: static !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: auto !important;
+  height: auto !important;
+  flex: 0 0 auto !important;
+}
+html body header.navbar .navbar-utilities .notif-bell svg,
+html body nav.navbar .navbar-utilities .notif-bell svg {
+  display: block !important;
+  flex: 0 0 auto !important;
+  fill: currentColor !important;
+  color: inherit !important;
+}
+/* Darker green so white number stays readable */
+/* All count badges (bell + Messages tab): one shade darker than lime */
+html body header.navbar .badge-notification,
+html body nav.navbar .badge-notification,
+html body header.navbar .navbar-utilities .notif-bell .badge-notification,
+html body nav.navbar .navbar-utilities .notif-bell .badge-notification,
+html body header.navbar .navbar-utilities .badge-notification,
+html body nav.navbar .navbar-utilities .badge-notification,
+html body header.navbar nav.menu .badge-notification,
+html body nav.navbar nav.menu .badge-notification {
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  left: auto !important;
+  margin-left: 6px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  padding: 0 6px !important;
+  border-radius: 999px !important;
+  background: #a8bc1e !important; /* one shade darker than lime #c4d82e */
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: none !important;
+  z-index: auto !important;
+}
+html body header.navbar .navbar-utilities .notif-bell .badge-notification,
+html body nav.navbar .navbar-utilities .notif-bell .badge-notification {
+  margin-left: 0 !important;
+}
+/* Hover: bell + caret go lime */
+html body header.navbar .navbar-utilities .nav-item.dropdown > a#notificationsDropdown:hover,
+html body nav.navbar .navbar-utilities .nav-item.dropdown > a#notificationsDropdown:hover,
+html body header.navbar .navbar-utilities .nav-item.dropdown > a#notificationsDropdown:focus,
+html body nav.navbar .navbar-utilities .nav-item.dropdown > a#notificationsDropdown:focus,
+html body header.navbar .navbar-utilities .nav-item.dropdown.show > a#notificationsDropdown,
+html body nav.navbar .navbar-utilities .nav-item.dropdown.show > a#notificationsDropdown {
+  color: #c4d82e !important;
 }
 
 html body nav.navbar nav.menu > a,
@@ -232,43 +321,43 @@ html body header.navbar nav.menu > a,
 html body nav.navbar nav.menu > .nav-item > a,
 html body header.navbar nav.menu > .nav-item > a {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
-  font-weight: 500 !important;
-  font-size: 12px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
   line-height: 1.2 !important;
   padding: 6px 7px !important;
   margin: 0 !important;
   white-space: nowrap !important;
-  color: #fff !important;
-}
-html body.role-manager nav.navbar nav.menu > a,
-html body.role-manager header.navbar nav.menu > a,
-html body.role-manager nav.navbar nav.menu > .nav-item > a,
-html body.role-manager header.navbar nav.menu > .nav-item > a {
+  color: #ffffff !important;
+  opacity: 1 !important;
   flex-shrink: 0 !important;
+  background: transparent !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease !important;
+}
+html body.role-admin header.navbar nav.menu > a,
+html body.role-manager header.navbar nav.menu > a {
+  font-size: 12px !important;
+  padding: 6px 5px !important;
+}
+html body nav.navbar nav.menu > a:hover,
+html body header.navbar nav.menu > a:hover,
+html body nav.navbar nav.menu > a.active,
+html body header.navbar nav.menu > a.active,
+html body nav.navbar nav.menu > a:focus,
+html body header.navbar nav.menu > a:focus,
+html body.role-admin header.navbar nav.menu > a:hover,
+html body.role-admin header.navbar nav.menu > a.active,
+html body.role-manager header.navbar nav.menu > a:hover,
+html body.role-manager header.navbar nav.menu > a.active {
+  color: #c4d82e !important;
+  background: transparent !important;
+  opacity: 1 !important;
 }
 
 html body nav.navbar nav.menu > .nav-item,
-html body header.navbar nav.menu > .nav-item,
-html body nav.navbar nav.menu > .navbar-profile,
-html body header.navbar nav.menu > .navbar-profile {
+html body header.navbar nav.menu > .nav-item {
   margin: 0 !important;
   flex: 0 0 auto !important;
-}
-
-html body header.navbar .navbar-utilities,
-html body nav.navbar .navbar-utilities {
-  display: flex !important;
-  align-items: center !important;
-  flex: 0 0 auto !important;
-  margin-left: 8px !important;
-  overflow: visible !important;
-  position: relative !important;
-  z-index: 5 !important;
-}
-html body header.navbar .navbar-utilities .nav-item.dropdown,
-html body header.navbar .navbar-utilities .navbar-profile {
-  position: relative !important;
-  overflow: visible !important;
 }
 
 html body nav.navbar nav.menu svg,
@@ -289,6 +378,19 @@ html body #notificationsDropdown.dropdown-toggle::after {
   border-bottom: 0 !important;
   border-left: 0.32em solid transparent !important;
 }
+html body header.navbar #notificationsDropdown.dropdown-toggle::after,
+html body nav.navbar #notificationsDropdown.dropdown-toggle::after {
+  border-top-color: #ffffff !important;
+  margin-left: 4px !important;
+}
+html body header.navbar #notificationsDropdown.dropdown-toggle:hover::after,
+html body nav.navbar #notificationsDropdown.dropdown-toggle:hover::after,
+html body header.navbar #notificationsDropdown.dropdown-toggle:focus::after,
+html body nav.navbar #notificationsDropdown.dropdown-toggle:focus::after,
+html body header.navbar .nav-item.dropdown.show > #notificationsDropdown.dropdown-toggle::after,
+html body nav.navbar .nav-item.dropdown.show > #notificationsDropdown.dropdown-toggle::after {
+  border-top-color: #c4d82e !important;
+}
 
 @media (max-width: 1200px) {
   html body nav.navbar,
@@ -298,6 +400,8 @@ html body #notificationsDropdown.dropdown-toggle::after {
     gap: 12px !important;
   }
 
+  html body nav.navbar > .navbar-end,
+  html body header.navbar > .navbar-end,
   html body nav.navbar nav.menu,
   html body header.navbar nav.menu,
   html body header.navbar .navbar-utilities,
@@ -307,9 +411,9 @@ html body #notificationsDropdown.dropdown-toggle::after {
 
   html body nav.navbar .navbar-logo,
   html body header.navbar .navbar-logo {
-    order: 1;
+    order: 1 !important;
     margin-left: 0 !important;
-    margin-right: auto !important;
+    margin-right: 0 !important;
   }
 
   html body nav.navbar .mobile-menu-btn,
@@ -317,7 +421,7 @@ html body #notificationsDropdown.dropdown-toggle::after {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    order: 2;
+    order: 2 !important;
     margin-left: auto !important;
     margin-right: 0 !important;
     color: #fff !important;
@@ -369,30 +473,32 @@ nav.menu a,
 }
 
 html body .dropdown-menu.notifications-dropdown {
-  width: 380px !important;
-  min-width: 320px !important;
-  max-width: min(380px, 92vw) !important;
-  max-height: 420px !important;
+  width: 440px !important;
+  min-width: 380px !important;
+  max-width: min(440px, 92vw) !important;
+  max-height: 260px !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
   padding: 0 !important;
-  margin-top: 8px !important;
-  border: 1px solid #e6eaf0 !important;
+  margin-top: 10px !important;
+  border: 1px solid #c5cbd3 !important;
   border-radius: 14px !important;
   background: #fff !important;
-  box-shadow: 0 16px 40px rgba(38, 49, 66, 0.18) !important;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.2) !important;
   z-index: 10050 !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #b8c2c2 #eef2f2 !important;
 }
 
 html body .dropdown-menu.notifications-dropdown .dropdown-header {
   font-weight: 700 !important;
-  text-align: left !important;
-  padding: 14px 16px !important;
+  text-align: center !important;
+  padding: 12px 16px !important;
   margin: 0 !important;
-  color: #253141 !important;
+  color: #334155 !important;
   white-space: nowrap;
   background: #fff !important;
-  border-bottom: 1px solid #e8edf2 !important;
+  border-bottom: 1px solid #d0d5db !important;
   font-size: 15px !important;
 }
 
@@ -400,7 +506,7 @@ html body .dropdown-menu.notifications-dropdown .dropdown-divider {
   margin: 0 !important;
   opacity: 1 !important;
   border: 0 !important;
-  border-top: 1px solid #eef2f6 !important;
+  border-top: 1px solid #d0d5db !important;
 }
 
 html body .dropdown-menu.notifications-dropdown .dropdown-item,
@@ -409,15 +515,15 @@ html body .dropdown-menu.notifications-dropdown .notification-dropdown-item {
   display: flex !important;
   justify-content: space-between !important;
   align-items: flex-start !important;
-  gap: 12px !important;
+  gap: 16px !important;
   white-space: normal !important;
-  padding: 12px 16px !important;
+  padding: 11px 16px !important;
   margin: 0 !important;
   font-size: 13px !important;
   font-weight: 600 !important;
-  line-height: 1.4 !important;
+  line-height: 1.35 !important;
   text-align: left !important;
-  color: #253141 !important;
+  color: #8f9f14 !important;
   background: #fff !important;
   border-radius: 0 !important;
 }
@@ -427,17 +533,18 @@ html body .dropdown-menu.notifications-dropdown .dropdown-item:focus,
 html body .dropdown-menu.notifications-dropdown a.dropdown-item:hover,
 html body .dropdown-menu.notifications-dropdown a.dropdown-item:focus,
 html body .dropdown-menu.notifications-dropdown .notification-dropdown-item:hover {
-  background: #f4f7f2 !important;
-  color: #253141 !important;
+  background: rgba(196, 216, 46, 0.12) !important;
+  color: #8f9f14 !important;
 }
 
 html body .dropdown-menu.notifications-dropdown .notification-dropdown-message {
   min-width: 0;
   flex: 1 1 auto;
   overflow-wrap: anywhere;
-  color: #253141 !important;
+  color: #8f9f14 !important;
   text-align: left !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
 }
 
 html body .dropdown-menu.notifications-dropdown .notification-dropdown-time {
@@ -447,6 +554,7 @@ html body .dropdown-menu.notifications-dropdown .notification-dropdown-time {
   color: #64748b !important;
   margin: 0;
   padding-top: 1px;
+  flex: 0 0 auto;
 }
 
 html body .dropdown-menu.notifications-dropdown .dropdown-item.text-muted {
@@ -461,25 +569,25 @@ html body .dropdown-menu.notifications-dropdown .notification-dropdown-footer {
   position: sticky;
   bottom: 0;
   background: #fff;
-  border-top: 1px solid #e8edf2;
+  border-top: 1px solid #9aa5a5;
 }
 
 html body .dropdown-menu.notifications-dropdown .notification-dropdown-all {
   display: block !important;
   width: 100% !important;
   margin: 0 !important;
-  padding: 12px 16px !important;
+  padding: 10px 14px !important;
   border-radius: 0 !important;
   background: #fff !important;
   color: #253141 !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   font-weight: 700 !important;
   text-align: center !important;
 }
 
 html body .dropdown-menu.notifications-dropdown .notification-dropdown-all:hover,
 html body .dropdown-menu.notifications-dropdown .notification-dropdown-all:focus {
-  background: #f4f7f2 !important;
+  background: rgba(212, 225, 24, 0.15) !important;
   color: #253141 !important;
 }
 
@@ -819,8 +927,9 @@ body > .signup-container {
   header.navbar nav.menu a,
   nav.navbar .nav-item.dropdown > a,
   header.navbar .nav-item.dropdown > a {
-      color: #fff !important;
-      font-weight: 400;
+      color: #ffffff !important;
+      font-weight: 600 !important;
+      opacity: 1 !important;
   }
   nav.navbar nav.menu a:hover,
   header.navbar nav.menu a:hover,
@@ -831,7 +940,8 @@ body > .signup-container {
   nav.navbar .nav-item.dropdown > a:focus,
   header.navbar .nav-item.dropdown > a:focus {
       background: transparent !important;
-      color: var(--lime) !important;
+      color: #c4d82e !important;
+      opacity: 1 !important;
   }
   nav.navbar .nav-item.dropdown svg,
   header.navbar .nav-item.dropdown svg { fill: #fff !important; }
@@ -887,7 +997,7 @@ body > .signup-container {
 .employees-page h1 { color: #263041 !important; }
 
 .add-employee-button {
-    background: #a0b021 !important;
+    background: #d4e21a !important;
     border: none !important;
     border-radius: 14px !important;
     color: #000 !important;
@@ -1031,8 +1141,8 @@ html body .mobile-sidebar-brand .logo-text {
   white-space: nowrap !important;
 }
 html body .mobile-sidebar .badge-notification {
-  background: #c4d82e;
-  color: #263041;
+  background: #a8bc1e !important;
+  color: #ffffff !important;
 }
 
 /* lime avatar */
@@ -1102,7 +1212,7 @@ main form a.btn,
 main form .btn,
 main form .btn-secondary,
 main form .back-link {
-    background: #d4e514;
+    background: #d4e21a;
     color: #000000;
     
     font-weight: 700;
@@ -1110,7 +1220,7 @@ main form .back-link {
 main form:not(.compose-form):not(.reports-filter-form):not(.reports-toolbar-forms):not(#leavePoliciesForm):not(.balance-year-form):not(.requests-search-form):not(.pr-doc) button[type="submit"]:not(.notifications-btn):not(.app-page-btn):not(.requests-btn):not(.pr-btn):hover,
 main form a.btn:hover,
 main form .btn:hover {
-    background: #d4e514;
+    background: #c3d010;
     color: #000000;
 }
 
@@ -1121,7 +1231,7 @@ main .eye-icon svg { stroke: var(--form-olive); color: var(--form-olive); }
 main input[type="checkbox"] { accent-color: var(--form-olive); }
 
 /* ===== Add / Edit employee: match prototype ===== */
-:root { --form-olive: #a2b226; --form-olive-dark: #8c9a1f; --form-grey: #767672; }
+:root { --form-olive: #d4e21a; --form-olive-dark: #c3d010; --form-grey: #767672; }
 
 /* card */
 .employee-form-card {
@@ -1226,9 +1336,9 @@ main form .back-link {
     line-height: 1.2;
     border-radius: 15px;
     cursor: pointer;
-    border: 2px solid #71781c;
+    border: 2px solid #c3d010;
     text-decoration: none;
-    background: #d4e514;
+    background: #d4e21a;
     color: #000000;
     transition: background-color 0.15s ease;
 }
@@ -1380,12 +1490,12 @@ html body .employee-create-page .signup-container .dept-option:hover { backgroun
 
 /* OK button */
 .swal2-confirm {
-    background: #a2b222 !important; color: #263041 !important;
+    background: #d4e21a !important; color: #263041 !important;
     font-weight: 700 !important; font-size: 18px !important;
     border-radius: 10px !important; padding: 10px 22px !important; min-width: 0 !important;
     box-shadow: none !important;
 }
-.swal2-confirm:hover { background: #8d9c1c !important; }
+.swal2-confirm:hover { background: #c3d010 !important; }
 
 .swal2-popup:not(:has(.swal2-icon.swal2-warning)):not(.request-details-popup):not(.attachment-preview-popup):not(.swal-approve-popup):not(.calendar-day-popup):not(:has(.cal-day-modal)):not(:has(.cal-day-title)) .swal2-confirm {
     border-width: 3px !important;
@@ -1440,8 +1550,8 @@ html body .pr-doc .pr-section h2 {
     font-size:14px; font-weight:700; margin:0; padding:12px 16px;
     border:0 !important; border-bottom:2px solid #263041 !important;
 }
-html body .pr-doc .pr-readonly { padding:14px 16px; font-size:11px; color:#555; }
-html body .pr-doc .pr-title { color:#263041; font-weight:700; }
+html body .pr-doc .pr-readonly { padding:10px 12px; font-size:13px; color:#243044; }
+html body .pr-doc .pr-title { color:#263041; font-weight:800; font-size:28px !important; }
 
 html body .pr-doc .pr-meta th {
     background: #263041 !important;
@@ -1482,8 +1592,8 @@ html body .pr-doc .pr-legend td {
     background: #fff !important;
     color: #243044 !important;
     border: 1px solid #111111 !important;
-    padding: 10px 16px !important;
-    font-size: 14px !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
     font-weight: 400 !important;
     text-align: left !important;
     white-space: nowrap !important;
@@ -1512,10 +1622,10 @@ html body .pr-doc .pr-score-heading {
     display: block !important;
     background: transparent !important;
     color: #253141 !important;
-    font-size: 22px !important;
+    font-size: 16px !important;
     font-weight: 700 !important;
     line-height: 1.2 !important;
-    margin: 0 0 12px !important;
+    margin: 0 0 8px !important;
     padding: 0 !important;
     border: 0 !important;
     text-align: left !important;
@@ -1548,8 +1658,8 @@ html body .pr-doc .pr-score-table td {
     border-right: 1px solid #1a1a1a !important;
     border-bottom: 1px solid #1a1a1a !important;
     font-weight: 400 !important;
-    font-size: 15px !important;
-    padding: 16px 12px !important;
+    font-size: 12px !important;
+    padding: 8px 8px !important;
     text-align: center !important;
     vertical-align: middle !important;
 }
@@ -1579,8 +1689,8 @@ html body .pr-doc .pr-score-table th:first-child {
 html body .pr-doc .pr-score-table input[type="radio"] {
     appearance: none !important;
     -webkit-appearance: none !important;
-    width: 18px !important;
-    height: 18px !important;
+    width: 16px !important;
+    height: 16px !important;
     margin: 0 !important;
     border: 1.5px solid #1a1a1a !important;
     border-radius: 50% !important;
@@ -1642,7 +1752,7 @@ html body .pr-doc .pr-section h2,
 html body .pr-doc .pr-card h2,
 html body .lh-body .pr-card h2 {
     background:#fff !important; color:#243044 !important;
-    font-size:14px !important; font-weight:700 !important; margin:0; padding:12px 16px;
+    font-size:12px !important; font-weight:700 !important; margin:0; padding:10px 14px;
     border:0 !important; border-bottom:2px solid #263041 !important;
 }
 html body .pr-doc .lh-doc-body > .pr-card:nth-child(odd) h2,
@@ -1652,19 +1762,19 @@ html body .pr-doc .lh-doc-body > .pr-section:nth-child(odd) h2 {
 
 html body .pr-doc .pr-section textarea,
 html body .pr-doc .pr-readonly {
-    padding:14px 16px; font-size:14px; color:#243044; min-height:64px;
+    padding:10px 12px; font-size:13px; color:#243044; min-height:88px;
     background:#fff;
 }
 
 html body .pr-doc .pr-row,
 html body .lh-body .pr-row {
-    display:grid; grid-template-columns:130px 1fr; align-items:center;
-    gap:12px; padding:5px 16px;
+    display:grid; grid-template-columns:120px 1fr; align-items:center;
+    gap:10px; padding:4px 14px;
 }
 html body .pr-doc .pr-row:last-child,
-html body .lh-body .pr-row:last-child { padding-bottom:14px; }
+html body .lh-body .pr-row:last-child { padding-bottom:12px; }
 html body .pr-doc .pr-card h2 + .pr-row,
-html body .lh-body .pr-card h2 + .pr-row { padding-top:14px; }
+html body .lh-body .pr-card h2 + .pr-row { padding-top:12px; }
 html body .pr-doc .pr-label,
 html body .lh-body .pr-label { font-size:11px; font-weight:700; color:#263041; }
 
@@ -1674,7 +1784,7 @@ html body .lh-body .pr-row input,
 html body .lh-body .pr-row select {
     width:100%; background:#d6e21c !important; color:#263041 !important;
     border:2px solid #91a30a !important; border-radius:12px !important;
-    padding:6px 14px !important; font-size:11px; font-family:inherit; box-sizing:border-box;
+    padding:5px 12px !important; font-size:11px !important; font-family:inherit; box-sizing:border-box;
     height: auto !important; min-height: 0 !important; color-scheme: light;
 }
 html body .pr-doc .pr-row select option,
@@ -1704,10 +1814,15 @@ html body .pr-doc .pr-btn {
     line-height: 1.2 !important;
     font-weight: 700 !important;
 }
-html body .pr-doc .pr-btn--primary { background:#a0af28 !important; color:#263041 !important; border:0 !important; }
+html body .pr-doc .pr-btn--primary { background:#d4e21a !important; color:#263041 !important; border:0 !important; }
 html body .pr-doc .pr-btn--draft { background:#d5253a !important; color:#fff !important; border:0 !important; }
 
-html body .pr-doc .pr-title { color:#263041; font-weight:700; }
+html body .pr-doc .pr-title { color:#263041; font-weight:800; font-size:28px !important; }
+html body .pr-doc .pr-row .filter-select__trigger {
+    font-size: 11px !important;
+    min-height: 32px !important;
+    padding: 6px 12px !important;
+}
 
 
 /* ===== Delete / warning popup: match prototype ===== */
@@ -1863,8 +1978,8 @@ html body .swal2-popup:has(.cal-day-title) .swal2-confirm,
 html body button.swal2-confirm.calendar-day-close,
 html body .cal-day-close,
 html body button.cal-day-close {
-    background: #a2b222 !important;
-    background-color: #a2b222 !important;
+    background: #d4e21a !important;
+    background-color: #d4e21a !important;
     color: #263041 !important;
     font-weight: 700 !important;
     font-size: 18px !important;
@@ -1890,8 +2005,8 @@ html body .swal2-popup:has(.cal-day-modal) .swal2-confirm:hover,
 html body button.swal2-confirm.calendar-day-close:hover,
 html body .cal-day-close:hover,
 html body button.cal-day-close:hover {
-    background: #8d9c1c !important;
-    background-color: #8d9c1c !important;
+    background: #c3d010 !important;
+    background-color: #c3d010 !important;
     color: #263041 !important;
 }
 
@@ -1982,13 +2097,72 @@ html body main .calendar-page .calendar-shell {
 }
 html body main .admin-container,
 html body main .manager-container,
-html body main .dashboard-container,
-html body main .pr-page {
+html body main .dashboard-container {
     width: min(100%, 1040px) !important;
     max-width: 1040px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box !important;
+}
+/* Document forms use A4 portrait; policies/profile keep their own widths */
+html body main .pr-page,
+html body main .pr-doc,
+html body main .employee-create-page > .signup-container,
+html body main .page-container .employee-form-card {
+    width: min(100%, 210mm) !important;
+    max-width: 210mm !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+}
+/* Policies + profile: full-width page so headings share the same left edge as other pages */
+html body main .app-page,
+html body main .app-page.profile-page,
+html body main .profile-page {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+}
+html body main .app-page > h1,
+html body main .profile-page > h1,
+html body main .app-page.profile-page > h1 {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    text-align: left !important;
+}
+html body main .app-page > :not(h1):not(.app-page-lead):not(.app-page-header),
+html body main .profile-page > :not(h1):not(.app-page-lead) {
+    width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+}
+html body main .app-page > .app-page-header,
+html body main .app-page > .app-page-header > h1,
+html body main .app-page > h1,
+html body main .profile-page > h1 {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    text-align: left !important;
+}
+/* Apply leave form keeps its existing wider layout */
+html body main form.leave-form,
+html body main .apply-page,
+html body main .apply-container,
+html body main .main-content:has(form.leave-form) {
+    width: min(100%, 980px) !important;
+    max-width: 980px !important;
 }
 html body main .messages-page {
     width: 100% !important;
@@ -2157,12 +2331,22 @@ html body main .page-container > :not(h1):not(.page-lead) {
     margin-right: auto !important;
     box-sizing: border-box !important;
 }
+html body main .pr-page,
+html body main .pr-doc,
 html body main .employee-create-page > .signup-container {
-    width: min(100%, 1040px) !important;
-    max-width: 1040px !important;
+    width: min(100%, 210mm) !important;
+    max-width: 210mm !important;
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box !important;
+}
+html body main .app-page,
+html body main .app-page.profile-page,
+html body main .profile-page {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 
 /* Leave application is one card. Center the card so both sides have space. */
@@ -2518,4 +2702,53 @@ html body main .employee-create-page > p {
         width: 14px !important;
         height: 14px !important;
     }
+}
+
+/* Force shared green action buttons to the same lime as Reports */
+html body main :is(
+  .requests-btn,
+  .requests-btn--primary,
+  .requests-btn--secondary,
+  .requests-btn--search,
+  .request-btn--approve,
+  .request-btn--escalate,
+  .request-btn--edit,
+  .add-employee-button,
+  .btn-form-action,
+  .pr-btn--primary,
+  .pr-btn--ghost,
+  .app-page-btn:not(.app-page-btn--danger),
+  .notifications-btn:not(.notifications-btn--danger),
+  .cal-nav-today,
+  button.btn-primary,
+  a.btn-primary
+),
+html body main form:not(.compose-form) button[type="submit"]:not(.pr-btn--draft):not(.requests-btn--danger):not(.btn-danger):not(.request-btn--reject):not(.request-btn--delete):not(.request-btn--withdraw),
+html body .swal2-confirm {
+  background: #d4e21a !important;
+  background-color: #d4e21a !important;
+  color: #0a1347 !important;
+  border-color: #c3d010 !important;
+}
+html body main :is(
+  .requests-btn,
+  .requests-btn--primary,
+  .requests-btn--secondary,
+  .requests-btn--search,
+  .request-btn--approve,
+  .request-btn--escalate,
+  .request-btn--edit,
+  .add-employee-button,
+  .btn-form-action,
+  .pr-btn--primary,
+  .pr-btn--ghost,
+  .cal-nav-today,
+  button.btn-primary,
+  a.btn-primary
+):hover,
+html body main form:not(.compose-form) button[type="submit"]:not(.pr-btn--draft):not(.requests-btn--danger):not(.btn-danger):not(.request-btn--reject):not(.request-btn--delete):not(.request-btn--withdraw):hover,
+html body .swal2-confirm:hover {
+  background: #c3d010 !important;
+  background-color: #c3d010 !important;
+  color: #0a1347 !important;
 }

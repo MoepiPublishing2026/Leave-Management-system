@@ -457,7 +457,7 @@
         background: var(--msg-bg);
     }
 
-    /* Do NOT use justify-content:flex-end here — it clips older messages and blocks scroll. */
+    /* Do NOT use justify-content:flex-end here -- it clips older messages and blocks scroll. */
     .messages-stack {
         flex: 1 1 0% !important;
         min-height: 0 !important;
@@ -843,8 +843,8 @@
     }
 
     .forward-modal-actions button.primary {
-        background: #b2cd16;
-        border-color: #91bf14;
+        background: #d4e21a;
+        border-color: #c3d010;
         color: #fff;
     }
 
@@ -1195,7 +1195,7 @@
                 $leave = $activeConversation->leaveRequest;
             @endphp
             <header class="messages-header" aria-label="Conversation">
-                <a class="mobile-back" href="{{ route('messages.index') }}" aria-label="Back">←</a>
+                <a class="mobile-back" href="{{ route('messages.index') }}" aria-label="Back">&larr;</a>
                 <div class="messages-header-avatar {{ $peerTone }}" aria-hidden="true">
                     @if(!empty($peer?->profile_picture))
                         <img src="{{ route('users.profile_picture', ['user' => $peer->id]) }}?v={{ optional($peer->updated_at)->timestamp }}" alt="">
@@ -1206,14 +1206,10 @@
                 <div class="messages-header-text">
                     <h3>{{ $peerName }}</h3>
                     <div class="meta">
-                        Leave #{{ $activeConversation->leave_request_id }}
-                        · {{ $employeeName }}
-                        · {{ $leave?->leave_type ?? 'Leave' }}
-                        @if($leave?->start_date && $leave?->end_date)
-                            · {{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }} – {{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}
+                        Leave #{{ $activeConversation->leave_request_id }} &middot; {{ $employeeName }} &middot; {{ $leave?->leave_type ?? 'Leave' }}
+                        @if($leave?->start_date && $leave?->end_date) &middot; {{ \Carbon\Carbon::parse($leave->start_date)->format('d M Y') }} &ndash; {{ \Carbon\Carbon::parse($leave->end_date)->format('d M Y') }}
                         @endif
-                        @if($leave?->status)
-                            · {{ ucfirst($leave->status) }}
+                        @if($leave?->status) &middot; {{ ucfirst($leave->status) }}
                         @endif
                     </div>
                 </div>
@@ -1221,7 +1217,7 @@
 
             <div class="messages-body" id="messagesBody">
                 @if($activeMessages->isNotEmpty())
-                    <p class="messages-options-hint">Click any message — options appear below</p>
+                    <p class="messages-options-hint">Click any message &mdash; options appear below</p>
                 @endif
                 <div class="messages-stack">
                 @forelse($activeMessages as $m)
@@ -1287,14 +1283,14 @@
                     <button type="button" data-action="forward">Forward</button>
                     <button type="button" data-action="delete-me" class="danger">Delete for me</button>
                     <button type="button" data-action="delete-everyone" class="danger" hidden>Delete for everyone</button>
-                    <button type="button" class="close-btn" id="clearMessageSelection" aria-label="Close">✕</button>
+                    <button type="button" class="close-btn" id="clearMessageSelection" aria-label="Close">?</button>
                 </div>
                 <div class="reply-bar" id="replyBar" hidden>
                     <div class="reply-bar-text">
                         <strong id="replyBarName"></strong>
                         <span id="replyBarPreview"></span>
                     </div>
-                    <button type="button" class="reply-bar-cancel" id="cancelReply" aria-label="Cancel reply">×</button>
+                    <button type="button" class="reply-bar-cancel" id="cancelReply" aria-label="Cancel reply">�</button>
                 </div>
                 <form class="compose-form" id="composeForm" method="POST" action="{{ route('messages.send', ['conversation' => $activeConversation->id]) }}" enctype="multipart/form-data">
                     @csrf
@@ -1342,7 +1338,7 @@
                             $fcOtherName = $userDisplayName($fcOther, $isAdmin ? 'Manager' : 'Senior Manager');
                             $fcEmployeeName = $userDisplayName($fc->leaveRequest?->user, 'Employee');
                         @endphp
-                        <option value="{{ $fc->id }}">{{ $fcOtherName }} · Leave #{{ $fc->leave_request_id }} · {{ $fcEmployeeName }}</option>
+                        <option value="{{ $fc->id }}">{{ $fcOtherName }} &middot; Leave #{{ $fc->leave_request_id }} &middot; {{ $fcEmployeeName }}</option>
                     @endforeach
                 </select>
                 <div class="forward-modal-actions">
@@ -1599,7 +1595,7 @@
                 if (voiceRecordLabel) voiceRecordLabel.textContent = 'Stop';
                 voiceStatus.hidden = false;
                 voiceStatus.classList.add('is-recording');
-                voiceStatus.textContent = 'Recording… Tap the microphone again to stop and send';
+                voiceStatus.textContent = 'Recording&hellip; Tap the microphone again to stop and send';
             } catch (error) {
                 stopStream();
                 alert('Microphone access was denied or unavailable.');

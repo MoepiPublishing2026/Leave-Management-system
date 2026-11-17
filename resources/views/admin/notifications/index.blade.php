@@ -6,7 +6,7 @@
 @include('partials.notifications-page-styles')
 
 @php
-    $unreadCount = (int) ($notifications->whereNull('read_at')->count());
+    $unreadCount = (int) ($notifications->getCollection()->whereNull('read_at')->count());
 @endphp
 
 <div class="notifications-page">

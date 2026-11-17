@@ -9,10 +9,10 @@
 
 <style>
     .employee-create-page { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; max-width: none; margin: 0; padding: 0 0 32px; color: #1e293b; }
-    .signup-container { position: relative; max-width: 980px; margin: 0 auto; background-color: #ffffff; border-radius: 15px; padding: 35px 30px; box-shadow: 0 0 10px #bdb6b6ff; border: 1px solid #dde3ea; text-align: center; }
+    .signup-container { position: relative; width: min(100%, 210mm); max-width: 210mm; margin: 0 auto; background-color: #ffffff; border-radius: 15px; padding: 35px 30px; box-shadow: 0 0 10px #bdb6b6ff; border: 1px solid #dde3ea; text-align: center; box-sizing: border-box; }
     label { display: block; margin-top: 20px; font-weight: 600; font-size: 14px; color: #4a4a4a; text-transform: uppercase; letter-spacing: 1.6px; text-align: left; }
     input[type="text"], input[type="email"], input[type="password"], select { width: 100%; margin-top: 7px; padding: 13px 17px; font-size: 16px; border-radius: 8px; border: 1px solid #9ef755ff; color: #0f172a; background: #ffffff; box-sizing: border-box; transition: border-color 0.3s ease; }
-    input:focus, select:focus { outline: none; border-color: #8d9c1c; box-shadow: none; }
+    input:focus, select:focus { outline: none; border-color: #c3d010; box-shadow: none; }
     .autofill-trap { position: absolute; left: -10000px; top: 0; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
     .error { color: #ff1e5a; font-size: 13px; margin-top: 5px; text-align: left; }
     .field-hint { color: #64748b; font-size: 12px; margin-top: 5px; text-align: left; font-weight: 500; text-transform: none; letter-spacing: normal; }
@@ -30,14 +30,14 @@
     }
 
     /* ===== Match prototype ===== */
-    html body .employee-create-page { font-family:'Poppins',"Segoe UI",sans-serif !important; max-width:720px !important; margin:0 auto !important; padding:34px 16px 40px !important; }
+    html body .employee-create-page { font-family:'Poppins',"Segoe UI",sans-serif !important; width:min(100%,210mm) !important; max-width:210mm !important; margin:0 auto !important; padding:34px 16px 40px !important; box-sizing:border-box !important; }
     html body .employee-create-page h1 { font-size:34px !important; color:#263248 !important; letter-spacing:0 !important; }
     html body .employee-create-page > p { font-size:.75rem !important; color:#666 !important; }
     html body .employee-create-page .signup-container { max-width:100% !important; border-radius:16px !important; border:1px solid #ddd !important; box-shadow:0 4px 18px rgba(0,0,0,.18) !important; padding:34px 44px 24px !important; }
     html body .employee-create-page .signup-container label { font-size:12px !important; font-weight:400 !important; letter-spacing:0 !important; color:#333 !important; margin-top:16px !important; }
     html body .employee-create-page .signup-container input[type="text"],
     html body .employee-create-page .signup-container input[type="email"],
-    html body .employee-create-page .signup-container input[type="password"] { border:2px solid #a2b222 !important; border-radius:14px !important; padding:13px 16px !important; font-size:14px !important; }
+    html body .employee-create-page .signup-container input[type="password"] { border:2px solid #d4e21a !important; border-radius:14px !important; padding:13px 16px !important; font-size:14px !important; }
     html body .employee-create-page .password-toggle { position: relative; margin-top: 7px; }
     html body .employee-create-page .password-toggle input { margin-top: 0 !important; padding-right: 46px !important; width: 100%; }
     html body .employee-create-page .password-toggle input::-ms-reveal,
@@ -46,18 +46,18 @@
         position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
         display: inline-flex; align-items: center; justify-content: center;
         padding: 0; border: 0; background: transparent; cursor: pointer;
-        color: #a2b222; line-height: 0;
+        color: #d4e21a; line-height: 0;
     }
-    html body .employee-create-page .password-toggle .toggle-password svg { width: 22px; height: 22px; stroke: #a2b222; }
+    html body .employee-create-page .password-toggle .toggle-password svg { width: 22px; height: 22px; stroke: #d4e21a; }
     html body .employee-create-page .signup-container select { border:2px solid #777 !important; border-radius:14px !important; padding:11px 16px !important; font-size:14px !important; font-weight:700 !important; color:#263248 !important; box-shadow:none !important; background-color:#fff !important; }
     html body .employee-create-page .checkbox-row label { margin-top:0 !important; font-size:13px !important; text-transform:none !important; }
-    html body .employee-create-page input[type="checkbox"] { accent-color:#a2b222 !important; }
+    html body .employee-create-page input[type="checkbox"] { accent-color:#d4e21a !important; }
     html body .employee-create-page .field-hint { font-size:11px !important; font-weight:400 !important; color:#767672 !important; }
     
     /* ===== Prototype match: Bright Lime Green Buttons ===== */
     html body .employee-create-page .button-group .btn-form-action {
-        background: #b2cd16 !important; /* Bright lime green */
-        border: 1px solid #91bf14 !important; /* Slight border */
+        background: #d4e21a !important; /* Bright lime green */
+        border: 1px solid #c3d010 !important; /* Slight border */
         color: #0a1347 !important; /* Dark text */
         border-radius: 6px !important; /* Squared corners */
         padding: 8px 24px !important;
@@ -69,7 +69,7 @@
         transition: background-color 0.15s ease;
     }
     html body .employee-create-page .button-group .btn-form-action:hover {
-        background: #9eb812 !important; /* Slightly darker on hover */
+        background: #c3d010 !important; /* Slightly darker on hover */
         color: #0a1347 !important;
     }
     
@@ -152,7 +152,7 @@
                         <label class="dept-option">
                             <input type="checkbox" name="managed_departments[]" value="{{ $dept }}" class="managed-dept-checkbox"
                                    {{ in_array($dept, $selectedManaged, true) ? 'checked' : '' }}>
-                            <span>{{ $dept }}@if($owner) <small>â€” currently {{ $owner }}</small>@endif</span>
+                            <span>{{ $dept }}@if($owner) <small>— currently {{ $owner }}</small>@endif</span>
                         </label>
                     @endforeach
                 </div>

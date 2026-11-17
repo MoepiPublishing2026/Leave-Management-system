@@ -58,7 +58,7 @@
     </div>
 
     @if (filled($review->self_scores))
-        <h2 style="margin:22px 0 10px;font-size:18px;color:#253141;">Self rating</h2>
+        <h2 style="margin:26px 0 12px;font-size:22px;color:#253141;">Self rating</h2>
         <table class="lh-scores">
             <thead>
             <tr>
@@ -85,7 +85,7 @@
         @endif
     @endif
 
-    <h2 style="margin:22px 0 10px;font-size:18px;color:#253141;">Final rating</h2>
+    <h2 style="margin:26px 0 12px;font-size:22px;color:#253141;">Final rating</h2>
     <table class="lh-scores">
         <thead>
         <tr>

@@ -79,7 +79,7 @@
     }
     html body .cal-day-close,
     html body button.cal-day-close {
-        background: #a2b222 !important;
+        background: #d4e21a !important;
         color: #263041 !important;
         font-weight: 700 !important;
         font-size: 18px !important;
@@ -103,7 +103,7 @@
     }
     html body .cal-day-close:hover,
     html body button.cal-day-close:hover {
-        background: #8d9c1c !important;
+        background: #c3d010 !important;
         color: #263041 !important;
     }
 </style>

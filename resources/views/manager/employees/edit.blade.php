@@ -16,7 +16,7 @@
         color: #1e293b;
     }
     .signup-container {
-        max-width: 980px;
+        max-width: 210mm;
         margin: 0 auto;
         background-color: #ffffff;
         border-radius: 15px;
@@ -113,8 +113,8 @@
         line-height: 1.2;
         border-radius: 8px;
         cursor: pointer;
-        border: 1px solid #91bf14;
-        background-color: #b2cd16;
+        border: 1px solid #c3d010;
+        background-color: #d4e21a;
         color: #0a1347;
         text-decoration: none;
         text-align: center;
@@ -127,7 +127,7 @@
         font-family: inherit;
     }
     .button-group .btn-form-action:hover {
-        background-color: #9eb812;
+        background-color: #c3d010;
         color: #0a1347;
     }
     .branding {
@@ -155,7 +155,7 @@
     }    
 
     /* ===== Match prototype ===== */
-html body .employee-create-page { font-family:'Poppins',"Segoe UI",sans-serif !important; max-width:720px !important; margin:0 auto !important; padding:34px 16px 40px !important; }
+html body .employee-create-page { font-family:'Poppins',"Segoe UI",sans-serif !important; width:min(100%,210mm) !important; max-width:210mm !important; margin:0 auto !important; padding:34px 16px 40px !important; box-sizing:border-box !important; }
 html body .employee-create-page h1 { font-size:34px !important; color:#263248 !important; letter-spacing:0 !important; }
 html body .employee-create-page > p { font-size:.75rem !important; color:#666 !important; }
 
@@ -174,7 +174,7 @@ html body .employee-create-page .signup-container label {
 html body .employee-create-page .signup-container input[type="text"],
 html body .employee-create-page .signup-container input[type="email"],
 html body .employee-create-page .signup-container input[type="password"] {
-    border:2px solid #a2b222 !important; border-radius:14px !important;
+    border:2px solid #d4e21a !important; border-radius:14px !important;
     padding:13px 16px !important; font-size:14px !important;
 }
 
@@ -192,7 +192,7 @@ html body .employee-create-page .checkbox-row label {
     text-transform:none !important; letter-spacing:0 !important; color:#333 !important;
 }
 html body .employee-create-page .managed-dept-list label span { font-weight:400 !important; }
-html body .employee-create-page input[type="checkbox"] { accent-color:#a2b222 !important; }
+html body .employee-create-page input[type="checkbox"] { accent-color:#d4e21a !important; }
 
 /* helper text under fields */
 html body .employee-create-page .field-hint {
@@ -203,11 +203,11 @@ html body .employee-create-page .field-hint {
 html body .employee-create-page .button-group .btn-form-action,
 html body .employee-create-page .button-group a.btn-form-action,
 html body .employee-create-page .button-group button.btn-form-action {
-    background:#a2b222 !important; color:#000 !important; border:0 !important;
+    background:#d4e21a !important; color:#000 !important; border:0 !important;
     border-radius:8px !important; padding:8px 16px !important;
     font-size:13px !important; min-height:0 !important; height:auto !important;
 }
-html body .employee-create-page .button-group .btn-form-action:hover { background:#8d9c1c !important; }
+html body .employee-create-page .button-group .btn-form-action:hover { background:#c3d010 !important; }
 
 html body .employee-create-page .branding { font-size:11px !important; margin-top:20px !important; }
 
@@ -312,7 +312,7 @@ html body .employee-create-page .branding { font-size:11px !important; margin-to
             <label class="dept-option">
                 <input type="checkbox" name="managed_departments[]" value="{{ $dept }}" class="managed-dept-checkbox"
                        {{ in_array($dept, $selectedManaged, true) ? 'checked' : '' }}>
-                <span>{{ $dept }}@if($ownedByOther) <small>â€” currently {{ $ownerName }}</small>@endif</span>
+                <span>{{ $dept }}@if($ownedByOther) <small>— currently {{ $ownerName }}</small>@endif</span>
             </label>
         @endforeach
     </div>

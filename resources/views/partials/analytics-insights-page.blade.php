@@ -11,8 +11,8 @@
     .analytics-insights-page {
         --ai-text: #263244;
         --ai-muted: #5b6170;
-        --ai-lime: #c8df00;
-        --ai-lime-fill: #c8df00;
+        --ai-lime: #d4e21a;
+        --ai-lime-fill: #d4e21a;
         --ai-green: #22c681;
         --ai-border: #d1d1d1;
         --ai-card-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);

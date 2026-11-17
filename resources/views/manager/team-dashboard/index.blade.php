@@ -234,7 +234,7 @@
         border: 0 !important;
     }
     .manager-container .dashboard-period-filter .filter-select__option { text-align: center; font-weight: 700; }
-    .manager-container .dashboard-period-filter .filter-select__option.is-selected { background: #a2b224; color: #1f2937; }
+    .manager-container .dashboard-period-filter .filter-select__option.is-selected { background: #d4e21a; color: #1f2937; }
 
     @media (max-width: 1200px) {
         .charts-container {

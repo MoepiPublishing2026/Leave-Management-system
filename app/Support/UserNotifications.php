@@ -147,13 +147,7 @@ class UserNotifications
         }
 
         if ($role === 'admin') {
-            $leaveId = $data['leave_request_id'] ?? null;
-            if ($leaveId) {
-                $leave = LeaveRequest::query()->find($leaveId);
-
-                return $leave && LeaveApprovalWorkflow::seniorCanAccessLeave($user, $leave);
-            }
-
+            // Seniors do not use manager "new/updated request" noise — escalations cover that.
             if (in_array($type, [
                 NewLeaveRequestNotification::class,
                 LeaveRequestUpdatedNotification::class,
@@ -161,7 +155,7 @@ class UserNotifications
                 return false;
             }
 
-            return in_array($type, [
+            $allowed = [
                 MessageReceivedNotification::class,
                 OverdueLeaveEscalatedNotification::class,
                 LeaveStatusNotification::class,
@@ -169,6 +163,25 @@ class UserNotifications
                 LeaveRequestOverdueNotification::class,
                 LeaveWithdrawnNotification::class,
                 ProofUploadedNotification::class,
+                PendingReviewReminderNotification::class,
+                PendingLeaveActionReminderNotification::class,
+                PerformanceReviewSubmittedNotification::class,
+            ];
+
+            if (! in_array($type, $allowed, true)) {
+                return false;
+            }
+
+            $leaveId = $data['leave_request_id'] ?? null;
+            if ($leaveId) {
+                $leave = LeaveRequest::query()->find($leaveId);
+
+                return $leave && LeaveApprovalWorkflow::seniorCanAccessLeave($user, $leave);
+            }
+
+            return in_array($type, [
+                MessageReceivedNotification::class,
+                OverdueLeaveEscalatedNotification::class,
                 PendingReviewReminderNotification::class,
                 PendingLeaveActionReminderNotification::class,
                 PerformanceReviewSubmittedNotification::class,

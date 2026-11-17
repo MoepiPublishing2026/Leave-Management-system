@@ -24,7 +24,7 @@
             height: 90px;
             background-color: #ffffff !important;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             flex-wrap: nowrap;
             padding: 0 20px;
@@ -61,7 +61,14 @@
             display: flex;
             gap: 6px;
             align-items: center;
+            margin-left: 0;
+        }
+        .navbar-end {
+            display: flex;
+            align-items: center;
             margin-left: auto;
+            gap: 8px;
+            min-width: 0;
         }
 
         nav.menu a {
@@ -109,28 +116,53 @@
             color: #0a1347;
         }
 
-        .dropdown-menu.notifications-dropdown {
-            min-width: 400px;
-            max-height: 350px;
-            overflow-y: auto;
-            border-radius: 8px;
-            padding: 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        /* Notifications dropdown styled via ui-consistency.css (prototype match) */
+        .notif-bell {
+            position: static;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            width: auto;
+            height: auto;
         }
-
-        .dropdown-menu.notifications-dropdown .dropdown-header {
-            font-weight: 700;
-            text-align: center;
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            background: #ffffff;
+        .notif-bell .badge-notification {
+            position: static;
+            top: auto;
+            right: auto;
+            margin: 0;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: #a8bc1e;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
         }
-
-        .dropdown-menu.notifications-dropdown .dropdown-item {
-            white-space: normal;
-            padding: 10px 15px;
+        #notificationsDropdown {
+            color: #ffffff;
         }
-
+        #notificationsDropdown .notif-bell svg {
+            fill: currentColor;
+        }
+        #notificationsDropdown:hover,
+        #notificationsDropdown:focus,
+        .nav-item.dropdown.show > #notificationsDropdown {
+            color: #c4d82e;
+        }
+        #notificationsDropdown.dropdown-toggle::after {
+            border-top-color: #ffffff !important;
+        }
+        #notificationsDropdown.dropdown-toggle:hover::after,
+        #notificationsDropdown.dropdown-toggle:focus::after,
+        .nav-item.dropdown.show > #notificationsDropdown.dropdown-toggle::after {
+            border-top-color: #c4d82e !important;
+        }
         .badge-notification {
             display: inline-flex;
             align-items: center;
@@ -139,8 +171,8 @@
             height: 18px;
             padding: 0 6px;
             border-radius: 999px;
-            background: #4c8615ff;
-            color: white;
+            background: #a8bc1e;
+            color: #ffffff;
             font-size: 11px;
             font-weight: 800;
             margin-left: 6px;
@@ -295,7 +327,7 @@
             background-color: #f0f2f7;
         }
 
-        /* Main Content â€” scroll offset handled by ui-consistency.css */
+        /* Main Content — scroll offset handled by ui-consistency.css */
         main {
             padding: 40px;
             max-width: 1800px;
@@ -311,17 +343,25 @@
                 flex-wrap: nowrap;
                 gap: 10px;
             }
-            /* Mobile navbar: hamburger left, small logo right (profile hidden) */
+            /* Mobile navbar: logo left, hamburger right */
             .navbar-logo {
                 display: flex;
-                margin-left: auto;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
                 cursor: pointer;
             }
             .navbar-logo img { height: 40px; max-width: 200px; }
             .navbar-profile { display: none; }
+            .navbar-end,
+            .navbar-utilities { display: none !important; }
             nav.menu { display: none; }
-            .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
-            .mobile-menu-btn { margin-right: auto; }
+            .mobile-menu-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                margin-left: auto !important;
+                margin-right: 0 !important;
+            }
             main {
                 padding: 18px;
             }
@@ -367,7 +407,7 @@
     </style>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261117align" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261117msgbadge" />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -405,8 +445,6 @@
 </head>
 <body>
     <header class="navbar" role="banner">
-        <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
-
         <a class="navbar-logo" href="{{ route('dashboard') }}" aria-label="Go to dashboard">
             <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
             <span class="logo-text">MOEPI</span>
@@ -425,46 +463,52 @@
         @endphp
         @endauth
 
-        <nav class="menu" aria-label="Primary Navigation">
-            @include('partials.nav-links-employee')
-        </nav>
+        <div class="navbar-end">
+            <nav class="menu" aria-label="Primary Navigation">
+                @include('partials.nav-links-employee')
+            </nav>
 
             @auth
-        <div class="navbar-utilities">
-            <div class="nav-item dropdown">
-                <a href="#" id="notificationsDropdown" class="nav-link dropdown-toggle position-relative" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="#5e920a" viewBox="0 0 24 24">
-                        <path d="M12 2C8.134 2 5 5.134 5 9v7l-1.707 1.707a1 1 0 0 0 .707 1.707h16a1 1 0 0 0 .707-1.707L19 16V9c0-3.866-3.134-7-7-7zM7 9a5 5 0 0 1 10 0v8H7V9zm5 13a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2z"/>
-                    </svg>
-                    @if($notificationCount > 0)
-                        <span class="badge-notification">{{ $notificationCount }}</span>
-                    @endif
-                </a>
-                @include('partials.navbar-notifications-dropdown', ['showViewAll' => true])
-            </div>
-
-            <div class="navbar-profile" id="profileMenu">
-                @if($user->profile_picture)
-                    <img src="{{ route('users.profile_picture', ['user' => $user->id]) }}?v={{ optional($user->updated_at)->timestamp }}" alt="Profile Picture" class="profile-image" />
-                @else
-                    <div class="profile-circle" title="{{ $user->first_name }} {{ $user->last_name }}">
-                        {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
-                    </div>
-                @endif
-
-                <div class="profile-dropdown" id="profileDropdown">
-                    @include('partials.external-app-links')
-                    <a href="{{ route('logout') }}"
-                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                       Logout
+            <div class="navbar-utilities">
+                <div class="nav-item dropdown">
+                    <a href="#" id="notificationsDropdown" class="nav-link dropdown-toggle position-relative" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="notif-bell">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 2C8.134 2 5 5.134 5 9v7l-1.707 1.707a1 1 0 0 0 .707 1.707h16a1 1 0 0 0 .707-1.707L19 16V9c0-3.866-3.134-7-7-7zM7 9a5 5 0 0 1 10 0v8H7V9zm5 13a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2z"/>
+                            </svg>
+                            @if($notificationCount > 0)
+                                <span class="badge-notification">{{ $notificationCount }}</span>
+                            @endif
+                        </span>
                     </a>
-                    <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">
-                        @csrf
-                    </form>
+                    @include('partials.navbar-notifications-dropdown', ['showViewAll' => true])
+                </div>
+
+                <div class="navbar-profile" id="profileMenu">
+                    @if($user->profile_picture)
+                        <img src="{{ route('users.profile_picture', ['user' => $user->id]) }}?v={{ optional($user->updated_at)->timestamp }}" alt="Profile Picture" class="profile-image" />
+                    @else
+                        <div class="profile-circle" title="{{ $user->first_name }} {{ $user->last_name }}">
+                            {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
+                        </div>
+                    @endif
+
+                    <div class="profile-dropdown" id="profileDropdown">
+                        @include('partials.external-app-links')
+                        <a href="{{ route('logout') }}"
+                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                           Logout
+                        </a>
+                        <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">
+                            @csrf
+                        </form>
+                    </div>
                 </div>
             </div>
             @endauth
-        </nav>
+        </div>
+
+        <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleMobileSidebar(true)">&#9776;</button>
     </header>
 
     <div id="mobileSidebarBackdrop" class="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>

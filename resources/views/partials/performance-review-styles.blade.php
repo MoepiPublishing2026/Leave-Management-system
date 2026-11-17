@@ -2,10 +2,12 @@
 <style>
     .pr-page {
         font-family: Inter, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        max-width: 980px;
+        width: min(100%, 210mm);
+        max-width: 210mm;
         margin: 0 auto;
         padding: 8px 0 48px;
         color: #334155;
+        box-sizing: border-box;
     }
     .pr-toolbar {
         display: flex;
@@ -37,15 +39,15 @@
     }
     .pr-title {
         text-align: center;
-        font-size: 32px;
+        font-size: 28px;
         font-weight: 800;
         color: #334155;
-        margin: 0 0 22px;
+        margin: 0 0 18px;
         letter-spacing: 0.02em;
     }
     .pr-card {
         background: #fff;
-        margin: 22px 0;
+        margin: 18px 0;
         border-radius: 4px;
         overflow: visible;
         border: 2px solid #d6e21c;
@@ -57,19 +59,19 @@
         font-size: 12px;
         font-weight: 700;
         margin: 0;
-        padding: 12px 16px;
+        padding: 10px 14px;
         border: 0;
         border-bottom: 1px solid #d6e21c;
     }
     .pr-row {
         display: grid;
-        grid-template-columns: 130px 1fr;
+        grid-template-columns: 120px 1fr;
         align-items: center;
-        gap: 12px;
-        padding: 5px 16px;
+        gap: 10px;
+        padding: 4px 14px;
     }
-    .pr-row:last-child { padding-bottom: 14px; }
-    .pr-card h2 + .pr-row { padding-top: 14px; }
+    .pr-row:last-child { padding-bottom: 12px; }
+    .pr-card h2 + .pr-row { padding-top: 12px; }
     .pr-label { font-size: 11px; font-weight: 700; color: #263041; }
     
     /* Lime green pill inputs */
@@ -80,7 +82,7 @@
         color: #263041 !important;
         border: 2px solid #91a30a !important;
         border-radius: 12px !important;
-        padding: 6px 14px !important;
+        padding: 5px 12px !important;
         font-size: 11px !important;
         font-weight: 600 !important;
         font-family: inherit;
@@ -96,10 +98,10 @@
         color: #263041 !important;
         border: 2px solid #91a30a !important;
         border-radius: 12px !important;
-        padding: 8px 14px !important;
+        padding: 6px 12px !important;
         font-size: 11px !important;
         font-weight: 600 !important;
-        min-height: 36px;
+        min-height: 32px;
         box-shadow: none !important;
         display: flex !important;
         align-items: center !important;
@@ -126,8 +128,8 @@
         background: #263041;
         color: #fff;
         font-weight: 700;
-        font-size: 14px;
-        padding: 10px 12px;
+        font-size: 13px;
+        padding: 8px 10px;
         text-align: left;
         white-space: nowrap;
     }
@@ -140,33 +142,33 @@
         width: 100%;
         border: 0;
         outline: none;
-        padding: 8px 6px;
-        font-size: 14px;
+        padding: 6px 6px;
+        font-size: 13px;
         background: transparent;
         font-family: inherit;
         color: #1e293b;
     }
     .pr-section {
-        margin-bottom: 18px;
+        margin-bottom: 16px;
         border: 1px solid #cbd5e1;
     }
     .pr-section h2 {
         margin: 0;
         background: #263041;
         color: #fff;
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 700;
-        padding: 10px 14px;
+        padding: 8px 12px;
     }
     .pr-section textarea,
     .pr-section .pr-readonly {
         width: 100%;
-        min-height: 110px;
+        min-height: 88px;
         border: 0;
         outline: none;
-        padding: 12px 14px;
-        font-size: 14px;
-        line-height: 1.5;
+        padding: 10px 12px;
+        font-size: 13px;
+        line-height: 1.45;
         resize: vertical;
         font-family: inherit;
         box-sizing: border-box;
@@ -189,8 +191,8 @@
     .pr-id-table td,
     .pr-legend td {
         border: 1px solid #cbd5e1;
-        padding: 8px 10px;
-        font-size: 13px;
+        padding: 6px 8px;
+        font-size: 12px;
     }
     .pr-id-table th,
     .pr-legend th {
@@ -223,9 +225,9 @@
     .pr-score-table th,
     .pr-score-table td {
         border: 1px solid #64748b;
-        padding: 8px 6px;
+        padding: 6px 4px;
         text-align: center;
-        font-size: 13px;
+        font-size: 12px;
     }
     .pr-score-table th {
         background: #263041;
@@ -239,8 +241,8 @@
         width: 46%;
     }
     .pr-score-table input[type="radio"] {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         accent-color: #263041;
         cursor: pointer;
     }
@@ -299,19 +301,19 @@
     
     /* Submit Review - Lime Green */
     .pr-btn--primary { 
-        background: #b2cd16 !important; 
+        background: #d4e21a !important; 
         color: #ffffff !important; 
-        border: 1px solid #91bf14 !important; 
+        border: 1px solid #c3d010 !important; 
         order: 2 !important; 
     }
     .pr-btn--primary:hover { 
-        background: #9eb812 !important; 
+        background: #c3d010 !important; 
     }
     
     .pr-btn--secondary { background: #64748b; color: #fff; }
     .pr-btn--secondary:hover { background: #475569; color: #fff; }
-    .pr-btn--ghost { background: #b2cd16; color: #0a1347; border: 1px solid #91bf14; }
-    .pr-btn--ghost:hover { background: #9eb812; color: #0a1347; }
+    .pr-btn--ghost { background: #d4e21a; color: #0a1347; border: 1px solid #c3d010; }
+    .pr-btn--ghost:hover { background: #c3d010; color: #0a1347; }
     .pr-footer {
         margin-top: 28px;
         text-align: center;
@@ -418,9 +420,10 @@
         .pr-btn { width: 100%; justify-content: center; box-sizing: border-box; }
     }
     @media print {
+        @page { size: A4 portrait; margin: 12mm; }
         .pr-toolbar, .pr-actions, .pr-filters, nav, header, .navbar, .mobile-menu-btn { display: none !important; }
-        .pr-doc { box-shadow: none; border: 0; }
-        .pr-page { max-width: none; }
+        .pr-doc { box-shadow: none; border: 0; width: 210mm; max-width: 210mm; }
+        .pr-page { width: 210mm; max-width: 210mm; }
     }
 
         /* ===== Action Buttons ===== */
@@ -458,13 +461,13 @@
     
     /* Submit Review - Lime Green (Moved to Right via Order) */
     .pr-btn--primary { 
-        background: #b2cd16 !important; 
+        background: #d4e21a !important; 
         color: #ffffff !important; /* White font */
-        border: 1px solid #91bf14 !important; 
+        border: 1px solid #c3d010 !important; 
         order: 2 !important; 
     }
     .pr-btn--primary:hover { 
-        background: #9eb812 !important; 
+        background: #c3d010 !important; 
     }
 
 </style>

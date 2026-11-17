@@ -23,7 +23,7 @@
     <p style="margin:0 0 16px;">{{ $messageBody }}</p>
     <p style="margin:0 0 16px;">
         Request <strong>#{{ $leaveRequest->id }}</strong> —
-        {{ $type }} leave from {{ $leaveRequest->start_date }} to {{ $leaveRequest->end_date }}.
+        {{ $type }} leave from {{ $leaveRequest->start_date }} to {{ $leaveRequest->end_date }}@include('emails.partials.half-day-slot', ['leaveRequest' => $leaveRequest, 'asInline' => true]).
     </p>
 
     @include('emails.partials.action-button-row', ['buttons' => $buttons])

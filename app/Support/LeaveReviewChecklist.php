@@ -72,6 +72,8 @@ class LeaveReviewChecklist
         return [
             'days' => LeaveDaysFormatter::format($requestedDays),
             'isHalfDay' => (bool) $leave->is_half_day,
+            'halfDayPeriod' => (string) ($leave->half_day_period ?? ''),
+            'halfDayPeriodLabel' => LeaveWorkdayRules::halfDayPeriodLabel($leave->half_day_period),
             'review' => [
                 'allocated' => LeaveDaysFormatter::format($allocated),
                 'taken' => LeaveDaysFormatter::format($taken),

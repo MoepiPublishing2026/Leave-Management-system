@@ -81,7 +81,12 @@
                 @endphp
                 <tr class="row-click {{ $req->isOverdue() ? 'overdue-row' : '' }}" data-details='@json($details)'>
                     <td>{{ $requests->firstItem() + $index }}</td>
-                    <td>{{ $req->leave_type }}</td>
+                    <td>
+                        {{ $req->leave_type }}
+                        @if (!empty($req->is_half_day))
+                            <div class="request-half-slot">Half day{{ ($details['halfDayPeriodLabel'] ?? '') !== '' ? ': '.$details['halfDayPeriodLabel'] : '' }}</div>
+                        @endif
+                    </td>
                     <td>{{ $managerName }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>
