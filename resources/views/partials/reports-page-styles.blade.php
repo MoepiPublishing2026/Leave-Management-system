@@ -3,8 +3,8 @@
     .reports-page {
         --rp-text: #243044;
         --rp-muted: #6b7280;
-        --rp-lime: #b2cd16;
-        --rp-lime-dark: #9eb812;
+        --rp-lime: #d4e21a;
+        --rp-lime-dark: #c3d010;
         --rp-mint: #e6f4f2;
         --rp-border: #d5dbe3;
         font-family: "Poppins", "Segoe UI", sans-serif;
@@ -162,7 +162,7 @@
         border: 0 !important;
         text-decoration: none !important;
         background: var(--rp-lime) !important;
-        color: #0a1347 !important;
+        color: #111 !important;
         box-shadow: none !important;
         box-sizing: border-box;
     }
@@ -170,19 +170,19 @@
     html body main .reports-page form button.reports-btn:hover,
     html body main .reports-page form a.reports-btn:hover {
         background: var(--rp-lime-dark) !important;
-        color: #0a1347 !important;
+        color: #111 !important;
     }
     html body main .reports-page .reports-btn--export,
     html body main .reports-page form button.reports-btn--export {
-        background: #fff !important;
-        color: var(--rp-text) !important;
+        background: var(--rp-lime) !important;
+        color: #111 !important;
         border: 0 !important;
         font-weight: 700 !important;
     }
     html body main .reports-page .reports-btn--export:hover,
     html body main .reports-page form button.reports-btn--export:hover {
-        background: #fff !important;
-        color: var(--rp-text) !important;
+        background: var(--rp-lime-dark) !important;
+        color: #111 !important;
     }
 
     .reports-page .cards {

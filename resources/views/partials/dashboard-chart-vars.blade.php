@@ -118,13 +118,27 @@
         });
     };
 
-    window.stackedBarTopRadius = (radius = 8) => (ctx) => {
-        const value = Number(ctx.raw) || 0;
-        if (value <= 0) return 0;
-        const datasets = ctx.chart?.data?.datasets || [];
-        for (let i = ctx.datasetIndex + 1; i < datasets.length; i += 1) {
-            if ((Number(datasets[i].data?.[ctx.dataIndex]) || 0) > 0) return 0;
+    /* Slight bar corner curve (PDF) — not sharp, not heavily rounded. */
+    window.barCornerRadius = 5;
+    window.barTopRadius = {
+        topLeft: window.barCornerRadius,
+        topRight: window.barCornerRadius,
+        bottomLeft: 0,
+        bottomRight: 0,
+    };
+    window.stackedBarTopRadius = (radius = window.barCornerRadius) => (ctx) => {
+        const chart = ctx.chart;
+        const datasets = chart.data.datasets;
+        const stackId = datasets[ctx.datasetIndex].stack;
+        let topIndex = ctx.datasetIndex;
+        for (let i = datasets.length - 1; i >= 0; i--) {
+            if (datasets[i].stack !== stackId) continue;
+            if ((Number(datasets[i].data[ctx.dataIndex]) || 0) > 0) {
+                topIndex = i;
+                break;
+            }
         }
+        if (ctx.datasetIndex !== topIndex) return 0;
         return { topLeft: radius, topRight: radius, bottomLeft: 0, bottomRight: 0 };
     };
 

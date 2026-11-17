@@ -15,8 +15,8 @@
         color: #253141;
     }
     .mgr-page-header .mgr-scope-switch {
-        background: #d9253f;
-        border-color: #d9253f;
+        background: #d5253a;
+        border-color: #d5253a;
         border-radius: 14px;
         padding: 12px 28px;
         font-size: 12px;
@@ -75,11 +75,12 @@
     .manager-container .cards .card:hover { 
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); 
     }
-    .manager-container .cards .card.card-all      { background: #4fe6c5 !important; }
-    .manager-container .cards .card.card-pending  { background: #f2b96b !important; }
-    .manager-container .cards .card.card-overdue  { background: #ab8cf5 !important; }
-    .manager-container .cards .card.card-approved { background: #a03d85 !important; }
-    .manager-container .cards .card.card-rejected { background: #94c4c8 !important; }
+    .manager-container .cards .card.card-all      { background: #4ee5c5 !important; }
+    .manager-container .cards .card.card-pending  { background: #f3b86b !important; }
+    .manager-container .cards .card.card-overdue  { background: #ae8df5 !important; }
+    .manager-container .cards .card.card-approved { background: #a33d86 !important; }
+    .manager-container .cards .card.card-rejected { background: #8fc4c7 !important; }
+    .manager-container .cards .card.card-onleave  { background: #bad550 !important; }
     .manager-container .cards .card.card-onleave  { background: #b9d84a !important; }
     .card .card-title svg, .card .card-title .icon { display: none; }
     .card:hover {
@@ -140,6 +141,8 @@
     
     .manager-container .chart-body--ring { height: 214px; }
     .manager-container .chart-body--ring canvas { max-height: 214px; }
+    .manager-container .chart-body--paid { height: 186px; }
+    .manager-container .chart-body--paid canvas { max-height: 186px; height: 100% !important; }
     .manager-container .chart-body--plot { height: 186px; }
     .manager-container .chart-html-legend li,
     .manager-container .chart-html-legend span,
@@ -150,19 +153,85 @@
         color: #0f172a !important;
     }
 
+    .manager-container .dashboard-period-filter {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 14px;
+    }
     .manager-container .dashboard-period-filter__form {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 10px 14px !important;
         background: #d9e5e4;
         border: none;
         border-radius: 14px;
         box-shadow: none;
+        padding: 10px 14px;
+        width: auto !important;
+        min-height: 0 !important;
     }
-    .manager-container .dashboard-period-filter__label { font-size: 0.72rem; font-weight: 400; color: #4b5563; }
+    .manager-container .dashboard-period-filter__row {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 8px !important;
+        width: auto !important;
+        min-height: 0 !important;
+        position: relative !important;
+        margin: 0 !important;
+    }
+    .manager-container .dashboard-period-filter__label,
+    .manager-container .dashboard-period-filter__label-1 {
+        display: block !important;
+        font-size: 0.72rem !important;
+        font-weight: 400 !important;
+        color: #4b5563 !important;
+        letter-spacing: 0 !important;
+        text-transform: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        white-space: nowrap !important;
+        pointer-events: none !important;
+        position: static !important;
+        text-align: left !important;
+    }
+    .manager-container .dashboard-period-filter .filter-select-wrap {
+        position: relative !important;
+        inset: auto !important;
+        width: auto !important;
+        min-width: 150px !important;
+        flex: 0 0 auto !important;
+        z-index: auto !important;
+    }
     .manager-container .dashboard-period-filter .filter-select__trigger {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
         border: none;
         border-radius: 14px;
         font-size: 0.8rem;
         font-weight: 700;
         box-shadow: none;
+        background: #fff !important;
+        min-height: 36px !important;
+        height: auto !important;
+        width: auto !important;
+        padding: 8px 14px !important;
+        gap: 8px !important;
+    }
+    .manager-container .dashboard-period-filter .filter-select__label {
+        position: static !important;
+        width: auto !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        clip: auto !important;
+        white-space: nowrap !important;
+        border: 0 !important;
     }
     .manager-container .dashboard-period-filter .filter-select__option { text-align: center; font-weight: 700; }
     .manager-container .dashboard-period-filter .filter-select__option.is-selected { background: #a2b224; color: #1f2937; }
@@ -277,7 +346,7 @@
         </div>
         <div class="chart-card">
             <h3>Paid vs Unpaid Leave</h3>
-            <div class="chart-body chart-body--ring">
+            <div class="chart-body chart-body--paid">
                 <canvas id="leaveChart"></canvas>
             </div>
         </div>
@@ -351,19 +420,17 @@ document.addEventListener('DOMContentLoaded', () => {
     window.finalizeChartDefaults();
 
     const protoColors = ['#4a7ff7', '#b08cf5', '#f5b96b', '#f0d24a', '#4fe8c6', '#90c8c8', '#a04088', '#b8d850'];
-    const statusSliceColors = {
-        Pending: '#105078',
-        Overdue: '#f4a0ab',
-        Approved: '#b08cf5',
-        Rejected: '#f07a86'
-    };
+    const statusSliceColors = @json(config('leave_status_colors.status_pie'));
     const monthlyStatusColors = {
         Approved: '#7ebade',
         Pending: '#105078',
         Overdue: '#f4a0ab',
         Rejected: '#d4e04a',
     };
-    const blue = '#5b86ea';
+    const blue = @json(config('leave_status_colors.department_bar'));
+    const paidColor = @json(config('leave_status_colors.paid_unpaid.Paid'));
+    const unpaidColor = @json(config('leave_status_colors.paid_unpaid.Unpaid'));
+    const monthlyLineColor = @json(config('leave_status_colors.monthly_applications_line'));
 
     const sliceLabels = {
         id: 'sliceLabels',
@@ -460,20 +527,28 @@ document.addEventListener('DOMContentLoaded', () => {
     new Chart(document.getElementById('leaveChart'), {
         type: 'bar',
         data: {
-            labels: ['Leave'],
+            labels: [''],
             datasets: [
                 {
                     label: 'Paid',
                     data: [paidPercentage],
-                    backgroundColor: '#4a7ff7',
+                    backgroundColor: paidColor,
                     borderWidth: 0,
+                    borderRadius: { topLeft: 5, bottomLeft: 5, topRight: 0, bottomRight: 0 },
+                    borderSkipped: false,
+                    categoryPercentage: 0.85,
+                    barPercentage: 0.9,
                     stack: 'leave'
                 },
                 {
                     label: 'Unpaid',
                     data: [unpaidPercentage],
-                    backgroundColor: '#c4b0f2',
+                    backgroundColor: unpaidColor,
                     borderWidth: 0,
+                    borderRadius: { topLeft: 0, bottomLeft: 0, topRight: 5, bottomRight: 5 },
+                    borderSkipped: false,
+                    categoryPercentage: 0.85,
+                    barPercentage: 0.9,
                     stack: 'leave'
                 }
             ]
@@ -482,19 +557,25 @@ document.addEventListener('DOMContentLoaded', () => {
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
+            layout: { padding: { top: 2, right: 4, bottom: 2, left: 4 } },
             plugins: {
                 legend: {
                     display: true,
                     position: 'top',
+                    align: 'center',
                     labels: {
                         usePointStyle: true,
                         pointStyle: 'circle',
+                        boxWidth: 8,
+                        boxHeight: 8,
+                        padding: 14,
                         color: '#3d4450',
-                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500' }
+                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 12, weight: '400' }
                     }
                 },
                 tooltip: {
                     callbacks: {
+                        title: () => '',
                         label: ctx => `${ctx.dataset.label}: ${ctx.raw}%`
                     }
                 }
@@ -504,17 +585,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     stacked: true,
                     min: 0,
                     max: 100,
+                    grid: { display: false, drawBorder: false },
+                    border: { display: false },
                     ticks: {
                         stepSize: 20,
                         callback: value => value + '%',
                         color: '#3d4450',
-                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500' }
-                    },
-                    grid: { color: '#d9d9d9' }
+                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 11, weight: '400' }
+                    }
                 },
                 y: {
                     stacked: true,
-                    display: false
+                    display: false,
+                    grid: { display: false },
+                    border: { display: false }
                 }
             }
         }
@@ -576,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthlyPending = padMonthlySeries(@json($monthlyPendingData));
     const monthlyOverdue = padMonthlySeries(@json($monthlyOverdueData));
     const monthlyRejected = padMonthlySeries(@json($monthlyRejectedData));
-    const monthlyColor = blue;
+    const monthlyColor = monthlyLineColor;
     const monthlyLineChart = new Chart(document.getElementById('monthlyLine'), {
         type: 'line',
         data: {
@@ -590,8 +674,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 tension: 0.45,
                 cubicInterpolationMode: 'monotone',
                 fill: false,
-                pointRadius: 0,
-                pointHoverRadius: 3,
+                pointRadius: 4,
+                pointHoverRadius: 5,
+                pointBackgroundColor: monthlyColor,
+                pointBorderColor: monthlyColor,
+                pointBorderWidth: 0,
                 capBezierPoints: true
             }]
         },
@@ -619,7 +706,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: deptData,
                     backgroundColor: blue,
                     borderWidth: 0,
-                    borderRadius: 5,
+                    borderRadius: window.barTopRadius,
+                    borderSkipped: false,
                     maxBarThickness: 48
                 }]
             },
@@ -639,7 +727,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: monthlyApproved,
                     backgroundColor: monthlyStatusColors.Approved,
                     borderWidth: 0,
-                    borderRadius: window.stackedBarTopRadius(8),
+                    borderRadius: 0,
                     borderSkipped: false,
                     maxBarThickness: 28,
                     stack: 'status'
@@ -649,7 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: monthlyPending,
                     backgroundColor: monthlyStatusColors.Pending,
                     borderWidth: 0,
-                    borderRadius: window.stackedBarTopRadius(8),
+                    borderRadius: 0,
                     borderSkipped: false,
                     maxBarThickness: 28,
                     stack: 'status'
@@ -659,7 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: monthlyOverdue,
                     backgroundColor: monthlyStatusColors.Overdue,
                     borderWidth: 0,
-                    borderRadius: window.stackedBarTopRadius(8),
+                    borderRadius: 0,
                     borderSkipped: false,
                     maxBarThickness: 28,
                     stack: 'status'
@@ -669,7 +757,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: monthlyRejected,
                     backgroundColor: monthlyStatusColors.Rejected,
                     borderWidth: 0,
-                    borderRadius: window.stackedBarTopRadius(8),
+                    borderRadius: 0,
                     borderSkipped: false,
                     maxBarThickness: 28,
                     stack: 'status'
@@ -688,11 +776,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     display: true,
                     position: 'bottom',
                     labels: {
-                        boxWidth: 10,
-                        boxHeight: 10,
-                        padding: 12,
+                        usePointStyle: false,
+                        boxWidth: 12,
+                        boxHeight: 12,
+                        borderRadius: 0,
+                        padding: 14,
                         color: '#263142',
-                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500' }
+                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 11, weight: '700' }
                     }
                 }
             },

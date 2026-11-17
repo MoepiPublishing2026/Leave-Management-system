@@ -14,21 +14,25 @@
     .admin-dash-top {
         width: 100%;
         max-width: 1410px;
-        margin: 0 auto 18px;
+        margin: 0 auto 16px;
         padding: 0 30px;
         box-sizing: border-box;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
         gap: 18px;
+        position: relative;
+        z-index: 40;
     }
     .admin-dash-tools {
         display: flex;
         align-items: center;
+        justify-content: flex-end;
         gap: 12px;
         flex-shrink: 0;
         position: relative;
-        z-index: 20;
+        z-index: 50;
+        min-height: 50px;
     }
     .menu-button {
         width: 54px;
@@ -65,57 +69,141 @@
         outline-offset: 3px;
     }
 
+    /* Filter card top aligns with the hamburger menu top; bottom overlaps the dashboard */
     .dashboard-filter-position {
         display: none;
-        width: 210px;
+        width: 190px;
+        position: absolute;
+        right: calc(54px + 12px);
+        top: 0;
+        transform: none;
+        z-index: 60;
     }
     .dashboard-filter-position.show {
         display: block;
     }
 
     .dashboard-filter-position .dashboard-period-filter {
-        margin: 0;
-        justify-content: stretch;
+        margin: 0 !important;
+        justify-content: stretch !important;
     }
     .dashboard-filter-position .dashboard-period-filter__form {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: stretch;
-        gap: 4px;
-        text-align: center;
-        background: #ffffff;
-        border: 3px solid #d4e21a;
-        border-radius: 22px;
-        padding: 10px 16px 12px;
-        box-shadow: 0 10px 24px rgba(38, 49, 66, 0.12);
-        width: 100%;
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+        align-items: stretch !important;
+        gap: 18px !important;
+        text-align: left !important;
+        background: #ffffff !important;
+        border: 3px solid #d4e21a !important;
+        border-radius: 18px !important;
+        padding: 10px 12px !important;
+        box-shadow: 0 10px 24px rgba(38, 49, 66, 0.12) !important;
+        width: 100% !important;
+        min-height: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .dashboard-filter-position .dashboard-period-filter__row {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0 !important;
+        width: 100% !important;
+        min-height: 40px !important;
+        position: relative !important;
+    }
+
+    .dashboard-filter-position .dashboard-period-filter__row--staff,
+    .dashboard-filter-position .dashboard-period-filter__row--period {
+        margin: 0 !important;
+    }
+
+    .dashboard-filter-position .dashboard-period-filter__label-1 {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-family: 'Inter', 'Segoe UI', sans-serif !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        color: #30302d !important;
+        letter-spacing: 0 !important;
+        text-transform: none !important;
+        white-space: nowrap !important;
+        flex: 0 0 auto !important;
+        text-align: center !important;
+        cursor: pointer !important;
+        position: relative !important;
+        z-index: 1 !important;
+        pointer-events: none !important;
+    }
+
+    .dashboard-filter-position .filter-select-wrap {
+        position: absolute !important;
+        inset: 0 !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        flex: none !important;
+        z-index: 2 !important;
+        overflow: visible !important;
+    }
+    /* Open staff/period menu must sit above the other row so options stay clickable */
+    .dashboard-filter-position .filter-select-wrap.is-open {
+        z-index: 40 !important;
+    }
+    .dashboard-filter-position .filter-select__menu {
+        z-index: 41 !important;
+        pointer-events: auto !important;
     }
 
     .dashboard-filter-position .filter-select__trigger {
-        min-height: 54px;
-        width: 100%;
-        background: #ffffff;
-        border: none;
-        border-radius: 14px;
-        color: #111111;
-        font-family: 'Inter', 'Segoe UI', sans-serif;
-        font-size: 18px;
-        font-weight: 700;
-        letter-spacing: 0;
-        box-shadow: none;
+        display: flex !important;
+        align-items: center !important;
+        min-height: 40px !important;
+        height: 100% !important;
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        color: #30302d !important;
+        font-family: 'Inter', 'Segoe UI', sans-serif !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0 !important;
+        box-shadow: none !important;
+        padding: 0 2px 0 0 !important;
+        justify-content: flex-end !important;
+        box-sizing: border-box !important;
+        gap: 0 !important;
+    }
+
+    /* Prototype rows show the heading + chevron only */
+    .dashboard-filter-position .filter-select__label {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
     }
     .admin-container {
         font-family: 'Inter', 'Segoe UI', sans-serif;
         width: 100%;
         max-width: 1410px;
         box-sizing: border-box;
-        padding: 36px 22px 22px;
+        /* Top padding clears the open filter hanging from the menu row */
+        padding: 72px 22px 22px;
         background: #ffffff;
         border: 1px solid #e7edf2;
         border-radius: 28px;
         box-shadow: 0 12px 32px rgba(38, 49, 66, 0.06);
         margin: 0 auto 72px;
+        position: relative;
+        z-index: 1;
     }
     .admin-page-header {
         min-width: 0;
@@ -146,42 +234,47 @@
     .admin-container .cards .card {
         flex: 1 1 0;
         min-width: 0;
-        height: 92px;
-        min-height: 92px;
+        height: 96px !important;
+        min-height: 96px !important;
+        max-height: 96px !important;
         border: none !important;
-        border-radius: 20px;
+        border-radius: 16px;
         box-shadow: none !important;
-        padding: 10px 6px;
+        padding: 12px 8px !important;
         text-align: center;
         text-decoration: none;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        align-items: center;
         color: #fff;
         box-sizing: border-box;
         opacity: 1;
+        overflow: hidden;
     }
     .admin-container .cards .card:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
     }
-    .admin-container .cards .card.card-all      { background: #4fe8c6 !important; }
-    .admin-container .cards .card.card-pending  { background: #b090f6 !important; }
-    .admin-container .cards .card.card-overdue  { background: #f0b868 !important; }
-    .admin-container .cards .card.card-approved { background: #a04088 !important; }
-    .admin-container .cards .card.card-rejected { background: #90c8c8 !important; }
-    .admin-container .cards .card.card-onleave  { background: #b8d850 !important; }
+    .admin-container .cards .card.card-all      { background: #4ee5c5 !important; }
+    .admin-container .cards .card.card-pending  { background: #f3b86b !important; }
+    .admin-container .cards .card.card-overdue  { background: #ae8df5 !important; }
+    .admin-container .cards .card.card-approved { background: #a33d86 !important; }
+    .admin-container .cards .card.card-rejected { background: #8fc4c7 !important; }
+    .admin-container .cards .card.card-onleave  { background: #bad550 !important; }
     .card-title {
         font-family: 'Inter', 'Segoe UI', sans-serif;
         font-size: 0.78rem;
         font-weight: 400;
-        margin: 0 0 2px 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        justify-content: center;
+        margin: 0 0 4px 0;
+        display: block;
         text-align: center;
         color: #ffffff;
         line-height: 1.2;
+        max-height: 2.4em;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        width: 100%;
     }
     .card-value {
         font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -190,6 +283,7 @@
         margin-top: 0;
         color: #ffffff;
         line-height: 1.1;
+        flex: 0 0 auto;
     }
     .dash-charts-grid {
         display: grid;
@@ -224,30 +318,9 @@
     }
     .admin-container .chart-body--ring { height: 214px; }
     .admin-container .chart-body--ring canvas { max-height: 214px; }
+    .admin-container .chart-body--paid { height: 186px; }
+    .admin-container .chart-body--paid canvas { max-height: 186px; height: 100% !important; }
     .admin-container .chart-body--plot { height: 186px; }
-    .dashboard-filter-position .filter-select-wrap {
-        min-width: 0;
-        width: 100%;
-    }
-    .dashboard-filter-position .filter-select__trigger {
-        min-height: 40px;
-        width: 100%;
-        justify-content: center;
-        background: #ffffff;
-        border: none;
-        border-radius: 12px;
-        color: #30302d;
-        font-family: 'Inter', 'Segoe UI', sans-serif;
-        font-size: 16px;
-        font-weight: 700;
-        letter-spacing: 0;
-        color: #111111;
-        box-shadow: none;
-        padding: 6px 8px;
-    }
-    .dashboard-filter-position .filter-select__label {
-        text-align: center;
-    }
     .dashboard-filter-position .filter-select__option {
         text-align: center;
         font-weight: 700;
@@ -369,7 +442,7 @@
         </div>
         <div class="chart-card">
             <h3>Paid vs Unpaid Leave</h3>
-            <div class="chart-body chart-body--ring">
+            <div class="chart-body chart-body--paid">
                 <canvas id="leaveChart"></canvas>
             </div>
         </div>
@@ -491,20 +564,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const protoColors = ['#4a7ff7', '#b08cf5', '#f5b96b', '#f0d24a', '#4fe8c6', '#90c8c8', '#a04088', '#b8d850'];
-    const statusSliceColors = {
-        Pending: '#105078',
-        Overdue: '#f4a0ab',
-        Approved: '#b08cf5',
-        Rejected: '#f07a86'
-    };
+    const statusSliceColors = @json(config('leave_status_colors.status_pie'));
     const monthlyStatusColors = {
         Approved: '#7ebade',
         Pending: '#105078',
         Overdue: '#f4a0ab',
-        Rejected: '#d4e04a',
-        Withdrawn: '#fbe8b0'
+        Rejected: '#d4e04a'
     };
-    const blue = '#5b86ea';
+    const blue = @json(config('leave_status_colors.department_bar'));
+    const paidColor = @json(config('leave_status_colors.paid_unpaid.Paid'));
+    const unpaidColor = @json(config('leave_status_colors.paid_unpaid.Unpaid'));
+    const monthlyLineColor = @json(config('leave_status_colors.monthly_applications_line'));
 
     const sliceLabels = {
         id: 'sliceLabels',
@@ -648,8 +718,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthlyPending = padMonthlySeries(@json($monthlyPendingData));
     const monthlyOverdue = padMonthlySeries(@json($monthlyOverdueData));
     const monthlyRejected = padMonthlySeries(@json($monthlyRejectedData));
-    const monthlyWithdrawn = padMonthlySeries(@json($monthlyWithdrawnData ?? []));
-    const monthlyColor = blue;
+    const monthlyColor = monthlyLineColor;
     const monthlyLineChart = new Chart(document.getElementById('monthlyLine'), {
         type: 'line',
         data: {
@@ -663,8 +732,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 tension: 0.45,
                 cubicInterpolationMode: 'monotone',
                 fill: false,
-                pointRadius: 0,
-                pointHoverRadius: 3,
+                pointRadius: 4,
+                pointHoverRadius: 5,
+                pointBackgroundColor: monthlyColor,
+                pointBorderColor: monthlyColor,
+                pointBorderWidth: 0,
                 capBezierPoints: true
             }]
         },
@@ -692,7 +764,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: deptData,
                     backgroundColor: blue,
                     borderWidth: 0,
-                    borderRadius: 5,
+                    borderRadius: window.barTopRadius,
+                    borderSkipped: false,
                     maxBarThickness: 48
                 }]
             },
@@ -712,7 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: monthlyApproved,
                     backgroundColor: monthlyStatusColors.Approved,
                     borderWidth: 0,
-                    borderRadius: window.stackedBarTopRadius(8),
+                    borderRadius: 0,
                     borderSkipped: false,
                     maxBarThickness: 28,
                     stack: 'status'
@@ -722,7 +795,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: monthlyPending,
                     backgroundColor: monthlyStatusColors.Pending,
                     borderWidth: 0,
-                    borderRadius: window.stackedBarTopRadius(8),
+                    borderRadius: 0,
                     borderSkipped: false,
                     maxBarThickness: 28,
                     stack: 'status'
@@ -732,7 +805,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: monthlyOverdue,
                     backgroundColor: monthlyStatusColors.Overdue,
                     borderWidth: 0,
-                    borderRadius: window.stackedBarTopRadius(8),
+                    borderRadius: 0,
                     borderSkipped: false,
                     maxBarThickness: 28,
                     stack: 'status'
@@ -742,17 +815,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: monthlyRejected,
                     backgroundColor: monthlyStatusColors.Rejected,
                     borderWidth: 0,
-                    borderRadius: window.stackedBarTopRadius(8),
-                    borderSkipped: false,
-                    maxBarThickness: 28,
-                    stack: 'status'
-                },
-                {
-                    label: 'Withdrawn',
-                    data: monthlyWithdrawn,
-                    backgroundColor: monthlyStatusColors.Withdrawn,
-                    borderWidth: 0,
-                    borderRadius: window.stackedBarTopRadius(8),
+                    borderRadius: 0,
                     borderSkipped: false,
                     maxBarThickness: 28,
                     stack: 'status'
@@ -771,11 +834,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     display: true,
                     position: 'bottom',
                     labels: {
-                        boxWidth: 10,
-                        boxHeight: 10,
-                        padding: 12,
+                        usePointStyle: false,
+                        boxWidth: 12,
+                        boxHeight: 12,
+                        borderRadius: 0,
+                        padding: 14,
                         color: '#263142',
-                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 10, weight: '500' }
+                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 11, weight: '700' }
                     }
                 }
             },
@@ -797,20 +862,28 @@ document.addEventListener('DOMContentLoaded', () => {
     new Chart(document.getElementById('leaveChart'), {
         type: 'bar',
         data: {
-            labels: ['Leave'],
+            labels: [''],
             datasets: [
                 {
                     label: 'Paid',
                     data: [paidPercentage],
-                    backgroundColor: '#4a7ff7',
+                    backgroundColor: paidColor,
                     borderWidth: 0,
+                    borderRadius: { topLeft: 5, bottomLeft: 5, topRight: 0, bottomRight: 0 },
+                    borderSkipped: false,
+                    categoryPercentage: 0.85,
+                    barPercentage: 0.9,
                     stack: 'leave'
                 },
                 {
                     label: 'Unpaid',
                     data: [unpaidPercentage],
-                    backgroundColor: '#c4b0f2',
+                    backgroundColor: unpaidColor,
                     borderWidth: 0,
+                    borderRadius: { topLeft: 0, bottomLeft: 0, topRight: 5, bottomRight: 5 },
+                    borderSkipped: false,
+                    categoryPercentage: 0.85,
+                    barPercentage: 0.9,
                     stack: 'leave'
                 }
             ]
@@ -819,17 +892,25 @@ document.addEventListener('DOMContentLoaded', () => {
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
+            layout: { padding: { top: 2, right: 4, bottom: 2, left: 4 } },
             plugins: {
                 legend: {
                     display: true,
                     position: 'top',
+                    align: 'center',
                     labels: {
                         usePointStyle: true,
-                        pointStyle: 'circle'
+                        pointStyle: 'circle',
+                        boxWidth: 8,
+                        boxHeight: 8,
+                        padding: 14,
+                        color: '#3d4450',
+                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 12, weight: '400' }
                     }
                 },
                 tooltip: {
                     callbacks: {
+                        title: () => '',
                         label: ctx => `${ctx.dataset.label}: ${ctx.raw}%`
                     }
                 }
@@ -839,14 +920,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     stacked: true,
                     min: 0,
                     max: 100,
+                    grid: { display: false, drawBorder: false },
+                    border: { display: false },
                     ticks: {
                         stepSize: 20,
-                        callback: value => value + '%'
+                        callback: value => value + '%',
+                        color: '#3d4450',
+                        font: { family: "'Inter', 'Segoe UI', sans-serif", size: 11, weight: '400' }
                     }
                 },
                 y: {
                     stacked: true,
-                    display: false
+                    display: false,
+                    grid: { display: false },
+                    border: { display: false }
                 }
             }
         }

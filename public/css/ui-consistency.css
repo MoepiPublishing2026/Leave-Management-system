@@ -13,7 +13,7 @@
 }
 
 body:has(.site-footer) {
-  --footer-height: 76px;
+  --footer-height: 64px;
 }
 
 html,
@@ -188,6 +188,21 @@ html body header.navbar nav.menu {
   min-width: auto !important;
   overflow: visible !important;
 }
+/* Keep links + bell/avatar as one right-aligned group */
+html body nav.navbar nav.menu .navbar-utilities,
+html body header.navbar nav.menu .navbar-utilities {
+  display: flex !important;
+  align-items: center !important;
+  flex: 0 0 auto !important;
+  margin-left: 8px !important;
+  margin-right: 0 !important;
+}
+/* Senior manager: nav group ends on the same right edge as the content container */
+html body.role-admin header.navbar nav.menu,
+html body.role-admin nav.navbar nav.menu {
+  margin-left: auto !important;
+  margin-right: max(0px, calc((100% - 1040px) / 2 - 10px)) !important;
+}
 /* Only the manager bar has enough tabs to need a scrolling row */
 html body.role-manager nav.navbar nav.menu,
 html body.role-manager header.navbar nav.menu {
@@ -217,7 +232,7 @@ html body header.navbar nav.menu > a,
 html body nav.navbar nav.menu > .nav-item > a,
 html body header.navbar nav.menu > .nav-item > a {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
-  font-weight: 400 !important;
+  font-weight: 500 !important;
   font-size: 12px !important;
   line-height: 1.2 !important;
   padding: 6px 7px !important;
@@ -842,7 +857,8 @@ body > .signup-container {
     color: #fff;
     text-align: center;
     font-size: 12px;
-    padding: 16px 16px;
+    line-height: 1.3;
+    padding: 10px 16px;
     margin: 0;
 } 
 
@@ -851,18 +867,19 @@ body > .signup-container {
 
 /* Red "My Leave Dashboard" button */
 .mgr-page-header a {
-    background: #d9253f !important;
+    background: #d5253a !important;
     color: #fff !important;
     border-radius: 12px !important;
     border: none !important;
 }
 
 /* Stat cards */
-.card.card-all      { background: #4de8c8 !important; }
-.card.card-pending  { background: #f4b86a !important; }
-.card.card-overdue  { background: #b08cf5 !important; }
-.card.card-approved { background: #a23d85 !important; }
+.card.card-all      { background: #4ee5c5 !important; }
+.card.card-pending  { background: #f3b86b !important; }
+.card.card-overdue  { background: #ae8df5 !important; }
+.card.card-approved { background: #a33d86 !important; }
 .card.card-rejected { background: #8fc4c7 !important; }
+.card.card-onleave  { background: #bad550 !important; }
 .card.card-onleave  { background: #bad84e !important; }
 .card { border: none !important; border-radius: 18px !important; }
 
@@ -1029,7 +1046,7 @@ html body .mobile-sidebar .badge-notification {
 }
 
 @media (max-width: 1200px) {
-    .site-footer { padding: 12px 16px; }
+    .site-footer { padding: 8px 16px; }
 }
 
 /* Employees list: centered content, sharp corners */
@@ -1400,7 +1417,7 @@ html body .employee-create-page .signup-container .dept-option:hover { backgroun
 .alert-danger,
 .error-message {
     background: #fde8ea !important;
-    border: 2px solid #d9253f !important;
+    border: 2px solid #d5253a !important;
     color: #a31b2e !important;
     border-radius: 10px !important;
 }
@@ -1954,7 +1971,6 @@ html body main :is(
     .admin-container,
     .manager-container,
     .dashboard-container,
-    .messages-wrap,
     .calendar-page .calendar-shell
 ) {
     margin-left: auto !important;
@@ -1967,13 +1983,94 @@ html body main .calendar-page .calendar-shell {
 html body main .admin-container,
 html body main .manager-container,
 html body main .dashboard-container,
-html body main .messages-wrap,
 html body main .pr-page {
     width: min(100%, 1040px) !important;
     max-width: 1040px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box !important;
+}
+html body main .messages-page {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+}
+html body:has(.messages-page) main.content {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+html body main .messages-page {
+    flex: 1 1 0% !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+html body main .messages-page .messages-wrap {
+    width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
+    flex: 1 1 0% !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+}
+html body main .messages-page .messages-sidebar,
+html body main .messages-page .messages-main {
+    min-height: 0 !important;
+    max-height: 100% !important;
+    height: auto !important;
+    overflow: hidden !important;
+}
+html body main .messages-page .thread-list {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: calc(100vh - var(--navbar-height, 90px) - var(--footer-height, 76px) - 150px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+}
+html body main .messages-page .messages-body {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+html body main .messages-page .messages-stack {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    max-height: calc(100vh - var(--navbar-height, 90px) - var(--footer-height, 76px) - 280px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    justify-content: flex-start !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+html body main .messages-page .messages-stack::-webkit-scrollbar,
+html body main .messages-page .thread-list::-webkit-scrollbar,
+html body:has(.messages-page) main.content::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+}
+html body main .messages-page .thread-list {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+html body:has(.messages-page) main.content {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+html body main .messages-page .messages-page-title {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    text-align: left !important;
 }
 
 html body main .admin-dash-top {
@@ -2099,7 +2196,7 @@ html body main .team-requests-page .requests-search-form {
     top: auto !important;
     right: auto !important;
     left: auto !important;
-    width: 100% !important;
+    width: auto !important;
     max-width: none !important;
 }
 html body main .pr-reviews-page .requests-search-form {
@@ -2107,8 +2204,39 @@ html body main .pr-reviews-page .requests-search-form {
     top: auto !important;
     right: auto !important;
     left: auto !important;
-    width: 100% !important;
+    width: auto !important;
     max-width: none !important;
+}
+html body main .pr-reviews-page form.requests-search-form button.requests-btn.requests-btn--search[type="submit"],
+html body main .pr-reviews-page form.requests-search-form a.requests-btn.requests-btn--secondary {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    width: 100px !important;
+    min-width: 100px !important;
+    max-width: 100px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+    border-radius: 10px !important;
+}
+html body main .pr-reviews-page .requests-toolbar a.requests-btn.requests-btn--primary {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    padding: 0 14px !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+    border-radius: 10px !important;
 }
 html body main .pr-reviews-page > h1,
 html body main .pr-reviews-page > .mgr-page-header {
@@ -2167,26 +2295,35 @@ html body main > .mgr-page-header:not(.calendar-page-header) .mgr-scope-switch {
     margin-right: max(0px, calc((100% - 1040px) / 2)) !important;
 }
 
-/* Dashboard filters stay under the title and share the cards' right edge. */
+/* Senior dashboard: title left, hamburger on the same right edge as the white container. */
 html body main .admin-dash-top {
-    display: block !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
     width: 100% !important;
     max-width: none !important;
-    margin: 0 0 12px !important;
+    margin: 0 0 16px !important;
     padding: 0 !important;
+    gap: 18px !important;
+    box-sizing: border-box !important;
 }
 html body main .admin-dash-top .admin-page-header {
     margin: 0 !important;
     padding: 0 !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
 }
 html body main .admin-dash-top .admin-dash-tools {
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-start !important;
     justify-content: flex-end !important;
-    align-self: auto !important;
-    width: min(100%, 1040px) !important;
-    max-width: 1040px !important;
-    margin: 0 auto 12px !important;
+    align-self: flex-start !important;
+    width: auto !important;
+    max-width: none !important;
+    /* Match admin-container (1040px) right edge — not the viewport edge */
+    margin: 0 max(0px, calc((100% - 1040px) / 2)) 0 0 !important;
+    flex: 0 0 auto !important;
+    position: relative !important;
 }
 
 /* Subheadings start on the same left edge as the content. Titles stay on the left. */
@@ -2224,8 +2361,7 @@ html body main .employee-create-page > p {
 }
 
 @media (max-width: 768px) {
-    html body main h1,
-    html body main .messages-page-title,
+    html body main h1:not(.messages-page-title),
     html body main .analytics-insights-page .page-header h2,
     html body main .employee-create-page h1,
     html body main .my-requests-page h1,

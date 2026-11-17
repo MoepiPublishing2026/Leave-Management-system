@@ -187,7 +187,7 @@ class MessagesController extends Controller
         $conversations = $this->conversationsQueryFor($user)
             ->with([
                 'leaveRequest.user',
-                'manager',
+                'manager.manager',
                 'admin',
                 'messages' => function ($q) {
                     $q->latest()->limit(1);
@@ -199,7 +199,21 @@ class MessagesController extends Controller
                 },
             ])
             ->latest('updated_at')
-            ->get();
+            ->get()
+            // One chat row per employee (leave applicant), not one row per duplicate thread.
+            ->groupBy(function (LeaveRequestConversation $conversation) {
+                $employeeId = (int) ($conversation->leaveRequest?->user_id ?? 0);
+
+                return $employeeId > 0 ? 'employee:'.$employeeId : 'conversation:'.$conversation->id;
+            })
+            ->map(function ($group) {
+                $primary = $group->sortByDesc(fn ($c) => optional($c->updated_at)->timestamp ?? 0)->first();
+                $primary->setAttribute('unread_count', (int) $group->sum(fn ($c) => (int) ($c->unread_count ?? 0)));
+
+                return $primary;
+            })
+            ->sortByDesc(fn ($c) => optional($c->updated_at)->timestamp ?? 0)
+            ->values();
 
         if ($conversations->isNotEmpty()) {
             $now = Carbon::now();
@@ -214,7 +228,7 @@ class MessagesController extends Controller
 
         if ($conversationId) {
             $activeConversation = $this->conversationsQueryFor($user)
-                ->with(['leaveRequest.user', 'manager', 'admin'])
+                ->with(['leaveRequest.user', 'manager.manager', 'admin'])
                 ->find($conversationId);
 
             if ($activeConversation) {

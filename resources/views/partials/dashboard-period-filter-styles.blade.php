@@ -92,14 +92,34 @@
         border-radius: 20px;
         box-shadow: none;
         padding: 10px 14px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 14px;
     }
-    .dashboard-period-filter__label {
+    /* Default / manager: horizontal rows (Employee + Period side by side) */
+    .dashboard-period-filter__row {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        min-width: 0;
+    }
+    .dashboard-period-filter__label,
+    .dashboard-period-filter__label-1 {
         color: #475569;
+        font-size: 0.72rem;
         font-weight: 400;
+        letter-spacing: 0.04em;
+        text-transform: none;
+        margin: 0;
+        white-space: nowrap;
+        flex: 0 0 auto;
     }
     .dashboard-period-filter .filter-select-wrap {
         min-width: 170px;
         flex: 0 0 auto;
+        position: relative;
     }
     .dashboard-period-filter .filter-select__trigger {
         border: 0;

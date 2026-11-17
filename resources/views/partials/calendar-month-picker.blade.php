@@ -17,32 +17,51 @@
 
 @once
 <style>
+    /* Align prev/next with Sunday / Saturday column centres */
     .calendar-nav-bar {
-        display: flex;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
         align-items: center;
-        gap: 12px;
+        column-gap: 8px;
         width: 100%;
+        box-sizing: border-box;
+        padding: 0 14px;
         margin: 6px auto 16px;
-        flex-wrap: nowrap;
     }
+    .calendar-nav-bar > .cal-nav-btn:first-of-type {
+        grid-column: 1;
+        justify-self: center;
+    }
+    .calendar-nav-bar > .cal-nav-picker {
+        grid-column: 2 / 7;
+        justify-self: center;
+        width: auto;
+        flex: none;
+    }
+    .calendar-nav-bar > .cal-nav-btn:last-of-type {
+        grid-column: 7;
+        justify-self: center;
+    }
+    /* Prototype: white outline circles + pill month label */
     .cal-nav-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 46px;
-        width: 46px;
-        height: 34px;
+        flex: none;
+        width: 42px;
+        height: 42px;
+        min-height: 42px;
         padding: 0;
-        border-radius: 999px;
-        border: 1.5px solid #c5ced6;
+        border-radius: 50%;
+        border: 1.5px solid #6b7280;
         background: #fff;
-        color: #263041;
+        color: #8a9a1a;
         text-decoration: none;
         line-height: 0;
         box-shadow: none;
         transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
         user-select: none;
+        box-sizing: border-box;
     }
     .cal-nav-btn svg {
         display: block;
@@ -50,9 +69,9 @@
         height: 18px;
     }
     .cal-nav-btn:hover {
-        background: #f4f7f8;
-        border-color: #0c5b83;
-        color: #0c5b83;
+        background: #f8fafc;
+        border-color: #4b5563;
+        color: #6f7f12;
     }
     .cal-nav-picker {
         position: relative;
@@ -63,45 +82,51 @@
     .cal-nav-current {
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 10px;
-        min-width: 168px;
-        padding: 8px 16px 8px 18px;
-        border: 1.5px solid #c5ced6;
+        min-width: 200px;
+        height: 42px;
+        min-height: 42px;
+        padding: 0 28px;
+        border: 1.5px solid #6b7280;
         border-radius: 999px;
         background: #fff;
         box-shadow: none;
         cursor: pointer;
-        transition: border-color 0.15s ease;
+        box-sizing: border-box;
+        transition: border-color 0.15s ease, background-color 0.15s ease;
     }
     .cal-nav-current:hover,
     .cal-nav-current[aria-expanded="true"] {
-        border-color: #0c5b83;
+        background: #f8fafc;
+        border-color: #4b5563;
     }
     .cal-nav-current-text {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
         justify-content: center;
-        line-height: 1.15;
+        gap: 6px;
+        line-height: 1;
         text-align: center;
         flex: 1;
     }
     .cal-nav-current-month {
-        font-size: 1.05rem;
+        font-size: 1rem;
         font-weight: 700;
-        color: #2c3e50;
-        letter-spacing: 0.01em;
+        color: #263041;
+        letter-spacing: 0;
     }
     .cal-nav-current-year {
-        font-size: 0.78rem;
+        font-size: 1rem;
         font-weight: 700;
-        color: #b2cd16;
+        color: #263041;
     }
     .cal-nav-chevron {
         margin-left: auto;
         width: 16px;
         height: 16px;
-        color: #b2cd16;
+        color: #8a9a1a;
         transition: transform 0.2s ease;
     }
     .cal-nav-current[aria-expanded="true"] .cal-nav-chevron {
@@ -226,14 +251,15 @@
     @media (max-width: 480px) {
         .cal-nav-current {
             min-width: 0;
-            padding: 8px 10px;
+            padding: 0 16px;
+            height: 42px;
         }
         .calendar-nav-bar {
             gap: 8px;
         }
         .cal-nav-btn {
             width: 38px;
-            height: 30px;
+            height: 38px;
             flex-basis: 38px;
         }
     }

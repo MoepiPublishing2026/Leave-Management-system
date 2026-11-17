@@ -84,11 +84,14 @@
     }
 
     html body main .analytics-insights-page .filter-form .filter-select__trigger {
+        display: inline-flex !important;
+        align-items: center !important;
         width: 100% !important;
         min-width: 154px !important;
         max-width: none !important;
-        height: 50px !important;
-        min-height: 50px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
         padding: 0 16px 0 14px !important;
         border: 2px solid var(--ai-lime) !important;
         border-radius: 18px !important;
@@ -97,12 +100,13 @@
         font-family: inherit;
         font-size: 14px !important;
         font-weight: 500 !important;
+        line-height: 1 !important;
         color: #111 !important;
         flex-direction: row-reverse;
         justify-content: flex-end;
         gap: 10px;
         white-space: nowrap;
-        box-sizing: border-box;
+        box-sizing: border-box !important;
     }
 
     .analytics-insights-page .filter-form .filter-select__label {
@@ -163,16 +167,17 @@
 
     html body main .analytics-insights-page .filter-clear {
         display: inline-flex !important;
-        align-items: center;
-        justify-content: center;
+        align-items: center !important;
+        justify-content: center !important;
         gap: 8px;
         flex: 0 0 auto !important;
         width: auto !important;
         min-width: 116px !important;
-        height:  50px !important;
+        height: 44px !important;
         min-height: 44px !important;
+        max-height: 44px !important;
         padding: 0 24px !important;
-        box-sizing: border-box;
+        box-sizing: border-box !important;
         border: 2px solid var(--ai-lime-fill) !important;
         border-radius: 18px !important;
         background: var(--ai-lime-fill) !important;
@@ -180,6 +185,7 @@
         font-family: inherit;
         font-size: 14px !important;
         font-weight: 500 !important;
+        line-height: 1 !important;
         text-decoration: none !important;
         white-space: nowrap;
         box-shadow: none !important;

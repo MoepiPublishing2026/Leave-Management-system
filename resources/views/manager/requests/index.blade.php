@@ -26,23 +26,24 @@ html body main .team-requests-page .mgr-scope-switch {
 }
 
 /* Mint toolbar: + New Request, search, Search, Clear */
+/* Match My Leave Requests search toolbar sizing */
 html body main .team-requests-page .requests-toolbar {
     display: flex !important;
     align-items: center !important;
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap !important;
     gap: 16px !important;
     background: #d8e3e1 !important;
     border: 0 !important;
-    border-radius: 14px !important;
-    padding: 14px 18px !important;
+    border-radius: 12px !important;
+    padding: 14px 22px !important;
     box-shadow: none !important;
     min-height: 0 !important;
-    margin-bottom: 16px !important;
+    margin-bottom: 10px !important;
 }
 html body main .team-requests-page .requests-toolbar-left { flex: 0 0 auto !important; }
 html body main .team-requests-page .requests-toolbar-right {
-    flex: 1 1 auto !important;
-    margin-left: 0 !important;
+    flex: 0 1 auto !important;
+    margin-left: auto !important;
     min-width: 0 !important;
 }
 html body main .team-requests-page .requests-search-form {
@@ -50,30 +51,30 @@ html body main .team-requests-page .requests-search-form {
     top: auto !important;
     right: auto !important;
     left: auto !important;
-    width: 100% !important;
+    width: auto !important;
     max-width: none !important;
     margin: 0 !important;
     display: flex !important;
     align-items: center !important;
-    gap: 12px !important;
+    gap: 16px !important;
 }
 html body main .team-requests-page .requests-search-form input[type="text"] {
-    flex: 1 1 auto !important;
+    flex: 0 1 auto !important;
     width: auto !important;
-    min-width: 0 !important;
-    height: 48px !important;
+    min-width: 250px !important;
+    height: auto !important;
     box-sizing: border-box !important;
     padding: 12px 16px 12px 46px !important;
     border: 0 !important;
-    border-radius: 12px !important;
-    background-color: #fff !important;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2.4' stroke-linecap='round'><circle cx='11' cy='11' r='6.5'/><path d='M16 16l5 5'/></svg>") !important;
-    background-repeat: no-repeat !important;
-    background-position: 16px center !important;
-    background-size: 20px 20px !important;
-    font-size: 15px !important;
-    line-height: 1.3 !important;
+    border-radius: 10px !important;
+    background: #fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a2b222' stroke-width='2.4' stroke-linecap='round'><circle cx='11' cy='11' r='6.5'/><path d='M16 16l5 5'/></svg>") no-repeat 16px center / 20px 20px !important;
+    font-size: 12px !important;
+    line-height: 1.1 !important;
+    color: #333 !important;
     box-shadow: none !important;
+}
+html body main .team-requests-page .requests-search-form input[type="text"]::placeholder {
+    color: #777 !important;
 }
 html body main .team-requests-page .requests-btn--primary,
 html body main .team-requests-page .requests-btn--search,
@@ -81,23 +82,31 @@ html body main .team-requests-page .requests-btn--secondary {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    height: 48px !important;
-    padding: 0 22px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 12px 14px !important;
     background: #d4e21a !important;
-    color: #1a1a1a !important;
+    color: #111 !important;
     border: 0 !important;
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     font-weight: 700 !important;
-    font-size: 15px !important;
+    font-size: 13px !important;
+    line-height: 1.1 !important;
     text-decoration: none !important;
     box-shadow: none !important;
     white-space: nowrap !important;
+    text-transform: none !important;
+    cursor: pointer !important;
+}
+html body main .team-requests-page .requests-btn--search,
+html body main .team-requests-page .requests-btn--secondary {
+    padding: 12px 32px !important;
 }
 html body main .team-requests-page .requests-btn--primary:hover,
 html body main .team-requests-page .requests-btn--search:hover,
 html body main .team-requests-page .requests-btn--secondary:hover {
-    background: #c6d40f !important;
-    color: #1a1a1a !important;
+    background: #c3d010 !important;
+    color: #111 !important;
 }
 
 /* tabs and payment filter */
@@ -161,7 +170,7 @@ html body .team-requests-page .request-link {
 }
 html body .team-requests-page .requests-hint { color:#777 !important; font-size:.75rem; }
 /* card title shadow */
-html body .team-requests-page .requests-table td:nth-child(2) { text-shadow:1px 2px 3px rgba(0,0,0,.35); }
+html body .team-requests-page .requests-table td:nth-child(2) { text-shadow: none; }
 
 /* icons */
 html body .team-requests-page .requests-table td:nth-child(3)::before {

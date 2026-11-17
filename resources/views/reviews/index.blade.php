@@ -12,35 +12,65 @@ html body .pr-reviews-page h1 { color:#263248; font-weight:700; letter-spacing:0
 html body .pr-reviews-page .requests-page-lead { color:#64748b; }
 html body .pr-reviews-page .requests-page-lead strong { color:#a2b222; }
 
+/* Match requests search toolbar colour / height / font (no search icon) */
 html body .pr-reviews-page .requests-toolbar {
-    display:flex !important; align-items:center !important; gap:16px !important;
-    background:#e7eeed !important; border:0 !important; border-radius:12px !important;
-    padding:14px 22px !important; box-shadow:none !important;
+    display:flex !important; align-items:center !important; flex-wrap:wrap !important; gap:16px !important;
+    background:#d8e3e1 !important; border:0 !important; border-radius:12px !important;
+    padding:14px 22px !important; box-shadow:none !important; margin-bottom:10px !important;
 }
 html body .pr-reviews-page .requests-toolbar-right {
-    flex:1 1 auto !important; margin-left:0 !important; min-width:0 !important;
+    flex:0 0 auto !important; margin-left:auto !important; min-width:0 !important;
 }
 html body main .pr-reviews-page .requests-search-form {
     position:static !important; top:auto !important; right:auto !important; left:auto !important;
-    display:flex !important; align-items:center !important; gap:14px !important;
-    width:100% !important; max-width:none !important; margin:0 !important; z-index:auto !important;
+    display:flex !important; align-items:center !important; gap:16px !important;
+    width:auto !important; max-width:none !important; margin:0 !important; z-index:auto !important;
 }
-html body .pr-reviews-page .requests-btn--primary,
-html body .pr-reviews-page .requests-btn--search,
-html body .pr-reviews-page .requests-btn--secondary {
+/* Beat shared form button rules (Search is a <button>, Clear is an <a>). */
+html body main .pr-reviews-page .requests-toolbar a.requests-btn.requests-btn--primary,
+html body main .pr-reviews-page form.requests-search-form button.requests-btn.requests-btn--search[type="submit"],
+html body main .pr-reviews-page form.requests-search-form a.requests-btn.requests-btn--secondary,
+html body main .pr-reviews-page .requests-btn--primary,
+html body main .pr-reviews-page .requests-btn--search,
+html body main .pr-reviews-page .requests-btn--secondary {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
     background: #d4e21a !important;
     color: #111 !important;
     border: 0 !important;
     border-radius: 10px !important;
-    padding: 12px 14px !important;
-    font-family: inherit;
+    padding: 0 14px !important;
+    font-family: inherit !important;
     font-size: 13px !important;
     font-weight: 700 !important;
-    line-height: 1.1 !important;
-    min-height: 48px !important;
+    line-height: 1 !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
     box-shadow: none !important;
     text-transform: none !important;
-    cursor: pointer;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    flex: 0 0 auto !important;
+}
+html body main .pr-reviews-page form.requests-search-form button.requests-btn.requests-btn--search[type="submit"],
+html body main .pr-reviews-page form.requests-search-form a.requests-btn.requests-btn--secondary,
+html body main .pr-reviews-page .requests-btn--search,
+html body main .pr-reviews-page .requests-btn--secondary {
+    width: 100px !important;
+    min-width: 100px !important;
+    max-width: 100px !important;
+    padding: 0 !important;
+}
+html body main .pr-reviews-page .requests-btn--primary:hover,
+html body main .pr-reviews-page form.requests-search-form button.requests-btn.requests-btn--search[type="submit"]:hover,
+html body main .pr-reviews-page form.requests-search-form a.requests-btn.requests-btn--secondary:hover,
+html body main .pr-reviews-page .requests-btn--search:hover,
+html body main .pr-reviews-page .requests-btn--secondary:hover {
+    background: #c3d010 !important;
+    color: #111 !important;
 }
 /* Reviewed pill + View/Edit button: oval */
 html body .pr-reviews-page .pr-status,
@@ -49,10 +79,25 @@ html body .pr-reviews-page .pr-card-btn {
     padding: 6px 16px !important;
 }
 html body .pr-reviews-page .requests-search-form input[type="text"] {
-    flex:1 1 auto !important; width:auto !important; min-width:0 !important; height:41px !important;
-    background:#fff !important; background-image:none !important;
-    border:0 !important; border-radius:10px !important;
-    padding:12px 18px !important; font-size:15px !important; color:#333 !important;
+    flex:0 1 auto !important;
+    width:auto !important;
+    max-width:none !important;
+    min-width:250px !important;
+    height:40px !important;
+    box-sizing:border-box !important;
+    background:#fff !important;
+    background-image:none !important;
+    border:0 !important;
+    border-radius:10px !important;
+    padding:0 16px !important;
+    font-family:inherit !important;
+    font-size:12px !important;
+    line-height:1.1 !important;
+    color:#333 !important;
+    box-shadow:none !important;
+}
+html body .pr-reviews-page .requests-search-form input[type="text"]::placeholder {
+    color:#777 !important;
 }
 
 html body .pr-reviews-page .requests-filter-bar {
@@ -60,8 +105,8 @@ html body .pr-reviews-page .requests-filter-bar {
     background:transparent !important; border:0 !important; box-shadow:none !important; padding:0 !important;
 }
 html body .pr-reviews-page .requests-filters {
-    display:inline-flex; gap:20px; background:#e7eeed !important; border:0 !important;
-    border-radius:14px; padding:12px 20px;
+    display:inline-flex; gap:20px; background:#d8e3e1 !important; border:0 !important;
+    border-radius:12px; padding:14px 20px;
 }
 html body .pr-reviews-page .requests-filter {
     background:transparent !important; color:#263248 !important; font-weight:600 !important;
@@ -202,7 +247,13 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
                 @if ($isManagerList)
                     <input type="hidden" name="scope" value="{{ $reviewScope }}" />
                 @endif
-                <input type="text" name="search" placeholder="Search employee, reviewer, status" value="{{ $search }}" aria-label="Search reviews" />
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="{{ ($isSenior || $reviewScope === 'team') ? 'Search employee, reviewer, status' : 'Search status, month, year…' }}"
+                    value="{{ $search }}"
+                    aria-label="Search reviews"
+                />
                 <button type="submit" class="requests-btn requests-btn--search">Search</button>
                 <a href="{{ route($indexRoute, $clearParams) }}" class="requests-btn requests-btn--secondary">Clear</a>
             </form>

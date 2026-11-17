@@ -256,8 +256,10 @@
                 item.setAttribute('aria-disabled', option.disabled ? 'true' : 'false');
                 if (!option.disabled) {
                     item.addEventListener('click', (event) => {
+                        event.preventDefault();
                         event.stopPropagation();
-                        select.value = option.value;
+                        // selectedIndex so empty "All Staff" / "All Employees" applies reliably
+                        select.selectedIndex = option.index;
                         menu.querySelectorAll('.filter-select__option').forEach((node) => {
                             node.classList.remove('is-selected');
                             node.setAttribute('aria-selected', 'false');
@@ -268,8 +270,14 @@
                         if (triggerLabel) {
                             triggerLabel.textContent = option.textContent;
                         }
-                        select.dispatchEvent(new Event('change', { bubbles: true }));
                         closeAllFilterSelects();
+                        const form = select.form;
+                        const shouldSubmit = !!form && (select.getAttribute('onchange') || '').includes('form.submit');
+                        if (shouldSubmit) {
+                            form.submit();
+                        } else {
+                            select.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
                     });
                 }
                 menu.appendChild(item);

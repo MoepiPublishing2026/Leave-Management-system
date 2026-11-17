@@ -112,15 +112,15 @@
     font-size: 0.98rem;
     font-weight: 400;
     color: #3d4650;
-    text-shadow: 0 2px 3px rgba(0, 0, 0, 0.18);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+    text-shadow: none;
+    box-shadow: none;
     border: 1px solid #e3e7ea;
   }
-  .leave-balance-item:hover { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); }
+  .leave-balance-item:hover { box-shadow: none; }
   .leave-balance-item.disabled {
     background: #e4e9ec;
     color: #7a848c;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+    box-shadow: none;
     cursor: not-allowed;
   }
   .leave-type {
@@ -167,11 +167,12 @@
     box-sizing: border-box;
   }
   .dashboard-container .cards .card:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important; }
-  .dashboard-container .cards .card.card-all      { background: #4fe6c5 !important; }
-  .dashboard-container .cards .card.card-pending  { background: #f2b96b !important; }
-  .dashboard-container .cards .card.card-overdue  { background: #ab8cf5 !important; }
-  .dashboard-container .cards .card.card-approved { background: #a03d85 !important; }
-  .dashboard-container .cards .card.card-rejected { background: #94c4c8 !important; }
+  .dashboard-container .cards .card.card-all      { background: #4ee5c5 !important; }
+  .dashboard-container .cards .card.card-pending  { background: #f3b86b !important; }
+  .dashboard-container .cards .card.card-overdue  { background: #ae8df5 !important; }
+  .dashboard-container .cards .card.card-approved { background: #a33d86 !important; }
+  .dashboard-container .cards .card.card-rejected { background: #8fc4c7 !important; }
+  .dashboard-container .cards .card.card-onleave  { background: #bad550 !important; }
   .dashboard-container .cards .card.card-onleave  { background: #b9d84a !important; }
   .card .card-title svg, .card .card-title .icon { display: none; }
   .card-title {
@@ -228,8 +229,8 @@
     font-weight: 700;
     color: #253141;
   }
-  .status-legend-item { display: inline-flex; align-items: center; gap: 8px; }
-  .status-legend-swatch { width: 10px; height: 10px; border-radius: 2px; }
+  .status-legend-item { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+  .status-legend-swatch { width: 12px; height: 12px; border-radius: 0; }
 
   /* Pyramid — same shape as My Leave Dashboard */
   html body .dashboard-container .pyramid-body {
@@ -488,16 +489,13 @@
     window.applyBoldChartDefaults();
     window.finalizeChartDefaults();
 
-    // ---------- Palettes taken from the design ----------
+    // ---------- Palettes (type / utilization unchanged; status pie from dict) ----------
     const protoColors = ['#4a7ff7', '#b08cf5', '#f5b96b', '#ffdc50', '#4fe6c5', '#94c4c8', '#a03d85', '#b9d84a'];
-
-    const statusColors = {
-      Pending:  '#b08cf5',
-      Approved: '#ffdc50',
-      Overdue:  '#f5b96b',
-      Rejected: '#4a7ff7',
-      Withdrawn: '#fbe8b0',
-    };
+    const statusColors = Object.assign(
+      { Withdrawn: '#fbe8b0' },
+      @json(config('leave_status_colors.status_pie_personal'))
+    );
+    const monthlyLineColor = @json(config('leave_status_colors.monthly_applications_line'));
 
     const monthlyStatusColors = {
       Approved:  '#7ebade',
@@ -631,14 +629,17 @@
         datasets: [{
           label: 'Applications',
           data: monthlyTotals,
-          borderColor: '#4a7ff7',
-          backgroundColor: '#4a7ff7',
+          borderColor: monthlyLineColor,
+          backgroundColor: monthlyLineColor,
           borderWidth: 2,
           tension: 0.45,
           cubicInterpolationMode: 'monotone',
           fill: false,
-          pointRadius: 0,
-          pointHoverRadius: 3,
+          pointRadius: 4,
+          pointHoverRadius: 5,
+          pointBackgroundColor: monthlyLineColor,
+          pointBorderColor: monthlyLineColor,
+          pointBorderWidth: 0,
           capBezierPoints: true
         }]
       },
@@ -665,7 +666,7 @@
       data,
       backgroundColor: monthlyStatusColors[label],
       borderWidth: 0,
-      borderRadius: window.stackedBarTopRadius(8),
+      borderRadius: 0,
       borderSkipped: false,
       maxBarThickness: 28,
       stack: 'status'
@@ -754,7 +755,7 @@
           data: utilizationData,
           backgroundColor: utilizationTypes.map((t) => utilizationColors[normalizeKey(t)] || configColorForType(t)),
           borderWidth: 0,
-          borderRadius: { topLeft: 10, topRight: 10, bottomLeft: 0, bottomRight: 0 },
+          borderRadius: window.barTopRadius || { topLeft: 5, topRight: 5, bottomLeft: 0, bottomRight: 0 },
           borderSkipped: false,
           minBarLength: 8,
           maxBarThickness: 34,

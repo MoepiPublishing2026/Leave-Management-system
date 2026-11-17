@@ -143,7 +143,7 @@
         background: #0c5b83;
         color: #fff;
         padding: 12px 4px;
-        border-radius: 10px;
+        border-radius: 18px;
         font-size: 0.85rem;
         letter-spacing: 0.02em;
         text-transform: uppercase;
@@ -404,14 +404,49 @@
         }
     }
 
-    /* ===== Clean up Month Picker Pill ===== */
+    /* Keep nav width/gaps aligned with the 7-day calendar grid inside the padded panel */
+    .calendar-page .calendar-nav-bar {
+        display: grid !important;
+        grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+        column-gap: 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 0 14px !important; /* match .calendar-panel padding */
+    }
+    .calendar-page .calendar-nav-bar > .cal-nav-btn:first-of-type {
+        grid-column: 1 !important;
+        justify-self: center !important;
+    }
+    .calendar-page .calendar-nav-bar > .cal-nav-picker {
+        grid-column: 2 / 7 !important;
+        justify-self: center !important;
+    }
+    .calendar-page .calendar-nav-bar > .cal-nav-btn:last-of-type {
+        grid-column: 7 !important;
+        justify-self: center !important;
+    }
 
-    /* Hide the dropdown chevron arrow */
+    /* Prototype month picker: white outline circles + pill */
     .calendar-page .cal-nav-chevron {
         display: none !important;
     }
 
-    /* Adjust the text container to sit side-by-side on one line */
+    .calendar-page .cal-nav-btn {
+        width: 42px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        border-radius: 50% !important;
+        border: 1.5px solid #6b7280 !important;
+        background: #fff !important;
+        color: #8a9a1a !important;
+    }
+
+    .calendar-page .cal-nav-btn:hover {
+        background: #f8fafc !important;
+        border-color: #4b5563 !important;
+        color: #6f7f12 !important;
+    }
+
     .calendar-page .cal-nav-current-text {
         flex-direction: row !important;
         align-items: center !important;
@@ -419,25 +454,28 @@
         gap: 6px !important;
     }
 
-    /* Style the Month text */
-    .calendar-page .cal-nav-current-month {
-        font-size: 1rem !important;
-        font-weight: 600 !important;
-        color: #1e293b !important;
-    }
-
-    /* Style the Year text to match the month (black, not green) */
+    .calendar-page .cal-nav-current-month,
     .calendar-page .cal-nav-current-year {
         font-size: 1rem !important;
-        font-weight: 600 !important;
-        color: #1e293b !important;
+        font-weight: 700 !important;
+        color: #263041 !important;
     }
 
-    /* Center the pill */
     .calendar-page .cal-nav-current {
-        min-width: 160px !important;
-        padding: 8px 20px !important;
+        min-width: 200px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+        padding: 0 28px !important;
         justify-content: center !important;
+        border: 1.5px solid #6b7280 !important;
+        border-radius: 999px !important;
+        background: #fff !important;
+    }
+
+    .calendar-page .cal-nav-current:hover,
+    .calendar-page .cal-nav-current[aria-expanded="true"] {
+        background: #f8fafc !important;
+        border-color: #4b5563 !important;
     }
 
     /* ===== "Showing days with approved leave" box: no background colour ===== */

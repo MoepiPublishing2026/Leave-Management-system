@@ -411,13 +411,13 @@
         font-size: 1rem;
         font-weight: 600;
         color: #253141;
-        box-shadow: 0 8px 18px rgba(38, 49, 66, 0.10);
+        box-shadow: none;
         text-decoration: none;
         border: 1px solid #ececec;
-        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        transition: transform 0.2s ease, border-color 0.2s ease;
     }
     .balance-type-card:hover:not(.is-disabled) {
-        box-shadow: 0 8px 20px rgba(13, 59, 53, 0.25);
+        box-shadow: none;
         transform: translateY(-2px);
     }
     .balance-type-card.is-disabled {
@@ -863,7 +863,7 @@
         background: #fff !important;
         border: 1.5px solid #c6d63a !important;
         border-radius: 16px !important;
-        box-shadow: 0 8px 18px rgba(38, 49, 66, 0.10) !important;
+        box-shadow: none !important;
         color: #253141 !important;
         width: 100% !important;
         height: 100% !important;
@@ -872,7 +872,7 @@
     }
     .balance-page .balance-type-card:hover:not(.is-disabled) {
         border: 1.5px solid #263041 !important;
-        box-shadow: 0 10px 22px rgba(38, 49, 66, 0.12) !important;
+        box-shadow: none !important;
         transform: translateY(-2px);
     }
     .balance-page .balance-type-card .type-name {

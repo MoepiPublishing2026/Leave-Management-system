@@ -3,106 +3,192 @@
 @section('title', 'Messages')
 
 @section('content')
-
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-    .messages-page-title {
-        font-weight: 700;
-        font-size: clamp(24px, 3vw, 34px);
-        color: #273548;
-        margin: 0 auto 10px;
-        padding-left: 18px;
-        text-align: left;
-        letter-spacing: 0;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        width: 100%;
-        max-width: 1200px;
-        box-sizing: border-box;
+    :root {
+        --msg-bg: #FFFFFF;
+        --msg-text: #1A2B3A;
+        --msg-lime: #CDE800;
+        --msg-blue: #2FB5F0;
+        --msg-search: #D3DCE3;
+        --msg-selected: #C2CBD3;
+        --msg-input: #E9F4F6;
+        --msg-voice: #EDF7F0;
+        --msg-banner: #FFF6E0;
+        --msg-divider: #D0D5DB;
     }
 
-    .messages-wrap {
-        width: 100%;
-        max-width: 1200px;
-        height: clamp(400px, 65vh, 750px);
-        min-height: 400px;
-        margin: 0 auto 40px;
-        background: #fff;
-        border-radius: 0;
-        box-shadow: none;
-        overflow: hidden;
-        display: grid;
+    /* Fill the fixed main area; scroll happens inside the chat list / message stack. */
+    html body:has(.messages-page) main.content {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+        padding-top: 16px !important;
+        padding-bottom: 8px !important;
+    }
+
+    html body .messages-page {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 0% !important;
+        height: 0 !important; /* flex + height:0 forces remaining viewport height */
+        min-height: 0 !important;
+        overflow: hidden !important;
+        background: var(--msg-bg);
+        color: var(--msg-text);
+        padding-bottom: 0;
+        border-bottom: none;
+        margin-bottom: 0;
+        width: 100% !important;
+        max-width: none !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    html body .messages-page,
+    html body .messages-page * {
+        font-family: 'Poppins', sans-serif;
+    }
+
+    html body main .messages-page .messages-page-title,
+    .messages-page-title {
+        flex: 0 0 auto !important;
+        font-weight: 800 !important;
+        font-size: 31px !important;
+        color: var(--msg-text) !important;
+        margin: 0 0 8px 0 !important;
+        padding: 0 !important;
+        text-align: left !important;
+        letter-spacing: 0 !important;
+        font-family: 'Poppins', sans-serif !important;
+        width: 100% !important;
+        max-width: none !important;
         box-sizing: border-box;
-        grid-template-columns: minmax(300px, 36%) minmax(0, 1fr);
+        line-height: 1.15 !important;
+    }
+
+    html body main .messages-page .messages-wrap,
+    .messages-wrap {
+        flex: 1 1 0% !important;
+        width: 1040px !important;
+        max-width: 100% !important;
+        height: 0 !important; /* take leftover space under title, then inner scroll */
+        min-height: 0 !important;
+        max-height: none !important;
+        margin: 0 auto !important;
+        background: var(--msg-bg);
+        border-radius: 0;
+        box-shadow: none !important;
+        overflow: hidden !important;
+        display: grid !important;
+        box-sizing: border-box;
+        grid-template-columns: 35% 65% !important;
+        grid-template-rows: minmax(0, 1fr) !important;
         border: none;
+        color: var(--msg-text);
     }
 
     /* LEFT SIDEBAR */
 
     .messages-sidebar {
-        background: #fff;
-        border-right: 4px solid #858585;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
+        background: var(--msg-bg);
+        border-right: 3px solid #6F6F6F;
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        max-height: 100% !important;
+        min-height: 0 !important;
         min-width: 0;
+        overflow: hidden !important;
         box-sizing: border-box;
+        align-self: stretch;
     }
 
     .messages-sidebar-head {
-        padding: 10px 20px 12px;
-        font-size: 24px;
-        font-weight: 800;
-        color: #273548;
+        flex: 0 0 auto;
+        padding: 6px 14px 8px;
+        font-size: 20px !important;
+        font-weight: 700 !important;
+        color: var(--msg-text) !important;
         text-align: left;
         border-bottom: none;
-        background: #fff;
+        background: var(--msg-bg);
         letter-spacing: 0;
+        font-family: 'Poppins', sans-serif !important;
     }
 
     .messages-search {
-        margin: 0 16px 14px;
+        flex: 0 0 auto;
+        margin: 0 0 10px;
+        /* Match thread padding so the bar starts where avatars start */
+        padding: 0 12px 0 14px;
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
     }
 
     .messages-search-field {
         display: flex;
         align-items: center;
         gap: 8px;
-        height: 40px;
-        padding: 0 14px;
-        background: #e7eef3;
-        border-radius: 10px;
-        color: #8b97a3;
+        width: 100%;
+        height: 30px;
+        padding: 4px 12px;
+        background: var(--msg-search) !important;
+        border-radius: 10px !important;
+        color: #5B6B7A;
+        border: none !important;
+        box-shadow: none !important;
+        box-sizing: border-box;
     }
 
     .messages-search-field svg {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         flex: none;
-        stroke: currentColor;
+        stroke: var(--msg-text);
+        stroke-width: 2;
     }
 
     .messages-search-field input {
         width: 100%;
-        border: 0;
-        outline: none;
-        background: transparent;
-        color: #273548;
-        font-size: 0.92rem;
-        font-family: inherit;
+        border: 0 !important;
+        outline: none !important;
+        background: transparent !important;
+        color: var(--msg-text) !important;
+        font-size: 12px !important;
+        font-weight: 400 !important;
+        font-family: 'Poppins', sans-serif !important;
+        box-shadow: none !important;
     }
 
     .messages-search-field input::placeholder {
-        color: #8b97a3;
+        color: #5B6B7A !important;
+        opacity: 1;
+        font-family: 'Poppins', sans-serif !important;
+        font-size: 12px !important;
     }
 
     .messages-search-empty {
-        padding: 18px 16px;
-        color: #8b97a3;
-        font-size: 0.9rem;
+        padding: 18px 20px;
+        color: #5B6B7A;
+        font-size: 0.95rem;
     }
 
     .thread-list {
-        overflow-y: auto;
-        flex: 1;
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        /* Explicit viewport cap so the list always scrolls like WhatsApp */
+        max-height: calc(100vh - var(--navbar-height, 90px) - var(--footer-height, 76px) - 150px) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
     }
 
     .thread-list .thread[hidden] {
@@ -113,39 +199,50 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 12px 10px;
+        padding: 10px 12px 10px 14px;
         text-decoration: none;
         color: inherit;
+        border: none !important;
+        border-left: 0 !important;
         border-bottom: none;
         transition: background-color 0.12s ease;
         box-sizing: border-box;
+        background: var(--msg-bg);
     }
 
     .thread:hover {
-        background: #f5f5f5;
+        background: #F3F5F7;
     }
 
     .thread.active {
-        background: #bfc3c7;
-        box-shadow: none;
-    }
-
-    .thread.active .thread-avatar {
-        background: #31b3f8;
+        background: var(--msg-selected) !important;
+        box-shadow: none !important;
+        border-left: 0 !important;
     }
 
     .thread-avatar {
-        width: 54px;
-        height: 54px;
+        width: 42px;
+        height: 42px;
         border-radius: 50%;
         flex-shrink: 0;
         overflow: hidden;
-        background: #d5e11b;
+        background: var(--msg-lime);
         border: none;
         display: flex;
         align-items: center;
         justify-content: center;
         box-shadow: none;
+    }
+
+    .thread-avatar.tone-blue {
+        background: var(--msg-lime);
+    }
+
+    /* Selected chat always uses the blue profile icon. */
+    .thread.active .thread-avatar,
+    .thread.active .thread-avatar.tone-blue,
+    .thread.active .thread-avatar.tone-lime {
+        background: var(--msg-blue) !important;
     }
 
     .thread-avatar img {
@@ -155,7 +252,7 @@
     }
 
     .thread-avatar-fallback {
-        font-size: 20px;
+        font-size: 14px;
         font-weight: 500;
         color: #fff;
         letter-spacing: 0;
@@ -171,13 +268,13 @@
         align-items: baseline;
         justify-content: space-between;
         gap: 8px;
-        margin-bottom: 1px;
+        margin-bottom: 4px;
     }
 
     .thread-name {
-        font-weight: 500;
-        font-size: 16px;
-        color: #111;
+        font-weight: 400;
+        font-size: 13px;
+        color: var(--msg-text);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -185,18 +282,19 @@
     }
 
     .thread.active .thread-name {
-        font-weight: 800;
+        font-weight: 700;
     }
 
     .thread-time {
-        font-size: 14px;
-        color: #111;
+        font-size: 11px;
+        color: var(--msg-text);
         flex-shrink: 0;
-        font-weight: 500;
+        font-weight: 400;
     }
 
     .thread.active .thread-time {
-        font-weight: 800;
+        font-weight: 700;
+        color: var(--msg-text);
     }
 
     .thread-row-bottom {
@@ -207,8 +305,8 @@
     }
 
     .thread-preview {
-        font-size: 12px;
-        color: #333;
+        font-size: 11px;
+        color: #3D4F5F;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -217,15 +315,20 @@
         font-weight: 400;
     }
 
+    .thread.active .thread-preview {
+        font-weight: 700;
+        color: var(--msg-text);
+    }
+
     .thread-unread {
         flex-shrink: 0;
-        min-width: 19px;
-        height: 19px;
-        padding: 0 3px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 4px;
         border-radius: 999px;
-        background: #31b3f8;
+        background: var(--msg-blue);
         color: #fff;
-        font-size: 12px;
+        font-size: 10px;
         font-weight: 700;
         display: inline-flex;
         align-items: center;
@@ -235,37 +338,47 @@
     /* RIGHT CONVERSATION PANEL */
 
     .messages-main {
-        display: flex;
-        flex-direction: column;
+        display: flex !important;
+        flex-direction: column !important;
         min-width: 0;
-        min-height: 0;
-        overflow: hidden;
-        background: #fff;
+        min-height: 0 !important;
+        height: auto !important;
+        max-height: 100% !important;
+        overflow: hidden !important;
+        background: var(--msg-bg);
+        align-self: stretch;
     }
 
+    /* Header: sender avatar + name on top, leave requester info below */
     .messages-header {
-        border-bottom: 1px solid #999;
-        padding: 12px 10px;
+        flex: 0 0 auto;
+        border-bottom: 1px solid #6F6F6F;
+        padding: 10px 12px;
         display: flex;
         align-items: center;
         gap: 10px;
-        background: #fff;
+        background: var(--msg-bg);
         box-shadow: none;
-        min-height: 80px;
+        min-height: 64px;
         box-sizing: border-box;
+        width: 100%;
     }
 
     .messages-header-avatar {
-        width: 54px;
-        height: 54px;
+        width: 42px;
+        height: 42px;
         border-radius: 50%;
         flex-shrink: 0;
         overflow: hidden;
-        background: #d5e11b;
+        background: var(--msg-lime);
         border: none;
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+
+    .messages-header-avatar.tone-blue {
+        background: var(--msg-blue);
     }
 
     .messages-header-avatar img {
@@ -275,7 +388,7 @@
     }
 
     .messages-header-avatar span {
-        font-size: 20px;
+        font-size: 14px;
         font-weight: 500;
         color: #fff;
     }
@@ -286,34 +399,86 @@
 
     .messages-header-text h3 {
         margin: 0;
-        font-size: 15px;
-        font-weight: 800;
-        color: #273548;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--msg-text);
         letter-spacing: 0;
         line-height: 1.3;
+        font-family: 'Poppins', sans-serif;
     }
 
     .messages-header-text .meta {
-        margin-top: 7px;
-        color: #555;
+        margin-top: 4px;
+        color: #5B6B7A;
         font-size: 10px;
-        font-weight: 600;
+        font-weight: 700;
         line-height: 1.4;
         white-space: normal;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* Hide scrollbars but keep scrolling */
+    .thread-list,
+    .messages-stack {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+
+    .thread-list::-webkit-scrollbar,
+    .messages-stack::-webkit-scrollbar {
+        width: 0 !important;
+        height: 0 !important;
+        display: none !important;
+        background: transparent !important;
+    }
+
+    html body:has(.messages-page) main.content {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+
+    html body:has(.messages-page) main.content::-webkit-scrollbar {
+        width: 0 !important;
+        height: 0 !important;
+        display: none !important;
     }
 
     /* MESSAGE AREA */
 
     .messages-body {
-        flex: 1;
-        min-height: 0;
-        padding: 14px 12px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        padding: 10px 14px 0;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
         align-items: stretch;
-        gap: 18px;
-        background: #fff;
+        gap: 10px;
+        background: var(--msg-bg);
+    }
+
+    /* Do NOT use justify-content:flex-end here — it clips older messages and blocks scroll. */
+    .messages-stack {
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        max-height: calc(100vh - var(--navbar-height, 90px) - var(--footer-height, 76px) - 280px) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        gap: 12px;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+    }
+
+    /* Keep short threads pinned near the bottom like WhatsApp, while still allowing scroll. */
+    .messages-stack::before {
+        content: '';
+        flex: 1 0 auto;
+        min-height: 0;
     }
 
     .bubble-row {
@@ -334,7 +499,7 @@
         display: flex;
         flex-direction: column;
         width: max-content;
-        max-width: min(24rem, 85%);
+        max-width: min(28rem, 78%);
         min-width: 0;
     }
 
@@ -350,25 +515,40 @@
 
     .bubble {
         display: block;
+        position: relative;
         width: 100%;
         max-width: 100%;
         min-width: 0;
         box-sizing: border-box;
         padding: 8px 12px;
-        border-radius: 15px;
-        background: #d5e11b;
-        color: #273548;
+        border-radius: 20px;
+        background: var(--msg-lime);
+        color: var(--msg-text);
         font-size: 12px;
+        font-weight: 400;
+        font-family: 'Poppins', sans-serif;
         line-height: 1.35;
         overflow-wrap: anywhere;
         word-break: break-word;
         box-shadow: none;
         cursor: pointer;
-        transition: outline-color 0.12s ease, box-shadow 0.12s ease;
+        transition: outline-color 0.12s ease;
     }
 
     .bubble-row:not(.me) .bubble {
-        border-radius: 15px 15px 15px 3px;
+        border-radius: 20px 20px 20px 4px;
+    }
+
+    .bubble-row:not(.me) .bubble::after {
+        content: '';
+        position: absolute;
+        left: -5px;
+        bottom: 2px;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 0 0 10px 8px;
+        border-color: transparent transparent var(--msg-lime) transparent;
     }
 
     .bubble-line {
@@ -390,19 +570,23 @@
     }
 
     .bubble-row.me .bubble {
-        background: #31b3f8;
+        background: var(--msg-blue);
         color: #fff;
-        border-radius: 5px;
+        border-radius: 10px;
+    }
+
+    .bubble-row.me .bubble::after {
+        display: none;
     }
 
     .bubble-meta {
         align-self: flex-end;
         font-size: 10px;
-        font-weight: 700;
-        color: #263445;
+        font-weight: 500;
+        color: var(--msg-text);
         white-space: nowrap;
         line-height: 1.3;
-        padding-top: 3px;
+        padding-top: 2px;
     }
 
     .bubble-row.me .bubble-meta {
@@ -479,7 +663,7 @@
     }
 
     .bubble:hover {
-        box-shadow: 0 2px 6px rgba(39, 53, 72, 0.12);
+        box-shadow: none;
     }
 
     .bubble.is-selected {
@@ -490,13 +674,15 @@
     /* MESSAGE OPTIONS */
 
     .messages-options-hint {
-        margin: 0 0 0;
-        padding: 13px 12px;
-        border-radius: 7px;
-        background: #faf5e9;
-        color: #273548;
+        flex: 0 0 auto;
+        margin: 0;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: var(--msg-banner);
+        color: var(--msg-text);
         font-size: 11px;
-        font-weight: 800;
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif;
         text-align: center;
         letter-spacing: 0;
     }
@@ -668,15 +854,15 @@
         width: 100%;
         box-sizing: border-box;
         border-top: none;
-        padding: 10px 8px 16px;
-        background: #fff;
+        padding: 6px 10px 10px;
+        background: var(--msg-bg);
         position: relative;
         z-index: 2;
     }
 
     .compose-form {
         display: flex;
-        gap: 12px;
+        gap: 8px;
         align-items: center;
     }
 
@@ -684,22 +870,25 @@
         flex: 1;
         min-width: 0;
         min-height: 36px;
-        max-height: 120px;
+        max-height: 100px;
         resize: none;
-        padding: 10px 40px;
-        border-radius: 24px;
+        padding: 8px 14px;
+        border-radius: 999px;
         border: none;
-        background: #e7f1f2;
-        font-family: inherit;
-        font-size: 13px;
+        background: var(--msg-input) !important;
+        font-family: 'Poppins', sans-serif !important;
+        font-size: 12px;
+        color: var(--msg-text);
         outline: none;
-        box-shadow: none;
+        box-shadow: none !important;
         box-sizing: border-box;
+        text-align: left;
     }
 
     .compose-form textarea::placeholder {
-        color: #777;
+        color: #5B6B7A;
         opacity: 1;
+        text-align: center;
     }
 
     .compose-form textarea:focus {
@@ -708,9 +897,9 @@
     }
 
     .compose-form button[type="submit"] {
-        width: 42px !important;
-        min-width: 42px !important;
-        max-width: 42px !important;
+        width: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
         height: 36px !important;
         padding: 0 !important;
         border-radius: 50% !important;
@@ -720,34 +909,35 @@
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        font-size: 17px;
+        font-size: 14px;
         line-height: 1;
-        background: #d5e11b !important;
+        background: var(--msg-lime) !important;
         color: #fff !important;
         cursor: pointer;
-        box-shadow: none;
+        box-shadow: none !important;
     }
 
     .compose-form button[type="submit"]:hover {
-        background: #bcca13 !important;
+        background: #b8d100 !important;
     }
 
     .compose-voice-btn {
         width: auto;
-        min-width: 58px;
-        height: 36px;
-        padding: 0 12px;
-        border-radius: 22px;
+        min-width: 52px;
+        height: 34px;
+        padding: 0 10px;
+        border-radius: 999px;
         border: none;
-        background: #e7f1f2;
-        color: #a0b51b;
+        background: var(--msg-voice);
+        color: var(--msg-lime);
         font-size: 11px;
-        font-weight: 800;
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif !important;
         letter-spacing: 0;
         line-height: 1;
         cursor: pointer;
         flex-shrink: 0;
-        font-family: inherit;
+        box-shadow: none;
     }
 
     .compose-voice-btn.is-recording {
@@ -825,44 +1015,48 @@
         line-height: 1;
     }
 
-    @media (max-width: 700px) {
-        .messages-page-title {
-            font-size: 28px;
-            padding: 0 12px;
+    /* Keep Messages layout identical on all screen sizes (no mobile restyle). */
+    @media (max-width: 1200px) {
+        html body .messages-page .messages-page-title {
+            font-size: 31px !important;
+            color: #1A2B3A !important;
+            margin-left: 0 !important;
+            text-align: left !important;
         }
 
-        .messages-wrap {
-            height: 70vh;
-            min-height: 400px;
-            grid-template-columns: minmax(0, 1fr);
+        html body .messages-page .messages-wrap {
+            width: min(100%, 1040px) !important;
+            max-width: 1040px !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            grid-template-columns: 35% 65% !important;
+            grid-template-rows: minmax(0, 1fr) !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
         }
 
-        .messages-wrap.is-mobile-thread .messages-sidebar {
-            display: none;
+        html body .messages-page .thread-list {
+            max-height: calc(100vh - var(--navbar-height, 90px) - var(--footer-height, 76px) - 150px) !important;
+            overflow-y: auto !important;
+            min-height: 0 !important;
         }
 
-        .messages-wrap:not(.is-mobile-thread) .messages-main {
-            display: none;
+        html body .messages-page .messages-search {
+            max-width: none !important;
+            margin: 0 0 10px !important;
+            padding: 0 12px 0 14px !important;
         }
 
-        .mobile-back {
-            display: inline-flex;
+        html body .messages-page .messages-sidebar,
+        html body .messages-page .messages-main {
+            display: flex !important;
         }
 
-        .messages-compose {
-            padding: 8px;
-        }
-
-        .compose-form {
-            gap: 6px;
-        }
-
-        .compose-form textarea {
-            padding: 10px 14px;
-        }
-
-        .messages-header-text .meta {
-            font-size: 10px;
+        html body .messages-page .messages-search-field {
+            width: 100% !important;
+            height: 30px !important;
+            border-radius: 10px !important;
+            background: #D3DCE3 !important;
         }
     }
 </style>
@@ -883,10 +1077,8 @@
         if ($c->isYesterday()) {
             return 'Yesterday';
         }
-        if ($c->isCurrentWeek()) {
-            return $c->format('l');
-        }
-        return $c->format('d/m/y');
+
+        return $c->format('d M Y');
     };
 
     $userInitials = function ($user) {
@@ -898,8 +1090,27 @@
         $init = trim($a . $b);
         return $init !== '' ? $init : '?';
     };
+
+    $userDisplayName = function ($user, $fallback = 'User') {
+        if (!$user) {
+            return $fallback;
+        }
+        $name = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
+
+        return $name !== '' ? $name : $fallback;
+    };
+
+    // Chat is manager <-> senior manager. Leave applicant is only for leave info.
+    $chatPeer = function ($conversation) use ($isAdmin) {
+        if ($isAdmin) {
+            return $conversation->manager;
+        }
+
+        return $conversation->admin ?: $conversation->manager?->manager;
+    };
 @endphp
 
+<div class="messages-page">
 <h1 class="messages-page-title">Messages</h1>
 
 <div class="messages-wrap {{ $activeConversation ? 'is-mobile-thread' : '' }}">
@@ -917,8 +1128,9 @@
         <div class="thread-list">
             @forelse($conversations as $c)
                 @php
-                    $otherUser = $isAdmin ? $c->manager : $c->admin;
-                    $otherName = trim(($otherUser->first_name ?? '') . ' ' . ($otherUser->last_name ?? '')) ?: ($isAdmin ? 'Manager' : 'Senior Manager');
+                    $peer = $chatPeer($c);
+                    $listName = $userDisplayName($peer, $isAdmin ? 'Manager' : 'Senior Manager');
+                    $applicant = $c->leaveRequest?->user;
                     $lastMessage = $c->messages->first();
                     if ($lastMessage) {
                         if ($lastMessage->deleted_for_everyone_at) {
@@ -932,25 +1144,33 @@
                     } else {
                         $preview = 'No messages yet';
                     }
+                    $unreadCount = (int) ($c->unread_count ?? 0);
+                    $avatarTone = ((int) ($peer->id ?? 0) % 2 === 0) ? 'tone-blue' : 'tone-lime';
+                    $isActiveThread = (int) ($activeConversation?->id) === (int) $c->id
+                        || (
+                            $activeConversation
+                            && (int) ($activeConversation->leaveRequest?->user_id ?? 0) > 0
+                            && (int) ($activeConversation->leaveRequest?->user_id) === (int) ($applicant->id ?? 0)
+                        );
                 @endphp
-                <a class="thread {{ ($activeConversation?->id) === $c->id ? 'active' : '' }}"
+                <a class="thread {{ $isActiveThread ? 'active' : '' }} {{ $unreadCount > 0 ? 'has-unread' : '' }}"
                    href="{{ route('messages.index', ['conversation' => $c->id]) }}">
-                    <div class="thread-avatar" aria-hidden="true">
-                        @if(!empty($otherUser?->profile_picture))
-                            <img src="{{ route('users.profile_picture', ['user' => $otherUser->id]) }}?v={{ optional($otherUser->updated_at)->timestamp }}" alt="">
+                    <div class="thread-avatar {{ $avatarTone }}" aria-hidden="true">
+                        @if(!empty($peer?->profile_picture))
+                            <img src="{{ route('users.profile_picture', ['user' => $peer->id]) }}?v={{ optional($peer->updated_at)->timestamp }}" alt="">
                         @else
-                            <span class="thread-avatar-fallback">{{ $userInitials($otherUser) }}</span>
+                            <span class="thread-avatar-fallback">{{ $userInitials($peer) }}</span>
                         @endif
                     </div>
                     <div class="thread-body">
                         <div class="thread-row-top">
-                            <span class="thread-name">{{ $otherName }}</span>
-                            <span class="thread-time">{{ $threadTime($c->updated_at) }}</span>
+                            <span class="thread-name">{{ $listName }}</span>
+                            <span class="thread-time">{{ $threadTime($lastMessage?->created_at ?? $c->updated_at) }}</span>
                         </div>
                         <div class="thread-row-bottom">
                             <span class="thread-preview">{{ $preview }}</span>
-                            @if(($c->unread_count ?? 0) > 0)
-                                <span class="thread-unread">{{ $c->unread_count }}</span>
+                            @if($unreadCount > 0)
+                                <span class="thread-unread">{{ $unreadCount }}</span>
                             @endif
                         </div>
                     </div>
@@ -967,23 +1187,24 @@
             <div class="messages-empty-pane">Select a chat to view messages</div>
         @else
             @php
+                $peer = $chatPeer($activeConversation);
+                $peerName = $userDisplayName($peer, $isAdmin ? 'Manager' : 'Senior Manager');
+                $peerTone = ((int) ($peer->id ?? 0) % 2 === 0) ? 'tone-blue' : 'tone-lime';
                 $employee = $activeConversation->leaveRequest?->user;
-                $employeeName = trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? '')) ?: 'Employee';
-                $otherUser = $isAdmin ? $activeConversation->manager : $activeConversation->admin;
-                $otherName = trim(($otherUser->first_name ?? '') . ' ' . ($otherUser->last_name ?? '')) ?: ($isAdmin ? 'Manager' : 'Senior Manager');
+                $employeeName = $userDisplayName($employee, 'Employee');
                 $leave = $activeConversation->leaveRequest;
             @endphp
-            <header class="messages-header">
+            <header class="messages-header" aria-label="Conversation">
                 <a class="mobile-back" href="{{ route('messages.index') }}" aria-label="Back">←</a>
-                <div class="messages-header-avatar" aria-hidden="true">
-                    @if(!empty($otherUser?->profile_picture))
-                        <img src="{{ route('users.profile_picture', ['user' => $otherUser->id]) }}?v={{ optional($otherUser->updated_at)->timestamp }}" alt="">
+                <div class="messages-header-avatar {{ $peerTone }}" aria-hidden="true">
+                    @if(!empty($peer?->profile_picture))
+                        <img src="{{ route('users.profile_picture', ['user' => $peer->id]) }}?v={{ optional($peer->updated_at)->timestamp }}" alt="">
                     @else
-                        <span>{{ $userInitials($otherUser) }}</span>
+                        <span>{{ $userInitials($peer) }}</span>
                     @endif
                 </div>
                 <div class="messages-header-text">
-                    <h3>{{ $otherName }}</h3>
+                    <h3>{{ $peerName }}</h3>
                     <div class="meta">
                         Leave #{{ $activeConversation->leave_request_id }}
                         · {{ $employeeName }}
@@ -1002,6 +1223,7 @@
                 @if($activeMessages->isNotEmpty())
                     <p class="messages-options-hint">Click any message — options appear below</p>
                 @endif
+                <div class="messages-stack">
                 @forelse($activeMessages as $m)
                     @php
                         $isMe = $m->sender_id === $meId;
@@ -1035,35 +1257,17 @@
                                         <span class="bubble-text">{{ $m->body }}</span>
                                     </div>
                                 @endif
-                                <div class="bubble-voice-meta">
-                                    <span class="bubble-meta">
-                                        {{ optional($m->created_at)->format('H:i') }}
-                                        @if ($isMe)
-                                            @if ($m->read_at)
-                                                <span class="ticks blue" title="Read"> ✓✓</span>
-                                            @elseif ($m->delivered_at)
-                                                <span class="ticks gray" title="Delivered"> ✓✓</span>
-                                            @else
-                                                <span class="ticks gray" title="Sent"> ✓</span>
-                                            @endif
-                                        @endif
-                                    </span>
-                                </div>
+                                @if ($isMe)
+                                    <div class="bubble-voice-meta">
+                                        <span class="bubble-meta">{{ optional($m->created_at)->format('H:i') }}</span>
+                                    </div>
+                                @endif
                             @else
                                 <div class="bubble-line">
                                     <span class="bubble-text">{{ $m->displayBody() }}</span>
-                                    <span class="bubble-meta">
-                                        {{ optional($m->created_at)->format('H:i') }}
-                                        @if ($isMe)
-                                            @if ($m->read_at)
-                                                <span class="ticks blue" title="Read"> ✓✓</span>
-                                            @elseif ($m->delivered_at)
-                                                <span class="ticks gray" title="Delivered"> ✓✓</span>
-                                            @else
-                                                <span class="ticks gray" title="Sent"> ✓</span>
-                                            @endif
-                                        @endif
-                                    </span>
+                                    @if ($isMe)
+                                        <span class="bubble-meta">{{ optional($m->created_at)->format('H:i') }}</span>
+                                    @endif
                                 </div>
                             @endif
                             </div>
@@ -1072,6 +1276,7 @@
                 @empty
                     <div class="messages-empty">No messages yet</div>
                 @endforelse
+                </div>
             </div>
 
             <div class="messages-compose">
@@ -1096,8 +1301,13 @@
                     <input type="hidden" name="reply_to_message_id" id="replyToInput" value="">
                     <input type="file" name="voice" id="voiceInput" accept="audio/*" hidden>
                     <button type="button" class="compose-voice-btn" id="voiceRecordBtn" aria-label="Record voice note" title="Tap to record a voice note"><span id="voiceRecordLabel">Voice</span></button>
-                    <textarea name="body" id="composeBody" placeholder="Type a message" rows="1">{{ old('body') }}</textarea>
-                    <button type="submit" aria-label="Send">➤</button>
+                    <textarea name="body" id="composeBody" placeholder="Type a message.." rows="1">{{ old('body') }}</textarea>
+                    <button type="submit" aria-label="Send" title="Send">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M22 2L11 13"></path>
+                            <path d="M22 2L15 22l-4-9-9-4 20-7z"></path>
+                        </svg>
+                    </button>
                 </form>
                 <div class="voice-status" id="voiceStatus" hidden></div>
                 @error('body')
@@ -1109,6 +1319,7 @@
             </div>
         @endif
     </section>
+</div>
 </div>
 
 @if($activeConversation)
@@ -1127,10 +1338,9 @@
                     <option value="">Choose a chat</option>
                     @foreach($forwardConversations as $fc)
                         @php
-                            $fcOther = $isAdmin ? $fc->manager : $fc->admin;
-                            $fcOtherName = trim(($fcOther->first_name ?? '') . ' ' . ($fcOther->last_name ?? '')) ?: ($isAdmin ? 'Manager' : 'Senior Manager');
-                            $fcEmployee = $fc->leaveRequest?->user;
-                            $fcEmployeeName = trim(($fcEmployee->first_name ?? '') . ' ' . ($fcEmployee->last_name ?? '')) ?: 'Employee';
+                            $fcOther = $chatPeer($fc);
+                            $fcOtherName = $userDisplayName($fcOther, $isAdmin ? 'Manager' : 'Senior Manager');
+                            $fcEmployeeName = $userDisplayName($fc->leaveRequest?->user, 'Employee');
                         @endphp
                         <option value="{{ $fc->id }}">{{ $fcOtherName }} · Leave #{{ $fc->leave_request_id }} · {{ $fcEmployeeName }}</option>
                     @endforeach
@@ -1167,7 +1377,7 @@
             event.preventDefault();
         });
     document.addEventListener('DOMContentLoaded', () => {
-        const box = document.getElementById('messagesBody');
+        const box = document.querySelector('.messages-stack') || document.getElementById('messagesBody');
         if (box) box.scrollTop = box.scrollHeight;
 
         const form = document.getElementById('composeForm');

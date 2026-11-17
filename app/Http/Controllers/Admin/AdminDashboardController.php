@@ -81,14 +81,12 @@ class AdminDashboardController extends Controller
         $monthlyPendingData = $monthlyBreakdown['monthlyPendingData'];
         $monthlyOverdueData = $monthlyBreakdown['monthlyOverdueData'];
         $monthlyRejectedData = $monthlyBreakdown['monthlyRejectedData'];
-        $monthlyWithdrawnData = $monthlyBreakdown['monthlyWithdrawnData'];
         $barData = [];
         for ($i = 0; $i < 12; $i++) {
             $barData[] = (int) $monthlyApprovedData[$i]
                 + (int) $monthlyPendingData[$i]
                 + (int) $monthlyOverdueData[$i]
-                + (int) $monthlyRejectedData[$i]
-                + (int) $monthlyWithdrawnData[$i];
+                + (int) $monthlyRejectedData[$i];
         }
 
         $rawStatusCounts = (clone $baseQuery)->select('status', DB::raw('count(*) as total'))
@@ -156,7 +154,6 @@ class AdminDashboardController extends Controller
             'monthlyPendingData' => $monthlyPendingData,
             'monthlyOverdueData' => $monthlyOverdueData,
             'monthlyRejectedData' => $monthlyRejectedData,
-            'monthlyWithdrawnData' => $monthlyWithdrawnData,
         ]);
 
         

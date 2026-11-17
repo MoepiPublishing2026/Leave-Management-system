@@ -55,23 +55,25 @@
         @endif
     </div>
     <div class="requests-toolbar-right">
-        <form method="GET" action="{{ route($formRoute) }}" class="requests-search-form">
-            <input type="hidden" name="status" value="{{ $status }}" />
-            @if (!empty($monthFilter))
-                <input type="hidden" name="month" value="{{ $monthFilter }}" />
-            @endif
-            @if (!empty($employeeFilter))
-                <input type="hidden" name="employee" value="{{ $employeeFilter }}" />
-            @endif
-            @if ($payFilter !== 'all')
-                <input type="hidden" name="pay" value="{{ $payFilter }}" />
-            @endif
-            <input type="text" name="search" placeholder="{{ $searchPlaceholder ?? 'Search requests...' }}" value="{{ $search ?? '' }}" aria-label="Search requests" />
-            @if (!empty($showSearchActions))
-                <button type="submit" class="requests-btn requests-btn--search">Search</button>
-                <a href="{{ route($filterRoute, $clearSearchParams) }}" class="requests-btn requests-btn--secondary">Clear</a>
-            @endif
-        </form>
+        @if (empty($hideSearch))
+            <form method="GET" action="{{ route($formRoute) }}" class="requests-search-form">
+                <input type="hidden" name="status" value="{{ $status }}" />
+                @if (!empty($monthFilter))
+                    <input type="hidden" name="month" value="{{ $monthFilter }}" />
+                @endif
+                @if (!empty($employeeFilter))
+                    <input type="hidden" name="employee" value="{{ $employeeFilter }}" />
+                @endif
+                @if ($payFilter !== 'all')
+                    <input type="hidden" name="pay" value="{{ $payFilter }}" />
+                @endif
+                <input type="text" name="search" placeholder="{{ $searchPlaceholder ?? 'Search requests...' }}" value="{{ $search ?? '' }}" aria-label="Search requests" />
+                @if (!empty($showSearchActions))
+                    <button type="submit" class="requests-btn requests-btn--search">Search</button>
+                    <a href="{{ route($filterRoute, $clearSearchParams) }}" class="requests-btn requests-btn--secondary">Clear</a>
+                @endif
+            </form>
+        @endif
     </div>
 </div>
 

@@ -5,6 +5,27 @@
 @section('content')
 @include('partials.requests-page-styles')
 
+<style>
+    /* Keep Messages / actions flush to the right of each request card */
+    html body main .requests-page .requests-table tr.row-click {
+        grid-template-columns: max-content max-content minmax(0, 1fr) !important;
+    }
+    html body main .requests-page .requests-table td:nth-child(8),
+    html body main .requests-page .requests-table td.request-actions-cell {
+        grid-column: 3 !important;
+        grid-row: 4 !important;
+        justify-self: stretch !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        text-align: right !important;
+    }
+    html body main .requests-page .request-actions {
+        width: 100% !important;
+        justify-content: flex-end !important;
+        margin-left: auto !important;
+    }
+</style>
+
 @php
     use App\Support\LeaveProofRules;
     use App\Support\LeaveAttachmentLinks;

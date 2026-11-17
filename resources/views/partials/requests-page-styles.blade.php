@@ -382,7 +382,7 @@
     .requests-table tr.row-click {
         position: relative;
         display: grid;
-        grid-template-columns: auto auto 1fr;
+        grid-template-columns: max-content max-content minmax(0, 1fr);
         column-gap: 0;
         row-gap: 4px;
         background: #fff;
@@ -417,7 +417,7 @@
         font-size: 1.5rem;
         font-weight: 700;
         color: #555;
-        text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.35);
+        text-shadow: none;
     }
     .requests-table td:nth-child(7) {
         grid-column: 3;
@@ -471,7 +471,10 @@
     .requests-table td:nth-child(8) {
         grid-column: 3;
         grid-row: 4;
-        justify-self: end;
+        justify-self: stretch;
+        width: 100%;
+        min-width: 0;
+        text-align: right;
     }
     .requests-table tr:not(.row-click),
     .requests-table tr:not(.row-click) td {
@@ -578,9 +581,10 @@
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: flex-end;
         gap: 8px;
         min-height: 0;
+        width: 100%;
     }
     .request-actions > a,
     .request-actions > form,

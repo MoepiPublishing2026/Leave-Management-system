@@ -195,7 +195,7 @@
         font-size: 22px;
         font-weight: 700;
         color: #555;
-        text-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+        text-shadow: none;
     }
     .leave-card__badges { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
 
@@ -370,7 +370,7 @@
         'payFilter' => $payFilter ?? 'all',
         'search' => $search ?? '',
         'showNewRequest' => true,
-        'searchPlaceholder' => 'Search name, type, status, dates..',
+        'searchPlaceholder' => 'Search type, status, dates…',
         'statusFilters' => [
             'all' => 'All',
             'pending' => 'Pending',

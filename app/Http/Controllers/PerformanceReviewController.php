@@ -36,11 +36,22 @@ class PerformanceReviewController extends Controller
 
         if ($search !== '') {
             $like = '%'.$search.'%';
-            $query->where(function ($q) use ($like) {
-                $q->where('employee_name', 'like', $like)
-                    ->orWhere('reviewer_name', 'like', $like)
-                    ->orWhere('employee_position', 'like', $like)
-                    ->orWhere('status', 'like', $like);
+            $searchByPerson = $reviewScope === 'team' || strtolower((string) ($user->role ?? '')) === 'admin';
+            $query->where(function ($q) use ($like, $search, $searchByPerson) {
+                $q->where('status', 'like', $like)
+                    ->orWhere('review_period', 'like', $like)
+                    ->orWhere('employee_position', 'like', $like);
+
+                if (ctype_digit($search)) {
+                    $q->orWhere('period_year', (int) $search)
+                        ->orWhere('period_month', (int) $search)
+                        ->orWhere('id', (int) $search);
+                }
+
+                if ($searchByPerson) {
+                    $q->orWhere('employee_name', 'like', $like)
+                        ->orWhere('reviewer_name', 'like', $like);
+                }
             });
         }
 
