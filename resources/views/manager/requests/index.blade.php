@@ -76,9 +76,7 @@ html body main .team-requests-page .requests-search-form input[type="text"] {
 html body main .team-requests-page .requests-search-form input[type="text"]::placeholder {
     color: #777 !important;
 }
-html body main .team-requests-page .requests-btn--primary,
-html body main .team-requests-page .requests-btn--search,
-html body main .team-requests-page .requests-btn--secondary {
+html body main .team-requests-page .requests-btn--primary {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -86,7 +84,7 @@ html body main .team-requests-page .requests-btn--secondary {
     min-height: 0 !important;
     padding: 12px 14px !important;
     background: #d4e21a !important;
-    color: #111 !important;
+    color: #0a1347 !important;
     border: 0 !important;
     border-radius: 10px !important;
     font-weight: 700 !important;
@@ -98,15 +96,41 @@ html body main .team-requests-page .requests-btn--secondary {
     text-transform: none !important;
     cursor: pointer !important;
 }
+/* Search + Clear: same height and width, lime */
+html body main .team-requests-page .requests-search-form .requests-btn--search,
+html body main .team-requests-page .requests-search-form .requests-btn--secondary,
 html body main .team-requests-page .requests-btn--search,
 html body main .team-requests-page .requests-btn--secondary {
-    padding: 12px 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    width: 100px !important;
+    min-width: 100px !important;
+    max-width: 100px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #d4e21a !important;
+    color: #0a1347 !important;
+    border: 1px solid #c3d010 !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+    text-transform: none !important;
+    cursor: pointer !important;
 }
 html body main .team-requests-page .requests-btn--primary:hover,
 html body main .team-requests-page .requests-btn--search:hover,
 html body main .team-requests-page .requests-btn--secondary:hover {
     background: #c3d010 !important;
-    color: #111 !important;
+    color: #0a1347 !important;
 }
 
 /* tabs and payment filter */
@@ -265,7 +289,7 @@ html body .team-requests-page .requests-table td.requests-empty {
         background: #d4e21a !important;
         color: #0a1347 !important;
         border: 1px solid #c3d010 !important;
-        border-radius: 6px !important;
+        border-radius: 10px !important;
         padding: 0 16px !important;
         font-weight: 700 !important;
         font-size: 13px !important;
@@ -273,6 +297,16 @@ html body .team-requests-page .requests-table td.requests-empty {
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
+    }
+    html body .team-requests-page .requests-search-form .requests-btn--search,
+    html body .team-requests-page .requests-search-form .requests-btn--secondary {
+        width: 100px !important;
+        min-width: 100px !important;
+        max-width: 100px !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+        padding: 0 !important;
     }
     html body .requests-page .requests-btn:hover {
         background: #c3d010 !important;

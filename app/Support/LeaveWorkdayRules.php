@@ -8,8 +8,8 @@ use Carbon\CarbonInterface;
 
 /**
  * Company workday rules: 08:00–17:00, with half-day slots 08:00–12:00 and 12:00–17:00.
- * Same-day apply/withdraw is blocked once the workday has started (08:00),
- * except Sick leave which may still be applied for until 12:00.
+ * Same-day leave may be applied for until 17:00 (end of workday); after that the day is over.
+ * Self-service withdraw is allowed until 08:00 on the leave start date.
  */
 class LeaveWorkdayRules
 {
@@ -17,8 +17,10 @@ class LeaveWorkdayRules
 
     public const WORK_START_MINUTE = 0;
 
-    /** Same-day Sick leave may still be submitted until this hour. */
-    public const SICK_SAME_DAY_APPLY_UNTIL_HOUR = 12;
+    /** Same-day leave may be submitted until this hour (17:00 / 5pm). */
+    public const SAME_DAY_APPLY_UNTIL_HOUR = 17;
+
+    public const SAME_DAY_APPLY_UNTIL_MINUTE = 0;
 
     public const HALF_DAY_MORNING = 'morning';
 
@@ -74,18 +76,19 @@ class LeaveWorkdayRules
         return strtolower(trim((string) $leaveType)) === 'sick';
     }
 
-    /** Cutoff datetime for same-day apply (08:00 normally, 12:00 for Sick). */
+    /** Cutoff datetime for same-day apply (17:00 for all leave types). */
     public static function sameDayApplyCutoff(?string $leaveType = null, ?CarbonInterface $now = null): Carbon
     {
         $now = $now ? Carbon::instance($now)->copy() : Carbon::now();
-        $hour = self::isSickLeave($leaveType)
-            ? self::SICK_SAME_DAY_APPLY_UNTIL_HOUR
-            : self::WORK_START_HOUR;
 
-        return $now->copy()->startOfDay()->setTime($hour, 0, 0);
+        return $now->copy()->startOfDay()->setTime(
+            self::SAME_DAY_APPLY_UNTIL_HOUR,
+            self::SAME_DAY_APPLY_UNTIL_MINUTE,
+            0
+        );
     }
 
-    /** True once today's same-day apply cutoff has passed for this leave type. */
+    /** True once today's same-day apply cutoff (17:00) has passed. */
     public static function sameDayCutoffPassed(?CarbonInterface $now = null, ?string $leaveType = null): bool
     {
         $now = $now ? Carbon::instance($now)->copy() : Carbon::now();
@@ -95,7 +98,7 @@ class LeaveWorkdayRules
 
     /**
      * Whether a leave start date may be chosen/submitted now.
-     * Same-day apply: before 08:00 normally; Sick allowed until 12:00.
+     * Same-day apply is allowed until 17:00 for every leave type.
      */
     public static function canApplyStartingOn(
         CarbonInterface $startDate,
@@ -120,11 +123,7 @@ class LeaveWorkdayRules
 
     public static function sameDayApplyBlockedMessage(?string $leaveType = null): string
     {
-        if (self::isSickLeave($leaveType)) {
-            return 'Same-day sick leave can only be applied for before 12:00. After midday, please choose another date or contact your manager.';
-        }
-
-        return 'Same-day leave can only be applied for before 08:00 (work starts at 08:00). Please choose another date or apply before 08:00.';
+        return 'Same-day leave can only be applied for before 17:00 (the workday ends at 17:00). Please choose another date or apply before 17:00.';
     }
 
     /**

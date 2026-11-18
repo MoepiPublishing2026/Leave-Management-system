@@ -2752,3 +2752,35 @@ html body .swal2-confirm:hover {
   background-color: #c3d010 !important;
   color: #0a1347 !important;
 }
+
+/* Team Requests: Search + Clear same size, lime */
+html body main .team-requests-page .requests-search-form .requests-btn--search,
+html body main .team-requests-page .requests-search-form .requests-btn--secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  width: 100px !important;
+  min-width: 100px !important;
+  max-width: 100px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: #d4e21a !important;
+  background-color: #d4e21a !important;
+  color: #0a1347 !important;
+  border: 1px solid #c3d010 !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+html body main .team-requests-page .requests-search-form .requests-btn--search:hover,
+html body main .team-requests-page .requests-search-form .requests-btn--secondary:hover {
+  background: #c3d010 !important;
+  background-color: #c3d010 !important;
+  color: #0a1347 !important;
+}

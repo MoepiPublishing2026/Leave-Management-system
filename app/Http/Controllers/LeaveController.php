@@ -544,9 +544,14 @@ private function applyFormData($user, ?LeaveRequest $editingLeave = null): array
     $existingStart = $editingLeave?->start_date
         ? Carbon::parse($editingLeave->start_date)->toDateString()
         : null;
-    $datePickerMinDate = ($existingStart && Carbon::parse($existingStart)->lt(Carbon::today()))
-        ? $existingStart
-        : 'today';
+    if ($existingStart && Carbon::parse($existingStart)->lt(Carbon::today())) {
+        $datePickerMinDate = $existingStart;
+    } elseif (\App\Support\LeaveWorkdayRules::sameDayCutoffPassed()) {
+        // After 17:00 the workday is over — same-day leave is no longer selectable.
+        $datePickerMinDate = Carbon::tomorrow()->toDateString();
+    } else {
+        $datePickerMinDate = 'today';
+    }
 
     return [
         'publicHolidays' => $publicHolidays,
