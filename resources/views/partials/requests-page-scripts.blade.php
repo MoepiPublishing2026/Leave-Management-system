@@ -418,7 +418,7 @@
             ]);
         }
         const workingDaysValue = details.isHalfDay
-            ? `${escapeHtml(String(requested))} (half day${details.halfDayPeriodLabel ? `: ${escapeHtml(String(details.halfDayPeriodLabel))}` : ''})`
+            ? `${escapeHtml(String(requested))} (half day)`
             : escapeHtml(String(requested));
         rows.push(
             ['Start date', dateText(details.start)],
@@ -454,7 +454,7 @@
                         <span>Taken: ${escapeHtml(review.taken || '0')}</span>
                         <span>Remaining: ${escapeHtml(review.remaining || '0')}</span>
                     </div>
-                    <p class="rd-senior-request">This request: ${escapeHtml(String(requested))} working day(s)${details.isHalfDay && details.halfDayPeriodLabel ? ` · Half-day ${escapeHtml(String(details.halfDayPeriodLabel))}` : ''}</p>
+                    <p class="rd-senior-request">This request: ${escapeHtml(String(requested))} working day(s)${details.isHalfDay ? ' (half day)' : ''}</p>
                     <div class="rd-senior-label">Verify supporting documents</div>
                     <p class="rd-senior-copy">${escapeHtml(documents)}</p>
                     ${alertHtml}
@@ -496,7 +496,7 @@
         let daysText = 'N/A';
         if (details.days !== '' && details.days !== null && details.days !== undefined) {
             daysText = details.isHalfDay
-                ? `${escapeHtml(String(details.days))} Days (half day${details.halfDayPeriodLabel ? `: ${escapeHtml(String(details.halfDayPeriodLabel))}` : ''})`
+                ? `${escapeHtml(String(details.days))} Days (half day)`
                 : `${escapeHtml(String(details.days))} Days`;
         }
 
