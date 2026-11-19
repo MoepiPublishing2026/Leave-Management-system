@@ -1,264 +1,238 @@
+
+@php
+    $formAction = $formAction ?? route('password.update');
+    $fieldName = $fieldName ?? 'email';
+    $fieldId = $fieldId ?? 'email';
+    $fieldLabel = $fieldLabel ?? 'Email Address';
+    $fieldPlaceholder = $fieldPlaceholder ?? 'Enter your email address';
+    $fieldAutocomplete = $fieldAutocomplete ?? 'username';
+    $fieldError = $fieldError ?? 'email';
+    $passwordName = $passwordName ?? 'password';
+    $passwordId = $passwordId ?? 'password';
+    $passwordError = $passwordError ?? 'password';
+    $confirmPasswordName = $confirmPasswordName ?? 'password_confirmation';
+    $confirmPasswordId = $confirmPasswordId ?? 'password_confirmation';
+    $confirmPasswordError = $confirmPasswordError ?? 'password_confirmation';
+    $belowLinkHref = $belowLinkHref ?? route('login');
+    $belowLinkText = $belowLinkText ?? 'Back to Login';
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Reset Password - Leave Management</title>
+
     <link rel="icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" sizes="192x192" />
     <link rel="icon" href="{{ asset('images/favicon-48.png') }}?v=3" type="image/png" sizes="48x48" />
     <link rel="shortcut icon" href="{{ asset('images/favicon-192.png') }}?v=3" type="image/png" />
+    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}?v=3" sizes="180x180" />
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html,
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #ffffff;
-            min-height: 100vh;
-        }
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            width: 100%;
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 0 10px #a7bd8dff;
-            position: relative;
-            overflow: hidden;
-        }
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #d4e21a 0%, #9ef755 100%);
-        }
-        .login-logo { text-align: center; margin-bottom: 20px; }
-        .login-logo img { height: 170px; width: auto; max-width: 100%; }
-        h2 { text-align: center; margin-bottom: 25px; font-size: 28px; color: #2d3748; }
-        
-        .form-group { margin-bottom: 20px; width: 100%; }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 13px;
-            color: #4a5568;
-            text-transform: uppercase;
-        }
-        
-        /* Fixed input styling */
-        .input-wrapper { position: relative; width: 100%; }
-        input[type="email"],
-        input[type="password"],
-        input[type="text"] {
-            width: 100%;
-            display: block;
-            padding: 14px 45px 14px 16px;
-            font-size: 16px;
-            border-radius: 10px;
-            border: 2px solid #e2e8f0;
-            color: #2d3748;
-            background: #ffffff;
-            transition: all 0.3s ease;
-        }
-        input:focus {
-            outline: none;
-            border-color: #d4e21a;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(178, 205, 22, 0.1);
-        }
 
-        .toggle-password {
-            position: absolute;
-            top: 50%;
-            right: 14px;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #a0aec0;
-            width: 22px;
-            height: 22px;
-            transition: color 0.3s ease;
-        }
-        .toggle-password:hover svg {
-            stroke: #d4e21a;
-        }
-        .toggle-password svg {
-            width: 22px;
-            height: 22px;
-            stroke: #d4e21a;
-            transition: stroke 0.3s ease;
-        }
-        
-        .error { color: #e53e3e; font-size: 13px; margin-top: 6px; }
-        
-        button {
-            width: 100%;
-            padding: 14px;
-            font-weight: 600;
-            font-size: 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            border: none;
-            background: linear-gradient(135deg, #d4e21a 0%, #9ef755 100%);
-            color: white;
-            margin-top: 10px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            transition: left 0.5s ease;
-        }
-
-        button:hover::before {
-            left: 100%;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(178, 205, 22, 0.3);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .links {
-            margin-top: 18px;
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .links a {
-            color: #d4e21a;
-            font-weight: 600;
-            text-decoration: none;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .links a::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: #d4e21a;
-            transition: width 0.3s ease;
-        }
-
-        .links a:hover::after {
-            width: 100%;
-        }
-
-        .links a:hover {
-            color: #9ef755;
-        }
-
-        .branding {
-            text-align: center;
-            margin-top: 18px;
-            font-size: 12px;
-            color: #a0aec0;
-        }
-    </style>
-
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/auth-design.css') }}?v=4" />
 </head>
-<body>
-    <div class="container auth-card">
-        <div class="login-logo">
+
+<body class="auth-page auth-reset-password-page">
+
+    <main class="auth-shell login-shell">
+
+        <div class="auth-logo">
             <img src="{{ asset('images/logo_trimmed.png') }}?v=20260817t" alt="Moepi Publishing Logo" />
         </div>
-        <h2 class="auth-title">Reset Password</h2>
 
-        <form method="POST" action="{{ route('password.update') }}">
+        <h1 class="auth-title">Reset Password</h1>
+
+        <div class="auth-mobile-divider" aria-hidden="true"></div>
+
+        <form method="POST" action="{{ $formAction }}" class="auth-form login-form">
             @csrf
+
             <input type="hidden" name="token" value="{{ $token }}" />
 
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" name="email" id="email" value="{{ old('email', $email) }}" required autofocus />
+            <div class="auth-form-group email-group">
+
+                <label class="auth-label" for="{{ $fieldId }}">
+                    {{ $fieldLabel }}
+                </label>
+
+                <div class="auth-input-wrap">
+                    <input
+                        class="auth-input"
+                        type="email"
+                        name="{{ $fieldName }}"
+                        id="{{ $fieldId }}"
+                        value="{{ old($fieldName, $email) }}"
+                        placeholder="{{ $fieldPlaceholder }}"
+                        required
+                        autofocus
+                        autocomplete="{{ $fieldAutocomplete }}"
+                    />
+                </div>
+
+                @error($fieldError)
+                    <div class="auth-error">{{ $message }}</div>
+                @enderror
+
             </div>
 
-            <div class="form-group">
-                <label for="password">New Password</label>
-                <div class="input-wrapper">
-                    <input type="password" name="password" id="password" required />
-                    <span class="toggle-password" id="togglePassword1">
-                        <svg id="eyeOpen1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
+        
+            <div class="auth-form-group password-group">
+
+                <label class="auth-label" for="{{ $passwordId }}">
+                    New Password
+                </label>
+
+                <div class="auth-input-wrap">
+
+                    <input
+                        class="auth-input password-input"
+                        type="password"
+                        name="{{ $passwordName }}"
+                        id="{{ $passwordId }}"
+                        placeholder="Enter your new password"
+                        required
+                        autocomplete="new-password"
+                    />
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        id="togglePassword"
+                        aria-label="Show password"
+                        aria-pressed="false"
+                    >
+                        <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" />
-                            <circle cx="12" cy="12" r="3" stroke-width="2" />
+                            <circle cx="12" cy="12" r="3" />
                         </svg>
-                        <svg id="eyeClosed1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" style="display:none;">
+
+                        <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" aria-hidden="true" style="display:none;">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5a10.6 10.6 0 00-4.9 1.2" />
                         </svg>
-                    </span>
+                    </button>
+
                 </div>
+
+                @error($passwordError)
+                    <div class="auth-error">{{ $message }}</div>
+                @enderror
+
             </div>
 
-            <div class="form-group">
-                <label for="password_confirmation">Confirm Password</label>
-                <div class="input-wrapper">
-                    <input type="password" name="password_confirmation" id="password_confirmation" required />
-                    <span class="toggle-password" id="togglePassword2">
-                        <svg id="eyeOpen2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
+           
+            <div class="auth-form-group password-group">
+
+                <label class="auth-label" for="{{ $confirmPasswordId }}">
+                    Confirm Password
+                </label>
+
+                <div class="auth-input-wrap">
+
+                    <input
+                        class="auth-input password-input"
+                        type="password"
+                        name="{{ $confirmPasswordName }}"
+                        id="{{ $confirmPasswordId }}"
+                        placeholder="Confirm your new password"
+                        required
+                        autocomplete="new-password"
+                    />
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        id="toggleConfirmPassword"
+                        aria-label="Show password"
+                        aria-pressed="false"
+                    >
+                        <svg id="confirmEyeOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4.5-7.5 10.5-7.5S22.5 12 22.5 12 18 19.5 12 19.5 1.5 12 1.5 12z" />
-                            <circle cx="12" cy="12" r="3" stroke-width="2" />
+                            <circle cx="12" cy="12" r="3" />
                         </svg>
-                        <svg id="eyeClosed2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" style="display:none;">
+
+                        <svg id="confirmEyeClosed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" aria-hidden="true" style="display:none;">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 10.6A3 3 0 0112 9a3 3 0 013 3c0 .5-.1.9-.3 1.3M6.7 6.7A10.9 10.9 0 001.5 12S6 19.5 12 19.5a10.6 10.6 0 004.7-1.1M17.3 17.3A10.9 10.9 0 0022.5 12s-4.5-7.5-10.5-7.5a10.6 10.6 0 00-4.9 1.2" />
                         </svg>
-                    </span>
+                    </button>
+
                 </div>
+
+                @error($confirmPasswordError)
+                    <div class="auth-error">{{ $message }}</div>
+                @enderror
+
             </div>
 
-            <button type="submit">Reset Password</button>
+            <button class="auth-primary login-button" type="submit">
+                Reset Password
+            </button>
+
         </form>
 
-        <div class="links"><a href="{{ route('login') }}">Back to Login</a></div>
+        <a class="auth-link forgot-link" href="{{ $belowLinkHref }}">
+            {{ $belowLinkText }}
+        </a>
 
-        <div class="branding">
-            &copy; {{ date('Y') }} Moepi Publishing. All rights reserved.
-        </div>
-    </div>
+        <footer class="auth-footer">
+            <p class="auth-copyright">
+                &copy;{{ date('Y') }} Moepi Publishing.All rights reserved
+            </p>
+        </footer>
+
+    </main>
 
     <script>
-        function setupToggle(inputId, toggleId, openId, closedId) {
-            document.querySelector(`#${toggleId}`).addEventListener('click', () => {
-                const input = document.querySelector(`#${inputId}`);
-                const open = document.querySelector(`#${openId}`);
-                const closed = document.querySelector(`#${closedId}`);
-                const isPass = input.type === 'password';
-                input.type = isPass ? 'text' : 'password';
-                open.style.display = isPass ? 'none' : 'block';
-                closed.style.display = isPass ? 'block' : 'none';
+        function setupPasswordToggle(inputId, buttonId, openId, closedId) {
+            const passwordField = document.getElementById(inputId);
+            const toggleButton = document.getElementById(buttonId);
+            const eyeOpen = document.getElementById(openId);
+            const eyeClosed = document.getElementById(closedId);
+
+            toggleButton.addEventListener('click', () => {
+                const isPassword = passwordField.type === 'password';
+
+                passwordField.type = isPassword ? 'text' : 'password';
+
+                eyeOpen.style.display = isPassword ? 'none' : 'block';
+                eyeClosed.style.display = isPassword ? 'block' : 'none';
+
+                toggleButton.setAttribute('aria-pressed', String(isPassword));
+                toggleButton.setAttribute(
+                    'aria-label',
+                    isPassword ? 'Hide password' : 'Show password'
+                );
             });
         }
-        setupToggle('password', 'togglePassword1', 'eyeOpen1', 'eyeClosed1');
-        setupToggle('password_confirmation', 'togglePassword2', 'eyeOpen2', 'eyeClosed2');
+
+        setupPasswordToggle(
+            '{{ $passwordId }}',
+            'togglePassword',
+            'eyeOpen',
+            'eyeClosed'
+        );
+
+        setupPasswordToggle(
+            '{{ $confirmPasswordId }}',
+            'toggleConfirmPassword',
+            'confirmEyeOpen',
+            'confirmEyeClosed'
+        );
     </script>
+
+    @if ($errors->any())
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Reset Password Failed',
+                html: '<ul style="text-align:left; list-style-position: inside;">' +
+                    @json($errors->all()).map(e => '<li>' + e + '</li>').join('') +
+                    '</ul>',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#29374c'
+            });
+        </script>
+    @endif
+
 </body>
 </html>
