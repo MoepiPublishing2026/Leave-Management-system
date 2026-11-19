@@ -195,12 +195,22 @@ class LeaveRequest extends Model
             $outcomeAt = $this->updated_at;
         }
 
+        $isBackdated = $this->isBackdatedAutoApproved();
+        $backdatedReason = $isBackdated
+            ? \App\Support\LeaveWorkdayRules::backdatedApprovalReason()
+            : '';
+        $approvalComment = $isBackdated
+            ? $backdatedReason
+            : (string) ($this->approval_comment ?? '');
+
         return [
             'submittedAt' => $stamp($this->created_at),
             'reviewedAt' => $stamp($this->recommended_at),
             'outcomeAt' => $stamp($outcomeAt),
             'handledAction' => (string) ($this->handled_action ?? ''),
-            'approvalComment' => (string) ($this->approval_comment ?? ''),
+            'isBackdated' => $isBackdated,
+            'backdatedReason' => $backdatedReason,
+            'approvalComment' => $approvalComment,
             'startShort' => $this->start_date ? Carbon::parse($this->start_date)->format('j M') : '',
             'endShort' => $this->end_date ? Carbon::parse($this->end_date)->format('j M') : '',
             'days' => LeaveDaysFormatter::format(
@@ -212,5 +222,27 @@ class LeaveRequest extends Model
             'halfDayPeriod' => (string) ($this->half_day_period ?? ''),
             'halfDayPeriodLabel' => \App\Support\LeaveWorkdayRules::halfDayPeriodLabel($this->half_day_period),
         ];
+    }
+
+    public function isBackdatedAutoApproved(): bool
+    {
+        if (strtolower((string) ($this->handled_action ?? '')) === 'auto_approved') {
+            return true;
+        }
+
+        $status = strtolower(trim((string) ($this->status ?? '')));
+        if ($status !== 'approved' || ! $this->end_date) {
+            return false;
+        }
+
+        $comment = strtolower((string) ($this->approval_comment ?? ''));
+        if (str_contains($comment, 'backdated') || str_contains($comment, 'automatically approved')) {
+            return true;
+        }
+
+        return \App\Support\LeaveWorkdayRules::isRetroactiveLeave(
+            Carbon::parse($this->start_date ?? $this->end_date),
+            Carbon::parse($this->end_date)
+        );
     }
 }

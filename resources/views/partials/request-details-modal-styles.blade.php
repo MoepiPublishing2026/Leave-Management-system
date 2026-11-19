@@ -719,6 +719,31 @@
     .rd-fields--extra {
         margin-top: 12px;
     }
+    .rd-backdated-note {
+        margin: 12px 0 4px;
+        padding: 12px 14px;
+        border: 2px solid #c5d931;
+        border-radius: 14px;
+        background: #f7fadb;
+        color: #1e293b;
+        text-align: left;
+        line-height: 1.4;
+    }
+    .rd-backdated-note strong {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+    .rd-backdated-note span {
+        font-size: 0.86rem;
+        font-weight: 500;
+    }
+    .rd-modal--senior .rd-backdated-note {
+        margin: 10px 0 14px;
+    }
     .rd-chip-row {
         display: grid;
         grid-template-columns: 1fr 1fr;

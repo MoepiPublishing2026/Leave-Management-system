@@ -285,15 +285,37 @@
         </div>`;
     }
 
+    function isBackdatedLeave(details) {
+        if (details && details.isBackdated) return true;
+        const status = String(details?.status || '').toLowerCase();
+        if (status !== 'approved') return false;
+        if (String(details?.handledAction || '').toLowerCase() === 'auto_approved') return true;
+        const reason = String(details?.backdatedReason || details?.approvalComment || '');
+        return /backdated|already approved|manager was told|emergency/i.test(reason);
+    }
+
+    function backdatedReasonText(details) {
+        if (hasText(details?.backdatedReason)) return String(details.backdatedReason);
+        if (hasText(details?.approvalComment) && /backdated|already approved|manager was told|emergency/i.test(String(details.approvalComment))) {
+            return String(details.approvalComment);
+        }
+        return backdatedApprovalReason;
+    }
+
+    function renderBackdatedNote(details) {
+        if (!isBackdatedLeave(details)) return '';
+        return `<div class="rd-backdated-note">
+            <strong>Why this leave was approved</strong>
+            <span>${escapeHtml(backdatedReasonText(details))}</span>
+        </div>`;
+    }
+
     function renderTimeline(details) {
         const status = String(details.status || '').toLowerCase();
         const submittedAt = details.submittedAt || '';
         const reviewedAt = details.reviewedAt || '';
         const outcomeAt = details.outcomeAt || details.handledAt || '';
-        const autoApproved = status === 'approved' && (
-            String(details.handledAction || '').toLowerCase() === 'auto_approved'
-            || (hasText(details.approvalComment) && /backdated|automatically approved/i.test(String(details.approvalComment)))
-        );
+        const autoApproved = isBackdatedLeave(details);
         const reviewedDone = autoApproved
             ? true
             : (hasText(reviewedAt) || (['approved', 'rejected'].includes(status) && hasText(outcomeAt)));
@@ -443,12 +465,6 @@
             ["Doctor's letter", escapeHtml(letterText).toUpperCase()],
             ['Recommendation', recommendation],
         );
-        if (hasText(details.approvalComment)) {
-            rows.push(['Why approved', escapeHtml(details.approvalComment)]);
-        } else if (String(details.handledAction || '').toLowerCase() === 'auto_approved') {
-            rows.push(['Why approved', escapeHtml(backdatedApprovalReason)]);
-        }
-
         return `
             <div class="rd-modal rd-modal--senior">
                 <div class="rd-senior-head">
@@ -460,6 +476,7 @@
                     <div class="rd-senior-name">${escapeHtml(details.employee || 'Unknown')}</div>
                     ${whoBits.length ? `<div class="rd-senior-meta">${whoBits.map((value) => escapeHtml(value)).join(' - ')}</div>` : ''}
                 </div>
+                ${renderBackdatedNote(details)}
                 <div class="rd-senior-box">
                     <div class="rd-senior-kicker">Manager review</div>
                     <div class="rd-senior-label">Verify leave balance</div>
@@ -573,18 +590,15 @@
                 extraChips.push(chip('Rejection', escapeHtml(details.rejectionReason), 'rd-chip--full'));
             }
 
-            if (hasText(details.approvalComment)) {
+            if (!isBackdatedLeave(details) && hasText(details.approvalComment)) {
                 extraChips.push(chip('Why approved', escapeHtml(details.approvalComment), 'rd-chip--full'));
             }
         } else {
             if (hasText(details.rejectionReason)) {
                 extraChips.push(chip('Rejection', escapeHtml(details.rejectionReason), 'rd-chip--full'));
             }
-            if (hasText(details.approvalComment)) {
+            if (!isBackdatedLeave(details) && hasText(details.approvalComment)) {
                 extraChips.push(chip('Why approved', escapeHtml(details.approvalComment), 'rd-chip--full'));
-            }
-            if (String(details.handledAction || '').toLowerCase() === 'auto_approved' && !hasText(details.approvalComment)) {
-                extraChips.push(chip('Why approved', escapeHtml(backdatedApprovalReason), 'rd-chip--full'));
             }
         }
 
@@ -603,6 +617,7 @@
                 <button type="button" class="rd-back" onclick="Swal.close()">${escapeHtml(pageConfig.backLabel)}</button>
                 <h2 class="rd-title">Request #${escapeHtml(details.id)}</h2>
                 ${renderTimeline(details)}
+                ${renderBackdatedNote(details)}
                 <div class="rd-fields">
                     ${chip('Leave Type', escapeHtml(details.type || 'N/A'), 'rd-chip--full')}
                     <div class="rd-chip-row">
