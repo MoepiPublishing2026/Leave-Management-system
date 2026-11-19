@@ -410,7 +410,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261117badge7d" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261119activefit" />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

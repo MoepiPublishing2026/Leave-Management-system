@@ -8,7 +8,8 @@ use Carbon\CarbonInterface;
 
 /**
  * Company workday rules: 08:00–17:00, with half-day slots 08:00–12:00 and 12:00–17:00.
- * Same-day leave may be applied for until 17:00 (end of workday); after that the day is over.
+ * Same-day leave may be applied at any time (no 17:00 cutoff).
+ * Fully past leave (end date before today) may be applied retroactively and is auto-approved.
  * Self-service withdraw is allowed until 08:00 on the leave start date.
  */
 class LeaveWorkdayRules
@@ -16,11 +17,6 @@ class LeaveWorkdayRules
     public const WORK_START_HOUR = 8;
 
     public const WORK_START_MINUTE = 0;
-
-    /** Same-day leave may be submitted until this hour (17:00 / 5pm). */
-    public const SAME_DAY_APPLY_UNTIL_HOUR = 17;
-
-    public const SAME_DAY_APPLY_UNTIL_MINUTE = 0;
 
     public const HALF_DAY_MORNING = 'morning';
 
@@ -76,29 +72,32 @@ class LeaveWorkdayRules
         return strtolower(trim((string) $leaveType)) === 'sick';
     }
 
-    /** Cutoff datetime for same-day apply (17:00 for all leave types). */
-    public static function sameDayApplyCutoff(?string $leaveType = null, ?CarbonInterface $now = null): Carbon
-    {
+    /**
+     * Fully past leave (all days already over) — allowed as a backdated application.
+     */
+    public static function isRetroactiveLeave(
+        CarbonInterface $startDate,
+        CarbonInterface $endDate,
+        ?CarbonInterface $now = null
+    ): bool {
         $now = $now ? Carbon::instance($now)->copy() : Carbon::now();
+        $endDay = Carbon::instance($endDate)->copy()->startOfDay();
 
-        return $now->copy()->startOfDay()->setTime(
-            self::SAME_DAY_APPLY_UNTIL_HOUR,
-            self::SAME_DAY_APPLY_UNTIL_MINUTE,
-            0
-        );
+        return $endDay->lt($now->copy()->startOfDay());
     }
 
-    /** True once today's same-day apply cutoff (17:00) has passed. */
-    public static function sameDayCutoffPassed(?CarbonInterface $now = null, ?string $leaveType = null): bool
+    /**
+     * Policy reason shown on request details when leave was taken before applying
+     * (already approved, manager informed, or emergency).
+     */
+    public static function backdatedApprovalReason(): string
     {
-        $now = $now ? Carbon::instance($now)->copy() : Carbon::now();
-
-        return $now->gte(self::sameDayApplyCutoff($leaveType, $now));
+        return 'Backdated leave — applied after the leave was taken because it was already approved, the manager was told, or it was an emergency.';
     }
 
     /**
      * Whether a leave start date may be chosen/submitted now.
-     * Same-day apply is allowed until 17:00 for every leave type.
+     * Past, same-day, and future dates are all allowed (no time-of-day cutoff).
      */
     public static function canApplyStartingOn(
         CarbonInterface $startDate,
@@ -106,24 +105,12 @@ class LeaveWorkdayRules
         ?CarbonInterface $existingStartDate = null,
         ?string $leaveType = null
     ): bool {
-        $now = $now ? Carbon::instance($now)->copy() : Carbon::now();
-        $startDay = Carbon::instance($startDate)->copy()->startOfDay();
-
-        if (! $startDay->isSameDay($now)) {
-            return $startDay->gte($now->copy()->startOfDay());
-        }
-
-        // Editing an existing same-day request may keep today's date after the cutoff.
-        if ($existingStartDate && Carbon::instance($existingStartDate)->copy()->startOfDay()->isSameDay($now)) {
-            return true;
-        }
-
-        return ! self::sameDayCutoffPassed($now, $leaveType);
+        return true;
     }
 
     public static function sameDayApplyBlockedMessage(?string $leaveType = null): string
     {
-        return 'Same-day leave can only be applied for before 17:00 (the workday ends at 17:00). Please choose another date or apply before 17:00.';
+        return 'This leave start date cannot be used.';
     }
 
     /**

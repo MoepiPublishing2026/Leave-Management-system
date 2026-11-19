@@ -25,7 +25,7 @@ class PerformanceReviewAcknowledgedNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $employee = $this->review->employee_name ?: 'the employee';
+        $employee = $this->review->liveEmployeeName() ?: 'the employee';
 
         $mail = SystemMailMessage::for($notifiable)
             ->subject('Performance review marked as reviewed — '.$employee)
@@ -40,7 +40,7 @@ class PerformanceReviewAcknowledgedNotification extends Notification
 
     public function toDatabase(object $notifiable): array
     {
-        $employee = $this->review->employee_name ?: 'the employee';
+        $employee = $this->review->liveEmployeeName() ?: 'the employee';
 
         return [
             'performance_review_id' => $this->review->id,

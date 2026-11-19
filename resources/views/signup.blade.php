@@ -158,13 +158,13 @@
             </div>
 
             <label for="first_name">First Name</label>
-            <input type="text" name="first_name" value="{{ old('first_name') }}" required />
+            <input type="text" name="first_name" value="{{ old('first_name') }}" required pattern="[A-Z][a-zA-Z]*" title="Must start with a capital letter and contain letters only" />
             @error('first_name')
                 <div class="error">{{ $message }}</div>
             @enderror
 
             <label for="last_name">Last Name</label>
-            <input type="text" name="last_name" value="{{ old('last_name') }}" required />
+            <input type="text" name="last_name" value="{{ old('last_name') }}" required pattern="[A-Z][a-zA-Z]*" title="Must start with a capital letter and contain letters only" />
             @error('last_name')
                 <div class="error">{{ $message }}</div>
             @enderror

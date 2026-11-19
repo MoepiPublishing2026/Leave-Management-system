@@ -19,12 +19,14 @@ class SignupController extends Controller
     public function signup(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'first_name' => \App\Support\PersonName::rules(255),
+            'last_name' => \App\Support\PersonName::rules(255),
             'department' => ['required', 'string', Rule::in(config('departments', []))],
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
         ], [
+            'first_name.regex' => \App\Support\PersonName::messages('First name')['regex'],
+            'last_name.regex' => \App\Support\PersonName::messages('Last name')['regex'],
             'department.in' => 'Please select a valid company department.',
         ]);
 
@@ -35,8 +37,8 @@ class SignupController extends Controller
         $managerId = DepartmentManagers::managerIdForDepartment($request->department);
 
         $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
+            'first_name' => \App\Support\PersonName::normalize($request->first_name),
+            'last_name' => \App\Support\PersonName::normalize($request->last_name),
             'department' => $request->department,
             'designation' => $request->department,
             'email' => $request->email,

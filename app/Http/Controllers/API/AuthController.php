@@ -14,10 +14,13 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
+            'first_name' => \App\Support\PersonName::rules(255),
+            'last_name'  => \App\Support\PersonName::rules(255),
             'email'      => 'required|email|unique:users,email',
             'password'   => 'required|string|min:8|confirmed',
+        ], [
+            'first_name.regex' => \App\Support\PersonName::messages('First name')['regex'],
+            'last_name.regex' => \App\Support\PersonName::messages('Last name')['regex'],
         ]);
 
         if ($validator->fails()) {
@@ -29,8 +32,8 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name'  => $request->last_name,
+            'first_name' => \App\Support\PersonName::normalize($request->first_name),
+            'last_name'  => \App\Support\PersonName::normalize($request->last_name),
             'department' => 'General',
             'designation'=> 'Employee',
             'email'      => $request->email,

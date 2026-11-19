@@ -28,22 +28,44 @@ class LeaveSubmittedNotification extends Notification
     {
         $approver = LeaveApplicant::approverLabel($notifiable);
         $type = $this->leaveRequest->leave_type ?: 'leave';
+        $autoApproved = strtolower((string) ($this->leaveRequest->handled_action ?? '')) === 'auto_approved';
 
-        return SystemMailMessage::for($notifiable)
-            ->subject('Leave request submitted — #'.$this->leaveRequest->id)
-            ->line("Your {$type} leave request #{$this->leaveRequest->id} has been submitted.")
-            ->line('It is now waiting for '.$approver.' to review.')
-            ->action('Open in app', LeavePortalLinks::myRequestsUrl($notifiable, $this->leaveRequest->id));
+        $mail = SystemMailMessage::for($notifiable)
+            ->subject($autoApproved
+                ? 'Leave request auto-approved — #'.$this->leaveRequest->id
+                : 'Leave request submitted — #'.$this->leaveRequest->id)
+            ->line("Your {$type} leave request #{$this->leaveRequest->id} has been submitted.");
+
+        if ($autoApproved) {
+            $mail->line('It was recorded as backdated leave and approved.');
+            if (filled($this->leaveRequest->approval_comment)) {
+                $mail->line('Reason: '.$this->leaveRequest->approval_comment);
+            }
+        } else {
+            $mail->line('It is now waiting for '.$approver.' to review.');
+        }
+
+        return $mail->action('Open in app', LeavePortalLinks::myRequestsUrl($notifiable, $this->leaveRequest->id));
     }
 
     public function toDatabase(object $notifiable): array
     {
         $approver = LeaveApplicant::approverLabel($notifiable);
         $type = $this->leaveRequest->leave_type ?: 'leave';
+        $autoApproved = strtolower((string) ($this->leaveRequest->handled_action ?? '')) === 'auto_approved'
+            || (
+                strtolower((string) ($this->leaveRequest->status ?? '')) === 'approved'
+                && filled($this->leaveRequest->approval_comment)
+                && str_contains(strtolower((string) $this->leaveRequest->approval_comment), 'backdated')
+            );
+
+        $message = $autoApproved
+            ? "Your {$type} leave request #{$this->leaveRequest->id} was recorded as backdated leave and approved (already approved, manager told, or emergency)."
+            : "Your {$type} leave request #{$this->leaveRequest->id} was submitted and is waiting for {$approver}.";
 
         return [
             'leave_request_id' => $this->leaveRequest->id,
-            'message' => "Your {$type} leave request #{$this->leaveRequest->id} was submitted and is waiting for {$approver}.",
+            'message' => $message,
             'date' => now(),
         ];
     }

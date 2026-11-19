@@ -31,7 +31,7 @@
         @include('reviews.partials.review-header-cards', [
             'editable' => false,
             'review' => $review,
-            'employeeName' => $review->employee_name,
+            'employeeName' => $review->liveEmployeeName(),
             'reviewerName' => $reviewerName,
             'showStatus' => true,
             'statusLabel' => $review->statusLabelFor($user),
@@ -57,7 +57,7 @@
         @if ($showSelfScores || $showFinalScores)
             <div class="pr-split">
                 <table class="pr-id-table">
-                    <tr><th>Employee</th><td>{{ $review->employee_name }}</td></tr>
+                    <tr><th>Employee</th><td>{{ $review->liveEmployeeName() }}</td></tr>
                     <tr><th>Position</th><td>{{ $review->employee_position ?: '—' }}</td></tr>
                     <tr><th>Reviewer</th><td>{{ $reviewerName ?: '—' }}</td></tr>
                     <tr><th>Date of review</th><td>{{ $review->review_date?->format('d M Y') ?: '—' }}</td></tr>

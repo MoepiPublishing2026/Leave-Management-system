@@ -407,7 +407,7 @@
     </style>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261117badge7d" />
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261119emptable" />
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

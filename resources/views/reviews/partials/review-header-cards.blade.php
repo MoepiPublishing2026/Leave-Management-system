@@ -1,7 +1,7 @@
 @php
     $editable = $editable ?? false;
     $showStatus = $showStatus ?? false;
-    $employeeName = $employeeName ?? ($review->employee_name ?? '');
+    $employeeName = $employeeName ?? ($review->liveEmployeeName() ?: ($review->employee_name ?? ''));
     $reviewerName = $reviewerName ?? '';
     $statusLabel = $statusLabel ?? '';
     $monthNames = [

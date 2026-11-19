@@ -18,6 +18,7 @@
         backLabel: @json($backLabel),
         seniorLayout: @json($seniorLayout),
     };
+    const backdatedApprovalReason = @json(\App\Support\LeaveWorkdayRules::backdatedApprovalReason());
 
     const fileIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2 5 5h-4a1 1 0 0 1-1-1V4zM8 13h8v2H8v-2zm0-4h8v2H8V9z"/></svg>';
 
@@ -289,21 +290,29 @@
         const submittedAt = details.submittedAt || '';
         const reviewedAt = details.reviewedAt || '';
         const outcomeAt = details.outcomeAt || details.handledAt || '';
-        const reviewedDone = hasText(reviewedAt) || (['approved', 'rejected'].includes(status) && hasText(outcomeAt));
-        const reviewedDate = reviewedAt || (reviewedDone ? outcomeAt : '');
+        const autoApproved = status === 'approved' && (
+            String(details.handledAction || '').toLowerCase() === 'auto_approved'
+            || (hasText(details.approvalComment) && /backdated|automatically approved/i.test(String(details.approvalComment)))
+        );
+        const reviewedDone = autoApproved
+            ? true
+            : (hasText(reviewedAt) || (['approved', 'rejected'].includes(status) && hasText(outcomeAt)));
+        const reviewedDate = autoApproved
+            ? (outcomeAt || reviewedAt)
+            : (reviewedAt || (reviewedDone ? outcomeAt : ''));
 
         let third = { label: 'Pending', date: '', tone: 'empty' };
         if (status === 'withdrawn') {
             third = { label: 'Withdrawn', date: outcomeAt, tone: 'orange' };
         } else if (status === 'approved') {
-            third = { label: 'Approved', date: outcomeAt, tone: 'lime' };
+            third = { label: autoApproved ? 'Auto-approved' : 'Approved', date: outcomeAt, tone: 'lime' };
         } else if (status === 'rejected') {
             third = { label: 'Rejected', date: outcomeAt, tone: 'red' };
         }
 
         const steps = [
             { label: 'Submitted', date: submittedAt, tone: hasText(submittedAt) ? 'lime' : 'empty' },
-            { label: 'Reviewed', date: reviewedDate, tone: reviewedDone ? 'lime' : 'empty' },
+            { label: autoApproved ? 'No review needed' : 'Reviewed', date: reviewedDate, tone: reviewedDone ? 'lime' : 'empty' },
             third,
         ];
 
@@ -434,6 +443,11 @@
             ["Doctor's letter", escapeHtml(letterText).toUpperCase()],
             ['Recommendation', recommendation],
         );
+        if (hasText(details.approvalComment)) {
+            rows.push(['Why approved', escapeHtml(details.approvalComment)]);
+        } else if (String(details.handledAction || '').toLowerCase() === 'auto_approved') {
+            rows.push(['Why approved', escapeHtml(backdatedApprovalReason)]);
+        }
 
         return `
             <div class="rd-modal rd-modal--senior">
@@ -507,7 +521,12 @@
 
             if (pageConfig.showHandledMeta) {
                 if (hasText(details.handledBy)) extraChips.push(chip('Handled by', escapeHtml(details.handledBy)));
-                if (hasText(details.handledAction)) extraChips.push(chip('Action', escapeHtml(details.handledAction)));
+                if (hasText(details.handledAction)) {
+                    const actionLabel = String(details.handledAction).toLowerCase() === 'auto_approved'
+                        ? 'Auto-approved (backdated)'
+                        : details.handledAction;
+                    extraChips.push(chip('Action', escapeHtml(actionLabel)));
+                }
                 if (hasText(details.lateReasonBy)) extraChips.push(chip('Late reason by', escapeHtml(details.lateReasonBy)));
             }
 
@@ -555,10 +574,18 @@
             }
 
             if (hasText(details.approvalComment)) {
-                extraChips.push(chip('Approval note', escapeHtml(details.approvalComment), 'rd-chip--full'));
+                extraChips.push(chip('Why approved', escapeHtml(details.approvalComment), 'rd-chip--full'));
             }
-        } else if (hasText(details.rejectionReason)) {
-            extraChips.push(chip('Rejection', escapeHtml(details.rejectionReason), 'rd-chip--full'));
+        } else {
+            if (hasText(details.rejectionReason)) {
+                extraChips.push(chip('Rejection', escapeHtml(details.rejectionReason), 'rd-chip--full'));
+            }
+            if (hasText(details.approvalComment)) {
+                extraChips.push(chip('Why approved', escapeHtml(details.approvalComment), 'rd-chip--full'));
+            }
+            if (String(details.handledAction || '').toLowerCase() === 'auto_approved' && !hasText(details.approvalComment)) {
+                extraChips.push(chip('Why approved', escapeHtml(backdatedApprovalReason), 'rd-chip--full'));
+            }
         }
 
         let messagesHtml = '';

@@ -286,7 +286,7 @@
             background-color: #f0f2f7;
         }
 
-        /* Main content below navbar — scroll offset handled by ui-consistency.css */
+        /* Main content below navbar Â— scroll offset handled by ui-consistency.css */
         main,
         main.content {
             padding: 40px;
@@ -452,7 +452,7 @@
     @stack('styles')
     @include('partials.dashboard-status-card-styles')
     @yield('head')
-    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261117searchclear"/>
+    <link rel="stylesheet" href="{{ asset('css/ui-consistency.css') }}?v=20261119activefit"/>
 </head>
 <body class="role-manager">
     <header class="navbar" role="banner">

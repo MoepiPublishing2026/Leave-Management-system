@@ -199,6 +199,8 @@ class LeaveRequest extends Model
             'submittedAt' => $stamp($this->created_at),
             'reviewedAt' => $stamp($this->recommended_at),
             'outcomeAt' => $stamp($outcomeAt),
+            'handledAction' => (string) ($this->handled_action ?? ''),
+            'approvalComment' => (string) ($this->approval_comment ?? ''),
             'startShort' => $this->start_date ? Carbon::parse($this->start_date)->format('j M') : '',
             'endShort' => $this->end_date ? Carbon::parse($this->end_date)->format('j M') : '',
             'days' => LeaveDaysFormatter::format(

@@ -186,6 +186,41 @@ html body .employee-create-page .signup-container select {
 }
 
 /* department checkboxes and "Account is active" */
+.managed-dept-list {
+    margin-top: 7px;
+    text-align: left;
+    border: 2px solid #777;
+    border-radius: 14px;
+    padding: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+    background: #fff;
+}
+html body .employee-create-page .signup-container .dept-option {
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    margin: 0 !important;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #263248 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+html body .employee-create-page .signup-container .dept-option:hover { background: #e9efb8; }
+html body .employee-create-page .signup-container .dept-option input {
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    flex-shrink: 0;
+    accent-color: #d4e21a;
+}
+.dept-option small { font-weight: 400; color: #767672; }
 html body .employee-create-page .managed-dept-list label,
 html body .employee-create-page .checkbox-row label {
     margin-top:0 !important; font-size:13px !important; font-weight:400 !important;
@@ -249,13 +284,13 @@ html body .employee-create-page .branding { font-size:11px !important; margin-to
         </div>
 
         <label for="first_name">First Name</label>
-        <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $employee->first_name) }}" required />
+        <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $employee->first_name) }}" required maxlength="15" pattern="[A-Z][a-zA-Z]*" title="Must start with a capital letter and contain letters only" />
         @error('first_name')
             <div class="error">{{ $message }}</div>
         @enderror
 
         <label for="last_name">Last Name</label>
-        <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $employee->last_name) }}" required />
+        <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $employee->last_name) }}" required maxlength="15" pattern="[A-Z][a-zA-Z]*" title="Must start with a capital letter and contain letters only" />
         @error('last_name')
             <div class="error">{{ $message }}</div>
         @enderror
@@ -279,9 +314,9 @@ html body .employee-create-page .branding { font-size:11px !important; margin-to
             $deptManagers = ($departmentManagers ?? collect())->toArray();
         @endphp
 
-        <div id="employee-department-block" @style(['display: none' => $currentRole === 'manager'])>
+        <div id="employee-department-block" @style(['display: none' => $currentRole === 'admin'])>
             <label for="department">Department</label>
-            <select name="department" id="department" @required($currentRole !== 'manager' && $currentRole !== 'admin') @disabled($currentRole === 'manager')>
+            <select name="department" id="department" @required($currentRole === 'employee' || $currentRole === 'manager')>
                 <option value="">Select department</option>
                 @foreach(($departments ?? []) as $dept)
                     <option value="{{ $dept }}" {{ old('department', $employee->department) === $dept ? 'selected' : '' }}>{{ $dept }}</option>
@@ -297,28 +332,25 @@ html body .employee-create-page .branding { font-size:11px !important; margin-to
 
         <div id="managed-departments-block" @style(['display: none' => $currentRole !== 'manager'])>
             <label>Departments responsible for</label>
-            <div class="dept-dropdown" id="deptDropdown">
-    <button type="button" class="dept-dropdown-btn" id="deptDropdownBtn" aria-expanded="false">
-        <span id="deptDropdownText">Select departments</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
-    </button>
-    <div class="dept-dropdown-panel" id="deptDropdownPanel">
-        @foreach(($departments ?? []) as $dept)
-            @php
-                $ownerId = $deptManagers[$dept]['manager_id'] ?? null;
-                $ownerName = $deptManagers[$dept]['manager_name'] ?? null;
-                $ownedByOther = $ownerId && (int) $ownerId !== (int) $employee->id;
-            @endphp
-            <label class="dept-option">
-                <input type="checkbox" name="managed_departments[]" value="{{ $dept }}" class="managed-dept-checkbox"
-                       {{ in_array($dept, $selectedManaged, true) ? 'checked' : '' }}>
-                <span>{{ $dept }}@if($ownedByOther) <small>— currently {{ $ownerName }}</small>@endif</span>
-            </label>
-        @endforeach
-    </div>
-</div>
+            <div class="managed-dept-list" id="managedDeptList">
+                @forelse(($departments ?? []) as $dept)
+                    @php
+                        $ownerId = $deptManagers[$dept]['manager_id'] ?? null;
+                        $ownerName = $deptManagers[$dept]['manager_name'] ?? null;
+                        $ownedByOther = $ownerId && (int) $ownerId !== (int) $employee->id;
+                    @endphp
+                    <label class="dept-option">
+                        <input type="checkbox" name="managed_departments[]" value="{{ $dept }}" class="managed-dept-checkbox"
+                               {{ in_array($dept, $selectedManaged, true) ? 'checked' : '' }}
+                               @disabled($currentRole !== 'manager')>
+                        <span>{{ $dept }}@if($ownedByOther) <small>? currently {{ $ownerName }}</small>@endif</span>
+                    </label>
+                @empty
+                    <p class="field-hint" style="margin:8px;">No departments configured.</p>
+                @endforelse
+            </div>
             <p class="field-hint" style="text-align:left;margin-top:6px;color:#64748b;font-size:0.85rem;">
-                Select one or more departments. Employees registered in these departments will be assigned to this manager automatically.
+                Select one or more departments this manager is responsible for. Employees in these departments will be assigned to them automatically.
             </p>
             @error('managed_departments')
                 <div class="error">{{ $message }}</div>
@@ -412,13 +444,20 @@ html body .employee-create-page .branding { font-size:11px !important; margin-to
         const deptManagers = @json(($departmentManagers ?? collect())->toArray());
 
         function updateDepartmentHint() {
-            if (!departmentHint || !departmentSelect) return;
+            if (!departmentHint || !departmentSelect || !roleSelect) return;
+            const role = roleSelect.value;
             const dept = departmentSelect.value;
-            const owner = deptManagers[dept];
+
+            if (role === 'manager') {
+                departmentHint.textContent = 'Department this manager falls under (shown on the employees list).';
+                return;
+            }
+
             if (!dept) {
                 departmentHint.textContent = 'Employees are automatically assigned to the manager responsible for this department.';
                 return;
             }
+            const owner = deptManagers[dept];
             if (owner && owner.manager_name) {
                 departmentHint.textContent = 'This employee will be assigned to ' + owner.manager_name + ' (responsible for ' + dept + ').';
             } else {
@@ -431,15 +470,16 @@ html body .employee-create-page .branding { font-size:11px !important; margin-to
             const role = roleSelect.value;
             const isEmployee = role === 'employee';
             const isManager = role === 'manager';
+            const isAdmin = role === 'admin';
 
-            if (departmentBlock) departmentBlock.style.display = isManager ? 'none' : 'block';
+            if (departmentBlock) departmentBlock.style.display = isAdmin ? 'none' : 'block';
             if (managedBlock) managedBlock.style.display = isManager ? 'block' : 'none';
             if (assignBlock) assignBlock.style.display = isManager ? 'block' : 'none';
 
             if (departmentSelect) {
-                departmentSelect.disabled = isManager;
-                departmentSelect.required = isEmployee;
-                if (isManager) {
+                departmentSelect.disabled = isAdmin;
+                departmentSelect.required = isEmployee || isManager;
+                if (isAdmin) {
                     departmentSelect.removeAttribute('name');
                 } else {
                     departmentSelect.name = 'department';
@@ -467,33 +507,6 @@ html body .employee-create-page .branding { font-size:11px !important; margin-to
         roleSelect?.addEventListener('change', syncRoleFields);
         syncRoleFields();
     });
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const wrap = document.getElementById('deptDropdown');
-    const btn = document.getElementById('deptDropdownBtn');
-    const text = document.getElementById('deptDropdownText');
-    if (!wrap || !btn) return;
-    const boxes = wrap.querySelectorAll('.managed-dept-checkbox');
-
-    function refresh() {
-        const picked = Array.from(boxes).filter(b => b.checked).map(b => b.value);
-        text.textContent = picked.length === 0 ? 'Select departments'
-            : picked.length <= 2 ? picked.join(', ')
-            : picked.length + ' departments selected';
-    }
-    btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        const open = wrap.classList.toggle('open');
-        btn.setAttribute('aria-expanded', open);
-    });
-    document.addEventListener('click', function (e) {
-        if (!wrap.contains(e.target)) wrap.classList.remove('open');
-    });
-    boxes.forEach(b => b.addEventListener('change', refresh));
-    refresh();
-});
 </script>
 
 @endsection

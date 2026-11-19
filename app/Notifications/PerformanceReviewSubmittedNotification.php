@@ -26,7 +26,7 @@ class PerformanceReviewSubmittedNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $employee = $this->review->employee_name ?: 'an employee';
+        $employee = $this->review->liveEmployeeName() ?: 'an employee';
         $managerName = PerformanceReviews::displayName($this->review->employee?->manager);
 
         try {
@@ -61,7 +61,7 @@ class PerformanceReviewSubmittedNotification extends Notification
 
     public function toDatabase(object $notifiable): array
     {
-        $employee = $this->review->employee_name ?: 'an employee';
+        $employee = $this->review->liveEmployeeName() ?: 'an employee';
 
         return [
             'performance_review_id' => $this->review->id,

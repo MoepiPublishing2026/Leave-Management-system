@@ -1,6 +1,6 @@
 @extends('layouts.letterhead-document')
 
-@section('title', 'Monthly Performance Review — '.$review->employee_name)
+@section('title', 'Monthly Performance Review — '.$review->liveEmployeeName())
 
 @section('styles')
 @include('partials.performance-review-styles')
@@ -26,7 +26,7 @@
     @include('reviews.partials.review-header-cards', [
         'editable' => false,
         'review' => $review,
-        'employeeName' => $review->employee_name,
+        'employeeName' => $review->liveEmployeeName(),
         'reviewerName' => $reviewerName,
         'showStatus' => true,
         'statusLabel' => $awaiting ? 'Awaiting review' : 'Reviewed',
@@ -44,7 +44,7 @@
 
     <div class="lh-split">
         <table class="lh-id-table">
-            <tr><th>Employee</th><td>{{ $review->employee_name }}</td></tr>
+            <tr><th>Employee</th><td>{{ $review->liveEmployeeName() }}</td></tr>
             <tr><th>Position</th><td>{{ $review->employee_position ?: '—' }}</td></tr>
             <tr><th>Reviewer</th><td>{{ $reviewerName ?: '—' }}</td></tr>
             <tr><th>Date of review</th><td>{{ $review->review_date?->format('d M Y') ?: '—' }}</td></tr>

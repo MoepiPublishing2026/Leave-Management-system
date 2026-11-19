@@ -284,8 +284,9 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
                     $editUrl = $canEditCard
                         ? route(PerformanceReviews::routeName($user, 'edit'), $item)
                         : $openUrl;
+                    $cardEmployeeName = $item->liveEmployeeName();
                     $reviewer = PerformanceReviews::displayName(PerformanceReviews::finalRater($item->employee))
-                        ?: ($item->reviewer_name ?: '—');
+                        ?: ($item->liveReviewerName() ?: '—');
                     $statusKey = strtolower(trim((string) $item->status));
                     $statusText = $item->statusLabelFor($user);
                     $statusClass = match ($statusKey) {
@@ -293,7 +294,7 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
                         'reviewed' => 'reviewed',
                         default => 'draft',
                     };
-                    $initials = collect(preg_split('/\s+/', trim((string) $item->employee_name)))
+                    $initials = collect(preg_split('/\s+/', trim((string) $cardEmployeeName)))
                         ->filter()
                         ->take(2)
                         ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))
@@ -302,7 +303,7 @@ html body .pr-reviews-page .pr-reviews-scope-header h1 { margin: 0; }
                 <article class="pr-review-card" onclick="window.location='{{ $openUrl }}'">
                     <div class="pr-review-card__avatar" aria-hidden="true">{{ $initials ?: '—' }}</div>
                     <div class="pr-review-card__main">
-                        <h3 class="pr-review-card__name">{{ $item->employee_name }}</h3>
+                        <h3 class="pr-review-card__name">{{ $cardEmployeeName }}</h3>
                         <p class="pr-review-card__sub">Reviewed by {{ $reviewer }} · Period {{ $item->periodLabel() }}</p>
                     </div>
                     <div class="pr-review-card__date">{{ $item->review_date?->format('j M Y') ?: '—' }}</div>

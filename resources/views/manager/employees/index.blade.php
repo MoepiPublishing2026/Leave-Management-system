@@ -101,13 +101,22 @@
     }
     .employees-table th:first-child,
     .employees-table td:first-child {
-        padding-left: 20px;
+        padding-left: 14px;
+    }
+    .employees-table th,
+    .employees-table td {
+        overflow: hidden;
+        min-width: 0;
     }
     .employees-table td:first-child,
     .employees-table td:nth-child(2) {
         color: #000;
         font-weight: 700;
-        white-space: nowrap;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        line-height: 1.35;
+        text-align: left;
     }
     .employees-table tbody tr {
         background: #d3e5df;
@@ -119,35 +128,45 @@
         border-bottom: 1px solid #A4B4F6;
     }
     .employees-email {
-        white-space: nowrap;
-        overflow-wrap: normal;
-        word-break: normal;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        line-height: 1.35;
+        text-align: left;
         max-width: none;
     }
     .employees-dept,
     .employees-assigned {
         overflow-wrap: anywhere;
         word-break: break-word;
-        max-width: 160px;
+        max-width: none;
         line-height: 1.35;
+        text-align: left;
     }
     .employee-status {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-width: 5.5rem;
-        padding: 5px 10px;
+        box-sizing: border-box;
+        min-width: 4.75rem;
+        max-width: 100%;
+        height: 28px;
+        padding: 0 12px;
         border-radius: 999px;
         font-weight: 750;
         font-size: 0.76rem;
+        line-height: 1;
         color: #fff;
         letter-spacing: 0.01em;
+        white-space: nowrap;
     }
     .employee-status--active {
         background: #C6D300;
+        color: #fff;
     }
     .employee-status--inactive {
         background: #64748b;
+        color: #fff;
     }
     .employee-actions {
         display: flex;
@@ -212,40 +231,71 @@ html body .employees-page .employees-table td .employee-actions button.delete-bu
 html body .employees-page .employees-table td .employee-actions svg { stroke:#222 !important; }
 
 /* header text slightly larger like the prototype */
-html body .employees-page .employees-table td.employees-email {
-    white-space: nowrap !important;
-    word-break: normal !important;
-    overflow-wrap: normal !important;
+html body .employees-page .employees-table td,
+html body .employees-page .employees-table th {
+    overflow: hidden !important;
+    min-width: 0 !important;
+}
+html body .employees-page .employees-table td:nth-child(7),
+html body .employees-page .employees-table th:nth-child(7) {
+    overflow: visible !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+html body .employees-page .employees-table .employee-status {
+    color: #fff !important;
+}
+html body .employees-page .employees-table .employee-status--active {
+    background: #C6D300 !important;
+    color: #fff !important;
+}
+html body .employees-page .employees-table .employee-status--inactive {
+    background: #64748b !important;
+    color: #fff !important;
+}
+html body .employees-page .employees-table td:first-child,
+html body .employees-page .employees-table td:nth-child(2),
+html body .employees-page .employees-table td.employees-email,
+html body .employees-page .employees-table td.employees-dept,
+html body .employees-page .employees-table td.employees-assigned {
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    text-align: left !important;
+    line-height: 1.35 !important;
     max-width: none !important;
 }
 html body .employees-page .employees-table th { font-size:.78rem !important; }
 html body .employees-page .employees-table-wrap {
-    overflow: hidden !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
 }
 html body .employees-page .employees-table {
     width: 100% !important;
-    min-width: 0 !important;
+    min-width: 960px !important;
     table-layout: fixed !important;
     border-collapse: separate !important;
     border-spacing: 0 !important;
 }
 @media (min-width: 769px) {
     html body .employees-page .employees-table th:nth-child(1),
-    html body .employees-page .employees-table td:nth-child(1) { width: 11% !important; }
+    html body .employees-page .employees-table td:nth-child(1) { width: 13% !important; }
     html body .employees-page .employees-table th:nth-child(2),
-    html body .employees-page .employees-table td:nth-child(2) { width: 12% !important; }
+    html body .employees-page .employees-table td:nth-child(2) { width: 13% !important; }
     html body .employees-page .employees-table th:nth-child(3),
-    html body .employees-page .employees-table td:nth-child(3) { width: 22% !important; }
+    html body .employees-page .employees-table td:nth-child(3) { width: 24% !important; }
     html body .employees-page .employees-table th:nth-child(4),
     html body .employees-page .employees-table td:nth-child(4) { width: 11% !important; }
     html body .employees-page .employees-table th:nth-child(5),
-    html body .employees-page .employees-table td:nth-child(5) { width: 13% !important; }
+    html body .employees-page .employees-table td:nth-child(5) { width: 12% !important; }
     html body .employees-page .employees-table th:nth-child(6),
     html body .employees-page .employees-table td:nth-child(6) { width: 10% !important; }
     html body .employees-page .employees-table th:nth-child(7),
-    html body .employees-page .employees-table td:nth-child(7) { width: 10% !important; }
+    html body .employees-page .employees-table td:nth-child(7) { width: 9% !important; }
     html body .employees-page .employees-table th:nth-child(8),
-    html body .employees-page .employees-table td:nth-child(8) { width: 11% !important; }
+    html body .employees-page .employees-table td:nth-child(8) { width: 8% !important; }
 }
 html body .employees-page .employees-table thead,
 html body .employees-page .employees-table th {
@@ -357,9 +407,9 @@ html body .employees-page .employees-table th {
             <tbody>
                 @forelse ($employees as $employee)
                     <tr>
-                        <td data-label="First name">{{ $employee->first_name }}</td>
-                        <td data-label="Last name">{{ $employee->last_name }}</td>
-                        <td class="employees-email" data-label="Email">{{ $employee->email }}</td>
+                        <td data-label="First name" title="{{ $employee->first_name }}">{{ $employee->first_name }}</td>
+                        <td data-label="Last name" title="{{ $employee->last_name }}">{{ $employee->last_name }}</td>
+                        <td class="employees-email" data-label="Email" title="{{ $employee->email }}">{{ $employee->email }}</td>
                         <td class="employees-dept" data-label="Department">{{ $employee->department ?: '—' }}</td>
                         <td class="employees-assigned" data-label="Assigned to / Manages">
                             @if(strtolower((string) ($employee->role ?? '')) === 'manager')

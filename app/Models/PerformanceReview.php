@@ -62,6 +62,21 @@ class PerformanceReview extends Model
         return $this->belongsTo(User::class, 'senior_id');
     }
 
+    /** Prefer the live user name so profile edits show everywhere. */
+    public function liveEmployeeName(): string
+    {
+        $live = PerformanceReviews::displayName($this->employee);
+
+        return $live !== '' ? $live : (string) ($this->employee_name ?? '');
+    }
+
+    public function liveReviewerName(): string
+    {
+        $live = PerformanceReviews::displayName($this->reviewer);
+
+        return $live !== '' ? $live : (string) ($this->reviewer_name ?? '');
+    }
+
     public function hasRequiredContent(): bool
     {
         foreach ([

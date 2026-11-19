@@ -1290,7 +1290,7 @@
                         <strong id="replyBarName"></strong>
                         <span id="replyBarPreview"></span>
                     </div>
-                    <button type="button" class="reply-bar-cancel" id="cancelReply" aria-label="Cancel reply">×</button>
+                    <button type="button" class="reply-bar-cancel" id="cancelReply" aria-label="Cancel reply">ï¿½</button>
                 </div>
                 <form class="compose-form" id="composeForm" method="POST" action="{{ route('messages.send', ['conversation' => $activeConversation->id]) }}" enctype="multipart/form-data">
                     @csrf

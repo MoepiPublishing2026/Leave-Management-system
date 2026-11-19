@@ -130,8 +130,8 @@ class EmployeeController extends Controller
         $managedDepartments = $this->selectedManagedDepartments($request);
 
         $rules = [
-            'first_name' => ['required', 'string', 'max:15', 'regex:/^[a-zA-Z]+$/'],
-            'last_name' => ['required', 'string', 'max:15', 'regex:/^[a-zA-Z]+$/'],
+            'first_name' => \App\Support\PersonName::rules(),
+            'last_name' => \App\Support\PersonName::rules(),
             'email' => 'required|email:rfc|max:255|unique:users,email',
             'role' => 'required|in:employee,manager,admin',
         ];
@@ -139,6 +139,7 @@ class EmployeeController extends Controller
         if ($role === 'employee') {
             $rules['department'] = ['required', 'string', Rule::in($this->departments())];
         } elseif ($role === 'manager') {
+            $rules['department'] = ['required', 'string', Rule::in($this->departments())];
             $rules['managed_departments'] = ['required', 'array', 'min:1'];
             $rules['managed_departments.*'] = ['string', Rule::in($this->departments())];
             $rules['manager_id'] = [
@@ -151,8 +152,9 @@ class EmployeeController extends Controller
         }
 
         $request->validate($rules, [
-            'first_name.regex' => 'First name must only contain letters.',
-            'last_name.regex' => 'Last name must only contain letters.',
+            'first_name.regex' => \App\Support\PersonName::messages('First name')['regex'],
+            'last_name.regex' => \App\Support\PersonName::messages('Last name')['regex'],
+            'department.required' => 'Please select the department this person falls under.',
             'department.in' => 'Please select a valid company department.',
             'managed_departments.required' => 'Select at least one department this manager is responsible for.',
             'managed_departments.min' => 'Select at least one department this manager is responsible for.',
@@ -194,9 +196,9 @@ class EmployeeController extends Controller
 
         try {
             $rawPassword = $this->makeLoginPassword();
-            $department = $role === 'manager'
-                ? ($managedDepartments[0] ?? null)
-                : ($request->department ?: null);
+            $department = $request->filled('department')
+                ? trim((string) $request->department)
+                : ($role === 'manager' ? ($managedDepartments[0] ?? null) : null);
 
             $user = User::create([
                 'first_name' => $request->first_name,
@@ -300,8 +302,8 @@ class EmployeeController extends Controller
         $managedDepartments = $this->selectedManagedDepartments($request);
 
         $rules = [
-            'first_name' => ['required', 'string', 'max:15', 'regex:/^[a-zA-Z]+$/'],
-            'last_name' => ['required', 'string', 'max:15', 'regex:/^[a-zA-Z]+$/'],
+            'first_name' => \App\Support\PersonName::rules(),
+            'last_name' => \App\Support\PersonName::rules(),
             'email' => 'required|email:rfc|max:255|unique:users,email,'.$employee->id,
             'role' => 'required|in:employee,manager,admin',
         ];
@@ -309,6 +311,7 @@ class EmployeeController extends Controller
         if ($role === 'employee') {
             $rules['department'] = ['required', 'string', Rule::in($this->departments($employee->department))];
         } elseif ($role === 'manager') {
+            $rules['department'] = ['required', 'string', Rule::in($this->departments($employee->department))];
             $rules['managed_departments'] = ['required', 'array', 'min:1'];
             $rules['managed_departments.*'] = ['string', Rule::in($this->departments($employee->department))];
             $rules['manager_id'] = [
@@ -321,8 +324,9 @@ class EmployeeController extends Controller
         }
 
         $request->validate($rules, [
-            'first_name.regex' => 'First name must only contain letters.',
-            'last_name.regex' => 'Last name must only contain letters.',
+            'first_name.regex' => \App\Support\PersonName::messages('First name')['regex'],
+            'last_name.regex' => \App\Support\PersonName::messages('Last name')['regex'],
+            'department.required' => 'Please select the department this person falls under.',
             'department.in' => 'Please select a valid company department.',
             'managed_departments.required' => 'Select at least one department this manager is responsible for.',
             'managed_departments.min' => 'Select at least one department this manager is responsible for.',
@@ -379,14 +383,13 @@ class EmployeeController extends Controller
 
         $previousRole = strtolower((string) ($employee->role ?? ''));
         $normalizedManaged = DepartmentManagers::normalizeDepartmentList($managedDepartments);
-        $currentDepartment = trim((string) ($employee->department ?? ''));
 
-        if ($role === 'manager') {
-            $department = in_array($currentDepartment, $normalizedManaged, true)
-                ? $employee->department
-                : ($normalizedManaged[0] ?? $employee->department);
+        if ($request->filled('department')) {
+            $department = trim((string) $request->department);
+        } elseif ($role === 'manager') {
+            $department = $normalizedManaged[0] ?? $employee->department;
         } else {
-            $department = $request->filled('department') ? trim((string) $request->department) : null;
+            $department = null;
         }
 
         if ($department === '') {

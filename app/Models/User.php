@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Notifications\ResetPasswordNotification;
+use App\Support\PerformanceReviews;
+use App\Support\PersonName;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -33,6 +35,38 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(function (User $user) {
+            if (! $user->wasChanged(['first_name', 'last_name'])) {
+                return;
+            }
+
+            $name = PerformanceReviews::displayName($user);
+            if ($name === '') {
+                return;
+            }
+
+            PerformanceReview::query()
+                ->where('employee_id', $user->id)
+                ->update(['employee_name' => $name]);
+
+            PerformanceReview::query()
+                ->where('reviewer_id', $user->id)
+                ->update(['reviewer_name' => $name]);
+        });
+    }
+
+    public function setFirstNameAttribute(?string $value): void
+    {
+        $this->attributes['first_name'] = PersonName::normalize($value);
+    }
+
+    public function setLastNameAttribute(?string $value): void
+    {
+        $this->attributes['last_name'] = PersonName::normalize($value);
+    }
 
     public function sendPasswordResetNotification($token): void
     {

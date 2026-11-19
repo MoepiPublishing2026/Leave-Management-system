@@ -541,16 +541,14 @@ private function applyFormData($user, ?LeaveRequest $editingLeave = null): array
         $leaveBalancesByYear[$year][$annualKey] = max(0, $annualDefault - $annualPoolUsed);
     }
 
-    $existingStart = $editingLeave?->start_date
-        ? Carbon::parse($editingLeave->start_date)->toDateString()
-        : null;
-    if ($existingStart && Carbon::parse($existingStart)->lt(Carbon::today())) {
-        $datePickerMinDate = $existingStart;
-    } elseif (\App\Support\LeaveWorkdayRules::sameDayCutoffPassed()) {
-        // After 17:00 the workday is over — same-day leave is no longer selectable.
-        $datePickerMinDate = Carbon::tomorrow()->toDateString();
-    } else {
-        $datePickerMinDate = 'today';
+    // Allow backdated leave within the previous + current leave years.
+    [$retroMin] = LeaveYear::window(LeaveYear::current() - 1);
+    $datePickerMinDate = $retroMin->toDateString();
+    if ($editingLeave?->start_date) {
+        $existingStart = Carbon::parse($editingLeave->start_date);
+        if ($existingStart->lt($retroMin)) {
+            $datePickerMinDate = $existingStart->toDateString();
+        }
     }
 
     return [
@@ -594,9 +592,25 @@ private function applyFormData($user, ?LeaveRequest $editingLeave = null): array
     $leaveType = $payload['leave_type'];
     $policy = LeavePolicy::where('leave_type', $leaveType)->first();
     $payload['user_id'] = Auth::id();
-    $payload['status'] = LeaveApplicant::isManager($user) ? 'pending_senior' : 'pending';
+
+    $startDate = Carbon::parse($payload['start_date']);
+    $endDate = Carbon::parse($payload['end_date']);
+    $isRetroactive = \App\Support\LeaveWorkdayRules::isRetroactiveLeave($startDate, $endDate);
+
+    if ($isRetroactive) {
+        $payload['status'] = 'approved';
+        $payload['approval_comment'] = \App\Support\LeaveWorkdayRules::backdatedApprovalReason();
+    } else {
+        $payload['status'] = LeaveApplicant::isManager($user) ? 'pending_senior' : 'pending';
+    }
 
     $leaveRequest = LeaveRequest::create($payload);
+
+    if ($isRetroactive) {
+        $leaveRequest->handled_at = Carbon::now();
+        $leaveRequest->handled_action = 'auto_approved';
+        $leaveRequest->save();
+    }
 
     try {
         $user->notify(new LeaveSubmittedNotification($leaveRequest));
@@ -604,7 +618,9 @@ private function applyFormData($user, ?LeaveRequest $editingLeave = null): array
         report($e);
     }
 
-    if (LeaveApplicant::isManager($user)) {
+    if ($isRetroactive) {
+        $this->notifyReviewersOfRetroactiveApproval($leaveRequest->load('user'));
+    } elseif (LeaveApplicant::isManager($user)) {
         try {
             \App\Support\LeaveApprovalWorkflow::notifySeniorsForDecision($leaveRequest->load('user'));
         } catch (\Throwable $e) {
@@ -637,8 +653,12 @@ private function applyFormData($user, ?LeaveRequest $editingLeave = null): array
     if ($policy && $policy->requires_proof && LeaveProofRules::allowsDeferredProof($leaveType) && ! $request->hasFile('file_uploads')) {
         $proofDeadlineAnchor = $payload['end_date'] ?? $payload['start_date'];
         $proofDeadline = Carbon::parse($proofDeadlineAnchor)->addDay()->format('d M Y');
-        $approverLabel = LeaveApplicant::approverLabel($user);
-        $successMessage = 'Sick leave submitted. Once '.$approverLabel.' approves it, upload your doctor\'s letter from My Leave Requests by '.$proofDeadline.' at the latest (the day after your leave ends).';
+        if ($isRetroactive) {
+            $successMessage = 'Leave application submitted successfully! Please upload your doctor\'s letter from My Leave Requests by '.$proofDeadline.' at the latest.';
+        } else {
+            $approverLabel = LeaveApplicant::approverLabel($user);
+            $successMessage = 'Sick leave submitted. Once '.$approverLabel.' approves it, upload your doctor\'s letter from My Leave Requests by '.$proofDeadline.' at the latest (the day after your leave ends).';
+        }
     }
 
     return redirect()->route(LeaveApplicant::applyRoute($user))->with('success', $successMessage);
@@ -683,7 +703,23 @@ public function update(Request $request, $id)
 
     $leaveRequest->fill($payload);
 
-    if ($sentBackToManager) {
+    $becameRetroactive = \App\Support\LeaveWorkdayRules::isRetroactiveLeave(
+        Carbon::parse($payload['start_date']),
+        Carbon::parse($payload['end_date'])
+    );
+
+    if ($becameRetroactive) {
+        $leaveRequest->status = 'approved';
+        $leaveRequest->handled_at = Carbon::now();
+        $leaveRequest->handled_action = 'auto_approved';
+        $leaveRequest->approval_comment = \App\Support\LeaveWorkdayRules::backdatedApprovalReason();
+        $leaveRequest->manager_recommendation = null;
+        $leaveRequest->manager_recommendation_comment = null;
+        $leaveRequest->recommended_by = null;
+        $leaveRequest->recommended_at = null;
+        $leaveRequest->pending_review_reminder_stage = 0;
+        $leaveRequest->last_pending_review_reminder_at = null;
+    } elseif ($sentBackToManager) {
         $leaveRequest->status = 'pending';
         $leaveRequest->manager_recommendation = null;
         $leaveRequest->manager_recommendation_comment = null;
@@ -702,14 +738,18 @@ public function update(Request $request, $id)
 
     $leaveRequest->save();
 
-    $this->notifyReviewersOfUpdate($leaveRequest->fresh(['user']), $sentBackToManager);
-
-    $message = $sentBackToManager
-        ? 'Leave request updated. Because the dates or leave type changed, it was sent back to your manager for a new recommendation.'
-        : 'Leave request updated. Reviewers will see the latest details and documents.';
+    if ($becameRetroactive) {
+        $this->notifyReviewersOfRetroactiveApproval($leaveRequest->fresh(['user']));
+        $message = 'Leave request updated successfully!';
+    } else {
+        $this->notifyReviewersOfUpdate($leaveRequest->fresh(['user']), $sentBackToManager);
+        $message = $sentBackToManager
+            ? 'Leave request updated. Because the dates or leave type changed, it was sent back to your manager for a new recommendation.'
+            : 'Leave request updated. Reviewers will see the latest details and documents.';
+    }
 
     return redirect()->route($this->myRequestsRoute(), [
-        'status' => 'pending',
+        'status' => $becameRetroactive ? 'approved' : 'pending',
         'request_id' => $leaveRequest->id,
     ])->with('success', $message);
 }
@@ -726,14 +766,10 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
     $hasExistingFiles = $existing ? LeaveProofRules::hasProofAttached($existing) : false;
     $requiresProofAtSubmit = $policy && $policy->requires_proof && ! LeaveProofRules::allowsDeferredProof($leaveType);
 
-    $startRule = 'required|date|after_or_equal:today';
-    if ($existing && $existing->start_date && Carbon::parse($existing->start_date)->lt(Carbon::today())) {
-        $startRule = 'required|date';
-    }
-
+    // Past dates are allowed for backdated / emergency leave.
     $rules = [
         'leave_type' => 'required|string|max:120',
-        'start_date' => $startRule,
+        'start_date' => 'required|date',
         'end_date' => $halfDay ? 'nullable|date|after_or_equal:start_date' : 'required|date|after_or_equal:start_date',
         'important_comment' => 'required|string|min:3|max:512',
         'half_day' => 'nullable|boolean',
@@ -787,9 +823,10 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
     $startDate = Carbon::parse($validated['start_date']);
     $endDate = Carbon::parse($validated['end_date']);
 
-    if ($existing && $startDate->lt(Carbon::today()) && $startDate->toDateString() !== Carbon::parse($existing->start_date)->toDateString()) {
+    [$earliestAllowed] = LeaveYear::window(LeaveYear::current() - 1);
+    if ($startDate->lt($earliestAllowed) && ! ($existing && $existing->start_date && Carbon::parse($existing->start_date)->lte($startDate))) {
         return redirect()->back()
-            ->withErrors(['start_date' => 'A new start date cannot be in the past.'])
+            ->withErrors(['start_date' => 'Leave cannot start before '.$earliestAllowed->format('d M Y').' (previous leave year).'])
             ->withInput();
     }
 
@@ -915,6 +952,38 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
     }
 
     return $validated;
+}
+
+private function notifyReviewersOfRetroactiveApproval(LeaveRequest $leaveRequest): void
+{
+    $recipients = collect();
+    $applicant = $leaveRequest->user;
+
+    if (! $leaveRequest->isManagerApplicant()) {
+        $assignedManager = $applicant?->manager_id
+            ? User::query()->managers()->whereKey($applicant->manager_id)->where('is_active', true)->first()
+            : null;
+        if ($assignedManager) {
+            $recipients->push($assignedManager);
+        }
+    }
+
+    $assignedSenior = \App\Support\LeaveApprovalWorkflow::assignedSeniorForUser($applicant);
+    if ($assignedSenior) {
+        $recipients->push($assignedSenior);
+    }
+
+    $recipients = $recipients->merge(
+        \App\Support\LeaveApprovalWorkflow::seniorsForLeave($leaveRequest)
+    );
+
+    foreach ($recipients->unique('id')->values() as $recipient) {
+        try {
+            $recipient->notify(new \App\Notifications\LeaveStatusNotification($leaveRequest, $applicant ?? $recipient));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
 }
 
 private function notifyReviewersOfUpdate(LeaveRequest $leaveRequest, bool $sentBackToManager): void

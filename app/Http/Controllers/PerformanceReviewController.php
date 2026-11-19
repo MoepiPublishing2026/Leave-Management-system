@@ -50,7 +50,15 @@ class PerformanceReviewController extends Controller
 
                 if ($searchByPerson) {
                     $q->orWhere('employee_name', 'like', $like)
-                        ->orWhere('reviewer_name', 'like', $like);
+                        ->orWhere('reviewer_name', 'like', $like)
+                        ->orWhereHas('employee', function ($person) use ($like) {
+                            $person->where('first_name', 'like', $like)
+                                ->orWhere('last_name', 'like', $like);
+                        })
+                        ->orWhereHas('reviewer', function ($person) use ($like) {
+                            $person->where('first_name', 'like', $like)
+                                ->orWhere('last_name', 'like', $like);
+                        });
                 }
             });
         }

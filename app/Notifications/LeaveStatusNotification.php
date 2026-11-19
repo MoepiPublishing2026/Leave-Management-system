@@ -33,25 +33,39 @@ class LeaveStatusNotification extends Notification
         $statusLabel = LeaveStatusLabels::display($this->leaveRequest->status);
         $isApplicant = (int) ($notifiable->id ?? 0) === (int) ($this->leaveRequest->user_id ?? 0);
         $type = $this->leaveRequest->leave_type ?: 'leave';
+        $autoApproved = $this->isAutoApprovedBackdated();
 
         $mail = SystemMailMessage::for($notifiable)
             ->subject($isApplicant
-                ? "Your leave request was {$statusLabel}"
-                : "Leave request #{$this->leaveRequest->id} was {$statusLabel}");
+                ? ($autoApproved ? 'Your leave request was auto-approved' : "Your leave request was {$statusLabel}")
+                : ($autoApproved
+                    ? "Leave request #{$this->leaveRequest->id} was auto-approved (backdated)"
+                    : "Leave request #{$this->leaveRequest->id} was {$statusLabel}"));
 
         if ($isApplicant) {
-            $mail->line("Your {$type} leave request #{$this->leaveRequest->id} has been marked {$statusLabel} by {$this->approverLabel()}.");
+            if ($autoApproved) {
+                $mail->line("Your {$type} leave request #{$this->leaveRequest->id} was recorded as backdated leave and approved.");
+            } else {
+                $mail->line("Your {$type} leave request #{$this->leaveRequest->id} has been marked {$statusLabel} by {$this->approverLabel()}.");
+            }
             if (strtolower((string) $this->leaveRequest->status) === 'rejected' && filled($this->leaveRequest->rejection_reason)) {
                 $mail->line('Reason: '.$this->leaveRequest->rejection_reason);
             }
             if (strtolower((string) $this->leaveRequest->status) === 'approved' && filled($this->leaveRequest->approval_comment)) {
-                $mail->line('Note: '.$this->leaveRequest->approval_comment);
+                $mail->line('Reason: '.$this->leaveRequest->approval_comment);
             }
             $mail->action('Open in app', LeavePortalLinks::myRequestsUrl($notifiable, $this->leaveRequest->id));
         } else {
             $applicant = $this->leaveRequest->user;
             $name = trim(($applicant->first_name ?? '').' '.($applicant->last_name ?? '')) ?: 'an employee';
-            $mail->line("Leave request #{$this->leaveRequest->id} for {$name} is now {$statusLabel}.");
+            if ($autoApproved) {
+                $mail->line("Leave request #{$this->leaveRequest->id} for {$name} was recorded as backdated leave and approved.");
+            } else {
+                $mail->line("Leave request #{$this->leaveRequest->id} for {$name} is now {$statusLabel}.");
+            }
+            if (filled($this->leaveRequest->approval_comment)) {
+                $mail->line('Reason: '.$this->leaveRequest->approval_comment);
+            }
             $mail->action('Open in app', LeavePortalLinks::teamRequestsUrl($this->leaveRequest->id));
         }
 
@@ -62,13 +76,18 @@ class LeaveStatusNotification extends Notification
     {
         $statusLabel = LeaveStatusLabels::display($this->leaveRequest->status);
         $isApplicant = (int) ($notifiable->id ?? 0) === (int) ($this->leaveRequest->user_id ?? 0);
+        $autoApproved = $this->isAutoApprovedBackdated();
 
         if ($isApplicant) {
-            $message = "Your leave request has been marked {$statusLabel} by {$this->approverLabel()}.";
+            $message = $autoApproved
+                ? 'Your leave request was recorded as backdated leave and approved (already approved, manager told, or emergency).'
+                : "Your leave request has been marked {$statusLabel} by {$this->approverLabel()}.";
         } else {
             $applicant = $this->leaveRequest->user;
             $name = trim(($applicant->first_name ?? '').' '.($applicant->last_name ?? '')) ?: 'an employee';
-            $message = "Leave request #{$this->leaveRequest->id} for {$name} is now {$statusLabel}.";
+            $message = $autoApproved
+                ? "Leave request #{$this->leaveRequest->id} for {$name} was recorded as backdated leave and approved (already approved, manager told, or emergency)."
+                : "Leave request #{$this->leaveRequest->id} for {$name} is now {$statusLabel}.";
         }
 
         return [
@@ -76,6 +95,18 @@ class LeaveStatusNotification extends Notification
             'message' => $message,
             'date' => now(),
         ];
+    }
+
+    private function isAutoApprovedBackdated(): bool
+    {
+        if (strtolower((string) ($this->leaveRequest->handled_action ?? '')) === 'auto_approved') {
+            return true;
+        }
+
+        $comment = strtolower((string) ($this->leaveRequest->approval_comment ?? ''));
+
+        return strtolower((string) ($this->leaveRequest->status ?? '')) === 'approved'
+            && (str_contains($comment, 'backdated') || str_contains($comment, 'automatically approved'));
     }
 
     private function approverLabel(): string
