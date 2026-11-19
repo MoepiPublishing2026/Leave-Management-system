@@ -451,6 +451,7 @@
     .requests-table td:nth-child(4) {
         grid-column: 1;
         grid-row: 4;
+        width: max-content;
     }
     .requests-table td:nth-child(4)::before {
         content: '';
@@ -462,11 +463,10 @@
         background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='1.8' stroke-linecap='round'><circle cx='12' cy='12' r='9'/><path d='M12 7v5l3 2'/></svg>") no-repeat center / 20px 20px;
     }
     .requests-table td:nth-child(4)::after {
-        content: '\00a0-\00a0';
+        content: none;
     }
     .requests-table td:nth-child(5) {
-        grid-column: 2;
-        grid-row: 4;
+        display: none !important;
     }
     .requests-table td:nth-child(8) {
         grid-column: 3;
@@ -876,7 +876,6 @@
         .requests-table td:nth-child(2),
         .requests-table td:nth-child(3),
         .requests-table td:nth-child(4),
-        .requests-table td:nth-child(5),
         .requests-table td:nth-child(6),
         .requests-table td:nth-child(7),
         .requests-table td:nth-child(8) {
@@ -884,6 +883,9 @@
             grid-row: auto;
             justify-self: start;
             min-width: 0;
+        }
+        .requests-table td:nth-child(5) {
+            display: none !important;
         }
         .requests-table td.request-actions-cell,
         .request-actions {

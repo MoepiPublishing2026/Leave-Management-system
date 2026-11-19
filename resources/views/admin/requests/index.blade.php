@@ -148,7 +148,7 @@
                         @endif
                     </td>
                     <td>{{ $applicantFull }}</td>
-                    <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M Y') }} - {{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}</td>
                     <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y H:i') : '—' }}</td>
                     <td class="request-status-cell">

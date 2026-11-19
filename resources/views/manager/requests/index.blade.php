@@ -169,9 +169,9 @@ html body .team-requests-page .requests-table td:nth-child(3) { grid-column:1 / 
 html body .team-requests-page .requests-table td:nth-child(3)::before { content:'Requested by:\00a0'; font-weight:400; }
 html body .team-requests-page .requests-table td:nth-child(6) { grid-column:1 / -1; grid-row:3; }
 html body .team-requests-page .requests-table td:nth-child(6)::before { content:'Submitted\00a0'; }
-html body .team-requests-page .requests-table td:nth-child(4) { grid-column:1; grid-row:4; }
-html body .team-requests-page .requests-table td:nth-child(4)::after { content:'\00a0–\00a0'; }
-html body .team-requests-page .requests-table td:nth-child(5) { grid-column:2; grid-row:4; }
+html body .team-requests-page .requests-table td:nth-child(4) { grid-column:1; grid-row:4; width:max-content; }
+html body .team-requests-page .requests-table td:nth-child(4)::after { content:none; }
+html body .team-requests-page .requests-table td:nth-child(5) { display:none !important; }
 html body .team-requests-page .requests-table td:nth-child(8) { grid-column:3; grid-row:4; justify-self:end; }
 html body .team-requests-page .requests-table tr:not(.row-click),
 html body .team-requests-page .requests-table tr:not(.row-click) td { display:block; }
@@ -209,7 +209,6 @@ html body .team-requests-page .requests-table td:nth-child(4)::before {
     content:''; display:inline-block; width:20px; height:20px; margin-right:8px; vertical-align:-4px;
     background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='1.8' stroke-linecap='round'><circle cx='12' cy='12' r='9'/><path d='M12 7v5l3 2'/></svg>") no-repeat center / 20px 20px;
 }
-html body .team-requests-page .requests-table td:nth-child(4)::after { content:'\00a0-\00a0'; }
 
 /* status pills */
 html body .team-requests-page .request-badge {
@@ -647,7 +646,7 @@ html body .team-requests-page .requests-table td.requests-empty {
                         @endif
                     </td>
                     <td>{{ $employeeFull }}</td>
-                    <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($req->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($req->end_date)->format('d M') }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->end_date)->format('d M') }}</td>
                     <td>{{ $req->created_at ? \Carbon\Carbon::parse($req->created_at)->format('d M Y') : '—' }}</td>
                     <td class="request-status-cell">
