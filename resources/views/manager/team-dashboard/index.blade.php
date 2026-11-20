@@ -73,7 +73,7 @@
         opacity: 1;
     }
     .manager-container .cards .card:hover { 
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); 
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important; 
     }
     .manager-container .cards .card.card-all      { background: #4ee5c5 !important; }
     .manager-container .cards .card.card-pending  { background: #f3b86b !important; }
