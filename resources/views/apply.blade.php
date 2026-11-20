@@ -1005,24 +1005,65 @@ document.addEventListener('DOMContentLoaded', function () {
         return String(type || '').toLowerCase() === 'sick';
     }
 
+    function isBackdatedLeaveSelection() {
+        const startDate = startDateInput ? startDateInput.value : '';
+        if (!startDate) {
+            return false;
+        }
+        const endDateInput = document.getElementById('end_date');
+        const endDate = (endDateInput && endDateInput.value) ? endDateInput.value : startDate;
+        const endDay = new Date(endDate + 'T00:00:00');
+        if (isNaN(endDay.getTime())) {
+            return false;
+        }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return endDay < today;
+    }
+
+    function leaveTypeNeedsProof(type) {
+        return requiresProofByType[type] === true
+            || requiresProofByType[type] === 1
+            || requiresProofByType[type] === '1';
+    }
+
+    function needsProofAtSubmitForSelection() {
+        const leaveType = leaveTypeSelect.value;
+        if (!leaveTypeNeedsProof(leaveType)) {
+            return false;
+        }
+        if (!isSickLeaveType(leaveType)) {
+            return true;
+        }
+        // Backdated sick leave: letter must be attached now (already saw a doctor).
+        return isBackdatedLeaveSelection();
+    }
+
     function updateFileUploadRequirement() {
         const leaveType = leaveTypeSelect.value;
-        const needsProofAtSubmit = !!requiresProofByType[leaveType] && !isSickLeaveType(leaveType);
-        const isDeferredSick = !!requiresProofByType[leaveType] && isSickLeaveType(leaveType);
+        const needsProofAtSubmit = needsProofAtSubmitForSelection();
+        const isDeferredSick = leaveTypeNeedsProof(leaveType)
+            && isSickLeaveType(leaveType)
+            && !isBackdatedLeaveSelection();
         const startDate = startDateInput ? startDateInput.value : '';
 
         fileUploadInput.removeAttribute('required');
 
         if (needsProofAtSubmit) {
             const keepingExisting = hasExistingAttachments && selectedFiles.length === 0;
+            const isBackdatedSick = isSickLeaveType(leaveType) && isBackdatedLeaveSelection();
             fileUploadContainer.classList.toggle('required', !keepingExisting);
             attachmentBadge.textContent = keepingExisting ? 'On file' : 'Required';
             attachmentBadge.className = keepingExisting
                 ? 'attachment-badge attachment-badge--optional'
                 : 'attachment-badge attachment-badge--required';
-            fileUploadHint.textContent = keepingExisting
-                ? 'Current documents will be kept. Upload new files only if you want to replace them.'
-                : 'Supporting document required for this leave type. PDF, JPG, PNG, or Word - up to 10 MB per file.';
+            if (keepingExisting) {
+                fileUploadHint.textContent = 'Current documents will be kept. Upload new files only if you want to replace them.';
+            } else if (isBackdatedSick) {
+                fileUploadHint.textContent = 'Doctor\'s letter required for backdated sick leave — attach it now. PDF, JPG, PNG, or Word - up to 10 MB per file.';
+            } else {
+                fileUploadHint.textContent = 'Supporting document required for this leave type. PDF, JPG, PNG, or Word - up to 10 MB per file.';
+            }
         } else if (isDeferredSick) {
             fileUploadContainer.classList.remove('required');
             attachmentBadge.textContent = 'Optional now';
@@ -1051,8 +1092,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     window.validateAttachmentsBeforeSubmit = function () {
         const type = leaveTypeSelect.value;
-        const needsProofAtSubmit = requiresProofByType[type] === true || requiresProofByType[type] === 1 || requiresProofByType[type] === '1';
-        if (!needsProofAtSubmit || isSickLeaveType(type)) {
+        const needsProofAtSubmit = needsProofAtSubmitForSelection();
+        if (!needsProofAtSubmit) {
             syncFileInput();
             return '';
         }
@@ -1060,7 +1101,9 @@ document.addEventListener('DOMContentLoaded', function () {
             return '';
         }
         if (selectedFiles.length === 0) {
-            return 'Please attach supporting proof for this leave type.';
+            return isSickLeaveType(type) && isBackdatedLeaveSelection()
+                ? 'Please attach a doctor\'s letter for backdated sick leave.'
+                : 'Please attach supporting proof for this leave type.';
         }
         syncFileInput();
         if (fileUploadInput.files && fileUploadInput.files.length > 0) {

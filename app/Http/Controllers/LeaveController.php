@@ -764,7 +764,17 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
     $policy = LeavePolicy::where('leave_type', $leaveType)->first();
     $halfDay = $request->boolean('half_day');
     $hasExistingFiles = $existing ? LeaveProofRules::hasProofAttached($existing) : false;
-    $requiresProofAtSubmit = $policy && $policy->requires_proof && ! LeaveProofRules::allowsDeferredProof($leaveType);
+    $startForProof = $request->input('start_date');
+    $endForProof = $halfDay
+        ? ($request->input('end_date') ?: $startForProof)
+        : $request->input('end_date');
+    $requiresProofAtSubmit = LeaveProofRules::requiresProofAtSubmit($leaveType, $startForProof, $endForProof);
+    $isBackdatedSickProof = $requiresProofAtSubmit
+        && LeaveProofRules::allowsDeferredProof($leaveType)
+        && LeaveProofRules::requiresProof($leaveType);
+    $proofRequiredMessage = $isBackdatedSickProof
+        ? LeaveProofRules::backdatedSickProofMessage()
+        : 'Proof (attachment) is required for this type of leave.';
 
     // Past dates are allowed for backdated / emergency leave.
     $rules = [
@@ -784,8 +794,10 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
         'important_comment.min' => 'Please provide a valid reason (at least 3 characters).',
         'half_day_period.required' => 'Please choose a half-day period: 08:00 – 12:00 or 12:00 – 17:00.',
         'half_day_period.in' => 'Please choose a half-day period: 08:00 – 12:00 or 12:00 – 17:00.',
-        'file_uploads.required' => 'Proof (attachment) is required for this type of leave.',
-        'file_uploads.min' => 'Please attach at least one supporting document.',
+        'file_uploads.required' => $proofRequiredMessage,
+        'file_uploads.min' => $isBackdatedSickProof
+            ? LeaveProofRules::backdatedSickProofMessage()
+            : 'Please attach at least one supporting document.',
         'file_uploads.*.max' => 'Each attachment must be 10 MB or smaller.',
         'file_uploads.*.file' => 'Each attachment must be a valid file.',
         'file_uploads.*.mimes' => 'Attachments must be PDF, JPG, PNG, or Word documents.',
@@ -799,7 +811,7 @@ private function collectLeaveApplication(Request $request, ?LeaveRequest $existi
 
     if ($requiresProofAtSubmit && ! $request->hasFile('file_uploads') && ! $hasExistingFiles) {
         return redirect()->back()
-            ->withErrors(['file_uploads' => 'Proof (attachment) is required for this type of leave.'])
+            ->withErrors(['file_uploads' => $proofRequiredMessage])
             ->withInput();
     }
 

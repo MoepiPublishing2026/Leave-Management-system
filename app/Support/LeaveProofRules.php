@@ -29,9 +29,36 @@ class LeaveProofRules
         return $policy && (bool) $policy->requires_proof;
     }
 
-    public static function requiresProofAtSubmit(?string $leaveType): bool
+    public static function requiresProofAtSubmit(?string $leaveType, $startDate = null, $endDate = null): bool
     {
-        return self::requiresProof($leaveType) && ! self::allowsDeferredProof($leaveType);
+        if (! self::requiresProof($leaveType)) {
+            return false;
+        }
+
+        // Non-sick types that require proof must attach it when applying.
+        if (! self::allowsDeferredProof($leaveType)) {
+            return true;
+        }
+
+        // Sick leave may defer the letter for current/future leave, but backdated
+        // sick leave already happened — the doctor's letter must be uploaded now.
+        if ($startDate && $endDate) {
+            try {
+                $start = Carbon::parse($startDate)->startOfDay();
+                $end = Carbon::parse($endDate)->startOfDay();
+            } catch (\Throwable $e) {
+                return false;
+            }
+
+            return LeaveWorkdayRules::isRetroactiveLeave($start, $end);
+        }
+
+        return false;
+    }
+
+    public static function backdatedSickProofMessage(): string
+    {
+        return 'A doctor\'s letter is required for backdated sick leave. Attach it when you apply.';
     }
 
     public static function hasProofAttached(LeaveRequest $request): bool
